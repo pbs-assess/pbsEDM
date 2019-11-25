@@ -19,3 +19,6 @@
 # TMB
 *.o
 *.so
+
+# Emacs backup files
+*~
