@@ -1,0 +1,21 @@
+# Rsudio
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# R
+.Rapp.history
+
+# Mac OSX
+.DS_Store
+
+# Data
+*.csv
+*.xls
+*.xlsx
+
+# TMB
+*.o
+*.so
