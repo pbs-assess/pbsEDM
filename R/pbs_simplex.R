@@ -24,7 +24,7 @@ pbs_simplex <- function (time_series,
 
   # Calculate Euclidean distances
   lag_dist <- dist(lag_mat, upper = TRUE) %>%
-    tidyr::tidy() %>%
+    broom::tidy() %>%
     tidyr::drop_na()
 
   # Instantiate prediction vector
