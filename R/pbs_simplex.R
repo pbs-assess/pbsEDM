@@ -12,23 +12,23 @@
 #'
 #' @examples
 pbs_simplex <- function (time_series,
-                         embed_dim, 
-                         libr_ind = seq_along(time_series), 
+                         embed_dim,
+                         libr_ind = seq_along(time_series),
                          pred_ind = libr_ind,
-                         lag_size = 1, 
+                         lag_size = 1,
                          forecast_dist = 1) {
   # Check arguments
   # Make lagged matrix
   lag_mat <- pbs_make_lags(time_series, embed_dim, lag_size)
   # Calculate Euclidean distances
-  lag_dist <- dist(lag_mat, upper = TRUE) %>% tidy() %>% drop_na()
+  lag_dist <- dist(lag_mat, upper = TRUE) %>% tidyr::tidy() %>% tidyr::drop_na()
   # Instantiate prediction vector
   pred_vec <- rep(NA, length(time_series))
   # Iterate over prediction set
   for (time_ind in pred_ind) {
     # Identify allowable indices
     rel_libr_ind <- setdiff(
-      libr_ind, 
+      libr_ind,
       c(
         seq_len((embed_dim - 1) * lag_size),
         (time_ind - embed_dim):(time_ind + embed_dim),
@@ -36,11 +36,11 @@ pbs_simplex <- function (time_series,
       )
     )
     # Identify nearest neighbours
-    rel_lag_dist <- lag_dist %>% 
-      filter(item2 %in% time_ind, item1 %in% rel_libr_ind) %>%
-      arrange(distance) %>%
-      mutate(n = row_number()) %>%
-      filter(n <= embed_dim + 1)
+    rel_lag_dist <- lag_dist %>%
+      dplyr::filter(item2 %in% time_ind, item1 %in% rel_libr_ind) %>%
+      dplyr::arrange(distance) %>%
+      dplyr::mutate(n = row_number()) %>%
+      dplyr::filter(n <= embed_dim + 1)
     # Are there enough points?
     if (nrow(rel_lag_dist) > embed_dim) {
       # Calculate the weights
@@ -65,6 +65,3 @@ pbs_simplex <- function (time_series,
     pred_vec = pred_vec
   )
 }
-
-
-
