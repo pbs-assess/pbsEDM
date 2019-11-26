@@ -7,7 +7,9 @@
 #' @param forecast_dist The number of time steps forward for each forecast
 #' @param lag_size The number of time steps separating successive lags
 #'
-#' @return dummy
+#' @return list with elements:
+#'   * element 1
+#'   * element 2
 #' @export
 #'
 #' @examples
