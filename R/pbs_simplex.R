@@ -18,12 +18,18 @@ pbs_simplex <- function (time_series,
                          lag_size = 1,
                          forecast_dist = 1) {
   # Check arguments
+
   # Make lagged matrix
   lag_mat <- pbs_make_lags(time_series, embed_dim, lag_size)
+
   # Calculate Euclidean distances
-  lag_dist <- dist(lag_mat, upper = TRUE) %>% tidyr::tidy() %>% tidyr::drop_na()
+  lag_dist <- dist(lag_mat, upper = TRUE) %>%
+    tidyr::tidy() %>%
+    tidyr::drop_na()
+
   # Instantiate prediction vector
   pred_vec <- rep(NA, length(time_series))
+
   # Iterate over prediction set
   for (time_ind in pred_ind) {
     # Identify allowable indices
@@ -37,14 +43,15 @@ pbs_simplex <- function (time_series,
     )
     # Identify nearest neighbours
     rel_lag_dist <- lag_dist %>%
-      dplyr::filter(item2 %in% time_ind, item1 %in% rel_libr_ind) %>%
+      dplyr::filter(item2 %in% time_ind,
+                    item1 %in% rel_libr_ind) %>%
       dplyr::arrange(distance) %>%
       dplyr::mutate(n = row_number()) %>%
       dplyr::filter(n <= embed_dim + 1)
     # Are there enough points?
     if (nrow(rel_lag_dist) > embed_dim) {
       # Calculate the weights
-      omega_weights <- exp(-rel_lag_dist$distance/rel_lag_dist$distance[1])
+      omega_weights <- exp(-rel_lag_dist$distance / rel_lag_dist$distance[1])
       # Identify the iterated indicies
       iterated_ind <- rel_lag_dist$item1 + forecast_dist
       # Predict the value
@@ -55,7 +62,9 @@ pbs_simplex <- function (time_series,
       pred_vec[time_ind] <- NA
     }
   }
-  pred_obs_cor <- cor(pred_vec, time_series, use = "pairwise.complete.obs")
+  pred_obs_cor <- cor(pred_vec,
+                      time_series,
+                      use = "pairwise.complete.obs")
   # Return
   list(
     embed_dim = embed_dim,
