@@ -7,7 +7,7 @@
 simplex(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{dummy}
 }
 \value{
 dummy

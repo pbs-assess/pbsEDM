@@ -1,11 +1,8 @@
 #' Title
 #'
-#' @param x
-#'
+#' @param x dummy
 #' @return dummy
 #' @export
-#'
-#' @examples
 simplex <- function(x) {
   x
 }
