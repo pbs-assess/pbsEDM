@@ -1,0 +1,128 @@
+---
+title: "Inclusion_issue"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Inclusion_issue}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+<!-- based on `mwe-2019.r` and two GitHub issues -->
+
+This vignette demonstrates an issue with `rEDM::simplex()`, using this simple
+time series:
+```{r showdata}
+simple_ts
+```
+
+The results from `rEDM` are (have run this once and saved results; not running
+in vignette so this package does not have to Import `rEDM`):
+```{r rEDMresults, eval=FALSE}
+simp_Efix = rEDM::simplex(simple_ts,
+                          E = 2,
+                          stats_only = FALSE)
+rEDM_points = simp_Efix[,"model_output"][[1]]       # time, obs, pred and pred_var
+# Make each row correspond to t:
+rEDM_points = rbind(c(1,
+                      simple_ts[1],
+                      NA,
+                      NA),
+                    rEDM_points)
+usethis::use_data(rEDM_points, overwrite = TRUE)
+```
+
+The results are:
+```{r rEDMvalues}
+rEDM_points
+```
+
+The isssue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
+Deyle et al. (2013) notation that $\bf{x}$ is the vector of lagged values of the
+scalars $X(t)$, where time $t = 1, 2, 3, ..., 99$ in this case, i.e.
+
+$$\bf{x}(t) = (X(t), X(t-1)).$$
+
+For $t^*=94$, Andy's earlier R code calculates nearest neighbours with indices $\psi$
+(using $\psi$ instead of the $t$ with a line through in Deyle et al. 2013),
+which for $t^*=94$ gives `psivec94` and corresponding weights `weights94`:
+```{r psi}
+psivec94 = c(6, 57, 88)
+weights94 = c(0.3678794, 0.3205861, 0.2895013)
+```
+giving the estimate of $X(95)$, from [S1] of Deyle et al. (2013), as
+```{r Xninetyfive}
+X95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
+X95est
+```
+
+(That code isn't in a package and isn't really functionalised, so when we have
+Luke's functionalised code run the same calculations with his code to hopefully
+get the same results TODO.)
+
+However, `rEDM` gives
+```{r rEDMninetyfive}
+X95est_rEDM = rEDM_points[95, "pred"]
+X95est_rEDM
+```
+
+But we can reproduce the `rEDM` result in the manual code by allowing
+$\bf{x}(96)$ to be a nearest neighbour of $\bf{x}(94)$,  giving
+```{r psi94allow}
+psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
+weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
+# Note that the first weight is the same as above (by definition it's always
+#  exp(-1)), but the second and third are very small because x[96] is
+#  very close to x[94].
+X95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
+               sum(weights94_allow)
+X95est_allow
+```
+
+However, the issue is that we should not be allowed to use $\bf{x}(96)$.
+By definition,
+$$\bf{x}(96) = (X(96), X(95)),$$
+which contains $X(95)$. But $X(95)$ is one of the components of
+$$\bf{x}(95) = (X(95), X(94))$$
+which is what we are trying to forecast from $\bf{x}(94)$.
+$X(95)$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
+it occurs in $\bf{x}(95)$ and $\bf{x}(96)$, by definition.
+
+So $\bf{x}(96)$ should not be used to forecast $\bf{x}(95)$, because it
+explicitly contains one of the two components of $\bf{x}(95)$.
+
+The Same issue occurs (with Andy's old code) for $t^*=75$.
+
+## Another attempt with `rEDM`
+
+Had tried this in `rEDM`, to not allow $X(96)$ to be a nearest neighbour
+predicting $X(95)$ from $X(94)$ -- think this isn't possible, since still kind of
+want cross-validation. Had played with `lib` and `pred` but couldn't get answer
+to agree with Andy's original one (may be off with the index by 1). Not running
+this in vignette:
+```{r rEDMagain, eval=FALSE}
+simp_Efix2 = simplex(simple_ts,
+                     E = 2,
+                     stats_only = FALSE,
+                     # lib = matrix(c(1, 94, 97, 99), nrow = 2, byrow = TRUE),
+                     lib = c(1, 94),
+                     pred = c(95, 97)
+                     # pred = matrix(c(95, 95, 96, 96), nrow = 2, byrow = TRUE)
+                     )
+rEDM_points2 = simp_Efix2[,"model_output"][[1]]       # time, obs, pred and pred_var
+# Make each row correspond to t:
+# rEDM_points2 = rbind(c(1, simple_ts[1], NA, NA), rEDM_points2) - only if doing all times
+head(rEDM_points2)
+```
