@@ -23,3 +23,5 @@
 # Emacs backup files
 *~
 inst/doc
+doc
+Meta
