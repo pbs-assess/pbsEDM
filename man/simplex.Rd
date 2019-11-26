@@ -9,6 +9,9 @@ simplex(x)
 \arguments{
 \item{x}{}
 }
+\value{
+dummy
+}
 \description{
 Title
 }

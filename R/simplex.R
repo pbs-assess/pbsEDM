@@ -2,10 +2,10 @@
 #'
 #' @param x
 #'
-#' @return
+#' @return dummy
 #' @export
 #'
 #' @examples
 simplex <- function(x) {
-
+  x
 }

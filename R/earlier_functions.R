@@ -25,7 +25,7 @@
 EDM_pred_E_2 <-  function(Nx.lags,
                        Efix = 2)
   {
-  lib.orig = select(Nx.lags, Xt, Xtmin1)  # Each row is time t
+  lib.orig = dplyr::select(Nx.lags, Xt, Xtmin1)  # Each row is time t
   usable = lib.orig$Xt * lib.orig$Xtmin1  # to give NA if either unavailable
   tstar.valid = which(!is.na(usable))     # valid values of tstar (not first or
                                           #  last for E=2)
@@ -43,16 +43,16 @@ EDM_pred_E_2 <-  function(Nx.lags,
       lib.temp[tstar.ind+1, "Xt"] = NA  # This is the value we don't know
       lib.temp[tstar.ind+2, "Xtmin1"] = NA
 
-      X.tstar.ind = as.numeric(select(lib.temp[tstar.ind,], Xt, Xtmin1))
+      X.tstar.ind = as.numeric(dplyr::select(lib.temp[tstar.ind,], Xt, Xtmin1))
       # Calculate distance from {\bf x}(t^*) = (X(t^*), X(t^*-1))
-      lib.temp = mutate(lib.temp,
+      lib.temp = dplyr::mutate(lib.temp,
           d=sqrt((Xt - X.tstar.ind[1])^2 + (Xtmin1 - X.tstar.ind[2])^2))
       # Any that have d = NA cannot then be the result of a projection:
       dIsNA = which(is.na(lib.temp$d))
       dIsNA = dIsNA[dIsNA > 1]       # else get 0 row in next line;
       lib.temp[dIsNA-1, "d"] = NA
       # Rank the valid ones with repsect to distance from x(t^*)
-      lib.temp = mutate(lib.temp, rank = dense_rank(d))
+      lib.temp = dplyr::mutate(lib.temp, rank = dense_rank(d))
 
       psivec = rep(NA, Efix+1)
       for(i in 1:length(psivec))
@@ -62,7 +62,7 @@ EDM_pred_E_2 <-  function(Nx.lags,
         }
       dxstarpsi1 = as.numeric(lib.temp[psivec[1], "d"])  # d of closest neighbour
                # weights for all points though only need Efix+1 closest:
-      lib.temp = mutate(lib.temp, w = exp(- d / dxstarpsi1))
+      lib.temp = dplyr::mutate(lib.temp, w = exp(- d / dxstarpsi1))
       sumw = sum(lib.temp[psivec, "w"])
       Xtstar.ind.Plus1 = sum( lib.temp[psivec, "w"] *
                                  lib.temp[psivec+1, "Xt"] ) / sumw
@@ -74,7 +74,7 @@ EDM_pred_E_2 <-  function(Nx.lags,
       my.full.calcs[[tstar.ind]] = lib.temp  # the nearest neighbours etc. for
                                              #  t^*
     }
-  Nx.lags = mutate(Nx.lags, my.pred = my.pred, my.var = my.var)
+  Nx.lags = dplyr::mutate(Nx.lags, my.pred = my.pred, my.var = my.var)
   return(list("Nx.lags" = Nx.lags, "my.full.calcs" = my.full.calcs,
               "psi.values" = psi.values))
   }
