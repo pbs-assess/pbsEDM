@@ -20,8 +20,15 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
-TODO: change this to use full `Nx_lags_orig` results, based on
-edm-work/code/simulated/egDeyle/tstarLoop2019.rnw:
+The tibble `Nx_lags_orig` is saved in the package and contains a simple time
+series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
+$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged values),
+with EDM results for embedding dimension 2, using `rEDM` and Andy's original
+function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
+
+<!-- Change what's below based on
+edm-work/code/simulated/egDeyle/tstarLoop2019.rnw
+-->
 
 ```{r fullresults}
 as.data.frame(Nx_lags_orig)
@@ -29,36 +36,12 @@ as.data.frame(Nx_lags_orig)
 
 TODO: change all this to use the above....
 
-<!-- based on `mwe-2019.r` and two GitHub issues -->
+<!-- based on `mwe-2019.r` and two GitHub issues
+ expect_equal(Nx_lags_orig$rEDM.pred, rEDM_points$pred)    is TRUE, so no longer
+ need rEDM_points
+-->
 
-This vignette demonstrates an issue with `rEDM::simplex()`, using this simple
-time series:
-```{r showdata}
-simple_ts
-```
-
-The results from `rEDM` are (have run this once and saved results; not running
-in vignette so this package does not have to Import `rEDM`):
-```{r rEDMresults, eval=FALSE}
-simp_Efix = rEDM::simplex(simple_ts,
-                          E = 2,
-                          stats_only = FALSE)
-rEDM_points = simp_Efix[,"model_output"][[1]]       # time, obs, pred and pred_var
-# Make each row correspond to t:
-rEDM_points = rbind(c(1,
-                      simple_ts[1],
-                      NA,
-                      NA),
-                    rEDM_points)
-usethis::use_data(rEDM_points, overwrite = TRUE)
-```
-
-The results are:
-```{r rEDMvalues}
-rEDM_points
-```
-
-The isssue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
+The issue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
 Deyle et al. (2013) notation that $\bf{x}$ is the vector of lagged values of the
 scalars $X(t)$, where time $t = 1, 2, 3, ..., 99$ in this case, i.e.
 
