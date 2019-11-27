@@ -106,3 +106,6 @@ psi_orig = res$psi.values
 usethis::use_data(Nx_lags_orig, overwrite = TRUE)
 usethis::use_data(full_calcs_orig, overwrite = TRUE)
 usethis::use_data(psi_orig, overwrite = TRUE)
+
+# These are the ones that are different:
+# dplyr::filter(Nx_lags_orig, abs(pred.diff) > 0.0000001)
