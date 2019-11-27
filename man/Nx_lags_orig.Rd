@@ -3,7 +3,7 @@
 \docType{data}
 \name{Nx_lags_orig}
 \alias{Nx_lags_orig}
-\title{Results from a simple simulation model analysed using `rEDM` and Andy's
+\title{Summary results from a simple simulation model analysed using `rEDM` and Andy's
 original independent code}
 \format{A 100x14 tibble where each row is a time step (year) and columns
   are:
@@ -37,5 +37,6 @@ Contains the original times series of populations `Nt`, simple lagged values
 and differences, and then calculations from `rEDM::simplex()` and Andy's
 original independent code. Indpendent code originally done to understand
 EDM, but revealed discrepancies between those results and those of `rEDM()`.
+See `full_calcs_orig` and `psi_orig` for full results.
 }
 \keyword{datasets}

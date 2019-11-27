@@ -13,17 +13,14 @@
 ##' @source Generated from running `data-raw/simple_ts.R`.
 "simple_ts"
 
-
-
-
-
-##' Results from a simple simulation model analysed using `rEDM` and Andy's
+##' Summary results from a simple simulation model analysed using `rEDM` and Andy's
 ##' original independent code
 ##'
 ##' Contains the original times series of populations `Nt`, simple lagged values
 ##' and differences, and then calculations from `rEDM::simplex()` and Andy's
 ##' original independent code. Indpendent code originally done to understand
 ##' EDM, but revealed discrepancies between those results and those of `rEDM()`.
+##' See `full_calcs_orig` and `psi_orig` for full results.
 ##'
 ##' @format A 100x14 tibble where each row is a time step (year) and columns
 ##'   are:
@@ -49,3 +46,33 @@
 ##'
 ##' @source Generated from Andy running `data-raw/Nx_lags.R`.
 "Nx_lags_orig"
+
+##' Full results from a simple simulation model analysed using Andy's
+##' original independent code
+##'
+##' Contains a list of dataframes from running `EDM_pred_E_2` on the simple time series.
+##'
+##' @format List of 100 tibbles, each component `[[tstar]]` for each
+##'   `tstar`. Each tibble is 100x5, and contains the original `Xt` and
+##'   `Xtmin1`, and then the `d`, `rank` and `w` for that
+##'   `tstar`. Tibble `[[1]]` is NULL since calculations can't be done for
+##'   $t^*=1$, e.g. $N(t-1)$ does not exist.
+##'
+##' @source Generated from Andy running `data-raw/Nx_lags.R`.
+"full_calcs_orig"
+
+##' Psi values from a simple simulation model analysed using Andy's
+##' original independent code
+##'
+##' For each $t^*$, contains values of $\psi_1, \psi_2$ and $\psi_3$ which are
+##' the time indices of the nearest, second-nearest and third-nearest neighbours
+##' in $\bf{x}$-space (vector $\bf{x}$, so in lagged difference space). There
+##' are three nearest neighbours since embedding dimension $E=2$.
+##'
+##' @format Dataframe of size 100x4 with one row for each `tstar`, and columns:
+##'   * `tstar`
+##'   * `psi1`, `psi2`, `psi3`: values of $\psi_1, \psi_2$ and $\psi_3$ for that
+##'   $t^*$.
+##'
+##' @source Generated from Andy running `data-raw/Nx_lags.R`.
+"psi_orig"
