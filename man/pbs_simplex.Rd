@@ -4,25 +4,44 @@
 \alias{pbs_simplex}
 \title{Perform out-of-sample forecasting via simplex projection}
 \usage{
-pbs_simplex(time_series, embed_dim, libr_ind = seq_along(time_series),
-  pred_ind = libr_ind, lag_size = 1, forecast_dist = 1)
+pbs_simplex(time_series, embed_dim = 2, lag_size = 1,
+  forecast_dist = 1, use_indices = seq_len(length(time_series)),
+  predict_indices = seq_len(length(time_series)),
+  return_value = "stats")
 }
 \arguments{
-\item{time_series}{A numeric vector with possible NA values}
+\item{time_series}{A time series with possible NA values (numeric vector).}
 
-\item{embed_dim}{An integer embedding dimension}
+\item{embed_dim}{The embedding dimension for the lagged-coordinate 
+embedding of the time series (integer scalar)}
 
-\item{libr_ind}{An integer vector of indices to predict from}
+\item{lag_size}{The number of time steps separating successive lags
+(integer scalar)}
 
-\item{pred_ind}{An integer vector of indicies to predict to}
+\item{forecast_dist}{The number of time steps forward to forecast
+(integer scalar)}
 
-\item{lag_size}{The number of time steps separating successive lags}
+\item{use_indices}{Time series indices to predict from (integer vector).
+Indices will be removed if the associated lagged coordinate vector 
+or its projection forward by forecast_distance (1) has one or more
+NA values, (2) contains one or more indices that appear in the focal
+vector, or (3) falls outside the time series.}
 
-\item{forecast_dist}{The number of time steps forward for each forecast}
+\item{predict_indices}{Time series indices to predict to (integer vector).
+Indices will be removed if the associated lagged coordinate vector 
+or its projection forward by forecast_distance (1) has one or more
+NA values, (2) contains one or more indices that appear in the focal
+vector, or (3) falls outside the time series.}
+
+\item{return_value}{One of "stats", "predictions", or "both".}
 }
 \value{
-dummy
+Either a tibble of statistics summarizing the forecast and
+  forecast accuracy, a vector of predicted values, or a list of both.
 }
 \description{
 Perform out-of-sample forecasting via simplex projection
+}
+\examples{
+pbs_simplex(rnorm(30, 0, 1))
 }

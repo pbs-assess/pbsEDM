@@ -13,6 +13,9 @@ pbs_make_lags(time_series, embed_dim, lag_size)
 
 \item{lag_size}{The number of time steps separating successive lags}
 }
+\value{
+matrix of successively lagged columns
+}
 \description{
 Create a matrix of lags of an original time series vector
 }

@@ -4,7 +4,7 @@
 #' @param embed_dim An integer embedding dimension
 #' @param lag_size The number of time steps separating successive lags
 #'
-#' @return
+#' @return matrix of successively lagged columns
 #' @export
 #'
 #' @examples
