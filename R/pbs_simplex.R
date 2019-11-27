@@ -25,14 +25,32 @@
 #'
 #' @examples pbs_simplex(rnorm(30, 0, 1))
 pbs_simplex <- function (time_series,
-                         embed_dim = 2,
-                         lag_size = 1,
-                         forecast_dist = 1,
+                         embed_dim = 2L,
+                         lag_size = 1L,
+                         forecast_dist = 1L,
                          use_indices = seq_len(length(time_series)),
                          predict_indices = seq_len(length(time_series)),
                          return_value = "stats") {
   # Check arguments
-
+  if (!is.numeric(time_series)) {
+    stop("time_series must be numeric.", call. = FALSE)
+  }
+  if (!is.vector(time_series)) {
+    stop("time_series must be a vector", call. = FALSE)
+  }
+  if (!is.integer(embed_dim)) {
+    warning("embed_dim coerced to an integer.", call. = FALSE)
+    embed_dim <- as.integer(embed_dim)
+  }
+  if (!is.integer(lag_size)) {
+    warning("lag_size coerced to an integer.", call. = FALSE)
+    embed_dim <- as.integer(lag_size)
+  }
+  if (!is.integer(forecast_dist)) {
+    warning("forecast_dist coerced to an integer.", call. = FALSE)
+    embed_dim <- as.integer(forecast_dist)
+  }
+  
   # Make a matrix of time series lags
   lag_mat <- pbs_make_lags(time_series, embed_dim, lag_size)
 
