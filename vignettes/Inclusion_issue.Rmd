@@ -20,6 +20,15 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
+TODO: change this to use full `Nx_lags_orig` results, based on
+edm-work/code/simulated/egDeyle/tstarLoop2019.rnw:
+
+```{r fullresults}
+as.data.frame(Nx_lags_orig)
+```
+
+TODO: change all this to use the above....
+
 <!-- based on `mwe-2019.r` and two GitHub issues -->
 
 This vignette demonstrates an issue with `rEDM::simplex()`, using this simple
