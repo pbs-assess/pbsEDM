@@ -55,12 +55,12 @@ pbs_simplex <- function (time_series,
   lag_mat <- pbs_make_lags(time_series, embed_dim, lag_size)
 
   # Calculate Euclidean distances among row vectors
-  lag_dist <- dist(lag_mat, diag = F, upper = TRUE) %>%
+  lag_dist <- dist(lag_mat, diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
     tidyr::drop_na()
 
   # Instantiate prediction vector
-  pred_vec <- rep(NA, length(time_series))
+  predict_vec <- rep(NA, length(time_series))
   predict_indices <- setdiff(predict_indices, length(predict_indices))
 
   # Iterate over prediction set
@@ -88,14 +88,14 @@ pbs_simplex <- function (time_series,
       # Identify the iterated indicies
       iterated_ind <- rel_lag_dist$item1 + forecast_dist
       # Predict the value
-      pred_vec[time_ind + forecast_dist] <- sum(
+      predict_vec[time_ind + forecast_dist] <- sum(
         time_series[iterated_ind] * omega_weights
       )  / sum(omega_weights)
     } else {
-      pred_vec[time_ind] <- NA
+      predict_vec[time_ind] <- NA
     }
   }
-  pred_obs_cor <- cor(pred_vec,
+  pred_obs_cor <- cor(predict_vec,
                       time_series,
                       use = "pairwise.complete.obs")
   # Return
@@ -108,11 +108,11 @@ pbs_simplex <- function (time_series,
   if (return_value == "stats") {
     return_tbl
   } else if (return_value == "predictions") {
-    pred_vec
+    predict_vec
   } else if (return_value == "both") {
     list(
       return_tbl = return_tbl,
-      return_vec = pred_vec
+      return_vec = predict_vec
     )
   }
 }
