@@ -20,6 +20,11 @@ pbs_simplex(time_series, embed_dim, libr_ind = seq_along(time_series),
 
 \item{forecast_dist}{The number of time steps forward for each forecast}
 }
+\value{
+list with elements:
+  * element 1
+  * element 2
+}
 \description{
 Perform out-of-sample forecasting via simplex projection
 }

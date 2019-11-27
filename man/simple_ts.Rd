@@ -3,7 +3,7 @@
 \docType{data}
 \name{simple_ts}
 \alias{simple_ts}
-\title{Simple example time series}
+\title{Simple example time series TODO can remove this at some point}
 \format{Vector of length 99 (since original `N(t)` was for 100, with each
 element representing $X(t) = N(t+1) - N(t)$.}
 \source{
