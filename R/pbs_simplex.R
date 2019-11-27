@@ -18,7 +18,7 @@
 #'   NA values, (2) contains one or more indices that appear in the focal
 #'   vector, or (3) falls outside the time series.
 #' @param return_value One of "stats", "predictions", or "both".
-#'
+#' 
 #' @return Either a tibble of statistics summarizing the forecast and
 #'   forecast accuracy, a vector of predicted values, or a list of both.
 #' @export
