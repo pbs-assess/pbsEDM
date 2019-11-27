@@ -33,21 +33,21 @@ pbs_simplex <- function (time_series,
                          return_value = "stats") {
   # Check arguments
   if (!is.numeric(time_series)) {
-    stop("time_series must be numeric.", call. = FALSE)
+    stop("time_series must be numeric.")
   }
   if (!is.vector(time_series)) {
-    stop("time_series must be a vector", call. = FALSE)
+    stop("time_series must be a vector")
   }
   if (!is.integer(embed_dim)) {
-    warning("embed_dim coerced to an integer.", call. = FALSE)
+    warning("embed_dim coerced to an integer.")
     embed_dim <- as.integer(embed_dim)
   }
   if (!is.integer(lag_size)) {
-    warning("lag_size coerced to an integer.", call. = FALSE)
+    warning("lag_size coerced to an integer.")
     embed_dim <- as.integer(lag_size)
   }
   if (!is.integer(forecast_dist)) {
-    warning("forecast_dist coerced to an integer.", call. = FALSE)
+    warning("forecast_dist coerced to an integer.")
     embed_dim <- as.integer(forecast_dist)
   }
   
@@ -66,6 +66,7 @@ pbs_simplex <- function (time_series,
   # Iterate over prediction set
   for (time_ind in predict_indices) {
     # Identify allowable indices
+    # TODO: One-sided exclusion radius
     rel_libr_ind <- setdiff(
       use_indices,
       c(
