@@ -81,11 +81,20 @@ pbs_simplex <- function (time_series,
                       time_series,
                       use = "pairwise.complete.obs")
   # Return
-  list(
+  return_tbl <- tibble::tibble(
     embed_dim = embed_dim,
     lag_size = lag_size,
     forecast_dist = forecast_dist,
     rho = pred_obs_cor,
-    pred_vec = pred_vec
   )
+  if (return_value == "stats") {
+    return_tbl
+  } else if (return_value == "predictions") {
+    pred_vec
+  } else if (return_value == "both") {
+    list(
+      return_tbl = return_tbl,
+      return_vec = pred_vec
+    )
+  }
 }
