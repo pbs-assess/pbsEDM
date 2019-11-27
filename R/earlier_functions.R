@@ -1,7 +1,7 @@
 # Some earlier functions that may be used for testing, but will be superceded by
 # more general functions. EDM_pred_E_2() was originally in edm-work/code as
 # myEDMpred().
-# ANDY ADDING HERE.
+# New comment
 ##' Simplex prediction for embedding dimension E=2
 ##'
 ##' Simple code to estimate X(t^*+1) and of its variance, for
