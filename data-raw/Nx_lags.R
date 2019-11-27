@@ -6,7 +6,8 @@
 #  edm-work/code/simulated/egDeyle/tStarLoop/tStarLoop19.rnw.
 
 rm(list=ls())
-source("../../edm-work/code/functions.r")
+load_all()
+# source("../../edm-work/code/functions.r")
 source("../../edm-work/code/simulated/sockeye-simulated/SockeyeSim.r")
 
 set.seed(42)
@@ -73,13 +74,35 @@ rEDM.points = dplyr::mutate(rEDM.points,
 mae.manual = mean(abs(rEDM.points$diff),
                   na.rm=TRUE)
 mae.manual
-
 # That agrees with the rEDM calculated value (as it did for 2017 version).
 
 Nx.lags = dplyr::mutate(Nx.lags,
                         rEDM.pred = c(NA, rEDM.points$pred),
                         rEDM.var = c(NA, rEDM.points$pred_var))
                         # rEDM.pred was XtPredEeq2, but use this to specify it's rEDM
-Nx_lags <- Nx.lags
+res = EDM_pred_E_2(Nx.lags)
+Nx.lags = res$Nx.lags
+my.full.calcs =  res$my.full.calcs
+psi.values = res$psi.values
 
-usethis::use_data(Nx_lags, overwrite = TRUE)
+Nx.lags = dplyr::mutate(Nx.lags,
+                        pred.diff = rEDM.pred - my.pred,
+                        var.diff = rEDM.var - my.var,
+                        pred.ratio = rEDM.pred / my.pred,
+                        var.ratio = rEDM.var / my.var)
+# round(Nx.lags$pred.diff, 6)
+eps = 0.0000001          # how far they have to be apart to investigate
+                         # index of the predicted value, t^*+1, is non-zero:
+tstarPlus1.big.pred.diff = which(abs(Nx.lags$pred.diff) > eps)
+tstarPlus1.big.pred.diff
+tstarPlus1.big.var.diff = which(abs(Nx.lags$var.diff) > eps)
+tstarPlus1.big.var.diff
+
+# Rename to save them in PBSedm package:
+Nx_lags_orig <- Nx.lags
+full_calcs_orig =  res$my.full.calcs
+psi_orig = res$psi.values
+
+usethis::use_data(Nx_lags_orig, overwrite = TRUE)
+usethis::use_data(full_calcs_orig, overwrite = TRUE)
+usethis::use_data(psi_orig, overwrite = TRUE)
