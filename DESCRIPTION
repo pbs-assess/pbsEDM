@@ -24,5 +24,6 @@ Imports:
     tidyr
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
