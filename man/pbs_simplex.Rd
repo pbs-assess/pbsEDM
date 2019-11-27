@@ -39,11 +39,6 @@ vector, or (3) falls outside the time series.}
 Either a tibble of statistics summarizing the forecast and
   forecast accuracy, a vector of predicted values, or a list of both.
 }
-\value{
-list with elements:
-  * element 1
-  * element 2
-}
 \description{
 Perform out-of-sample forecasting via simplex projection
 }
