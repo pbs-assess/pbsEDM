@@ -5,6 +5,8 @@
 #' @param lag_size The number of time steps separating successive lags
 #'
 #' @return matrix of successively lagged columns
+#' 
+#' @importFrom magrittr %>%
 #' @export
 #'
 #' @examples
