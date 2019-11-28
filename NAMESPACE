@@ -3,3 +3,4 @@
 export(EDM_pred_E_2)
 export(pbs_make_lags)
 export(pbs_simplex)
+importFrom(magrittr,"%>%")
