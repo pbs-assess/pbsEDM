@@ -21,6 +21,7 @@ LazyData: true
 RoxygenNote: 6.1.1
 Imports:
     dplyr,
+    magrittr,
     tidyr
 Suggests:
     knitr,
