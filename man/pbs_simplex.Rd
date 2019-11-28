@@ -4,8 +4,8 @@
 \alias{pbs_simplex}
 \title{Perform out-of-sample forecasting via simplex projection}
 \usage{
-pbs_simplex(time_series, embed_dim = 2, lag_size = 1,
-  forecast_dist = 1, use_indices = seq_len(length(time_series)),
+pbs_simplex(time_series, embed_dim = 2L, lag_size = 1L,
+  forecast_dist = 1L, use_indices = seq_len(length(time_series)),
   predict_indices = seq_len(length(time_series)),
   return_value = "stats")
 }
