@@ -4,7 +4,7 @@
 #' @param embed_dim An integer embedding dimension
 #' @param lag_size The number of time steps separating successive lags
 #'
-#' @return matrix of successively lagged columns
+#' @return tibble of successively lagged columns
 #' 
 #' @importFrom magrittr %>%
 #' @export
@@ -24,6 +24,5 @@ pbs_make_lags <- function(time_series,
     tidyr::drop_na() %>%
     dplyr::right_join(ts_index,
                       by = c("index")) %>%
-    dplyr::select(-index) %>%
-    as.matrix()
+    dplyr::select(-index)
 }
