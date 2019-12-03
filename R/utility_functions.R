@@ -1,21 +1,41 @@
-#' Create a matrix of lags of an original time series vector
+#' Create a Tibble of Lagged Copies of a Named Tibble Column
 #'
-#' @param time_series A numeric vector with possible NA values
-#' @param embed_dim An integer embedding dimension
+#' @param tbl A tibble with a named column to be lagged
+#' @param col_name The name of a column in tbl
+#' @param embed_dim An integer embedding dimension corresponding to the number
+#'     of lagged columns to create
 #' @param lag_size The number of time steps separating successive lags
 #'
-#' @return tibble of successively lagged columns
+#' @return A tibble of successively lagged columns
 #' 
 #' @importFrom magrittr %>%
 #' @export
 #'
-#' @examples
-pbs_make_lags <- function(time_series,
+#' @examples pbs_make_lags(tibble::tibble(x = 1:15), "x", 5, 1)
+#' 
+pbs_make_lags <- function(tbl,
+                          col_name,
                           embed_dim,
                           lag_size) {
-  ts_index <- tibble::tibble(index = seq_len(NROW(time_series)))
-  lapply(
-    X = seq_len(embed_dim) - 1,
+  # Check arguments
+  stopifnot(
+    tibble::is_tibble(tbl),
+    col_name %in% base::names(tbl),
+    base::is.numeric(embed_dim),
+    base::round(embed_dim) == embed_dim,
+    base::round(embed_dim) >= 1L,
+    base::is.numeric(lag_size),
+    base::round(lag_size) == lag_size,
+    base::round(lag_size) >= 1L
+  )
+  
+  # Create time_series vector and ts_index tibble
+  time_series <- dplyr::pull(tbl, col_name)
+  ts_index <- tibble::tibble(index = seq_along(time_series))
+  
+  # Return lagged tibble
+  base::lapply(
+    X = base::seq_len(embed_dim) - 1,
     FUN = function(X, ts, n) dplyr::lag(ts, X * n),
     ts = time_series,
     n = lag_size
