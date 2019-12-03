@@ -1,110 +1,129 @@
-#' Perform out-of-sample forecasting via simplex projection
+#' Use Simplex Projection to Perform Out-of-Sample Forecasting
 #'
-#' @param time_series A time series with possible NA values (numeric vector).
+#' @param data A time series with possible NA values (numeric vector or
+#'   tibble with a named column).
+#' @param col_name If `data` is a tibble, the time series column name 
+#'   (character scalar).
 #' @param embed_dim The embedding dimension for the lagged-coordinate 
 #'   embedding of the time series (integer scalar)
 #' @param lag_size The number of time steps separating successive lags
 #'   (integer scalar)
-#' @param forecast_dist The number of time steps forward to forecast
+#' @param pred_dist The number of time steps forward to forecast
 #'   (integer scalar)
-#' @param use_indices Time series indices to predict from (integer vector).
+#' @param lib_ind Time series indices to predict from (integer vector).
 #'   Indices will be removed if the associated lagged coordinate vector 
-#'   or its projection forward by forecast_distance (1) has one or more
+#'   or its projection forward by pred_dist (1) has one or more
 #'   NA values, (2) contains one or more indices that appear in the focal
 #'   vector, or (3) falls outside the time series.
-#' @param predict_indices Time series indices to predict to (integer vector).
+#' @param pred_ind Time series indices to predict to (integer vector).
 #'   Indices will be removed if the associated lagged coordinate vector 
-#'   or its projection forward by forecast_distance (1) has one or more
+#'   or its projection forward by pred_dist (1) has one or more
 #'   NA values, (2) contains one or more indices that appear in the focal
 #'   vector, or (3) falls outside the time series.
-#' @param return_value One of "stats", "predictions", or "both".
 #' 
-#' @return Either a tibble of statistics summarizing the forecast and
-#'   forecast accuracy, a vector of predicted values, or a list of both.
+#' @return A list of tibbles
 #'   
 #' @importFrom magrittr %>%
 #' @export
 #'
-#' @examples pbs_simplex(rnorm(30, 0, 1))
-pbs_simplex <- function (time_series,
+#' @examples pbs_simplex(tibble::tibble(x = 1:100), "x")
+#' 
+pbs_simplex <- function (data,
+                         col_name = NULL,
                          embed_dim = 2L,
                          lag_size = 1L,
-                         forecast_dist = 1L,
-                         use_indices = seq_len(length(time_series)),
-                         predict_indices = seq_len(length(time_series)),
-                         return_value = "stats") {
+                         pred_dist = 1L,
+                         lib_ind = seq_len(NROW(data)),
+                         pred_ind = seq_len(NROW(data))) {
   # Check arguments
   stopifnot(
-    is.numeric(time_series),
-    is.vector(time_series),
-    embed_dim %% 1 == 0,
-    lag_size %% 1 == 0,
-    forecast_dist %% 1 == 0
+    base::is.vector(data) | tibble::is_tibble(data),
+    base::is.numeric(data) | base::is.character(col_name),
+    base::is.numeric(embed_dim),
+    base::is.numeric(lag_size),
+    base::is.numeric(pred_dist),
+    base::is.numeric(lib_ind),
+    base::is.numeric(pred_ind),
+    base::round(embed_dim) == embed_dim,
+    base::round(lag_size) == lag_size,
+    base::round(pred_dist) == pred_dist,
+    base::round(lib_ind) == lib_ind,
+    base::round(pred_ind) == pred_ind,
+    base::NROW(data) > (embed_dim - 1) * lag_size
   )
   
-  # Make a matrix of time series lags
-  lag_mat <- pbs_make_lags(time_series, embed_dim, lag_size)
+  # If data is a vector, make into a tibble
+  if (is.numeric(data)) {
+    data <- tibble::tibble(x = data)
+    col_name <- "x"
+  }
+  
+  # Make a tibble of time series lags
+  lag_tbl <- pbs_make_lags(data, col_name, embed_dim, lag_size)
 
   # Calculate Euclidean distances among row vectors
-  lag_dist <- dist(lag_mat, diag = FALSE, upper = TRUE) %>%
+  lag_dist <- lag_tbl %>%
+    base::as.matrix() %>%
+    stats::dist(diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
     tidyr::drop_na()
 
+  # Initialize indices
+  data_ind <- data %>% nrow() %>% seq_len()
+  non_na_ind <- which(!is.na(rowSums(lag_tbl)))
+  proj_ok_ind <- data_ind %>% intersect(non_na_ind - pred_dist)
+  lib_ind <- lib_ind %>% intersect(non_na_ind) %>% intersect(proj_ok_ind)
+  pred_to_ind <- pred_ind %>% intersect(non_na_ind) # Possibly from NAs
+  pred_from_ind <- (pred_to_ind - pred_dist) %>% intersect(non_na_ind)
+  
   # Instantiate prediction vector
-  predict_vec <- rep(NA, length(time_series))
-  predict_indices <- setdiff(predict_indices, length(predict_indices))
+  pred_vec <- rep(NA, NROW(data))
 
   # Iterate over prediction set
-  for (time_ind in predict_indices) {
-    # Identify allowable indices
-    # TODO: One-sided exclusion radius
-    rel_libr_ind <- setdiff(
-      use_indices,
-      c(
-        seq_len((embed_dim - 1) * lag_size),
-        (time_ind - embed_dim):(time_ind + embed_dim),
-        (length(time_series) - forecast_dist + 1):(length(time_series))
-      )
+  for (time_ind in pred_from_ind) {
+    exclude_ind <- base::seq(
+      from = time_ind + pred_dist,
+      by = lag_size,
+      length.out = embed_dim
     )
+    rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
+    
     # Identify nearest neighbours
     rel_lag_dist <- lag_dist %>%
       dplyr::filter(item2 %in% time_ind,
-                    item1 %in% rel_libr_ind) %>%
+                    item1 %in% rel_lib_ind) %>%
       dplyr::arrange(distance) %>%
       dplyr::mutate(n = row_number()) %>%
       dplyr::filter(n <= embed_dim + 1)
     # Are there enough points?
-    if (nrow(rel_lag_dist) > embed_dim) {
+    if (base::nrow(rel_lag_dist) > embed_dim) {
       # Calculate the weights
       omega_weights <- exp(-rel_lag_dist$distance / rel_lag_dist$distance[1])
       # Identify the iterated indicies
-      iterated_ind <- rel_lag_dist$item1 + forecast_dist
+      iterated_ind <- rel_lag_dist$item1 + pred_dist
       # Predict the value
-      predict_vec[time_ind + forecast_dist] <- sum(
-        time_series[iterated_ind] * omega_weights
+      pred_vec[time_ind + pred_dist] <- sum(
+        dplyr::pull(data, col_name)[iterated_ind] * omega_weights
       )  / sum(omega_weights)
     } else {
-      predict_vec[time_ind] <- NA
+      pred_vec[time_ind + pred_dist] <- NA
     }
   }
-  pred_obs_cor <- cor(predict_vec,
-                      time_series,
-                      use = "pairwise.complete.obs")
+  pred_obs_cor <- stats::cor(pred_vec,
+                             dplyr::pull(data, col_name),
+                             use = "pairwise.complete.obs")
   # Return
-  return_tbl <- tibble::tibble(
-    embed_dim = embed_dim,
-    lag_size = lag_size,
-    forecast_dist = forecast_dist,
-    rho = pred_obs_cor,
+  list(
+    stats_tbl = tibble::tibble( # Needs variance etc.
+      embed_dim = embed_dim,
+      lag_size = lag_size,
+      pred_dist = pred_dist,
+      pred_obs_cor = pred_obs_cor
+    ),
+    pred_tbl = tibble::tibble(
+      obs = data[col_name],
+      pred = pred_vec
+    ),
+    nbr_list = NULL # List of tibbles of neighbour distances
   )
-  if (return_value == "stats") {
-    return_tbl
-  } else if (return_value == "predictions") {
-    predict_vec
-  } else if (return_value == "both") {
-    list(
-      return_tbl = return_tbl,
-      return_vec = predict_vec
-    )
-  }
 }
