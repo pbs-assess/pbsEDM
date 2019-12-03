@@ -2,15 +2,24 @@
 % Please edit documentation in R/pbs_simplex.R
 \name{pbs_simplex}
 \alias{pbs_simplex}
-\title{Perform out-of-sample forecasting via simplex projection}
+\title{Use Simplex Projection to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_simplex(time_series, embed_dim = 2L, lag_size = 1L,
-  forecast_dist = 1L, use_indices = seq_len(length(time_series)),
-  predict_indices = seq_len(length(time_series)),
-  return_value = "stats")
+pbs_simplex(
+  data,
+  col_name = NULL,
+  embed_dim = 2L,
+  lag_size = 1L,
+  pred_dist = 1L,
+  lib_ind = seq_len(NROW(data)),
+  pred_ind = seq_len(NROW(data))
+)
 }
 \arguments{
-\item{time_series}{A time series with possible NA values (numeric vector).}
+\item{data}{A time series with possible NA values (numeric vector or
+tibble with a named column).}
+
+\item{col_name}{If `data` is a tibble, the time series column name 
+(character scalar).}
 
 \item{embed_dim}{The embedding dimension for the lagged-coordinate 
 embedding of the time series (integer scalar)}
@@ -18,30 +27,28 @@ embedding of the time series (integer scalar)}
 \item{lag_size}{The number of time steps separating successive lags
 (integer scalar)}
 
-\item{forecast_dist}{The number of time steps forward to forecast
+\item{pred_dist}{The number of time steps forward to forecast
 (integer scalar)}
 
-\item{use_indices}{Time series indices to predict from (integer vector).
+\item{lib_ind}{Time series indices to predict from (integer vector).
 Indices will be removed if the associated lagged coordinate vector 
-or its projection forward by forecast_distance (1) has one or more
+or its projection forward by pred_dist (1) has one or more
 NA values, (2) contains one or more indices that appear in the focal
 vector, or (3) falls outside the time series.}
 
-\item{predict_indices}{Time series indices to predict to (integer vector).
+\item{pred_ind}{Time series indices to predict to (integer vector).
 Indices will be removed if the associated lagged coordinate vector 
-or its projection forward by forecast_distance (1) has one or more
+or its projection forward by pred_dist (1) has one or more
 NA values, (2) contains one or more indices that appear in the focal
 vector, or (3) falls outside the time series.}
-
-\item{return_value}{One of "stats", "predictions", or "both".}
 }
 \value{
-Either a tibble of statistics summarizing the forecast and
-  forecast accuracy, a vector of predicted values, or a list of both.
+A list of tibbles
 }
 \description{
-Perform out-of-sample forecasting via simplex projection
+Use Simplex Projection to Perform Out-of-Sample Forecasting
 }
 \examples{
-pbs_simplex(rnorm(30, 0, 1))
+pbs_simplex(tibble::tibble(x = 1:100), "x")
+
 }

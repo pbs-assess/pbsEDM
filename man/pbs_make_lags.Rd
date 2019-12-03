@@ -2,20 +2,27 @@
 % Please edit documentation in R/utility_functions.R
 \name{pbs_make_lags}
 \alias{pbs_make_lags}
-\title{Create a matrix of lags of an original time series vector}
+\title{Create a Tibble of Lagged Copies of a Named Tibble Column}
 \usage{
-pbs_make_lags(time_series, embed_dim, lag_size)
+pbs_make_lags(tbl, col_name, embed_dim, lag_size)
 }
 \arguments{
-\item{time_series}{A numeric vector with possible NA values}
+\item{tbl}{A tibble with a named column to be lagged}
 
-\item{embed_dim}{An integer embedding dimension}
+\item{col_name}{The name of a column in tbl}
+
+\item{embed_dim}{An integer embedding dimension corresponding to the number
+of lagged columns to create}
 
 \item{lag_size}{The number of time steps separating successive lags}
 }
 \value{
-matrix of successively lagged columns
+A tibble of successively lagged columns
 }
 \description{
-Create a matrix of lags of an original time series vector
+Create a Tibble of Lagged Copies of a Named Tibble Column
+}
+\examples{
+pbs_make_lags(tibble::tibble(x = 1:15), "x", 5, 1)
+
 }
