@@ -44,5 +44,6 @@ pbs_make_lags <- function(tbl,
     tidyr::drop_na() %>%
     dplyr::right_join(ts_index,
                       by = c("index")) %>%
-    dplyr::select(-index)
+    dplyr::select(-index) %>%
+    magrittr::set_colnames(paste0("Lag_", as.character(seq_len(embed_dim) - 1)))
 }
