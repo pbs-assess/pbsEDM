@@ -35,6 +35,7 @@ pbs_simplex <- function (data,
                          pred_dist = 1L,
                          lib_ind = seq_len(NROW(data)),
                          pred_ind = seq_len(NROW(data))) {
+  
   # Check arguments
   stopifnot(
     is.vector(data) | tibble::is_tibble(data),
@@ -66,6 +67,8 @@ pbs_simplex <- function (data,
     as.matrix() %>%
     stats::dist(diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
+    dplyr::rename(focal_ind = item2, nbr_ind = item1) %>%
+    dplyr::select(focal_ind, nbr_ind, distance) %>%
     tidyr::drop_na()
 
   # Initialize indices
@@ -76,43 +79,62 @@ pbs_simplex <- function (data,
   pred_to_ind <- pred_ind %>% intersect(non_na_ind) # Possibly from NAs
   pred_from_ind <- (pred_to_ind - pred_dist) %>% intersect(non_na_ind)
   
-  # Instantiate prediction vector
+  # Instantiate prediction vector and neighbour list
   pred_vec <- rep(NA, NROW(data))
+  nbr_list <- list()
 
   # Iterate over prediction set
   for (time_ind in pred_from_ind) {
+    
+    # Exclude invalid indices
     exclude_ind <- seq(
       from = time_ind + pred_dist,
       by = lag_size,
       length.out = embed_dim
     )
+    
+    # Specify the valid indices
     rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
     
     # Identify nearest neighbours
     rel_lag_dist <- lag_dist %>%
-      dplyr::filter(item2 %in% time_ind,
-                    item1 %in% rel_lib_ind) %>%
+      dplyr::filter(focal_ind %in% time_ind,
+                    nbr_ind %in% rel_lib_ind) %>%
       dplyr::arrange(distance) %>%
-      dplyr::mutate(n = row_number()) %>%
-      dplyr::filter(n <= embed_dim + 1)
+      dplyr::mutate(dist_rank = dplyr::row_number()) %>%
+      dplyr::filter(dist_rank <= embed_dim + 1) %>%
+      dplyr::mutate(weight = exp(-distance / distance[1]),
+                    proj_focal_ind = focal_ind + pred_dist,
+                    proj_nbr_ind = nbr_ind + pred_dist)
+    
+    # Concatenate to the neighbour list
+    nbr_list[[time_ind]] <- rel_lag_dist
+    
     # Are there enough points?
     if (nrow(rel_lag_dist) > embed_dim) {
-      # Calculate the weights
-      omega_weights <- exp(-rel_lag_dist$distance / rel_lag_dist$distance[1])
-      # Identify the iterated indicies
-      iterated_ind <- rel_lag_dist$item1 + pred_dist
+      
+      # Pull vectors
+      proj_ind <- dplyr::pull(rel_lag_dist, proj_nbr_ind)
+      proj_vals <- dplyr::pull(data, col_name)[proj_ind]
+      weight <- dplyr::pull(rel_lag_dist, weight)
+
       # Predict the value
-      pred_vec[time_ind + pred_dist] <- sum(
-        dplyr::pull(data, col_name)[iterated_ind] * omega_weights
-      )  / sum(omega_weights)
+      pred_vec[time_ind + pred_dist] <- sum(proj_vals * weight) / sum(weight) 
+
     } else {
+      
+      # Prediction is NA
       pred_vec[time_ind + pred_dist] <- NA
+      
     }
   }
+  
+  # Caluculate the prediction-observation correlation
   pred_obs_cor <- stats::cor(pred_vec,
                              dplyr::pull(data, col_name),
                              use = "pairwise.complete.obs")
-  # Return
+  
+  # Return a list
   list(
     stats_tbl = tibble::tibble( # Needs variance etc.
       embed_dim = embed_dim,
@@ -124,6 +146,6 @@ pbs_simplex <- function (data,
       obs = data[col_name],
       pred = pred_vec
     ),
-    nbr_list = NULL # List of tibbles of neighbour distances
+    nbr_list = nbr_list # List of tibbles of neighbour distances
   )
 }
