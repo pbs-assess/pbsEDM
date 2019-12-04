@@ -37,19 +37,19 @@ pbs_simplex <- function (data,
                          pred_ind = seq_len(NROW(data))) {
   # Check arguments
   stopifnot(
-    base::is.vector(data) | tibble::is_tibble(data),
-    base::is.numeric(data) | base::is.character(col_name),
-    base::is.numeric(embed_dim),
-    base::is.numeric(lag_size),
-    base::is.numeric(pred_dist),
-    base::is.numeric(lib_ind),
-    base::is.numeric(pred_ind),
-    base::round(embed_dim) == embed_dim,
-    base::round(lag_size) == lag_size,
-    base::round(pred_dist) == pred_dist,
-    base::round(lib_ind) == lib_ind,
-    base::round(pred_ind) == pred_ind,
-    base::NROW(data) > (embed_dim - 1) * lag_size
+    is.vector(data) | tibble::is_tibble(data),
+    is.numeric(data) | is.character(col_name),
+    is.numeric(embed_dim),
+    is.numeric(lag_size),
+    is.numeric(pred_dist),
+    is.numeric(lib_ind),
+    is.numeric(pred_ind),
+    round(embed_dim) == embed_dim,
+    round(lag_size) == lag_size,
+    round(pred_dist) == pred_dist,
+    round(lib_ind) == lib_ind,
+    round(pred_ind) == pred_ind,
+    NROW(data) > (embed_dim - 1) * lag_size
   )
   
   # If data is a vector, make into a tibble
@@ -63,7 +63,7 @@ pbs_simplex <- function (data,
 
   # Calculate Euclidean distances among row vectors
   lag_dist <- lag_tbl %>%
-    base::as.matrix() %>%
+    as.matrix() %>%
     stats::dist(diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
     tidyr::drop_na()
@@ -81,7 +81,7 @@ pbs_simplex <- function (data,
 
   # Iterate over prediction set
   for (time_ind in pred_from_ind) {
-    exclude_ind <- base::seq(
+    exclude_ind <- seq(
       from = time_ind + pred_dist,
       by = lag_size,
       length.out = embed_dim
@@ -96,7 +96,7 @@ pbs_simplex <- function (data,
       dplyr::mutate(n = row_number()) %>%
       dplyr::filter(n <= embed_dim + 1)
     # Are there enough points?
-    if (base::nrow(rel_lag_dist) > embed_dim) {
+    if (nrow(rel_lag_dist) > embed_dim) {
       # Calculate the weights
       omega_weights <- exp(-rel_lag_dist$distance / rel_lag_dist$distance[1])
       # Identify the iterated indicies
