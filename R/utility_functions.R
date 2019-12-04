@@ -20,13 +20,13 @@ pbs_make_lags <- function(tbl,
   # Check arguments
   stopifnot(
     tibble::is_tibble(tbl),
-    col_name %in% base::names(tbl),
-    base::is.numeric(embed_dim),
-    base::round(embed_dim) == embed_dim,
-    base::round(embed_dim) >= 1L,
-    base::is.numeric(lag_size),
-    base::round(lag_size) == lag_size,
-    base::round(lag_size) >= 1L
+    col_name %in% names(tbl),
+    is.numeric(embed_dim),
+    round(embed_dim) == embed_dim,
+    round(embed_dim) >= 1L,
+    is.numeric(lag_size),
+    round(lag_size) == lag_size,
+    round(lag_size) >= 1L
   )
   
   # Create time_series vector and ts_index tibble
@@ -34,8 +34,8 @@ pbs_make_lags <- function(tbl,
   ts_index <- tibble::tibble(index = seq_along(time_series))
   
   # Return lagged tibble
-  base::lapply(
-    X = base::seq_len(embed_dim) - 1,
+  lapply(
+    X = seq_len(embed_dim) - 1,
     FUN = function(X, ts, n) dplyr::lag(ts, X * n),
     ts = time_series,
     n = lag_size
