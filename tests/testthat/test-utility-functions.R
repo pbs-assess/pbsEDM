@@ -17,3 +17,16 @@ test_that("pbs_calc_dist() returns a tibble with three columns", {
 	expect_equal(names(lag_dist), c("focal_ind", "nbr_ind", "distance"))
 })
 
+test_that("pbs_make_tibble returns a tibble with named column", {
+	col_name <- "unlikely_name"
+	num_vec <- 1:10
+	old_tbl <- tibble::tibble(num_vec) %>% 
+		magrittr::set_colnames(col_name) %>%
+		pbs_make_tibble(col_name)
+	new_tbl <- pbs_make_tibble(num_vec, col_name)
+	expect_true(tibble::is_tibble(old_tbl))
+	expect_true(col_name %in% names(old_tbl))
+	expect_true(tibble::is_tibble(new_tbl))
+	expect_true(col_name %in% names(new_tbl))
+})
+
