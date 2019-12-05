@@ -29,44 +29,39 @@
 #' @examples pbs_simplex(tibble::tibble(x = 1:100), "x")
 #' 
 pbs_simplex <- function (data,
-                         col_name = NULL,
+                         col_name = "x",
                          embed_dim = 2L,
                          lag_size = 1L,
                          pred_dist = 1L,
                          lib_ind = seq_len(NROW(data)),
                          pred_ind = seq_len(NROW(data))) {
   
+  # Create tibble 'data_tbl'
+  data_tbl <- pbs_make_tibble(data, col_name)
+  
   # Check arguments
   stopifnot(
-    is.vector(data) | tibble::is_tibble(data),
-    is.numeric(data) | is.character(col_name),
-    is.numeric(embed_dim),
-    is.numeric(lag_size),
-    is.numeric(pred_dist),
-    is.numeric(lib_ind),
-    is.numeric(pred_ind),
+    rlang::is_numeric(embed_dim),
+    rlang::is_numeric(lag_size) & length(lag_size) == 1,
+    rlang::is_numeric(pred_dist) & length(pred_dist) == 1,
+    rlang::is_numeric(lib_ind),
+    rlang::is_numeric(pred_ind),
     round(embed_dim) == embed_dim,
     round(lag_size) == lag_size,
     round(pred_dist) == pred_dist,
     round(lib_ind) == lib_ind,
     round(pred_ind) == pred_ind,
-    NROW(data) > (embed_dim - 1) * lag_size
+    nrow(data_tbl) > (embed_dim - 1) * lag_size
   )
-  
-  # If data is a vector, make into a tibble
-  if (is.numeric(data)) {
-    data <- tibble::tibble(x = data)
-    col_name <- "x"
-  }
-  
+
   # Create a tibble of time series lags
-  lag_tbl <- pbs_make_lags(data, col_name, embed_dim, lag_size)
+  lag_tbl <- pbs_make_lags(data_tbl, col_name, embed_dim, lag_size)
 
   # Calculate Euclidean distances among row vectors
   lag_dist <- pbs_calc_dist(lag_tbl)
 
   # Initialize indices
-  data_ind <- data %>% nrow() %>% seq_len()
+  data_ind <- data_tbl %>% nrow() %>% seq_len()
   non_na_ind <- which(!is.na(rowSums(lag_tbl)))
   proj_ok_ind <- data_ind %>% intersect(non_na_ind - pred_dist)
   lib_ind <- lib_ind %>% intersect(non_na_ind) %>% intersect(proj_ok_ind)
@@ -74,7 +69,7 @@ pbs_simplex <- function (data,
   pred_from_ind <- (pred_to_ind - pred_dist) %>% intersect(non_na_ind)
   
   # Instantiate prediction vector and neighbour list
-  pred_vec <- rep(NA, NROW(data))
+  pred_vec <- rep(NA, nrow(data_tbl))
   nbr_list <- list()
 
   # Iterate over prediction set
@@ -91,15 +86,11 @@ pbs_simplex <- function (data,
     rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
     
     # Identify nearest neighbours
-    rel_lag_dist <- lag_dist %>%
-      dplyr::filter(focal_ind %in% time_ind,
-                    nbr_ind %in% rel_lib_ind) %>%
-      dplyr::arrange(distance) %>%
-      dplyr::mutate(dist_rank = dplyr::row_number()) %>%
-      dplyr::filter(dist_rank <= embed_dim + 1) %>%
-      dplyr::mutate(weight = exp(-distance / distance[1]),
-                    proj_focal_ind = focal_ind + pred_dist,
-                    proj_nbr_ind = nbr_ind + pred_dist)
+    rel_lag_dist <- pbs_make_nbrs(lag_dist, 
+                                  time_ind, 
+                                  rel_lib_ind, 
+                                  embed_dim, 
+                                  pred_dist)
     
     # Concatenate to the neighbour list
     nbr_list[[time_ind]] <- rel_lag_dist
@@ -109,7 +100,7 @@ pbs_simplex <- function (data,
       
       # Pull vectors
       proj_ind <- dplyr::pull(rel_lag_dist, proj_nbr_ind)
-      proj_vals <- dplyr::pull(data, col_name)[proj_ind]
+      proj_vals <- dplyr::pull(data_tbl, col_name)[proj_ind]
       weight <- dplyr::pull(rel_lag_dist, weight)
 
       # Predict the value
@@ -125,7 +116,7 @@ pbs_simplex <- function (data,
   
   # Caluculate the prediction-observation correlation
   pred_obs_cor <- stats::cor(pred_vec,
-                             dplyr::pull(data, col_name),
+                             dplyr::pull(data_tbl, col_name),
                              use = "pairwise.complete.obs")
   
   # Return a list
@@ -137,7 +128,7 @@ pbs_simplex <- function (data,
       pred_obs_cor = pred_obs_cor
     ),
     pred_tbl = tibble::tibble(
-      obs = data[col_name],
+      obs = data_tbl[col_name],
       pred = pred_vec
     ),
     nbr_list = nbr_list # List of tibbles of neighbour distances
