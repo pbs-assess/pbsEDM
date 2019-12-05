@@ -82,6 +82,8 @@ pbs_calc_dist <- function(row_tbl) {
 #' @param col_name A name to identify or apply to a column (character)
 #'
 #' @return A tibble with a named column
+#' 
+#' @importFrom magrittr %>%
 #' @export
 #'
 #' @examples pbs_make_tibble(1:10, "x")
@@ -99,4 +101,55 @@ pbs_make_tibble <- function(data, col_name) {
     stopifnot(col_name %in% names(data))
     tibble::as_tibble(data)
   }
+}
+
+#' Make a Tibble of Nearest Neighbours
+#'
+#' @param lag_dist Distances between neighbours (tibble with columns:
+#'     'focal_ind', 'nbr_ind', and 'distance')
+#' @param time_ind The time index of the focal vector (numeric scalar)
+#' @param rel_lib_ind The allowable neighbour indices (numeric vector)
+#' @param embed_dim The embedding dimension (numeric scalar)
+#' @param pred_dist The prediction distance (numeric scalar)
+#' @param max_nbrs The maximum number of neighbours (numeric scalar). It
+#'     should be the embed_dim + 1 for pbs_simplex() and length(rel_lib_ind)
+#'     for pbs_s_map().
+#'
+#' @return An tibble of ordered neighbour indices
+#' 
+#' @importFrom magrittr %>%
+#' @export
+#'
+#' @examples 1:100 %>% pbs_make_tibble("x") %>% 
+#'     pbs_make_lags("x", 5, 1) %>% pbs_calc_dist() %>%
+#'     pbs_make_nbrs(50, c(6:49, 56:99), 5, 1, 6)
+#' 
+pbs_make_nbrs <- function(lag_dist, 
+                          time_ind, 
+                          rel_lib_ind, 
+                          embed_dim, 
+                          pred_dist,
+                          max_nbrs = embed_dim + 1) {
+  
+  # Check arguments
+  stopifnot(
+    tibble::is_tibble(lag_dist),
+    names(lag_dist) == c("focal_ind", "nbr_ind", "distance"),
+    rlang::is_bare_numeric(time_ind) & length(time_ind) == 1,
+    rlang::is_bare_numeric(rel_lib_ind),
+    rlang::is_bare_numeric(embed_dim),
+    rlang::is_bare_numeric(pred_dist),
+    rlang::is_bare_numeric(max_nbrs)
+  )
+  
+  # Return tibble of ordered neighbours
+  lag_dist %>%
+    dplyr::filter(focal_ind %in% time_ind,
+                  nbr_ind %in% rel_lib_ind) %>%
+    dplyr::arrange(distance) %>%
+    dplyr::mutate(dist_rank = dplyr::row_number()) %>%
+    dplyr::filter(dist_rank <= max_nbrs) %>%
+    dplyr::mutate(weight = exp(-distance / distance[1]),
+                  proj_focal_ind = focal_ind + pred_dist,
+                  proj_nbr_ind = nbr_ind + pred_dist)
 }
