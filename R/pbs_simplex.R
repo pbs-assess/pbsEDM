@@ -59,17 +59,11 @@ pbs_simplex <- function (data,
     col_name <- "x"
   }
   
-  # Make a tibble of time series lags
+  # Create a tibble of time series lags
   lag_tbl <- pbs_make_lags(data, col_name, embed_dim, lag_size)
 
   # Calculate Euclidean distances among row vectors
-  lag_dist <- lag_tbl %>%
-    as.matrix() %>%
-    stats::dist(diag = FALSE, upper = TRUE) %>%
-    broom::tidy() %>%
-    dplyr::rename(focal_ind = item2, nbr_ind = item1) %>%
-    dplyr::select(focal_ind, nbr_ind, distance) %>%
-    tidyr::drop_na()
+  lag_dist <- pbs_calc_dist(lag_tbl)
 
   # Initialize indices
   data_ind <- data %>% nrow() %>% seq_len()
