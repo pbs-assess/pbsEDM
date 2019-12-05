@@ -73,3 +73,30 @@ pbs_calc_dist <- function(row_tbl) {
     dplyr::select(focal_ind, nbr_ind, distance) %>%
     tidyr::drop_na()
 }
+
+
+#' Attempt to Return a Tibble with a Named Column
+#'
+#' @param data An object to be returned as a tibble (a tibble, vector with 
+#'     null dimensions, or object coercable by tibble::as_tibble)
+#' @param col_name A name to identify or apply to a column (character)
+#'
+#' @return A tibble with a named column
+#' @export
+#'
+#' @examples pbs_make_tibble(1:10, "x")
+#' 
+pbs_make_tibble <- function(data, col_name) {
+  
+  # Is data a tibble with column col_name?
+  if (tibble::is_tibble(data)) {
+    stopifnot(col_name %in% names(data))
+    data
+  } else if (rlang::is_vector(data) & rlang::is_null(dim(data))) {
+    stopifnot(rlang::is_character(col_name))
+    tibble::tibble(data) %>% magrittr::set_colnames(col_name)
+  } else {
+    stopifnot(col_name %in% names(data))
+    tibble::as_tibble(data)
+  }
+}
