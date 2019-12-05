@@ -47,3 +47,29 @@ pbs_make_lags <- function(tbl,
     dplyr::select(-index) %>%
     magrittr::set_colnames(paste0("lag_", as.character(seq_len(embed_dim) - 1)))
 }
+
+#' Calculate Distances Among Tibble Row Vectors
+#'
+#' @param row_tbl A tibble of row vectors
+#'
+#' @return A long tibble of distances between pairs of row vectors
+#' 
+#' @importFrom magrittr %>%
+#' @export
+#'
+#' @examples pbs_calc_dist(pbs_make_lags(tibble::tibble(x = 1:100), "x", 3, 1))
+#' 
+pbs_calc_dist <- function(row_tbl) {
+  
+  # Check argument
+  stopifnot(tibble::is_tibble(row_tbl))
+  
+  # Calculate distances among row vectors
+  row_tbl %>%
+    as.matrix() %>%
+    stats::dist(diag = FALSE, upper = TRUE) %>%
+    broom::tidy() %>%
+    dplyr::rename(focal_ind = item2, nbr_ind = item1) %>%
+    dplyr::select(focal_ind, nbr_ind, distance) %>%
+    tidyr::drop_na()
+}
