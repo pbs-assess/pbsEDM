@@ -6,7 +6,7 @@
 \usage{
 pbs_simplex(
   data,
-  col_name = NULL,
+  col_name = "x",
   embed_dim = 2L,
   lag_size = 1L,
   pred_dist = 1L,
