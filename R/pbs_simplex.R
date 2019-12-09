@@ -40,17 +40,14 @@ pbs_simplex <- function (data,
   data_tbl <- pbs_make_tibble(data, col_name)
   
   # Check arguments
-  stopifnot(
-    rlang::is_integer(embed_dim),
-    rlang::is_integer(lag_size) & length(lag_size) == 1,
-    rlang::is_integer(pred_dist) & length(pred_dist) == 1,
-    rlang::is_integer(lib_ind),
-    rlang::is_integer(pred_ind),
-    round(embed_dim) == embed_dim,
-    round(lag_size) == lag_size,
-    round(pred_dist) == pred_dist,
-    round(lib_ind) == lib_ind,
-    round(pred_ind) == pred_ind,
+  assertthat::assert_that(
+    assertthat::is.count(embed_dim),
+    assertthat::is.count(lag_size),
+    assertthat::is.count(pred_dist),
+    is.numeric(lib_ind),
+    is.vector(lib_ind),
+    is.numeric(pred_ind),
+    is.vector(pred_ind),
     nrow(data_tbl) > (embed_dim - 1) * lag_size
   )
 
