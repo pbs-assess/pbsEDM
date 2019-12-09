@@ -41,11 +41,11 @@ pbs_simplex <- function (data,
   
   # Check arguments
   stopifnot(
-    rlang::is_numeric(embed_dim),
-    rlang::is_numeric(lag_size) & length(lag_size) == 1,
-    rlang::is_numeric(pred_dist) & length(pred_dist) == 1,
-    rlang::is_numeric(lib_ind),
-    rlang::is_numeric(pred_ind),
+    rlang::is_integer(embed_dim),
+    rlang::is_integer(lag_size) & length(lag_size) == 1,
+    rlang::is_integer(pred_dist) & length(pred_dist) == 1,
+    rlang::is_integer(lib_ind),
+    rlang::is_integer(pred_ind),
     round(embed_dim) == embed_dim,
     round(lag_size) == lag_size,
     round(pred_dist) == pred_dist,
@@ -114,18 +114,19 @@ pbs_simplex <- function (data,
     }
   }
   
-  # Caluculate the prediction-observation correlation
-  pred_obs_cor <- stats::cor(pred_vec,
-                             dplyr::pull(data_tbl, col_name),
-                             use = "pairwise.complete.obs")
-  
+  # Caluculate the prediction statistics
+  obs_vec <- dplyr::pull(data_tbl, col_name)
+  pred_obs_cor <- stats::cor(obs_vec, pred_vec, use = "pairwise.complete.obs")
+  pred_obs_rmse <- sqrt(mean((obs_vec - pred_vec)^2, na.rm = TRUE))
+
   # Return a list
   list(
     stats_tbl = tibble::tibble( # Needs variance etc.
       embed_dim = embed_dim,
       lag_size = lag_size,
       pred_dist = pred_dist,
-      pred_obs_cor = pred_obs_cor
+      pred_obs_cor = pred_obs_cor,
+      rmse = pred_obs_rmse
     ),
     pred_tbl = tibble::tibble(
       obs = data_tbl[col_name],
