@@ -92,8 +92,11 @@ pbs_simplex <- function (data,
     # Concatenate to the neighbour list
     nbr_list[[time_ind]] <- rel_lag_dist
     
-    # Are there enough points?
-    if (nrow(rel_lag_dist) > embed_dim) {
+    # Store the number of neighbours
+    num_nbrs <- nrow(rel_lag_dist)
+    
+    # Are there enough neighbours?
+    if (num_nbrs > embed_dim) {
       
       # Pull vectors
       proj_ind <- dplyr::pull(rel_lag_dist, proj_nbr_ind)
