@@ -4,16 +4,9 @@
 \alias{pbs_s_map}
 \title{Use An S-Map to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_s_map(
-  data,
-  col_name = NULL,
-  embed_dim = 2L,
-  local_weight = 0L,
-  lag_size = 1L,
-  pred_dist = 1L,
-  lib_ind = seq_len(NROW(data)),
-  pred_ind = seq_len(NROW(data))
-)
+pbs_s_map(data, col_name = "x", embed_dim = 2L, local_weight = 0L,
+  lag_size = 1L, pred_dist = 1L, lib_ind = seq_len(NROW(data)),
+  pred_ind = seq_len(NROW(data)))
 }
 \arguments{
 \item{data}{A time series with possible NA values (numeric vector or
