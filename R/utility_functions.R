@@ -18,15 +18,11 @@ pbs_make_lags <- function(tbl,
                           embed_dim,
                           lag_size) {
   # Check arguments
-  stopifnot(
+  assertthat::assert_that(
     tibble::is_tibble(tbl),
     col_name %in% names(tbl),
-    is.numeric(embed_dim),
-    round(embed_dim) == embed_dim,
-    round(embed_dim) >= 1L,
-    is.numeric(lag_size),
-    round(lag_size) == lag_size,
-    round(lag_size) >= 1L
+    assertthat::is.count(embed_dim),
+    assertthat::is.count(lag_size)
   )
   
   # Create time_series vector and ts_index tibble
@@ -62,7 +58,7 @@ pbs_make_lags <- function(tbl,
 pbs_calc_dist <- function(row_tbl) {
   
   # Check argument
-  stopifnot(tibble::is_tibble(row_tbl))
+  assertthat::assert_that(tibble::is_tibble(row_tbl))
   
   # Calculate distances among row vectors
   row_tbl %>%
@@ -92,13 +88,13 @@ pbs_make_tibble <- function(data, col_name) {
   
   # Is data a tibble with column col_name?
   if (tibble::is_tibble(data)) {
-    stopifnot(col_name %in% names(data))
+    assertthat::assert_that(col_name %in% names(data))
     data
-  } else if (rlang::is_vector(data) & rlang::is_null(dim(data))) {
-    stopifnot(rlang::is_character(col_name))
+  } else if (is.vector(data)) {
+    assertthat::assert_that(is.character(col_name))
     tibble::tibble(data) %>% magrittr::set_colnames(col_name)
   } else {
-    stopifnot(col_name %in% names(data))
+    assertthat::assert_that(col_name %in% names(data))
     tibble::as_tibble(data)
   }
 }
@@ -132,14 +128,15 @@ pbs_make_nbrs <- function(lag_dist,
                           max_nbrs = embed_dim + 1) {
   
   # Check arguments
-  stopifnot(
+  assertthat::assert_that(
     tibble::is_tibble(lag_dist),
     names(lag_dist) == c("focal_ind", "nbr_ind", "distance"),
-    rlang::is_bare_numeric(time_ind) & length(time_ind) == 1,
-    rlang::is_bare_numeric(rel_lib_ind),
-    rlang::is_bare_numeric(embed_dim),
-    rlang::is_bare_numeric(pred_dist),
-    rlang::is_bare_numeric(max_nbrs)
+    assertthat::is.count(time_ind),
+    assertthat::is.count(embed_dim),
+    assertthat::is.count(pred_dist),
+    assertthat::is.count(max_nbrs),
+    is.numeric(rel_lib_ind),
+    is.vector(rel_lib_ind)
   )
   
   # Return tibble of ordered neighbours
