@@ -130,7 +130,7 @@ pbs_make_nbrs <- function(lag_dist,
   # Check arguments
   assertthat::assert_that(
     tibble::is_tibble(lag_dist),
-    names(lag_dist) == c("focal_ind", "nbr_ind", "distance"),
+    all.equal(names(lag_dist), c("focal_ind", "nbr_ind", "distance")),
     assertthat::is.count(time_ind),
     assertthat::is.count(embed_dim),
     assertthat::is.count(pred_dist),
