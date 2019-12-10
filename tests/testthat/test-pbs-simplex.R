@@ -1,11 +1,11 @@
-context("test-simplex-functions.R")
+context("test-pbs-simplex.R")
 
-# Examples from eDNAcutoff:
-#test_that("false positives are correctly removed in small example", {
-#    expect_error(remove_false_pos(small_example, alpha = 0))
-#    expect_equal(remove_false_pos(small_example), small_example_result)
-#})
-
-#test_that("false positives are correctly removed in big example", {
-#    expect_equal(remove_false_pos(big_example), big_example_result)
-#})
+test_that("pbs_simplex() returns a list of 2 tibbles and a list", {
+  value <- pbs_simplex(tibble::tibble(x = 1:100), "x")
+  expect_true(is.list(value))
+  expect_equal(length(value), 3)
+  expect_equal(names(value), c("stats_tbl", "pred_tbl", "nbr_list"))
+  expect_true(tibble::is_tibble(value[[1]]))
+  expect_true(tibble::is_tibble(value[[2]]))
+  expect_true(is.list(value[[3]]))
+})
