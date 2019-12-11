@@ -26,7 +26,7 @@
 #' @importFrom magrittr %>%
 #' @export
 #'
-#' @examples pbs_simplex(tibble::tibble(x = 1:100), "x")
+#' @examples pbs_simplex(simple_ts, "x")
 #' 
 pbs_simplex <- function (data,
                          col_name = "x",
@@ -103,7 +103,7 @@ pbs_simplex <- function (data,
     if (num_nbrs > embed_dim) {
       
       # Pull vectors
-      proj_ind <- dplyr::pull(nbr_dist, proj_nbr_ind)
+      proj_ind <- dplyr::pull(nbr_dist, nbr_proj)
       proj_vals <- dplyr::pull(data_tbl, col_name)[proj_ind]
       weight <- dplyr::pull(nbr_dist, weight)
 
