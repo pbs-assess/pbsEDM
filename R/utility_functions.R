@@ -146,7 +146,6 @@ pbs_make_nbrs <- function(lag_dist,
     dplyr::arrange(distance) %>%
     dplyr::mutate(dist_rank = dplyr::row_number()) %>%
     dplyr::filter(dist_rank <= max_nbrs) %>%
-    dplyr::mutate(weight = exp(-distance / distance[1]),
-                  proj_focal_ind = focal_ind + pred_dist,
+    dplyr::mutate(proj_focal_ind = focal_ind + pred_dist,
                   proj_nbr_ind = nbr_ind + pred_dist)
 }
