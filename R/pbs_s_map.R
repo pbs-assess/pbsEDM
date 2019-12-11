@@ -28,7 +28,7 @@
 #' @importFrom magrittr %>%
 #' @export
 #'
-#' @examples pbs_s_map(tibble::tibble(x = 1:100), "x")
+#' @examples pbs_s_map(simple_ts, "x", local_weight = 2)
 #' 
 pbs_s_map <- function(data,
 											col_name = "x",
@@ -71,9 +71,7 @@ pbs_s_map <- function(data,
   # Instantiate prediction vector and neighbour list
   pred_vec <- rep(NA, nrow(data_tbl))
   nbr_list <- list()
-  
-	# 
-  
+
   # Iterate over prediction set
   for (time_ind in pred_from_ind) {
     
@@ -88,38 +86,39 @@ pbs_s_map <- function(data,
     rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
     
     # Identify nearest neighbours
-    rel_lag_dist <- pbs_make_nbrs(lag_dist, 
-                                  time_ind, 
-                                  rel_lib_ind, 
-                                  embed_dim, 
-                                  pred_dist,
-                                  max_nbrs = nrow(data_tbl))
+    nbr_dist <- pbs_make_nbrs(lag_dist, 
+                              time_ind, 
+                              rel_lib_ind, 
+                              embed_dim, 
+                              pred_dist,
+                              max_nbrs = nrow(data_tbl))
     
+    # Augment by weights
+    nbr_dist <- nbr_dist %>% 
+      dplyr::mutate(
+        weight = exp(-local_weight * distance / mean(distance, na.rm = TRUE))
+      )
+
     # Concatenate to the neighbour list
-    nbr_list[[time_ind]] <- rel_lag_dist
+    nbr_list[[time_ind]] <- nbr_dist
     
     # Store the number of neighbours
-    num_nbrs <- nrow(rel_lag_dist)
+    num_nbrs <- nrow(nbr_dist)
     
     # Are there enough neighbours?
     if (num_nbrs > embed_dim) {
       
       # Pull vectors
-      proj_ind <- dplyr::pull(rel_lag_dist, proj_nbr_ind)
+      proj_ind <- dplyr::pull(nbr_dist, nbr_proj)
       proj_vals <- dplyr::pull(data_tbl, col_name)[proj_ind]
       
-      # Store mean distance
-      mean_dist <- mean(rel_lag_dist$distance, na.rm = TRUE)
-      
       # Calculate the B vector and A matrix
-      a_mat <- matrix(nrow = num_nbrs, ncol = embed_dim)
+      a_mat <- matrix(NA_real_, nrow = num_nbrs, ncol = embed_dim)
       b_vec <- rep(NA_real_, num_nbrs)
-      w_vec <- rep(NA_real_, num_nbrs)
       for (i in seq_len(num_nbrs)) {
-        w_vec[i] <- exp(-local_weight * rel_lag_dist[i, "distance"] / mean_dist)
-        b_vec[i] <- w_vec[i] * proj_vals[i]
+        b_vec[i] <- nbr_dist$weight[i] * proj_vals[i]
         for (j in seq_len(embed_dim)) {
-          a_mat[i, j] <- w_vec[i] * lag_tbl[rel_lag_dist$proj_nbr_ind[i], j]
+          a_mat[i, j] <- nbr_dist$weight[i] * lag_tbl[[nbr_dist$nbr_proj[i], j]]
         }
       }
       
