@@ -2,7 +2,7 @@ Package: pbsEDM
 Type: Package
 Title: Perform Empirical Dynamic Modeling in R
 Version: 0.1.0
-Author@R:
+Authors@R:
     c(person(given = c("Luke", "A."),
              family = "Rogers",
              role = c("aut", "cre"),
@@ -10,7 +10,7 @@ Author@R:
              comment = c(ORCID = "0000-0003-3843-064X")),
       person(given = "Andrew",
              family = "Edwards",
-             role = c("aut", "cre"),
+             role = c("aut"),
              email = "andrew.edwards@dfo-mpo.gc.ca",
              comment = c(ORCID = "0000-0003-2749-8198"))
     )
