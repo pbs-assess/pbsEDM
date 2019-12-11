@@ -83,25 +83,29 @@ pbs_simplex <- function (data,
     rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
     
     # Identify nearest neighbours
-    rel_lag_dist <- pbs_make_nbrs(lag_dist, 
-                                  time_ind, 
-                                  rel_lib_ind, 
-                                  embed_dim, 
-                                  pred_dist)
+    nbr_dist <- pbs_make_nbrs(lag_dist, 
+                              time_ind, 
+                              rel_lib_ind, 
+                              embed_dim, 
+                              pred_dist)
+    
+    # Augment by weights
+    nbr_dist <- nbr_dist %>% 
+      dplyr::mutate(weight = exp(-distance / distance[1]))
     
     # Concatenate to the neighbour list
-    nbr_list[[time_ind]] <- rel_lag_dist
+    nbr_list[[time_ind]] <- nbr_dist
     
     # Store the number of neighbours
-    num_nbrs <- nrow(rel_lag_dist)
+    num_nbrs <- nrow(nbr_dist)
     
     # Are there enough neighbours?
     if (num_nbrs > embed_dim) {
       
       # Pull vectors
-      proj_ind <- dplyr::pull(rel_lag_dist, proj_nbr_ind)
+      proj_ind <- dplyr::pull(nbr_dist, proj_nbr_ind)
       proj_vals <- dplyr::pull(data_tbl, col_name)[proj_ind]
-      weight <- dplyr::pull(rel_lag_dist, weight)
+      weight <- dplyr::pull(nbr_dist, weight)
 
       # Predict the value
       pred_vec[time_ind + pred_dist] <- sum(proj_vals * weight) / sum(weight) 
