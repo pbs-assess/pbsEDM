@@ -118,7 +118,7 @@ pbs_s_map <- function(data,
       for (i in seq_len(num_nbrs)) {
         b_vec[i] <- nbr_dist$weight[i] * proj_vals[i]
         for (j in seq_len(embed_dim)) {
-          a_mat[i, j] <- nbr_dist$weight[i] * lag_tbl[[nbr_dist$nbr_proj[i], j]]
+          a_mat[i, j] <- nbr_dist$weight[i] * lag_tbl[[nbr_dist$nbr_ind[i], j]]
         }
       }
       
@@ -130,7 +130,7 @@ pbs_s_map <- function(data,
       c_vec <- v_mat %*% d_inv %*% t(u_mat) %*% b_vec
       
       # Predict the value
-      pred_vec[time_ind + pred_dist] <- sum(c_vec + lag_tbl[time_ind, ])
+      pred_vec[time_ind + pred_dist] <- sum(c_vec * lag_tbl[time_ind, ])
       
     } else {
       
