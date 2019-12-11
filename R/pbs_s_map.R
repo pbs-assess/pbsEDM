@@ -156,7 +156,7 @@ pbs_s_map <- function(data,
       rmse = pred_obs_rmse
     ),
     pred_tbl = tibble::tibble(
-      obs = data_tbl[col_name],
+      obs = obs_vec,
       pred = pred_vec
     ),
     nbr_list = nbr_list # List of tibbles of neighbour distances
