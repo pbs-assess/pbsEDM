@@ -188,4 +188,99 @@ util_exclude_indices <- function(time_ind,
   }
 }
 
+#' Make a Tibble of Lagged Columns from a Vector
+#' 
+#' Rows with NAs are replaced by rows of NAs.
+#'
+#' @param data A data frame with a named numeric column to be lagged
+#' @param name The name of the column to be lagged (character scalar)
+#' @param dim The number of lagged columns (numeric scalar)
+#' @param lag Number of time steps separating successive lags (numeric scalar)
+#' @param init The size of the first lag, usually 0 (numeric scalar)
+#'
+#' @return A tibble of successively lagged columns
+#'
+#' @importFrom magrittr %>%
+#'
+#' @examples make_lag_tibble(data.frame(x = 1:16), "x", 3, 2)
+#' 
+make_lag_tibble <- function(data, name, dim, lag, init = 0) {
+  
+  # Check arguments
+  stopifnot(
+    is.data.frame(data),
+    is.character(name),
+    is.numeric(dim),
+    is.numeric(lag),
+    is.numeric(init)
+  )
+  
+  # Pull named time series
+  tseries <- dplyr::pull(tibble::as_tibble(data), name)
+  
+  # Specify names
+  lag_sizes <- as.character((seq_len(dim) - 1) * lag)
+  lag_names <- paste0(name, "_lag_", lag_sizes)
+  
+  # Make index tibble
+  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, name)))
+  
+  # Return lag tibble
+  lapply(X = seq.int(from = init, by = lag, length.out = dim),
+         FUN = function(X, ts) dplyr::lag(ts, X),
+         ts = tseries) %>% 
+    dplyr::bind_cols() %>%
+    magrittr::set_colnames(lag_names) %>%
+    dplyr::mutate(index = dplyr::row_number()) %>% 
+    tidyr::drop_na() %>%
+    dplyr::right_join(index_tibble, by = "index") %>%
+    dplyr::select(-index)
+}
+
+#' Make and Combind Tibbles of Lagged Columns
+#'
+#' @param data A data frame with a named numeric column to be lagged
+#' @param names The name of the column to be lagged (character scalar)
+#' @param dims The number of lagged columns (numeric vector)
+#' @param lag Number of time steps separating successive lags (numeric scalar)
+#' @param init The size of the first lag, usually 0 (numeric scalar)
+#'
+#' @return A tibble of lagged columns
+#' 
+#' @importFrom magrittr %>%
+#'
+#' @examples 
+#' dat <- data.frame(x = 1:15, y = 11:25)
+#' combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1)
+#' 
+combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
+  
+  # Check arguments
+  stopifnot(
+    is.data.frame(data),
+    is.character(names),
+    is.numeric(dims),
+    is.numeric(lag),
+    is.numeric(init)
+  )
+  
+  # Make index tibble
+  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, names[1])))
+  
+  # Return combined lag tibble
+  lapply(X = seq_along(names),
+         FUN = function(X, dat, n, d, l) make_lag_tibble(dat, n[X], d[X], l),
+         dat = data,
+         n = names,
+         d = dims,
+         l = lag) %>%
+    dplyr::bind_cols() %>%
+    dplyr::mutate(index = dplyr::row_number()) %>% 
+    tidyr::drop_na() %>%
+    dplyr::right_join(index_tibble, by = "index") %>%
+    dplyr::select(-index)
+}
+
+
+
 
