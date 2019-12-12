@@ -307,5 +307,56 @@ make_dist_tibble <- function(mat) {
     tidyr::drop_na()
 }
 
+#' Make Global Allowable Indices from a Matrix of Lagged Column Row Vectors
+#'
+#' @param mat A matrix of lagged columns defining row vectors (matrix)
+#' @param from A vector of indices to consider forecasting from (numeric)
+#' @param into A vector of indices to consider forecasting into (numeric)
+#' @param dist The forecast distance (numeric scalar)
+#'
+#' @return A tibble with two columns of indices
+#' 
+#' @importFrom magrittr %>%
+#'
+#' @examples
+#' dat <- data.frame(x = c(1:7, NA, 9:15), y = 11:25)
+#' mat <- as.matrix(combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1))
+#' make_global_indices(mat)
+#' 
+make_global_indices <- function(mat, 
+                                from = seq_len(nrow(mat)), 
+                                into = seq_len(nrow(mat)), 
+                                dist = 1L) {
+  
+  # Check arguments
+  stopifnot(
+    is.matrix(mat),
+    is.numeric(from),
+    is.vector(from),
+    is.numeric(into),
+    is.vector(into),
+    is.numeric(dist)
+  )
+  
+  # Make 'from' indices
+  from_global <- tibble::as_tibble(mat) %>%
+    dplyr::mutate(index = row_number(),
+                  buffer = dplyr::lead(dplyr::pull(., 1), dist)) %>%
+    tidyr::drop_na() %>%
+    dplyr::pull(index)
+  
+  # Make 'into' indices
+  into_global <- tibble::as_tibble(mat) %>%
+    dplyr::mutate(index = row_number(),
+                  buffer = dplyr::lag(dplyr::pull(., 1), dist)) %>%
+    tidyr::drop_na() %>%
+    dplyr::pull(index)
+  
+  # Return indices
+  dplyr::bind_cols(from = from_global, into = into_global)
+}
+
+
+
 
 
