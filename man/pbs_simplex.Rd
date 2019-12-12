@@ -5,7 +5,7 @@
 \title{Use Simplex Projection to Perform Out-of-Sample Forecasting}
 \usage{
 pbs_simplex(data, col_name = "x", embed_dim = 2L, lag_size = 1L,
-  pred_dist = 1L, lib_ind = seq_len(NROW(data)),
+  pred_dist = 1L, one_sided = TRUE, lib_ind = seq_len(NROW(data)),
   pred_ind = seq_len(NROW(data)))
 }
 \arguments{
@@ -23,6 +23,8 @@ embedding of the time series (integer scalar)}
 
 \item{pred_dist}{The number of time steps forward to forecast
 (integer scalar)}
+
+\item{one_sided}{Should only the focal value be excluded? (logical)}
 
 \item{lib_ind}{Time series indices to predict from (integer vector).
 Indices will be removed if the associated lagged coordinate vector 
@@ -43,6 +45,6 @@ A list of tibbles
 Use Simplex Projection to Perform Out-of-Sample Forecasting
 }
 \examples{
-pbs_simplex(tibble::tibble(x = 1:100), "x")
+pbs_simplex(simple_ts, "x")
 
 }

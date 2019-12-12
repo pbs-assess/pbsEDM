@@ -5,8 +5,8 @@
 \title{Use An S-Map to Perform Out-of-Sample Forecasting}
 \usage{
 pbs_s_map(data, col_name = "x", embed_dim = 2L, local_weight = 0L,
-  lag_size = 1L, pred_dist = 1L, lib_ind = seq_len(NROW(data)),
-  pred_ind = seq_len(NROW(data)))
+  lag_size = 1L, pred_dist = 1L, one_sided = TRUE,
+  lib_ind = seq_len(NROW(data)), pred_ind = seq_len(NROW(data)))
 }
 \arguments{
 \item{data}{A time series with possible NA values (numeric vector or
@@ -27,6 +27,8 @@ embedding of the time series (integer scalar)}
 \item{pred_dist}{The number of time steps forward to forecast
 (integer scalar)}
 
+\item{one_sided}{Should only the focal value be excluded? (logical)}
+
 \item{lib_ind}{Time series indices to predict from (integer vector).
 Indices will be removed if the associated lagged coordinate vector 
 or its projection forward by pred_dist (1) has one or more
@@ -46,6 +48,6 @@ A list of tibbles
 Use An S-Map to Perform Out-of-Sample Forecasting
 }
 \examples{
-pbs_s_map(tibble::tibble(x = 1:100), "x")
+pbs_s_map(simple_ts, "x", local_weight = 2)
 
 }

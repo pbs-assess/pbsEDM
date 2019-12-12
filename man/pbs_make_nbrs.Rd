@@ -4,7 +4,7 @@
 \alias{pbs_make_nbrs}
 \title{Make a Tibble of Nearest Neighbours}
 \usage{
-pbs_make_nbrs(lag_dist, time_ind, rel_lib_ind, embed_dim, pred_dist,
+pbs_make_nbrs(lag_dist, time_ind, rel_ind, embed_dim, pred_dist,
   max_nbrs = embed_dim + 1)
 }
 \arguments{
@@ -13,14 +13,14 @@ pbs_make_nbrs(lag_dist, time_ind, rel_lib_ind, embed_dim, pred_dist,
 
 \item{time_ind}{The time index of the focal vector (numeric scalar)}
 
-\item{rel_lib_ind}{The allowable neighbour indices (numeric vector)}
+\item{rel_ind}{The allowable neighbour indices (numeric vector)}
 
 \item{embed_dim}{The embedding dimension (numeric scalar)}
 
 \item{pred_dist}{The prediction distance (numeric scalar)}
 
 \item{max_nbrs}{The maximum number of neighbours (numeric scalar). It
-should be the embed_dim + 1 for pbs_simplex() and length(rel_lib_ind)
+should be the embed_dim + 1 for pbs_simplex() and length(rel_ind)
 for pbs_s_map().}
 }
 \value{
