@@ -2,6 +2,7 @@
 
 export(EDM_pred_E_2)
 export(pbs_calc_dist)
+export(pbs_edm)
 export(pbs_make_lags)
 export(pbs_make_nbrs)
 export(pbs_make_tibble)
