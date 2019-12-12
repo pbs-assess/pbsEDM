@@ -30,3 +30,13 @@ test_that("pbs_make_tibble returns a tibble with named column", {
 	expect_true(col_name %in% names(new_tbl))
 })
 
+test_that("util_exclude_indices() returns a numeric vector", {
+  call_true <- util_exclude_indices(10, 1, 1, 5, T)
+  call_false <- util_exclude_indices(10, 1, 1, 5, F)
+  expect_true(is.numeric(call_true))
+  expect_true(is.vector(call_true))
+  expect_true(is.numeric(call_false))
+  expect_true(is.vector(call_false))
+})
+
+
