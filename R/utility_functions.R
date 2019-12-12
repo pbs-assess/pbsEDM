@@ -104,11 +104,11 @@ pbs_make_tibble <- function(data, col_name) {
 #' @param lag_dist Distances between neighbours (tibble with columns:
 #'     'focal_ind', 'nbr_ind', and 'distance')
 #' @param time_ind The time index of the focal vector (numeric scalar)
-#' @param rel_lib_ind The allowable neighbour indices (numeric vector)
+#' @param rel_ind The allowable neighbour indices (numeric vector)
 #' @param embed_dim The embedding dimension (numeric scalar)
 #' @param pred_dist The prediction distance (numeric scalar)
 #' @param max_nbrs The maximum number of neighbours (numeric scalar). It
-#'     should be the embed_dim + 1 for pbs_simplex() and length(rel_lib_ind)
+#'     should be the embed_dim + 1 for pbs_simplex() and length(rel_ind)
 #'     for pbs_s_map().
 #'
 #' @return An tibble of ordered neighbour indices
@@ -122,7 +122,7 @@ pbs_make_tibble <- function(data, col_name) {
 #' 
 pbs_make_nbrs <- function(lag_dist, 
                           time_ind, 
-                          rel_lib_ind, 
+                          rel_ind, 
                           embed_dim, 
                           pred_dist,
                           max_nbrs = embed_dim + 1) {
@@ -135,17 +135,57 @@ pbs_make_nbrs <- function(lag_dist,
     assertthat::is.count(embed_dim),
     assertthat::is.count(pred_dist),
     assertthat::is.count(max_nbrs),
-    is.numeric(rel_lib_ind),
-    is.vector(rel_lib_ind)
+    is.numeric(rel_ind),
+    is.vector(rel_ind)
   )
   
   # Return tibble of ordered neighbours
   lag_dist %>%
     dplyr::filter(focal_ind %in% time_ind,
-                  nbr_ind %in% rel_lib_ind) %>%
+                  nbr_ind %in% rel_ind) %>%
     dplyr::arrange(distance) %>%
     dplyr::mutate(dist_rank = dplyr::row_number()) %>%
     dplyr::filter(dist_rank <= max_nbrs) %>%
     dplyr::mutate(focal_proj = focal_ind + pred_dist,
                   nbr_proj = nbr_ind + pred_dist)
 }
+
+
+#' Exclude Indicies Associated with a Specified Time Index
+#'
+#' @param time_ind The time index of the focal vector (numeric scalar)
+#' @param pred_dist The prediction distance (numeric scalar)
+#' @param lag_size The number of time steps separating successive lags
+#' @param embed_dim The embedding dimension (numeric scalar)
+#' @param one_sided Should only the focal value be excluded? (logical)
+#'
+#' @return A numeric vector
+#'
+#' @examples util_exclude_indices(10, 1, 1, 5, T)
+#' 
+util_exclude_indices <- function(time_ind, 
+                                 pred_dist, 
+                                 lag_size, 
+                                 embed_dim,
+                                 one_sided = T) {
+  # Check arguments
+  assertthat::assert_that(
+    assertthat::is.count(time_ind),
+    assertthat::is.count(pred_dist),
+    assertthat::is.count(lag_size),
+    assertthat::is.count(embed_dim),
+    is.logical(one_sided)
+  )
+  if (one_sided) {
+    seq(from = time_ind + pred_dist, by = lag_size, length.out = embed_dim)
+  } else {
+    sort(
+      union(
+        seq(from = time_ind + pred_dist, by = lag_size, length.out = embed_dim),  
+        seq(from = time_ind + pred_dist, by = -lag_size, length.out = embed_dim)
+      )
+    )
+  }
+}
+
+
