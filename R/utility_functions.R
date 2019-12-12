@@ -230,11 +230,7 @@ make_lag_tibble <- function(data, name, dim, lag, init = 0) {
          FUN = function(X, ts) dplyr::lag(ts, X),
          ts = tseries) %>% 
     dplyr::bind_cols() %>%
-    magrittr::set_colnames(lag_names) %>%
-    dplyr::mutate(index = dplyr::row_number()) %>% 
-    tidyr::drop_na() %>%
-    dplyr::right_join(index_tibble, by = "index") %>%
-    dplyr::select(-index)
+    magrittr::set_colnames(lag_names)
 }
 
 #' Make and Combind Tibbles of Lagged Columns
@@ -250,8 +246,8 @@ make_lag_tibble <- function(data, name, dim, lag, init = 0) {
 #' @importFrom magrittr %>%
 #'
 #' @examples 
-#' dat <- data.frame(x = 1:15, y = 11:25)
-#' combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1)
+#' dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
+#' combine_lag_tibbles(dat, c("x", "y", "z"), c(3, 2, 1), 1)
 #' 
 combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
   
@@ -274,11 +270,7 @@ combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
          n = names,
          d = dims,
          l = lag) %>%
-    dplyr::bind_cols() %>%
-    dplyr::mutate(index = dplyr::row_number()) %>% 
-    tidyr::drop_na() %>%
-    dplyr::right_join(index_tibble, by = "index") %>%
-    dplyr::select(-index)
+    dplyr::bind_cols()
 }
 
 #' Make a Tibble of Euclidean Distances Between Rows of a Matrix
@@ -289,7 +281,7 @@ combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
 #' 
 #' @importFrom magrittr %>%
 #'
-#' @examples make_dist_tibble(matrix(1:12, nrow = 4))
+#' @examples make_dist_tibble(matrix(c(1:6, NA, 8:24), nrow = 6))
 #' 
 make_dist_tibble <- function(mat) {
   
@@ -298,9 +290,17 @@ make_dist_tibble <- function(mat) {
     is.numeric(mat),
     is.matrix(mat)
   )
+  
+  # Replace rows with NAs by NA rows
+  mat_na <- mat %>% as.data.frame() %>% tibble::as_tibble() %>%
+    dplyr::mutate(ind = seq_len(nrow(.))) %>%
+    tidyr::drop_na() %>%
+    dplyr::right_join(tibble::tibble(ind = seq_len(nrow(mat))), by = "ind") %>%
+    dplyr::select(-ind) %>%
+    as.matrix()
 
   # Calculate distances among row vectors
-    stats::dist(mat, diag = FALSE, upper = TRUE) %>%
+  stats::dist(mat_na, diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
     dplyr::rename(focal = item2, nbr = item1) %>%
     dplyr::select(focal, nbr, distance) %>%
@@ -340,15 +340,17 @@ make_global_indices <- function(mat,
   
   # Make 'from' indices
   from_global <- tibble::as_tibble(mat) %>%
-    dplyr::mutate(index = row_number(),
-                  buffer = dplyr::lead(dplyr::pull(., 1), dist)) %>%
+    dplyr::mutate(index = row_number()) %>%
+    dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
+    dplyr::mutate(buffer = dplyr::lead(na_col, dist)) %>%
     tidyr::drop_na() %>%
     dplyr::pull(index)
   
   # Make 'into' indices
   into_global <- tibble::as_tibble(mat) %>%
-    dplyr::mutate(index = row_number(),
-                  buffer = dplyr::lag(dplyr::pull(., 1), dist)) %>%
+    dplyr::mutate(index = row_number()) %>%
+    dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
+    dplyr::mutate(buffer = dplyr::lag(na_col, dist)) %>%
     tidyr::drop_na() %>%
     dplyr::pull(index)
   
