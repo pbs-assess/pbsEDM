@@ -12,6 +12,7 @@
 #'   (integer scalar)
 #' @param pred_dist The number of time steps forward to forecast
 #'   (integer scalar)
+#' @param one_sided Should only the focal value be excluded? (logical)
 #' @param lib_ind Time series indices to predict from (integer vector).
 #'   Indices will be removed if the associated lagged coordinate vector 
 #'   or its projection forward by pred_dist (1) has one or more
@@ -36,6 +37,7 @@ pbs_s_map <- function(data,
 											local_weight = 0L,
 											lag_size = 1L,
 											pred_dist = 1L,
+											one_sided = TRUE,
 											lib_ind = seq_len(NROW(data)),
 											pred_ind = seq_len(NROW(data))) {
 	
@@ -76,19 +78,19 @@ pbs_s_map <- function(data,
   for (time_ind in pred_from_ind) {
     
     # Exclude invalid indices
-    exclude_ind <- seq(
-      from = time_ind + pred_dist,
-      by = lag_size,
-      length.out = embed_dim
-    )
+    exclude_ind <- util_exclude_indices(time_ind, 
+                                        pred_dist, 
+                                        lag_size, 
+                                        embed_dim, 
+                                        one_sided = one_sided)
     
     # Specify the valid indices
-    rel_lib_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
+    rel_ind <- lib_ind %>% setdiff(time_ind) %>% setdiff(exclude_ind)
     
     # Identify nearest neighbours
     nbr_dist <- pbs_make_nbrs(lag_dist, 
                               time_ind, 
-                              rel_lib_ind, 
+                              rel_ind, 
                               embed_dim, 
                               pred_dist,
                               max_nbrs = nrow(data_tbl))
