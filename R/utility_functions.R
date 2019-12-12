@@ -220,7 +220,7 @@ make_lag_tibble <- function(data, name, dim, lag, init = 0) {
   
   # Specify names
   lag_sizes <- as.character((seq_len(dim) - 1) * lag)
-  lag_names <- paste0(name, "_lag_", lag_sizes)
+  lag_names <- paste0(name, "_lag", lag_sizes)
   
   # Make index tibble
   index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, name)))
@@ -281,6 +281,31 @@ combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
     dplyr::select(-index)
 }
 
+#' Make a Tibble of Euclidean Distances Between Rows of a Matrix
+#'
+#' @param mat A matrix of row vectors (matrix)
+#'
+#' @return A tibble of Euclidean distances
+#' 
+#' @importFrom magrittr %>%
+#'
+#' @examples make_dist_tibble(matrix(1:12, nrow = 4))
+#' 
+make_dist_tibble <- function(mat) {
+  
+  # Check argument
+  stopifnot(
+    is.numeric(mat),
+    is.matrix(mat)
+  )
+
+  # Calculate distances among row vectors
+    stats::dist(mat, diag = FALSE, upper = TRUE) %>%
+    broom::tidy() %>%
+    dplyr::rename(focal = item2, nbr = item1) %>%
+    dplyr::select(focal, nbr, distance) %>%
+    tidyr::drop_na()
+}
 
 
 
