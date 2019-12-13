@@ -339,7 +339,7 @@ make_global_indices <- function(mat,
   )
   
   # Make 'from' indices
-  from_global <- tibble::as_tibble(mat) %>%
+  global_from <- tibble::as_tibble(mat) %>%
     dplyr::mutate(index = row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lead(na_col, dist)) %>%
@@ -347,7 +347,7 @@ make_global_indices <- function(mat,
     dplyr::pull(index)
   
   # Make 'into' indices
-  into_global <- tibble::as_tibble(mat) %>%
+  global_into <- tibble::as_tibble(mat) %>%
     dplyr::mutate(index = row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lag(na_col, dist)) %>%
@@ -355,10 +355,51 @@ make_global_indices <- function(mat,
     dplyr::pull(index)
   
   # Return indices
-  dplyr::bind_cols(from = from_global, into = into_global)
+  dplyr::bind_cols(from = global_from, into = global_into)
 }
 
-
+#' Make Local Allowable Indices for Nearest Neighbour Vectors
+#'
+#' @param index Index for the focal vector (numeric scalar)
+#' @param dim Number of embedding dimensions (numeric scalar)
+#' @param from A vector of indices to consider forecasting from (numeric)
+#' @param lag Number of time steps separating successive lags (numeric scalar)
+#' @param dist The forecast distance (numeric scalar)
+#' @param symm Symmetric exclusion radius? (logical scalar)
+#'
+#' @return A vector of allowable indices for nearest neighbours
+#' 
+#' @importFrom magrittr %>%
+#'
+#' @examples make_local_indices(8, 3, 1:15)
+#' 
+make_local_indices <- function(index,
+                               dim,
+                               from,
+                               lag = 1,
+                               dist = 1,
+                               symm = FALSE) {
+  
+  # Check arguments
+  stopifnot(
+    is.numeric(dim),
+    is.numeric(lag),
+    is.numeric(from),
+    is.vector(from),
+    is.numeric(dist),
+    is.logical(symm)
+  )
+  
+  # Make local indices
+  if (symm) {
+    from %>% setdiff(index) %>%
+      setdiff(seq.int(from = index + dist, by = lag, length.out = dim)) %>%
+      setdiff(seq.int(from = index + dist, by = -lag, length.out = dim))
+  } else {
+    from %>% setdiff(index) %>% 
+      setdiff(seq.int(from = index + dist, by = lag, length.out = dim))
+  }
+}
 
 
 
