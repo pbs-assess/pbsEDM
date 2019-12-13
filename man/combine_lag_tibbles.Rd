@@ -24,7 +24,7 @@ A tibble of lagged columns
 Make and Combind Tibbles of Lagged Columns
 }
 \examples{
-dat <- data.frame(x = 1:15, y = 11:25)
-combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1)
+dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
+combine_lag_tibbles(dat, c("x", "y", "z"), c(3, 2, 1), 1)
 
 }
