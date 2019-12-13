@@ -39,4 +39,62 @@ test_that("util_exclude_indices() returns a numeric vector", {
   expect_true(is.vector(call_false))
 })
 
+test_that("make_lag_tibble() returns a tibble of correct dimensions", {
+  num_rows <- 16
+  num_cols <- 3
+  lag_tibble <- make_lag_tibble(data.frame(x = 1:num_rows), "x", num_cols, 2)
+  expect_true(tibble::is_tibble(lag_tibble))
+  expect_true(nrow(lag_tibble) == num_rows)
+  expect_true(ncol(lag_tibble) == num_cols)
+})
+
+test_that("combine_lag_tibbles() returns a tibble of correct dimensions", {
+  dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
+  dims <- c(3, 2, 1)
+  num_rows <- nrow(dat)
+  num_cols <- sum(dims)
+  lag_tibble <- combine_lag_tibbles(dat, c("x", "y", "z"), dims, 1)
+  expect_true(tibble::is_tibble(lag_tibble))
+  expect_true(nrow(lag_tibble) == num_rows)
+  expect_true(ncol(lag_tibble) == num_cols)
+})
+
+test_that("make_dist_tibble() returns a tibble of correct dimensions", {
+  vals <- c(1:6, NA, 8:24)
+  rows <- 6
+  mat <- matrix(vals, rows)
+  num_rows <- (5 - 1) * (6 - 1)
+  num_cols <- 3
+  dist_tibble <- make_dist_tibble(mat)
+  expect_true(tibble::is_tibble(dist_tibble))
+  expect_true(nrow(dist_tibble) == num_rows)
+  expect_true(ncol(dist_tibble) == num_cols)
+})
+
+test_that("make_global_indices() returns a tibble of correct dimensions", {
+  x_vals <- c(1:7, NA, 9:15)
+  y_vals <- 11:25
+  dat <- data.frame(x = x_vals, y = y_vals)
+  dims <- c(3, 2)
+  mat <- as.matrix(combine_lag_tibbles(dat, c("x", "y"), dims, 1))
+  global_indices <- make_global_indices(mat)
+  expect_true(tibble::is_tibble(global_indices))
+  expect_true(nrow(global_indices) == 8)
+  expect_true(ncol(global_indices) == 2)
+})
+
+test_that("make_local_indices() returns a vector of correct length", {
+  index <- 8
+  dim <- 3
+  from <- 1:15
+  local_indices_f <- make_local_indices(index, dim, from)
+  local_indices_t <- make_local_indices(index, dim, from, symm = TRUE)
+  expect_true(is.vector(local_indices_f))
+  expect_true(length(local_indices_f) == 11)
+  expect_true(is.vector(local_indices_t))
+  expect_true(length(local_indices_t) == 10)
+})
+
+
+
 
