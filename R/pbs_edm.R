@@ -21,12 +21,12 @@
 pbs_edm <- function(data,
                     names,
                     dims,
-                    lag,
-                    dist,
-                    symm,
-                    from,
-                    into,
-                    stats) {
+                    lag = 1L,
+                    dist = 1L,
+                    symm = FALSE,
+                    from = seq_len(nrow(mat)), 
+                    into = seq_len(nrow(mat)), 
+                    stats = TRUE) {
   
   # Check arguments
   stopifnot(
@@ -43,7 +43,7 @@ pbs_edm <- function(data,
     is.vector(into),
     is.logical(stats)
   )
-  # Make lag matrices
+  # Make lag matrix
   lag_matrix <- as.matrix(combine_lag_tibbles(data, names, dims, lag))
   
   # Calculate Euclidean distances
@@ -52,8 +52,8 @@ pbs_edm <- function(data,
   # Specify global indices
   global_indices <- make_global_indices(lag_matrix, from, into, dist)
   
-  # Generate predictions
-  
+  # Generate forecasts
+    
     # Specify local indices
   
     # Identify nearest neighbours
