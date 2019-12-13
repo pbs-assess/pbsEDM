@@ -340,7 +340,7 @@ make_global_indices <- function(mat,
   
   # Make 'from' indices
   global_from <- tibble::as_tibble(mat) %>%
-    dplyr::mutate(index = row_number()) %>%
+    dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lead(na_col, dist)) %>%
     tidyr::drop_na() %>%
@@ -348,7 +348,7 @@ make_global_indices <- function(mat,
   
   # Make 'into' indices
   global_into <- tibble::as_tibble(mat) %>%
-    dplyr::mutate(index = row_number()) %>%
+    dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lag(na_col, dist)) %>%
     tidyr::drop_na() %>%
