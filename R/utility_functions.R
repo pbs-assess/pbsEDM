@@ -193,7 +193,6 @@ util_exclude_indices <- function(time_ind,
 #' Rows with NAs are replaced by rows of NAs.
 #'
 #' @param data A data frame with a named numeric column to be lagged
-#' @param names The name of the column to be lagged (character scalar)
 #' @param lags Named list of numeric vectors giving lags to use for each
 #'     column. List names must match column names. (list of numeric vectors)
 #'
@@ -201,32 +200,35 @@ util_exclude_indices <- function(time_ind,
 #'
 #' @importFrom magrittr %>%
 #'
-#' @examples make_lag_tibble(data.frame(x = 1:16), "x", list(x = 0:2))
+#' @examples make_lag_tibble(data.frame(x = 1:16), list(x = 0:2))
 #' 
-make_lag_tibble <- function(data, names, lags) {
+make_lag_tibble <- function(data, lags) {
   
   # Check arguments
   stopifnot(
     is.data.frame(data),
-    is.character(names),
     is.list(lags),
     is.numeric(unlist(lags)),
-    all(is.element(names(lags), names))
+    length(lags) == 1,
+    is.numeric(unlist(lags)),
+    all(is.element(names(lags), names(data)))
   )
   
+  # time series names
+  ts_names <- names(lags)
+  
   # Pull named time series
-  tseries <- dplyr::pull(tibble::as_tibble(data), names)
+  tseries <- dplyr::pull(tibble::as_tibble(data), ts_names)
   
   # Specify names
-  # lag_sizes <- as.character((seq_len(dim) - 1) * lag)
-  lag_sizes <- as.character(lags[[names]])
-  lag_names <- paste0(names, "_lag", lag_sizes)
+  lag_sizes <- as.character(lags[[ts_names]])
+  lag_names <- paste0(ts_names, "_lag", lag_sizes)
   
   # Make index tibble
-  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, names)))
+  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, ts_names)))
   
   # Return lag tibble
-  lapply(X = lags[[names]],
+  lapply(X = lags[[ts_names]],
          FUN = function(X, ts) dplyr::lag(ts, X),
          ts = tseries) %>% 
     dplyr::bind_cols() %>%
@@ -236,7 +238,6 @@ make_lag_tibble <- function(data, names, lags) {
 #' Make and Combind Tibbles of Lagged Columns
 #'
 #' @param data A data frame with a named numeric column to be lagged
-#' @param names The name of the column to be lagged (character scalar)
 #' @param lags Named list of numeric vectors giving lags to use for each
 #'     column. List names must match column names. (list of numeric vectors)
 #'
@@ -246,27 +247,25 @@ make_lag_tibble <- function(data, names, lags) {
 #'
 #' @examples 
 #' dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
-#' combine_lag_tibbles(dat, c("x", "y", "z"), list(x = 0:2, y = 0:1, z = 0))
+#' combine_lag_tibbles(dat, list(x = 0:2, y = 0:1, z = 0))
 #' 
-combine_lag_tibbles <- function(data, names, lags) {
+combine_lag_tibbles <- function(data, lags) {
   
   # Check arguments
   stopifnot(
     is.data.frame(data),
-    is.character(names),
     is.list(lags),
     is.numeric(unlist(lags)),
-    all(is.element(names(lags), names))
+    all(is.element(names(lags), names(data)))
   )
   
   # Make index tibble
-  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, names[1])))
+  index_tibble <- tibble::tibble(index = seq_len(nrow(data)))
   
   # Return combined lag tibble
-  lapply(X = seq_along(names),
-         FUN = function(X, dat, n, l) make_lag_tibble(dat, n[X], l[X]),
+  lapply(X = seq_along(names(lags)),
+         FUN = function(X, dat, l) make_lag_tibble(dat, l[X]),
          dat = data,
-         n = names,
          l = lags) %>%
     dplyr::bind_cols()
 }

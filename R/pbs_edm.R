@@ -1,7 +1,6 @@
 #' Use EDM to Perform Out-of-Sample Forecasting 
 #'
 #' @param data A data frame with named columns (list of numeric vectors)
-#' @param names Names of numeric columns in data (character vector)
 #' @param lags Named list of numeric vectors giving lags to use for each
 #'     column. List names must match column names. (list of numeric vectors)
 #' @param dist Forecast distance (numeric scalar)
@@ -19,7 +18,6 @@
 #' @examples
 #' 
 pbs_edm <- function(data,
-                    names,
                     lags,
                     dist = 1L,
                     symm = FALSE,
@@ -30,9 +28,8 @@ pbs_edm <- function(data,
   # Check arguments
   stopifnot(
     is.data.frame(data),
-    is.character(names),
     is.list(lags),
-    all(is.element(names(lags), names)),
+    all(is.element(names(lags), names(data))),
     is.numeric(dist),
     is.logical(symm),
     is.numeric(from),
@@ -42,7 +39,7 @@ pbs_edm <- function(data,
     is.logical(stats)
   )
   # Make lag matrix
-  lag_matrix <- as.matrix(combine_lag_tibbles(data, names, lags))
+  lag_matrix <- as.matrix(combine_lag_tibbles(data, lags))
   
   # Calculate Euclidean distances
   dist_tibble <- make_dist_tibble(lag_matrix)
