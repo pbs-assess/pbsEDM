@@ -193,40 +193,40 @@ util_exclude_indices <- function(time_ind,
 #' Rows with NAs are replaced by rows of NAs.
 #'
 #' @param data A data frame with a named numeric column to be lagged
-#' @param name The name of the column to be lagged (character scalar)
-#' @param dim The number of lagged columns (numeric scalar)
-#' @param lag Number of time steps separating successive lags (numeric scalar)
-#' @param init The size of the first lag, usually 0 (numeric scalar)
+#' @param names The name of the column to be lagged (character scalar)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
 #'
 #' @return A tibble of successively lagged columns
 #'
 #' @importFrom magrittr %>%
 #'
-#' @examples make_lag_tibble(data.frame(x = 1:16), "x", 3, 2)
+#' @examples make_lag_tibble(data.frame(x = 1:16), "x", list(x = 0:2))
 #' 
-make_lag_tibble <- function(data, name, dim, lag, init = 0) {
+make_lag_tibble <- function(data, names, lags) {
   
   # Check arguments
   stopifnot(
     is.data.frame(data),
-    is.character(name),
-    is.numeric(dim),
-    is.numeric(lag),
-    is.numeric(init)
+    is.character(names),
+    is.list(lags),
+    is.numeric(unlist(lags)),
+    all(is.element(names(lags), names))
   )
   
   # Pull named time series
-  tseries <- dplyr::pull(tibble::as_tibble(data), name)
+  tseries <- dplyr::pull(tibble::as_tibble(data), names)
   
   # Specify names
-  lag_sizes <- as.character((seq_len(dim) - 1) * lag)
-  lag_names <- paste0(name, "_lag", lag_sizes)
+  # lag_sizes <- as.character((seq_len(dim) - 1) * lag)
+  lag_sizes <- as.character(lags[[names]])
+  lag_names <- paste0(names, "_lag", lag_sizes)
   
   # Make index tibble
-  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, name)))
+  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, names)))
   
   # Return lag tibble
-  lapply(X = seq.int(from = init, by = lag, length.out = dim),
+  lapply(X = lags[[names]],
          FUN = function(X, ts) dplyr::lag(ts, X),
          ts = tseries) %>% 
     dplyr::bind_cols() %>%
@@ -237,9 +237,8 @@ make_lag_tibble <- function(data, name, dim, lag, init = 0) {
 #'
 #' @param data A data frame with a named numeric column to be lagged
 #' @param names The name of the column to be lagged (character scalar)
-#' @param dims The number of lagged columns (numeric vector)
-#' @param lag Number of time steps separating successive lags (numeric scalar)
-#' @param init The size of the first lag, usually 0 (numeric scalar)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
 #'
 #' @return A tibble of lagged columns
 #' 
@@ -247,17 +246,17 @@ make_lag_tibble <- function(data, name, dim, lag, init = 0) {
 #'
 #' @examples 
 #' dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
-#' combine_lag_tibbles(dat, c("x", "y", "z"), c(3, 2, 1), 1)
+#' combine_lag_tibbles(dat, c("x", "y", "z"), list(x = 0:2, y = 0:1, z = 0))
 #' 
-combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
+combine_lag_tibbles <- function(data, names, lags) {
   
   # Check arguments
   stopifnot(
     is.data.frame(data),
     is.character(names),
-    is.numeric(dims),
-    is.numeric(lag),
-    is.numeric(init)
+    is.list(lags),
+    is.numeric(unlist(lags)),
+    all(is.element(names(lags), names))
   )
   
   # Make index tibble
@@ -265,11 +264,10 @@ combine_lag_tibbles <- function(data, names, dims, lag, init = 0) {
   
   # Return combined lag tibble
   lapply(X = seq_along(names),
-         FUN = function(X, dat, n, d, l) make_lag_tibble(dat, n[X], d[X], l),
+         FUN = function(X, dat, n, l) make_lag_tibble(dat, n[X], l[X]),
          dat = data,
          n = names,
-         d = dims,
-         l = lag) %>%
+         l = lags) %>%
     dplyr::bind_cols()
 }
 
@@ -325,7 +323,6 @@ make_dist_tibble <- function(mat) {
 #' 
 make_global_indices <- function(mat, 
                                 from = seq_len(nrow(mat)), 
-                                into = seq_len(nrow(mat)), 
                                 dist = 1L) {
   
   # Check arguments
@@ -333,8 +330,6 @@ make_global_indices <- function(mat,
     is.matrix(mat),
     is.numeric(from),
     is.vector(from),
-    is.numeric(into),
-    is.vector(into),
     is.numeric(dist)
   )
   
@@ -361,9 +356,9 @@ make_global_indices <- function(mat,
 #' Make Local Allowable Indices for Nearest Neighbour Vectors
 #'
 #' @param index Index for the focal vector (numeric scalar)
-#' @param dim Number of embedding dimensions (numeric scalar)
 #' @param from A vector of indices to consider forecasting from (numeric)
-#' @param lag Number of time steps separating successive lags (numeric scalar)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
 #' @param dist The forecast distance (numeric scalar)
 #' @param symm Symmetric exclusion radius? (logical scalar)
 #'
@@ -371,33 +366,36 @@ make_global_indices <- function(mat,
 #' 
 #' @importFrom magrittr %>%
 #'
-#' @examples make_local_indices(8, 3, 1:15)
+#' @examples make_local_indices(8, 1:15, list(x = 0:2))
 #' 
 make_local_indices <- function(index,
-                               dim,
                                from,
-                               lag = 1,
+                               lags,
                                dist = 1,
                                symm = FALSE) {
   
   # Check arguments
   stopifnot(
-    is.numeric(dim),
-    is.numeric(lag),
+    is.numeric(index),
     is.numeric(from),
     is.vector(from),
+    is.list(lags),
+    is.numeric(unlist(lags)),
     is.numeric(dist),
     is.logical(symm)
   )
   
+  # Specify unique lags
+  lags_vector <- sort(unique(unlist(lags)))
+  
   # Make local indices
   if (symm) {
     from %>% setdiff(index) %>%
-      setdiff(seq.int(from = index + dist, by = lag, length.out = dim)) %>%
-      setdiff(seq.int(from = index + dist, by = -lag, length.out = dim))
+      setdiff(index + dist + lags_vector) %>%
+      setdiff(index + dist - lags_vector)
   } else {
     from %>% setdiff(index) %>% 
-      setdiff(seq.int(from = index + dist, by = lag, length.out = dim))
+      setdiff(index + dist + lags_vector)
   }
 }
 

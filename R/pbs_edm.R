@@ -2,8 +2,8 @@
 #'
 #' @param data A data frame with named columns (list of numeric vectors)
 #' @param names Names of numeric columns in data (character vector)
-#' @param dims Number of embedding dimensions for each column (numeric vector)
-#' @param lag Number of time steps separating successive lags (numeric scalar)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
 #' @param dist Forecast distance (numeric scalar)
 #' @param symm Symmetric exclusion radius? (logical scalar)
 #' @param from Rows to predict from (numeric vector)
@@ -20,8 +20,7 @@
 #' 
 pbs_edm <- function(data,
                     names,
-                    dims,
-                    lag = 1L,
+                    lags,
                     dist = 1L,
                     symm = FALSE,
                     from = seq_len(nrow(mat)), 
@@ -32,9 +31,8 @@ pbs_edm <- function(data,
   stopifnot(
     is.data.frame(data),
     is.character(names),
-    is.numeric(dims),
-    is.vector(dims),
-    is.numeric(lag),
+    is.list(lags),
+    all(is.element(names(lags), names)),
     is.numeric(dist),
     is.logical(symm),
     is.numeric(from),
@@ -44,13 +42,13 @@ pbs_edm <- function(data,
     is.logical(stats)
   )
   # Make lag matrix
-  lag_matrix <- as.matrix(combine_lag_tibbles(data, names, dims, lag))
+  lag_matrix <- as.matrix(combine_lag_tibbles(data, names, lags))
   
   # Calculate Euclidean distances
   dist_tibble <- make_dist_tibble(lag_matrix)
   
   # Specify global indices
-  global_indices <- make_global_indices(lag_matrix, from, into, dist)
+  global_indices <- make_global_indices(lag_matrix, from, dist)
   
   # Generate forecasts
     
