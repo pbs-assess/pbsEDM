@@ -40,22 +40,11 @@ test_that("util_exclude_indices() returns a numeric vector", {
 })
 
 test_that("make_lag_tibble() returns a tibble of correct dimensions", {
-  num_rows <- 16
-  num_cols <- 3
-  lags <- list(x = 0:(num_cols - 1))
-  data_frame <- data.frame(x = 1:num_rows)
-  lag_tibble <- make_lag_tibble(data_frame, lags)
-  expect_true(tibble::is_tibble(lag_tibble))
-  expect_true(nrow(lag_tibble) == num_rows)
-  expect_true(ncol(lag_tibble) == num_cols)
-})
-
-test_that("combine_lag_tibbles() returns a tibble of correct dimensions", {
-  dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
-  lags <- list(x = 0:2, y = 0:1, z = 0)
+  dat <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+  ll <- list(x = 0:2, y = 0:1, z = 0)
   num_rows <- nrow(dat)
-  num_cols <- 6
-  lag_tibble <- combine_lag_tibbles(dat, lags)
+  num_cols <- length(unlist(ll))
+  lag_tibble <- make_lag_tibble(dat, ll)
   expect_true(tibble::is_tibble(lag_tibble))
   expect_true(nrow(lag_tibble) == num_rows)
   expect_true(ncol(lag_tibble) == num_cols)
@@ -78,7 +67,7 @@ test_that("make_global_indices() returns a tibble of correct dimensions", {
   y_vals <- 11:25
   dat <- data.frame(x = x_vals, y = y_vals)
   lags <- list(x = 0:2, y = 0:1)
-  mat <- as.matrix(combine_lag_tibbles(dat, lags))
+  mat <- as.matrix(make_lag_tibble(dat, lags))
   global_indices <- make_global_indices(mat)
   expect_true(tibble::is_tibble(global_indices))
   expect_true(nrow(global_indices) == 8)
