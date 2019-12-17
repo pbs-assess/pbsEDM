@@ -243,19 +243,18 @@ make_lag_tibble <- function(data, lags) {
 #'
 #' @examples make_dist_tibble(matrix(c(1:6, NA, 8:24), nrow = 6))
 #' 
-make_dist_tibble <- function(mat) {
+make_dist_tibble <- function(tbl) {
   
   # Check argument
   stopifnot(
-    is.numeric(mat),
-    is.matrix(mat)
+    tibble::is_tibble(tbl)
   )
   
-  # Replace rows with NAs by NA rows
-  mat_na <- mat %>% as.data.frame() %>% tibble::as_tibble() %>%
+  # Initialize matrix; replace rows with NAs by NA rows
+  mat_na <- tbl %>% 
     dplyr::mutate(ind = seq_len(nrow(.))) %>%
     tidyr::drop_na() %>%
-    dplyr::right_join(tibble::tibble(ind = seq_len(nrow(mat))), by = "ind") %>%
+    dplyr::right_join(tibble::tibble(ind = seq_len(nrow(tbl))), by = "ind") %>%
     dplyr::select(-ind) %>%
     as.matrix()
 
@@ -267,9 +266,9 @@ make_dist_tibble <- function(mat) {
     tidyr::drop_na()
 }
 
-#' Make Global Allowable Indices from a Matrix of Lagged Column Row Vectors
+#' Make Global Allowable Indices from a Data Frame of Lagged Column Row Vectors
 #'
-#' @param mat A matrix of lagged columns defining row vectors (matrix)
+#' @param data A data frame of lagged columns defining row vectors
 #' @param from A vector of indices to consider forecasting from (numeric)
 #' @param into A vector of indices to consider forecasting into (numeric)
 #' @param dist The forecast distance (numeric scalar)
@@ -279,24 +278,24 @@ make_dist_tibble <- function(mat) {
 #' @importFrom magrittr %>%
 #'
 #' @examples
-#' dat <- data.frame(x = c(1:7, NA, 9:15), y = 11:25)
-#' mat <- as.matrix(combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1))
-#' make_global_indices(mat)
+#' dat <- data.frame(x = c(1:7, NA, 9:20), y = 21:40)
+#' lag_tibble <- make_lag_tibble(dat, list(x = 0:2, y = 0:1))
+#' make_global_indices(lag_tibble)
 #' 
-make_global_indices <- function(mat, 
-                                from = seq_len(nrow(mat)), 
+make_global_indices <- function(tbl, 
+                                from = seq_len(nrow(tbl)), 
                                 dist = 1L) {
   
   # Check arguments
   stopifnot(
-    is.matrix(mat),
+    tibble::is_tibble(tbl),
     is.numeric(from),
     is.vector(from),
     is.numeric(dist)
   )
   
   # Make 'from' indices
-  global_from <- tibble::as_tibble(mat) %>%
+  global_from <- tbl %>%
     dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lead(na_col, dist)) %>%
@@ -304,7 +303,7 @@ make_global_indices <- function(mat,
     dplyr::pull(index)
   
   # Make 'into' indices
-  global_into <- tibble::as_tibble(mat) %>%
+  global_into <- tbl %>%
     dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lag(na_col, dist)) %>%
@@ -318,9 +317,9 @@ make_global_indices <- function(mat,
 #' Make Local Allowable Indices for Nearest Neighbour Vectors
 #'
 #' @param index Index for the focal vector (numeric scalar)
-#' @param from A vector of indices to consider forecasting from (numeric)
-#' @param lags Named list of numeric vectors giving lags to use for each
-#'     column. List names must match column names. (list of numeric vectors)
+#' @param from_global A vector of indices to consider forecasting from (numeric)
+#' @param lags Named list of numeric vectors giving lags for each column. 
+#'     List names must match column names. (list of numeric vectors)
 #' @param dist The forecast distance (numeric scalar)
 #' @param symm Symmetric exclusion radius? (logical scalar)
 #'
@@ -331,7 +330,7 @@ make_global_indices <- function(mat,
 #' @examples make_local_indices(8, 1:15, list(x = 0:2))
 #' 
 make_local_indices <- function(index,
-                               from,
+                               from_global,
                                lags,
                                dist = 1,
                                symm = FALSE) {
@@ -339,8 +338,8 @@ make_local_indices <- function(index,
   # Check arguments
   stopifnot(
     is.numeric(index),
-    is.numeric(from),
-    is.vector(from),
+    is.numeric(from_global),
+    is.vector(from_global),
     is.list(lags),
     is.numeric(unlist(lags)),
     is.numeric(dist),
@@ -352,23 +351,54 @@ make_local_indices <- function(index,
   
   # Make local indices
   if (symm) {
-    from %>% setdiff(index) %>%
+    from_global %>% setdiff(index) %>%
       setdiff(index + dist + lags_vector) %>%
       setdiff(index + dist - lags_vector)
   } else {
-    from %>% setdiff(index) %>% 
+    from_global %>% setdiff(index) %>% 
       setdiff(index + dist + lags_vector)
   }
 }
 
-make_neighbours <- function() {
+#' Make a Tibble of Nearest Neighbours
+#'
+#' @param index The time index of the focal vector
+#' @param from_local The allowable neighbour indices (numeric vector)
+#' @param dist_tibble A tibble with columns 'focal', 'nbr' and 'distance'
+#' @param max_neighbours The maximum number of neighbours
+#' @param dist The forecast distance (numeric scalar)
+#'
+#' @return A tibble
+#'
+#' @examples
+#'     dist_tibble <- tibble::tibble(x = 1:100) %>% 
+#'     make_lag_tibble(list(x = 0:4)) %>% 
+#'     make_dist_tibble()
+#'     make_neighbours(50, c(6:49, 56:99), dist_tibble)
+#' 
+
+make_neighbours <- function(index,
+                            from_local,
+                            dist_tibble,
+                            max_neighbours,
+                            dist = 1L) {
+  # Check arguments
+  stopifnot(
+    is.numeric(index),
+    is.numeric(from_local),
+    is.vector(from_local),
+    is.numeric(dist),
+    tibble::is_tibble(dist_tibble),
+    is.numeric(max_neighbours)
+  )
   
+  # Return a tibble of neighbours ordered by distance
+  dist_tibble %>%
+    dplyr::filter(focal %in% index, nbr %in% from_local) %>%
+    dplyr::arrange(distance) %>%
+    dplyr::mutate(dist_rank = dplyr::row_number()) %>%
+    dplyr::filter(dist_rank <= max_neighbours) %>%
+    dplyr::mutate(fcl_proj = focal + dist, nbr_proj = nbr + dist)
 }
 
-make_forecast <- function(index,
-                          lag_matrix,
-                          dist_tibble,
-                          global_indices) {
-  
-}
 
