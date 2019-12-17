@@ -188,19 +188,20 @@ util_exclude_indices <- function(time_ind,
   }
 }
 
-#' Make a Tibble of Lagged Columns from a Vector
+#' Make a Tibble of Lagged Columns of a Data Frame
 #' 
-#' Rows with NAs are replaced by rows of NAs.
 #'
-#' @param data A data frame with a named numeric column to be lagged
-#' @param lags Named list of numeric vectors giving lags to use for each
+#' @param data A data frame with a named numeric columns to be lagged
+#' @param lags A named list giving the lags to use for each corresponding
 #'     column. List names must match column names. (list of numeric vectors)
 #'
-#' @return A tibble of successively lagged columns
+#' @return A tibble of lagged columns
 #'
 #' @importFrom magrittr %>%
 #'
-#' @examples make_lag_tibble(data.frame(x = 1:16), list(x = 0:2))
+#' @examples 
+#' dat <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+#' make_lag_tibble(dat, list(x = 0:2, y = 0:1, z = 0))
 #' 
 make_lag_tibble <- function(data, lags) {
   
@@ -209,65 +210,27 @@ make_lag_tibble <- function(data, lags) {
     is.data.frame(data),
     is.list(lags),
     is.numeric(unlist(lags)),
-    length(lags) == 1,
-    is.numeric(unlist(lags)),
     all(is.element(names(lags), names(data)))
   )
   
-  # time series names
-  ts_names <- names(lags)
+  # Initialize vectors
+  lags_vector <- unlist(lags)
+  col_vector <- rep(names(lags), lengths(lags))
+  names_vector <- paste0(col_vector, "_lag", lags_vector)
   
-  # Pull named time series
-  tseries <- dplyr::pull(tibble::as_tibble(data), ts_names)
-  
-  # Specify names
-  lag_sizes <- as.character(lags[[ts_names]])
-  lag_names <- paste0(ts_names, "_lag", lag_sizes)
-  
-  # Make index tibble
-  index_tibble <- tibble::tibble(index = seq_along(dplyr::pull(data, ts_names)))
+  # Initialize data list
+  data_list <- mapply(FUN = dplyr::pull,
+                      var = col_vector,
+                      MoreArgs = list(.data = data),
+                      SIMPLIFY = FALSE)
   
   # Return lag tibble
-  lapply(X = lags[[ts_names]],
-         FUN = function(X, ts) dplyr::lag(ts, X),
-         ts = tseries) %>% 
+  mapply(FUN = dplyr::lag,
+         x = data_list,
+         n = lags_vector,
+         SIMPLIFY = FALSE) %>%
     dplyr::bind_cols() %>%
-    magrittr::set_colnames(lag_names)
-}
-
-#' Make and Combind Tibbles of Lagged Columns
-#'
-#' @param data A data frame with a named numeric column to be lagged
-#' @param lags Named list of numeric vectors giving lags to use for each
-#'     column. List names must match column names. (list of numeric vectors)
-#'
-#' @return A tibble of lagged columns
-#' 
-#' @importFrom magrittr %>%
-#'
-#' @examples 
-#' dat <- data.frame(x = 1:15, y = 11:25, z = 21:35)
-#' combine_lag_tibbles(dat, list(x = 0:2, y = 0:1, z = 0))
-#' 
-combine_lag_tibbles <- function(data, lags) {
-  
-  # Check arguments
-  stopifnot(
-    is.data.frame(data),
-    is.list(lags),
-    is.numeric(unlist(lags)),
-    all(is.element(names(lags), names(data)))
-  )
-  
-  # Make index tibble
-  index_tibble <- tibble::tibble(index = seq_len(nrow(data)))
-  
-  # Return combined lag tibble
-  lapply(X = seq_along(names(lags)),
-         FUN = function(X, dat, l) make_lag_tibble(dat, l[X]),
-         dat = data,
-         l = lags) %>%
-    dplyr::bind_cols()
+    magrittr::set_colnames(names_vector)
 }
 
 #' Make a Tibble of Euclidean Distances Between Rows of a Matrix
@@ -398,5 +361,14 @@ make_local_indices <- function(index,
   }
 }
 
+make_neighbours <- function() {
+  
+}
 
+make_forecast <- function(index,
+                          lag_matrix,
+                          dist_tibble,
+                          global_indices) {
+  
+}
 
