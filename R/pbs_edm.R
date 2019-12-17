@@ -39,15 +39,15 @@ pbs_edm <- function(data,
     is.logical(stats)
   )
   # Make lag matrix
-  lag_matrix <- as.matrix(combine_lag_tibbles(data, lags))
+  lag_tibble <- make_lag_tibble(data, lags)
   
   # Calculate Euclidean distances
-  dist_tibble <- make_dist_tibble(lag_matrix)
+  dist_tibble <- make_dist_tibble(lag_tibble)
   
   # Specify global indices
-  global_indices <- make_global_indices(lag_matrix, from, dist)
+  global_indices <- make_global_indices(lag_tibble, from, dist)
   
-  # Generate forecasts
+  # Make forecasts
     
     # Specify local indices
   
