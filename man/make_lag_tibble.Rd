@@ -2,28 +2,24 @@
 % Please edit documentation in R/utility_functions.R
 \name{make_lag_tibble}
 \alias{make_lag_tibble}
-\title{Make a Tibble of Lagged Columns from a Vector}
+\title{Make a Tibble of Lagged Columns of a Data Frame}
 \usage{
-make_lag_tibble(data, name, dim, lag, init = 0)
+make_lag_tibble(data, lags)
 }
 \arguments{
-\item{data}{A data frame with a named numeric column to be lagged}
+\item{data}{A data frame with a named numeric columns to be lagged}
 
-\item{name}{The name of the column to be lagged (character scalar)}
-
-\item{dim}{The number of lagged columns (numeric scalar)}
-
-\item{lag}{Number of time steps separating successive lags (numeric scalar)}
-
-\item{init}{The size of the first lag, usually 0 (numeric scalar)}
+\item{lags}{A named list giving the lags to use for each corresponding
+column. List names must match column names. (list of numeric vectors)}
 }
 \value{
-A tibble of successively lagged columns
+A tibble of lagged columns
 }
 \description{
-Rows with NAs are replaced by rows of NAs.
+Make a Tibble of Lagged Columns of a Data Frame
 }
 \examples{
-make_lag_tibble(data.frame(x = 1:16), "x", 3, 2)
+dat <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+make_lag_tibble(dat, list(x = 0:2, y = 0:1, z = 0))
 
 }

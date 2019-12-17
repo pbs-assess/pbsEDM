@@ -4,16 +4,15 @@
 \alias{make_local_indices}
 \title{Make Local Allowable Indices for Nearest Neighbour Vectors}
 \usage{
-make_local_indices(index, dim, from, lag = 1, dist = 1, symm = FALSE)
+make_local_indices(index, from, lags, dist = 1, symm = FALSE)
 }
 \arguments{
 \item{index}{Index for the focal vector (numeric scalar)}
 
-\item{dim}{Number of embedding dimensions (numeric scalar)}
-
 \item{from}{A vector of indices to consider forecasting from (numeric)}
 
-\item{lag}{Number of time steps separating successive lags (numeric scalar)}
+\item{lags}{Named list of numeric vectors giving lags to use for each
+column. List names must match column names. (list of numeric vectors)}
 
 \item{dist}{The forecast distance (numeric scalar)}
 
@@ -26,6 +25,6 @@ A vector of allowable indices for nearest neighbours
 Make Local Allowable Indices for Nearest Neighbour Vectors
 }
 \examples{
-make_local_indices(8, 3, 1:15)
+make_local_indices(8, 1:15, list(x = 0:2))
 
 }

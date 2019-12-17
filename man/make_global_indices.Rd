@@ -4,17 +4,16 @@
 \alias{make_global_indices}
 \title{Make Global Allowable Indices from a Matrix of Lagged Column Row Vectors}
 \usage{
-make_global_indices(mat, from = seq_len(nrow(mat)),
-  into = seq_len(nrow(mat)), dist = 1L)
+make_global_indices(mat, from = seq_len(nrow(mat)), dist = 1L)
 }
 \arguments{
 \item{mat}{A matrix of lagged columns defining row vectors (matrix)}
 
 \item{from}{A vector of indices to consider forecasting from (numeric)}
 
-\item{into}{A vector of indices to consider forecasting into (numeric)}
-
 \item{dist}{The forecast distance (numeric scalar)}
+
+\item{into}{A vector of indices to consider forecasting into (numeric)}
 }
 \value{
 A tibble with two columns of indices

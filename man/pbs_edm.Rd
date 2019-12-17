@@ -4,17 +4,14 @@
 \alias{pbs_edm}
 \title{Use EDM to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_edm(data, names, dims, lag = 1L, dist = 1L, symm = FALSE,
+pbs_edm(data, lags, dist = 1L, symm = FALSE,
   from = seq_len(nrow(mat)), into = seq_len(nrow(mat)), stats = TRUE)
 }
 \arguments{
 \item{data}{A data frame with named columns (list of numeric vectors)}
 
-\item{names}{Names of numeric columns in data (character vector)}
-
-\item{dims}{Number of embedding dimensions for each column (numeric vector)}
-
-\item{lag}{Number of time steps separating successive lags (numeric scalar)}
+\item{lags}{Named list of numeric vectors giving lags to use for each
+column. List names must match column names. (list of numeric vectors)}
 
 \item{dist}{Forecast distance (numeric scalar)}
 
