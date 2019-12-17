@@ -51,26 +51,22 @@ test_that("make_lag_tibble() returns a tibble of correct dimensions", {
 })
 
 test_that("make_dist_tibble() returns a tibble of correct dimensions", {
-  vals <- c(1:6, NA, 8:24)
-  rows <- 6
-  mat <- matrix(vals, rows)
-  num_rows <- (5 - 1) * (6 - 1)
-  num_cols <- 3
-  dist_tibble <- make_dist_tibble(mat)
+  tbl <- tibble::tibble(x = 1:6, y = c(NA, 8:12), z = 13:18)
+  num_rows <- nrow(tidyr::drop_na(tbl)) * (nrow(tidyr::drop_na(tbl)) - 1)
+  num_cols <- ncol(tbl)
+  dist_tibble <- make_dist_tibble(tbl)
   expect_true(tibble::is_tibble(dist_tibble))
   expect_true(nrow(dist_tibble) == num_rows)
   expect_true(ncol(dist_tibble) == num_cols)
 })
 
 test_that("make_global_indices() returns a tibble of correct dimensions", {
-  x_vals <- c(1:7, NA, 9:15)
-  y_vals <- 11:25
-  dat <- data.frame(x = x_vals, y = y_vals)
+  dat <- tibble::tibble(x = c(1:7, NA, 9:20), y = 21:40)
   lags <- list(x = 0:2, y = 0:1)
-  mat <- as.matrix(make_lag_tibble(dat, lags))
-  global_indices <- make_global_indices(mat)
+  lag_tibble <- make_lag_tibble(dat, lags)
+  global_indices <- make_global_indices(dat)
   expect_true(tibble::is_tibble(global_indices))
-  expect_true(nrow(global_indices) == 8)
+  expect_true(nrow(global_indices) == 17)
   expect_true(ncol(global_indices) == 2)
 })
 
@@ -86,6 +82,17 @@ test_that("make_local_indices() returns a vector of correct length", {
   expect_true(length(local_indices_t) == 10)
 })
 
-
+test_that("make_neighbours() returns a tibble of correct dimensions", {
+  tbl <- tibble::tibble(x = 1:20)
+  lags <- list(x = 0:3)
+  lag_tibble <- make_lag_tibble(tbl, lags)
+  dist_tibble <- make_dist_tibble(lag_tibble)
+  from_global <- make_global_indices(lag_tibble) %>% dplyr::pull(from)
+  from_local <- make_local_indices(11, from_global, lags)
+  nbs <- make_neighbours(15, from_local, dist_tibble, length(unlist(lags)) + 1)
+  expect_true(tibble::is_tibble(nbs))
+  expect_true(nrow(nbs) == length(unlist(lags)) + 1)
+  expect_true(ncol(nbs) == 6)
+})
 
 
