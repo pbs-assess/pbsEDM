@@ -191,7 +191,7 @@ util_exclude_indices <- function(time_ind,
 #' Make a Tibble of Lagged Columns of a Data Frame
 #' 
 #'
-#' @param data A data frame with a named numeric columns to be lagged
+#' @param data_frame A data frame with a named numeric columns to be lagged
 #' @param lags A named list giving the lags to use for each corresponding
 #'     column. List names must match column names. (list of numeric vectors)
 #'
@@ -203,14 +203,14 @@ util_exclude_indices <- function(time_ind,
 #' dat <- data.frame(x = 1:10, y = 11:20, z = 21:30)
 #' make_lag_tibble(dat, list(x = 0:2, y = 0:1, z = 0))
 #' 
-make_lag_tibble <- function(data, lags) {
+make_lag_tibble <- function(data_frame, lags) {
   
   # Check arguments
   stopifnot(
-    is.data.frame(data),
+    is.data.frame(data_frame),
     is.list(lags),
     is.numeric(unlist(lags)),
-    all(is.element(names(lags), names(data)))
+    all(is.element(names(lags), names(data_frame)))
   )
   
   # Initialize vectors
@@ -221,7 +221,7 @@ make_lag_tibble <- function(data, lags) {
   # Initialize data list
   data_list <- mapply(FUN = dplyr::pull,
                       var = col_vector,
-                      MoreArgs = list(.data = data),
+                      MoreArgs = list(.data = data_frame),
                       SIMPLIFY = FALSE)
   
   # Return lag tibble
@@ -233,15 +233,17 @@ make_lag_tibble <- function(data, lags) {
     magrittr::set_colnames(names_vector)
 }
 
-#' Make a Tibble of Euclidean Distances Between Rows of a Matrix
+#' Make a Tibble of Euclidean Distances Between Rows of a Tibble
 #'
-#' @param mat A matrix of row vectors (matrix)
+#' @param tbl A tibble of row vectors (tibble)
 #'
 #' @return A tibble of Euclidean distances
 #' 
 #' @importFrom magrittr %>%
 #'
-#' @examples make_dist_tibble(matrix(c(1:6, NA, 8:24), nrow = 6))
+#' @examples 
+#'   tbl <- tibble::tibble(x = 1:6, y = c(NA, 8:12), z = 13:18)
+#'   dist_tibble <- make_dist_tibble(tbl)
 #' 
 make_dist_tibble <- function(tbl) {
   
@@ -261,14 +263,14 @@ make_dist_tibble <- function(tbl) {
   # Calculate distances among row vectors
   stats::dist(mat_na, diag = FALSE, upper = TRUE) %>%
     broom::tidy() %>%
-    dplyr::rename(focal = item2, nbr = item1) %>%
-    dplyr::select(focal, nbr, distance) %>%
+    dplyr::rename(from_focal = item2, from_nbr = item1) %>%
+    dplyr::select(from_focal, from_nbr, distance) %>%
     tidyr::drop_na()
 }
 
 #' Make Global Allowable Indices from a Data Frame of Lagged Column Row Vectors
 #'
-#' @param data A data frame of lagged columns defining row vectors
+#' @param lag_tibble A data frame of lagged columns defining row vectors
 #' @param from A vector of indices to consider forecasting from (numeric)
 #' @param into A vector of indices to consider forecasting into (numeric)
 #' @param dist The forecast distance (numeric scalar)
@@ -282,20 +284,20 @@ make_dist_tibble <- function(tbl) {
 #' lag_tibble <- make_lag_tibble(dat, list(x = 0:2, y = 0:1))
 #' make_global_indices(lag_tibble)
 #' 
-make_global_indices <- function(tbl, 
-                                from = seq_len(nrow(tbl)), 
+make_global_indices <- function(lag_tibble, 
+                                from = seq_len(nrow(lag_tibble)), 
                                 dist = 1L) {
   
   # Check arguments
   stopifnot(
-    tibble::is_tibble(tbl),
+    tibble::is_tibble(lag_tibble),
     is.numeric(from),
     is.vector(from),
     is.numeric(dist)
   )
   
   # Make 'from' indices
-  global_from <- tbl %>%
+  from_global <- lag_tibble %>%
     dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lead(na_col, dist)) %>%
@@ -303,7 +305,7 @@ make_global_indices <- function(tbl,
     dplyr::pull(index)
   
   # Make 'into' indices
-  global_into <- tbl %>%
+  into_global <- lag_tibble %>%
     dplyr::mutate(index = dplyr::row_number()) %>%
     dplyr::mutate(na_col = purrr::pmap_dbl(., sum, na.rm = FALSE)) %>%
     dplyr::mutate(buffer = dplyr::lag(na_col, dist)) %>%
@@ -311,7 +313,7 @@ make_global_indices <- function(tbl,
     dplyr::pull(index)
   
   # Return indices
-  dplyr::bind_cols(from = global_from, into = global_into)
+  dplyr::bind_cols(from = from_global, into = into_global)
 }
 
 #' Make Local Allowable Indices for Nearest Neighbour Vectors
@@ -332,7 +334,7 @@ make_global_indices <- function(tbl,
 make_local_indices <- function(index,
                                from_global,
                                lags,
-                               dist = 1,
+                               dist = 1L,
                                symm = FALSE) {
   
   # Check arguments
@@ -360,9 +362,9 @@ make_local_indices <- function(index,
   }
 }
 
-#' Make a Tibble of Nearest Neighbours
+#' Make a Tibble of Nearest Neighbour Indices
 #'
-#' @param index The time index of the focal vector
+#' @param from_index The time index of the focal vector
 #' @param from_local The allowable neighbour indices (numeric vector)
 #' @param dist_tibble A tibble with columns 'focal', 'nbr' and 'distance'
 #' @param max_neighbours The maximum number of neighbours
@@ -374,31 +376,121 @@ make_local_indices <- function(index,
 #'     dist_tibble <- tibble::tibble(x = 1:100) %>% 
 #'     make_lag_tibble(list(x = 0:4)) %>% 
 #'     make_dist_tibble()
-#'     make_neighbours(50, c(6:49, 56:99), dist_tibble)
+#'     make_neighbours(50, c(6:49, 56:99), dist_tibble, 6)
 #' 
 
-make_neighbours <- function(index,
+make_neighbours <- function(from_index,
                             from_local,
                             dist_tibble,
                             max_neighbours,
-                            dist = 1L) {
+                            forecast_distance = 1L) {
   # Check arguments
   stopifnot(
-    is.numeric(index),
+    is.numeric(from_index),
     is.numeric(from_local),
     is.vector(from_local),
-    is.numeric(dist),
+    is.numeric(forecast_distance),
     tibble::is_tibble(dist_tibble),
     is.numeric(max_neighbours)
   )
   
   # Return a tibble of neighbours ordered by distance
   dist_tibble %>%
-    dplyr::filter(focal %in% index, nbr %in% from_local) %>%
+    dplyr::filter(from_focal %in% from_index, from_nbr %in% from_local) %>%
     dplyr::arrange(distance) %>%
     dplyr::mutate(dist_rank = dplyr::row_number()) %>%
     dplyr::filter(dist_rank <= max_neighbours) %>%
-    dplyr::mutate(fcl_proj = focal + dist, nbr_proj = nbr + dist)
+    dplyr::mutate(into_focal = from_focal + forecast_distance, 
+                  into_nbr = from_nbr + forecast_distance)
 }
+
+
+#' Title
+#'
+#' @param from_index 
+#' @param from_global 
+#' @param lags 
+#' @param lag_tibble 
+#' @param distance_tibble 
+#' @param forecast_distance 
+#' @param symmetric_exclusion 
+#'
+#' @return A list
+#'
+#' @examples
+#' 
+make_simplex_forecast <- function(from_index,
+                                  from_global,
+                                  lags,
+                                  lag_tibble,
+                                  distance_tibble,
+                                  forecast_distance,
+                                  symmetric_exclusion = FALSE) {
+  
+  # Check arguments
+  stopifnot(
+    is.numeric(from_index),
+    is.numeric(from_global),
+    is.vector(from_global),
+    is.list(lags),
+    is.numeric(unlist(lags)),
+    tibble::is_tibble(lag_tibble),
+    tibble::is_tibble(distance_tibble),
+    is.logical(symmetric_exclusion)
+  )
+  
+  # Specify local indices
+  from_local <- make_local_indices(index = from_index,
+                                   from_global = from_global,
+                                   lags = lags,
+                                   forecast_distance = forecast_distance,
+                                   symmetric_exclusion = symmetric_exclusion)
+  
+  # Identify nearest neighbours
+  nbr <- make_neighbours(index = from_index,
+                         from_local = from_local,
+                         dist_tibble = distance_tibble,
+                         max_neighbours = length(unlist(lags)) + 1,
+                         forecast_distance = forecast_distance)
+  
+  # Calculate weights
+  nbr_wts <- nbr %>% dplyr::mutate(weight = exp(-distance / distance[1]))
+  
+  # Calculate into index
+  into_index <- from_index + forecast_distance
+  
+  # Forecast value
+  if (nrow(nbr_wts) > length(unlist(lags))) {
+    
+    # Pull vectors
+    into_neighbour_indices <- nbr_wts %>% dplyr::pull(into_nbr)
+    into_neighbour_values <- lag_tibble %>% 
+      dplyr::filter(dplyr::row_number() %in% into_neighbour_indices) %>%
+      dplyr::pull(1)
+    into_neighbour_weights <- nbr_wts %>% dplyr::pull(weight)
+    
+    # Make forecast
+    into_forecast <- sum(into_neighbour_values * into_neighbour_weights) /
+      sum(into_neighbour_weights)
+
+  } else {
+    into_forecast <- NA_real_
+  }
+  
+  # Make forecast
+  list(
+    index = into_index,
+    observation = lag_tibble[[from_index + forecast_distance, 1]],
+    forecast = into_forecast,
+    neighbours = nbr_wts
+  )
+}
+
+
+
+
+
+
+
 
 
