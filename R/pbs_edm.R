@@ -59,7 +59,7 @@ pbs_edm <- function(data,
   
   # Calculate statistics
   
-  # Return data frame
+  # Return tibble
   
 }
 
