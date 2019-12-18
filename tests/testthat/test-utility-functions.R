@@ -64,9 +64,9 @@ test_that("make_global_indices() returns a tibble of correct dimensions", {
   dat <- tibble::tibble(x = c(1:7, NA, 9:20), y = 21:40)
   lags <- list(x = 0:2, y = 0:1)
   lag_tibble <- make_lag_tibble(dat, lags)
-  global_indices <- make_global_indices(dat)
+  global_indices <- make_global_indices(lag_tibble)
   expect_true(tibble::is_tibble(global_indices))
-  expect_true(nrow(global_indices) == 17)
+  expect_true(nrow(global_indices) == 13)
   expect_true(ncol(global_indices) == 2)
 })
 
