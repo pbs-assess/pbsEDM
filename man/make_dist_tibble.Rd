@@ -2,20 +2,21 @@
 % Please edit documentation in R/utility_functions.R
 \name{make_dist_tibble}
 \alias{make_dist_tibble}
-\title{Make a Tibble of Euclidean Distances Between Rows of a Matrix}
+\title{Make a Tibble of Euclidean Distances Between Rows of a Tibble}
 \usage{
-make_dist_tibble(mat)
+make_dist_tibble(tbl)
 }
 \arguments{
-\item{mat}{A matrix of row vectors (matrix)}
+\item{tbl}{A tibble of row vectors (tibble)}
 }
 \value{
 A tibble of Euclidean distances
 }
 \description{
-Make a Tibble of Euclidean Distances Between Rows of a Matrix
+Make a Tibble of Euclidean Distances Between Rows of a Tibble
 }
 \examples{
-make_dist_tibble(matrix(c(1:6, NA, 8:24), nrow = 6))
+  tbl <- tibble::tibble(x = 1:6, y = c(NA, 8:12), z = 13:18)
+  dist_tibble <- make_dist_tibble(tbl)
 
 }

@@ -4,10 +4,10 @@
 \alias{make_lag_tibble}
 \title{Make a Tibble of Lagged Columns of a Data Frame}
 \usage{
-make_lag_tibble(data, lags)
+make_lag_tibble(data_frame, lags)
 }
 \arguments{
-\item{data}{A data frame with a named numeric columns to be lagged}
+\item{data_frame}{A data frame with a named numeric columns to be lagged}
 
 \item{lags}{A named list giving the lags to use for each corresponding
 column. List names must match column names. (list of numeric vectors)}

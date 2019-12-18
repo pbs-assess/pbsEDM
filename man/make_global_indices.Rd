@@ -2,12 +2,13 @@
 % Please edit documentation in R/utility_functions.R
 \name{make_global_indices}
 \alias{make_global_indices}
-\title{Make Global Allowable Indices from a Matrix of Lagged Column Row Vectors}
+\title{Make Global Allowable Indices from a Data Frame of Lagged Column Row Vectors}
 \usage{
-make_global_indices(mat, from = seq_len(nrow(mat)), dist = 1L)
+make_global_indices(lag_tibble, from = seq_len(nrow(lag_tibble)),
+  dist = 1L)
 }
 \arguments{
-\item{mat}{A matrix of lagged columns defining row vectors (matrix)}
+\item{lag_tibble}{A data frame of lagged columns defining row vectors}
 
 \item{from}{A vector of indices to consider forecasting from (numeric)}
 
@@ -19,11 +20,11 @@ make_global_indices(mat, from = seq_len(nrow(mat)), dist = 1L)
 A tibble with two columns of indices
 }
 \description{
-Make Global Allowable Indices from a Matrix of Lagged Column Row Vectors
+Make Global Allowable Indices from a Data Frame of Lagged Column Row Vectors
 }
 \examples{
-dat <- data.frame(x = c(1:7, NA, 9:15), y = 11:25)
-mat <- as.matrix(combine_lag_tibbles(dat, c("x", "y"), c(3, 2), 1))
-make_global_indices(mat)
+dat <- data.frame(x = c(1:7, NA, 9:20), y = 21:40)
+lag_tibble <- make_lag_tibble(dat, list(x = 0:2, y = 0:1))
+make_global_indices(lag_tibble)
 
 }
