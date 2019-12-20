@@ -114,3 +114,25 @@ test_that("make_simplex_forecast() returns a tibble of correct dimensions", {
   expect_true(nrow(forecast) == 1)
   expect_true(ncol(forecast) == 4)
 }) 
+
+test_that("make_smap_forecast() returns a tibble of correct dimensions", {
+  tbl <- tibble::tibble(x = simple_ts)
+  from_index <- 15
+  lags <- list(x = 0:3)
+  local_weight <- 0
+  lag_tibble <- make_lag_tibble(tbl, lags)
+  from_global <- dplyr::pull(make_global_indices(lag_tibble), from)
+  distance_tibble <- make_dist_tibble(lag_tibble)
+  forecast_distance <- 1
+  forecast <- make_smap_forecast(from_index,
+                                 from_global,
+                                 lags,
+                                 local_weight,
+                                 lag_tibble,
+                                 distance_tibble,
+                                 forecast_distance,
+                                 symmetric_exclusion = FALSE)
+  expect_true(tibble::is_tibble(forecast))
+  expect_true(nrow(forecast) == 1)
+  expect_true(ncol(forecast) == 4)
+}) 
