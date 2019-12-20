@@ -318,12 +318,12 @@ make_global_indices <- function(lag_tibble,
 
 #' Make Local Allowable Indices for Nearest Neighbour Vectors
 #'
-#' @param index Index for the focal vector (numeric scalar)
+#' @param from_index Index for the focal vector (numeric scalar)
 #' @param from_global A vector of indices to consider forecasting from (numeric)
 #' @param lags Named list of numeric vectors giving lags for each column. 
 #'     List names must match column names. (list of numeric vectors)
-#' @param dist The forecast distance (numeric scalar)
-#' @param symm Symmetric exclusion radius? (logical scalar)
+#' @param forecast_distance The forecast distance (numeric scalar)
+#' @param symmetric_exclusion Symmetric exclusion radius? (logical scalar)
 #'
 #' @return A vector of allowable indices for nearest neighbours
 #' 
@@ -331,34 +331,34 @@ make_global_indices <- function(lag_tibble,
 #'
 #' @examples make_local_indices(8, 1:15, list(x = 0:2))
 #' 
-make_local_indices <- function(index,
+make_local_indices <- function(from_index,
                                from_global,
                                lags,
-                               dist = 1L,
-                               symm = FALSE) {
+                               forecast_distance = 1L,
+                               symmetric_exclusion = FALSE) {
   
   # Check arguments
   stopifnot(
-    is.numeric(index),
+    is.numeric(from_index),
     is.numeric(from_global),
     is.vector(from_global),
     is.list(lags),
     is.numeric(unlist(lags)),
-    is.numeric(dist),
-    is.logical(symm)
+    is.numeric(forecast_distance),
+    is.logical(symmetric_exclusion)
   )
   
   # Specify unique lags
   lags_vector <- sort(unique(unlist(lags)))
   
   # Make local indices
-  if (symm) {
-    from_global %>% setdiff(index) %>%
-      setdiff(index + dist + lags_vector) %>%
-      setdiff(index + dist - lags_vector)
+  if (symmetric_exclusion) {
+    from_global %>% setdiff(from_index) %>%
+      setdiff(from_index + forecast_distance + lags_vector) %>%
+      setdiff(from_index + forecast_distance - lags_vector)
   } else {
-    from_global %>% setdiff(index) %>% 
-      setdiff(index + dist + lags_vector)
+    from_global %>% setdiff(from_index) %>% 
+      setdiff(from_index + forecast_distance + lags_vector)
   }
 }
 
@@ -368,7 +368,7 @@ make_local_indices <- function(index,
 #' @param from_local The allowable neighbour indices (numeric vector)
 #' @param dist_tibble A tibble with columns 'focal', 'nbr' and 'distance'
 #' @param max_neighbours The maximum number of neighbours
-#' @param dist The forecast distance (numeric scalar)
+#' @param forecast_distance The forecast distance (numeric scalar)
 #'
 #' @return A tibble
 #'
@@ -381,7 +381,7 @@ make_local_indices <- function(index,
 
 make_neighbours <- function(from_index,
                             from_local,
-                            dist_tibble,
+                            distance_tibble,
                             max_neighbours,
                             forecast_distance = 1L) {
   # Check arguments
@@ -390,12 +390,12 @@ make_neighbours <- function(from_index,
     is.numeric(from_local),
     is.vector(from_local),
     is.numeric(forecast_distance),
-    tibble::is_tibble(dist_tibble),
+    tibble::is_tibble(distance_tibble),
     is.numeric(max_neighbours)
   )
   
   # Return a tibble of neighbours ordered by distance
-  dist_tibble %>%
+  distance_tibble %>%
     dplyr::filter(from_focal %in% from_index, from_nbr %in% from_local) %>%
     dplyr::arrange(distance) %>%
     dplyr::mutate(dist_rank = dplyr::row_number()) %>%
@@ -405,17 +405,21 @@ make_neighbours <- function(from_index,
 }
 
 
-#' Title
+#' Make a Simplex Projection Forecast from the Current Time Index
 #'
-#' @param from_index 
-#' @param from_global 
-#' @param lags 
-#' @param lag_tibble 
-#' @param distance_tibble 
-#' @param forecast_distance 
-#' @param symmetric_exclusion 
+#' @param from_index The index from which to forecast (numeric scalar)
+#' @param from_global A superset of neighbour indices (numeric vector)
+#' @param lags Named list of numeric vectors giving lags for each column. 
+#'     List names must match column names. (list of numeric vectors)
+#' @param lag_tibble A tibble of lagged numeric columns (tibble)
+#' @param distance_tibble A long-format tibble of Euclidean distances between
+#'     row vectors in lag_tibble (tibble)
+#' @param forecast_distance The forecast distance (numeric scalar)
+#' @param symmetric_exclusion Remove local indices symmectric around the
+#'     forecast value? (Logical scalar)
 #'
-#' @return A list
+#' @return A tibble with numeric columns: index, obsertation, and forecast; and
+#'     a list column with the neighbours tibble
 #'
 #' @examples
 #' 
@@ -440,18 +444,18 @@ make_simplex_forecast <- function(from_index,
   )
   
   # Specify local indices
-  from_local <- make_local_indices(index = from_index,
-                                   from_global = from_global,
-                                   lags = lags,
-                                   forecast_distance = forecast_distance,
-                                   symmetric_exclusion = symmetric_exclusion)
+  from_local <- make_local_indices(from_index,
+                                   from_global,
+                                   lags,
+                                   forecast_distance,
+                                   symmetric_exclusion)
   
   # Identify nearest neighbours
-  nbr <- make_neighbours(index = from_index,
-                         from_local = from_local,
-                         dist_tibble = distance_tibble,
+  nbr <- make_neighbours(from_index,
+                         from_local,
+                         distance_tibble,
                          max_neighbours = length(unlist(lags)) + 1,
-                         forecast_distance = forecast_distance)
+                         forecast_distance)
   
   # Calculate weights
   nbr_wts <- nbr %>% dplyr::mutate(weight = exp(-distance / distance[1]))
@@ -478,11 +482,11 @@ make_simplex_forecast <- function(from_index,
   }
   
   # Make forecast
-  list(
+  tibble::tibble(
     index = into_index,
     observation = lag_tibble[[from_index + forecast_distance, 1]],
     forecast = into_forecast,
-    neighbours = nbr_wts
+    neighbours = list(nbr_wts)
   )
 }
 
