@@ -1,5 +1,26 @@
-
-
+#' Use S-Mapping to Perform Out-of-Sample Forecasting
+#'
+#' @param data_frame A data frame with named columns (list of numeric vectors)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
+#' @param local_weight State-dependence parameter (numeric scalar)
+#' @param from_user Rows to predict from (numeric vector)
+#' @param into_user Rows to predict into (numeric vector)
+#' @param forecast_distance Forecast distance (numeric scalar)
+#' @param symmetric_exclusion Symmetric exclusion radius? (logical scalar)
+#' @param include_stats Return forecast stats? (logical scalar)
+#' @param include_forecasts Return forecast and observations? (logical scalar)
+#' @param include_neighbours Return neighbours? (logical scalar)
+#'
+#' @return A tibble (work in progress)
+#' @export
+#'
+#' @examples 
+#'   data_frame <- data.frame(x = simple_ts)
+#'   lags <- list(x = 0:3)
+#'   local_weight <- 0
+#'   pbs_smap(data_frame, lags, local_weight)
+#' 
 pbs_smap <- function(data_frame,
                      lags,
                      local_weight = 0,
