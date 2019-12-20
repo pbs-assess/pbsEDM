@@ -470,6 +470,8 @@ make_simplex_forecast <- function(from_index,
     into_neighbour_indices <- nbr_wts %>% dplyr::pull(into_nbr)
     into_neighbour_values <- lag_tibble %>% 
       dplyr::filter(dplyr::row_number() %in% into_neighbour_indices) %>%
+      dplyr::mutate(row_order = order(into_neighbour_indices)) %>%
+      dplyr::arrange(row_order) %>%
       dplyr::pull(1)
     into_neighbour_weights <- nbr_wts %>% dplyr::pull(weight)
     
