@@ -4,19 +4,20 @@
 \alias{make_local_indices}
 \title{Make Local Allowable Indices for Nearest Neighbour Vectors}
 \usage{
-make_local_indices(index, from_global, lags, dist = 1L, symm = FALSE)
+make_local_indices(from_index, from_global, lags, forecast_distance = 1L,
+  symmetric_exclusion = FALSE)
 }
 \arguments{
-\item{index}{Index for the focal vector (numeric scalar)}
+\item{from_index}{Index for the focal vector (numeric scalar)}
 
 \item{from_global}{A vector of indices to consider forecasting from (numeric)}
 
 \item{lags}{Named list of numeric vectors giving lags for each column. 
 List names must match column names. (list of numeric vectors)}
 
-\item{dist}{The forecast distance (numeric scalar)}
+\item{forecast_distance}{The forecast distance (numeric scalar)}
 
-\item{symm}{Symmetric exclusion radius? (logical scalar)}
+\item{symmetric_exclusion}{Symmetric exclusion radius? (logical scalar)}
 }
 \value{
 A vector of allowable indices for nearest neighbours

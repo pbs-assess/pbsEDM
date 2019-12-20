@@ -4,27 +4,33 @@
 \alias{pbs_edm}
 \title{Use EDM to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_edm(data, lags, dist = 1L, symm = FALSE,
-  from = seq_len(nrow(mat)), into = seq_len(nrow(mat)), stats = TRUE)
+pbs_edm(data_frame, lags, from_user = seq_len(nrow(data_frame)),
+  into_user = seq_len(nrow(data_frame)), forecast_distance = 1L,
+  symmetric_exclusion = FALSE, include_stats = TRUE,
+  include_forecasts = TRUE, include_neighbours = TRUE)
 }
 \arguments{
-\item{data}{A data frame with named columns (list of numeric vectors)}
+\item{data_frame}{A data frame with named columns (list of numeric vectors)}
 
 \item{lags}{Named list of numeric vectors giving lags to use for each
 column. List names must match column names. (list of numeric vectors)}
 
-\item{dist}{Forecast distance (numeric scalar)}
+\item{from_user}{Rows to predict from (numeric vector)}
 
-\item{symm}{Symmetric exclusion radius? (logical scalar)}
+\item{into_user}{Rows to predict into (numeric vector)}
 
-\item{from}{Rows to predict from (numeric vector)}
+\item{forecast_distance}{Forecast distance (numeric scalar)}
 
-\item{into}{Rows to predict into (numeric vector)}
+\item{symmetric_exclusion}{Symmetric exclusion radius? (logical scalar)}
 
-\item{stats}{Return only stats and omit neighbour lists? (logical scalar)}
+\item{include_stats}{Return forecast stats? (logical scalar)}
+
+\item{include_forecasts}{Return forecast and observations? (logical scalar)}
+
+\item{include_neighbours}{Return neighbours? (logical scalar)}
 }
 \value{
-A data frame
+A tibble
 }
 \description{
 Use EDM to Perform Out-of-Sample Forecasting

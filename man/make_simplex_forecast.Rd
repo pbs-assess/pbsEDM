@@ -2,31 +2,35 @@
 % Please edit documentation in R/utility_functions.R
 \name{make_simplex_forecast}
 \alias{make_simplex_forecast}
-\title{Title}
+\title{Make a Simplex Projection Forecast from the Current Time Index}
 \usage{
 make_simplex_forecast(from_index, from_global, lags, lag_tibble,
   distance_tibble, forecast_distance, symmetric_exclusion = FALSE)
 }
 \arguments{
-\item{from_index}{}
+\item{from_index}{The index from which to forecast (numeric scalar)}
 
-\item{from_global}{}
+\item{from_global}{A superset of neighbour indices (numeric vector)}
 
-\item{lags}{}
+\item{lags}{Named list of numeric vectors giving lags for each column. 
+List names must match column names. (list of numeric vectors)}
 
-\item{lag_tibble}{}
+\item{lag_tibble}{A tibble of lagged numeric columns (tibble)}
 
-\item{distance_tibble}{}
+\item{distance_tibble}{A long-format tibble of Euclidean distances between
+row vectors in lag_tibble (tibble)}
 
-\item{forecast_distance}{}
+\item{forecast_distance}{The forecast distance (numeric scalar)}
 
-\item{symmetric_exclusion}{}
+\item{symmetric_exclusion}{Remove local indices symmectric around the
+forecast value? (Logical scalar)}
 }
 \value{
-A list
+A tibble with numeric columns: index, obsertation, and forecast; and
+    a list column with the neighbours tibble
 }
 \description{
-Title
+Make a Simplex Projection Forecast from the Current Time Index
 }
 \examples{
 

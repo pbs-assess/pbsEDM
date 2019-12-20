@@ -4,7 +4,7 @@
 \alias{make_neighbours}
 \title{Make a Tibble of Nearest Neighbour Indices}
 \usage{
-make_neighbours(from_index, from_local, dist_tibble, max_neighbours,
+make_neighbours(from_index, from_local, distance_tibble, max_neighbours,
   forecast_distance = 1L)
 }
 \arguments{
@@ -12,11 +12,11 @@ make_neighbours(from_index, from_local, dist_tibble, max_neighbours,
 
 \item{from_local}{The allowable neighbour indices (numeric vector)}
 
-\item{dist_tibble}{A tibble with columns 'focal', 'nbr' and 'distance'}
-
 \item{max_neighbours}{The maximum number of neighbours}
 
-\item{dist}{The forecast distance (numeric scalar)}
+\item{forecast_distance}{The forecast distance (numeric scalar)}
+
+\item{dist_tibble}{A tibble with columns 'focal', 'nbr' and 'distance'}
 }
 \value{
 A tibble
