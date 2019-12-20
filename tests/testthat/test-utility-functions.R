@@ -71,11 +71,11 @@ test_that("make_global_indices() returns a tibble of correct dimensions", {
 })
 
 test_that("make_local_indices() returns a vector of correct length", {
-  index <- 8
-  from <- 1:15
+  from_index <- 8
+  from_global <- 1:15
   lags <- list(x = 0:2)
-  local_indices_f <- make_local_indices(index, from, lags)
-  local_indices_t <- make_local_indices(index, from, lags, symm = TRUE)
+  local_indices_f <- make_local_indices(from_index, from_global, lags)
+  local_indices_t <- make_local_indices(from_index, from_global, lags, 1, TRUE)
   expect_true(is.vector(local_indices_f))
   expect_true(length(local_indices_f) == 11)
   expect_true(is.vector(local_indices_t))
@@ -95,4 +95,22 @@ test_that("make_neighbours() returns a tibble of correct dimensions", {
   expect_true(ncol(nbs) == 6)
 })
 
-
+test_that("make_simplex_forecast() returns a tibble of correct dimensions", {
+  tbl <- tibble::tibble(x = simple_ts)
+  from_index <- 15
+  lags <- list(x = 0:3)
+  lag_tibble <- make_lag_tibble(tbl, lags)
+  from_global <- dplyr::pull(make_global_indices(lag_tibble), from)
+  distance_tibble <- make_dist_tibble(lag_tibble)
+  forecast_distance <- 1
+  forecast <- make_simplex_forecast(from_index,
+                                    from_global,
+                                    lags,
+                                    lag_tibble,
+                                    distance_tibble,
+                                    forecast_distance,
+                                    symmetric_exclusion = FALSE)
+  expect_true(tibble::is_tibble(forecast))
+  expect_true(nrow(forecast) == 1)
+  expect_true(ncol(forecast) == 4)
+}) 
