@@ -11,13 +11,16 @@
 #' @param include_forecasts Return forecast and observations? (logical scalar)
 #' @param include_neighbours Return neighbours? (logical scalar)
 #'
-#' @return A tibble
+#' @return A tibble (work in progress)
 #' 
 #' @importFrom magrittr %>%
 #' 
 #' @export
 #'
 #' @examples
+#'   data_frame <- data.frame(x = simple_ts, y = simple_ts, z = simple_ts)
+#'   lags <- list(x = 0:3, y = 0:1, z = 0)
+#'   pbs_edm(data_frame, lags)
 #' 
 pbs_edm <- function(data_frame,
                     lags,
