@@ -44,6 +44,7 @@ pbs_edm <- function(data_frame,
     is.logical(include_forecasts),
     is.logical(include_neighbours)
   )
+  
   # Make lag matrix
   lag_tibble <- make_lag_tibble(data_frame, lags)
   
