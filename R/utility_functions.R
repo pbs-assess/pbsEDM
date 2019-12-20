@@ -494,6 +494,98 @@ make_simplex_forecast <- function(from_index,
 
 
 
+make_smap_forecast <- function(from_index,
+                               from_global,
+                               lags,
+                               local_weight,
+                               lag_tibble,
+                               distance_tibble,
+                               forecast_distance,
+                               symmetric_exclusion = FALSE) {
+  
+  # Check arguments
+  stopifnot(
+    is.numeric(from_index),
+    is.numeric(from_global),
+    is.vector(from_global),
+    is.list(lags),
+    is.numeric(unlist(lags)),
+    is.numeric(local_weight),
+    tibble::is_tibble(lag_tibble),
+    tibble::is_tibble(distance_tibble),
+    is.logical(symmetric_exclusion)
+  )
+  
+  # Specify local indices
+  from_local <- make_local_indices(from_index,
+                                   from_global,
+                                   lags,
+                                   forecast_distance,
+                                   symmetric_exclusion)
+  
+  # Identify nearest neighbours
+  nbr <- make_neighbours(from_index,
+                         from_local,
+                         distance_tibble,
+                         max_neighbours = nrow(lag_tibble),
+                         forecast_distance)
+  
+  # Calculate weights
+  nbr_wts <- nbr %>% dplyr::mutate(
+    weight = exp(-local_weight * distance / mean(distance, na.rm = TRUE))
+  )
+
+  # Calculate into index
+  into_index <- from_index + forecast_distance
+  
+  # Compute number of neighbours and embedding dimension
+  num_nbrs <- nrow(nbr_wts)
+  embedding_dimension <- length(unlist(lags))
+  
+  # Forecast value
+  if (num_nbrs > embedding_dimension) {
+    
+    # Pull vectors
+    into_neighbour_indices <- nbr_wts %>% dplyr::pull(into_nbr)
+    into_neighbour_values <- lag_tibble %>% 
+      dplyr::filter(dplyr::row_number() %in% into_neighbour_indices) %>%
+      dplyr::mutate(row_order = order(into_neighbour_indices)) %>%
+      dplyr::arrange(row_order) %>%
+      dplyr::pull(1)
+    into_neighbour_weights <- nbr_wts %>% dplyr::pull(weight)
+    
+    # Calculate the B vector and A matrix
+    a_mat <- matrix(NA_real_, nrow = num_nbrs, ncol = embedding_dimension)
+    b_vec <- rep(NA_real_, num_nbrs)
+    for (i in seq_len(num_nbrs)) {
+      b_vec[i] <- nbr_wts$weight[i] * into_neighbour_values[i]
+      for (j in seq_len(embedding_dimension)) {
+        a_mat[i, j] <- nbr_wts$weight[i] * lag_tibble[[nbr_wts$from_nbr[i], j]]
+      }
+    }
+    
+    # Solve for C using Singluar Value Decomposition
+    a_svd <- svd(a_mat) # m x n
+    d_inv <- diag(1 / a_svd$d) # diag n x n
+    u_mat <- a_svd$u # m x n
+    v_mat <- a_svd$v # n x n
+    c_vec <- v_mat %*% d_inv %*% t(u_mat) %*% b_vec
+
+    # Make forecast
+    into_forecast <- sum(c_vec * lag_tibble[from_index, ])
+      
+  } else {
+    into_forecast <- NA_real_
+  }
+  
+  # Make forecast
+  tibble::tibble(
+    index = into_index,
+    observation = lag_tibble[[from_index + forecast_distance, 1]],
+    forecast = into_forecast,
+    neighbours = list(nbr_wts)
+  )
+}
 
 
 
