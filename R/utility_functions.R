@@ -1,3 +1,49 @@
+#' Return Simplex Projection Forecasts from Nearest Neighbour Values and Weights
+#'
+#' @param value_matrix A matrix of row vectors giving the projected nearest 
+#'     neighbour values
+#' @param weight_matrix A matrix of row vectors giving the projected nearest 
+#'     neighbour weights
+#'
+#' @return A vector of forecasts for the projected values
+#'
+#' @examples 
+#' A <- matrix(c(12, 15, 13,
+#'               21, 19, 22,
+#'               28, 29, 25), nrow = 3, byrow = TRUE)
+#' W <- matrix(c(0.6, 0.3, 0.1,
+#'               0.5, 0.4, 0.1,
+#'               0.7, 0.2, 0.1), nrow = 3, byrow = TRUE)
+#' simplex_forecast(A, W)
+#' 
+simplex_forecast <- function(value_matrix, weight_matrix) {
+  # Return forecast
+  rowSums(value_matrix * weight_matrix) / rowSums(weight_matrix)
+}
+
+
+#' Return S-Map Forecasts from SVD Solutions and Embedded Points
+#'
+#' @param c_matrix A matrix of row vector SVD solutions
+#' @param focal_matrix A matrix of row vectors giving the focal point from 
+#'     which to forecast
+#'
+#' @return
+#'
+#' @examples
+#' c_mat <- matrix(c(0.4, 0.3, 0.3,
+#'                   0.5, 0.4, 0.1,
+#'                   0.7, 0.2, 0.1), nrow = 3, byrow = TRUE)
+#' f_mat <- matrix(c(16, 11, 19,
+#'                   21, 14, 26,
+#'                   28, 26, 27), nrow = 3, byrow = TRUE)
+#' smap_forecast(c_mat, f_mat)
+#'                   
+smap_forecast <- function(c_matrix, focal_matrix) {
+  # Return forecast
+  rowSums(c_matrix * focal_matrix)
+}
+
 #' Make a Tibble of Lagged Columns of a Data Frame
 #' 
 #'
