@@ -41,6 +41,9 @@ pbs_edm <- function(data_frame,
                         n = lag_sizes_vector)
   
   # Make distance matrix
+  lags_matrix[which(is.na(rowSums(lags_matrix))), ] <- NA # For correct distance
+  distance_matrix <- as.matrix(dist(lags_matrix, diag = TRUE, upper = TRUE))
+  diag(distance_matrix) <- NA
   
   # Make neighbour index matrix
   
@@ -58,6 +61,5 @@ pbs_edm <- function(data_frame,
   # Return tibble
   
 }
-
 
 
