@@ -1,4 +1,4 @@
-context("test-utility-functions.R")
+context("test-utility-previous.R")
 
 test_that("pbs_make_lags() returns a tibble with the correct dimensions", {
 	embed_dim <- 10
