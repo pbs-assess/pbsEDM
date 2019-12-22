@@ -14,11 +14,13 @@
 #' @return
 #' @export
 #'
-#' @examples (In progress)
+#' @examples
+#' data_frame <- data.frame(x = 1:30)
+#' lags <- list(x = 0:3)
+#' pbs_edm(data_frame, lags)
 #' 
 pbs_edm <- function(data_frame,
                     lags,
-                    interpret_lags = NULL,
                     from_user = seq_len(nrow(data_frame)), 
                     into_user = seq_len(nrow(data_frame)), 
                     forecast_distance = 1L,
@@ -70,13 +72,16 @@ pbs_edm <- function(data_frame,
   }
 
   # Make neighbour index matrix
-  
-  # Calculate weights vector
+  num_nbrs <- length(lags_unique) + 1
+  neighbours_matrix <- t(apply(distance_matrix, 1, order))[, seq_len(num_nbrs)]
+
+  # Calculate weights matrix
   
   # Make projected neighbour index matrix
+  projected_matrix <- neighbours_matrix + forecast_distance
   
   # Make projected neighbour value matrix
-  
+
   # Make forecasts
   forecasts <- rowSums(value_matrix * weight_matrix) / rowSums(weight_matrix)
   
