@@ -14,7 +14,7 @@
 #' @return
 #' @export
 #'
-#' @examples
+#' @examples (In progress)
 #' 
 pbs_edm <- function(data_frame,
                     lags,
@@ -45,6 +45,30 @@ pbs_edm <- function(data_frame,
   distance_matrix <- as.matrix(dist(lags_matrix, diag = TRUE, upper = TRUE))
   diag(distance_matrix) <- NA
   
+  # Exclude indices that project beyond the time series
+  threshold <- ncol(distance_matrix) - forecast_distance
+  distance_matrix[, which(seq_len(ncol(distance_matrix)) > threshold)] <- NA
+  distance_matrix[which(seq_len(ncol(distance_matrix)) > threshold), ] <- NA
+  
+  # Exclude indices that contain the projection of the focal value
+  indices <- seq_len(nrow(distance_matrix))
+  lags_unique <- unique(lag_sizes_vector)
+  focal_indices <- rep(indices, each = length(lags_unique))
+  exclude_indices <- focal_indices + forecast_distance + lags_unique
+  within_range <- which(exclude_indices %in% indices)
+  exclude_matrix <- as.matrix(data.frame(x = focal_indices[within_range],
+                                         y = exclude_indices[within_range]))
+  distance_matrix[exclude_matrix] <- NA
+  
+  # Exclude indices symmetrically around the forecast index
+  if (symmetric_exclusion == TRUE) {
+    symm_na_indices <- focal_indices + forecast_distance - lags_unique
+    within_range <- which(symm_na_indices %in% indices)
+    symm_na_matrix <- as.matrix(data.frame(x = focal_indices[within_range],
+                                           y = symm_na_indices[within_range]))
+    distance_matrix[symm_na_matrix] <- NA
+  }
+
   # Make neighbour index matrix
   
   # Calculate weights vector
