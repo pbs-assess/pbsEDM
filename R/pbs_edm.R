@@ -15,14 +15,14 @@
 #' @export
 #'
 #' @examples
-#' data_frame <- data.frame(x = 1:30)
-#' lags <- list(x = 0:3)
+#' data_frame <- data.frame(x = simple_ts)
+#' lags <- list(x = 0:1)
 #' pbs_edm(data_frame, lags)
 #' 
 pbs_edm <- function(data_frame,
                     lags,
-                    from_user = seq_len(nrow(data_frame)), 
-                    into_user = seq_len(nrow(data_frame)), 
+                    # from_user = seq_len(nrow(data_frame)), 
+                    # into_user = seq_len(nrow(data_frame)), 
                     forecast_distance = 1L,
                     symmetric_exclusion = FALSE,
                     include_stats = TRUE,
@@ -73,22 +73,41 @@ pbs_edm <- function(data_frame,
 
   # Make neighbour index matrix
   num_nbrs <- length(lags_unique) + 1
-  neighbours_matrix <- t(apply(distance_matrix, 1, order))[, seq_len(num_nbrs)]
-
-  # Calculate weights matrix
+  nbr_ind_matrix <- t(apply(distance_matrix, 1, order))[, seq_len(num_nbrs)]
+  nbr_ind_matrix[which(rowSums(!is.na(distance_matrix)) < num_nbrs), ] <- NA
+  
+  # Make neighbour value matrix
+  nbr_val_matrix <- t(apply(nbr_ind_matrix, 1, function(x, y) y[x, 1],
+                            y = lags_matrix)) # Works because NAs are NA_real_
+  
+  # Calculate weight matrix
+  weight_matrix <- t(apply(nbr_val_matrix, 1, function(x) exp(-x / x[1])))
   
   # Make projected neighbour index matrix
-  projected_matrix <- neighbours_matrix + forecast_distance
+  pro_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
+  pro_ind_matrix <- pro_ind_matrix + forecast_distance
   
   # Make projected neighbour value matrix
+  pro_val_matrix <- t(apply(pro_ind_matrix, 1, function(x, y) y[x, 1],
+                            y = lags_matrix)) # Works because NAs are NA_real_
+  
+  # Make projected neighbour weight matrix
+  pro_wt_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
 
   # Make forecasts
-  forecasts <- rowSums(value_matrix * weight_matrix) / rowSums(weight_matrix)
+  forecasts <- rowSums(pro_val_matrix * pro_wt_matrix) / rowSums(pro_wt_matrix)
   
   # Compute statistics
+  rho <- cor(lags_matrix[, 1], forecasts, use = "pairwise.complete.obs")
+  rmse <- sqrt(mean((lags_matrix[, 1] - forecasts)^2, na.rm = TRUE))
   
   # Return tibble
-  
+  tibble::tibble(lags = lags, rho = rho, rmse = rmse,
+                 forecasts = list(
+                   tibble::tibble(observation = lags_matrix[, 1],
+                                  forecast = forecasts)),
+                 neighbours = list(nbr_ind_matrix), 
+                 distances = list(distance_matrix))
 }
 
 
