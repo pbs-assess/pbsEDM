@@ -1,17 +1,16 @@
-#' Title
+#' Use Empirical Dynamic Modeling to Perform Out-of-Sample Forecasting 
 #'
-#' @param data_frame 
-#' @param lags 
-#' @param interpret_lags 
-#' @param from_user 
-#' @param into_user 
-#' @param forecast_distance 
-#' @param symmetric_exclusion 
-#' @param include_stats 
-#' @param include_forecasts 
-#' @param include_neighbours 
+#' @param data_frame A data frame with named columns (list of numeric vectors)
+#' @param lags Named list of numeric vectors giving lags to use for each
+#'     column. List names must match column names. (list of numeric vectors)
+#' @param forecast_distance Forecast distance (numeric scalar)
+#' @param symmetric_exclusion Symmetric exclusion radius? (logical scalar)
+#' @param include_stats Return forecast stats? (logical scalar)
+#' @param include_forecasts Return forecast and observations? (logical scalar)
+#' @param include_neighbours Return neighbours? (logical scalar)
 #'
-#' @return
+#' @return A tibble with results, forecasts, neighbours, distances, and weights
+#' 
 #' @export
 #'
 #' @examples
@@ -41,9 +40,10 @@ pbs_edm <- function(data_frame,
   lags_matrix <- mapply(FUN = dplyr::lag,
                         x = cols_list,
                         n = lag_sizes_vector)
+  observations <- lags_matrix[, 1]
   
   # Make distance matrix
-  lags_matrix[which(is.na(rowSums(lags_matrix))), ] <- NA # For correct distance
+  lags_matrix[which(is.na(rowSums(lags_matrix))), ] <- NA # For distance
   distance_matrix <- as.matrix(dist(lags_matrix, diag = TRUE, upper = TRUE))
   diag(distance_matrix) <- NA
   
@@ -73,15 +73,19 @@ pbs_edm <- function(data_frame,
 
   # Make neighbour index matrix
   num_nbrs <- length(lags_unique) + 1
-  nbr_ind_matrix <- t(apply(distance_matrix, 1, order))[, seq_len(num_nbrs)]
+  seq_nbrs <- seq_len(num_nbrs)
+  nbr_ind_matrix <- t(apply(distance_matrix, 1, order))[, seq_nbrs]
   nbr_ind_matrix[which(rowSums(!is.na(distance_matrix)) < num_nbrs), ] <- NA
   
   # Make neighbour value matrix
   nbr_val_matrix <- t(apply(nbr_ind_matrix, 1, function(x, y) y[x, 1],
                             y = lags_matrix)) # Works because NAs are NA_real_
   
+  # Make neighbour distance matrix
+  nbr_dst_matrix <- t(apply(distance_matrix, 1, sort, na.last = T))[, seq_nbrs]
+  
   # Calculate weight matrix
-  weight_matrix <- t(apply(nbr_val_matrix, 1, function(x) exp(-x / x[1])))
+  weight_matrix <- t(apply(nbr_dst_matrix, 1, function(x) exp(-x / x[1])))
   
   # Make projected neighbour index matrix
   pro_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
@@ -98,16 +102,17 @@ pbs_edm <- function(data_frame,
   forecasts <- rowSums(pro_val_matrix * pro_wt_matrix) / rowSums(pro_wt_matrix)
   
   # Compute statistics
-  rho <- cor(lags_matrix[, 1], forecasts, use = "pairwise.complete.obs")
-  rmse <- sqrt(mean((lags_matrix[, 1] - forecasts)^2, na.rm = TRUE))
+  rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
+  rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
   
   # Return tibble
   tibble::tibble(lags = lags, rho = rho, rmse = rmse,
                  forecasts = list(
-                   tibble::tibble(observation = lags_matrix[, 1],
+                   tibble::tibble(observation = observations,
                                   forecast = forecasts)),
                  neighbours = list(nbr_ind_matrix), 
-                 distances = list(distance_matrix))
+                 distances = list(distance_matrix),
+                 weights = list(weight_matrix))
 }
 
 
