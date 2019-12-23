@@ -2,35 +2,33 @@
 % Please edit documentation in R/pbs_edm.R
 \name{pbs_edm}
 \alias{pbs_edm}
-\title{Title}
+\title{Use Empirical Dynamic Modeling to Perform Out-of-Sample Forecasting}
 \usage{
 pbs_edm(data_frame, lags, forecast_distance = 1L,
   symmetric_exclusion = FALSE, include_stats = TRUE,
   include_forecasts = TRUE, include_neighbours = TRUE)
 }
 \arguments{
-\item{data_frame}{}
+\item{data_frame}{A data frame with named columns (list of numeric vectors)}
 
-\item{lags}{}
+\item{lags}{Named list of numeric vectors giving lags to use for each
+column. List names must match column names. (list of numeric vectors)}
 
-\item{forecast_distance}{}
+\item{forecast_distance}{Forecast distance (numeric scalar)}
 
-\item{symmetric_exclusion}{}
+\item{symmetric_exclusion}{Symmetric exclusion radius? (logical scalar)}
 
-\item{include_stats}{}
+\item{include_stats}{Return forecast stats? (logical scalar)}
 
-\item{include_forecasts}{}
+\item{include_forecasts}{Return forecast and observations? (logical scalar)}
 
-\item{include_neighbours}{}
-
-\item{interpret_lags}{}
-
-\item{from_user}{}
-
-\item{into_user}{}
+\item{include_neighbours}{Return neighbours? (logical scalar)}
+}
+\value{
+A tibble with results, forecasts, neighbours, distances, and weights
 }
 \description{
-Title
+Use Empirical Dynamic Modeling to Perform Out-of-Sample Forecasting
 }
 \examples{
 data_frame <- data.frame(x = simple_ts)
