@@ -29,6 +29,16 @@ pbs_edm <- function(data_frame,
                     include_neighbours = TRUE) {
   
   # Check arguments
+  stopifnot(
+    is.data.frame(data_frame),
+    is.list(lags),
+    all(is.element(names(lags), names(data_frame))),
+    is.numeric(forecast_distance),
+    is.logical(symmetric_exclusion),
+    is.logical(include_stats),
+    is.logical(include_forecasts),
+    is.logical(include_neighbours)
+  )
   
   # Make lags matrix
   lag_sizes_vector <- unlist(lags, use.names = FALSE)
@@ -114,5 +124,3 @@ pbs_edm <- function(data_frame,
                  distances = list(distance_matrix),
                  weights = list(weight_matrix))
 }
-
-
