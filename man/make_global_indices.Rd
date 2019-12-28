@@ -4,8 +4,7 @@
 \alias{make_global_indices}
 \title{Make Global Allowable Indices from a Data Frame of Lagged Column Row Vectors}
 \usage{
-make_global_indices(lag_tibble, from = seq_len(nrow(lag_tibble)),
-  dist = 1L)
+make_global_indices(lag_tibble, from = seq_len(nrow(lag_tibble)), dist = 1L)
 }
 \arguments{
 \item{lag_tibble}{A data frame of lagged columns defining row vectors}

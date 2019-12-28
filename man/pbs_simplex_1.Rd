@@ -4,9 +4,16 @@
 \alias{pbs_simplex_1}
 \title{Use Simplex Projection to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_simplex_1(data, col_name = "x", embed_dim = 2L, lag_size = 1L,
-  pred_dist = 1L, one_sided = TRUE, lib_ind = seq_len(NROW(data)),
-  pred_ind = seq_len(NROW(data)))
+pbs_simplex_1(
+  data,
+  col_name = "x",
+  embed_dim = 2L,
+  lag_size = 1L,
+  pred_dist = 1L,
+  one_sided = TRUE,
+  lib_ind = seq_len(NROW(data)),
+  pred_ind = seq_len(NROW(data))
+)
 }
 \arguments{
 \item{data}{A time series with possible NA values (numeric vector or

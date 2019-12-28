@@ -4,8 +4,14 @@
 \alias{pbs_make_nbrs}
 \title{Make a Tibble of Nearest Neighbours}
 \usage{
-pbs_make_nbrs(lag_dist, time_ind, rel_ind, embed_dim, pred_dist,
-  max_nbrs = embed_dim + 1)
+pbs_make_nbrs(
+  lag_dist,
+  time_ind,
+  rel_ind,
+  embed_dim,
+  pred_dist,
+  max_nbrs = embed_dim + 1
+)
 }
 \arguments{
 \item{lag_dist}{Distances between neighbours (tibble with columns:

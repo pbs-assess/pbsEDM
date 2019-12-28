@@ -4,8 +4,15 @@
 \alias{make_simplex_forecast}
 \title{Make a Simplex Projection Forecast from the Current Time Index}
 \usage{
-make_simplex_forecast(from_index, from_global, lags, lag_tibble,
-  distance_tibble, forecast_distance, symmetric_exclusion = FALSE)
+make_simplex_forecast(
+  from_index,
+  from_global,
+  lags,
+  lag_tibble,
+  distance_tibble,
+  forecast_distance,
+  symmetric_exclusion = FALSE
+)
 }
 \arguments{
 \item{from_index}{The index from which to forecast (numeric scalar)}

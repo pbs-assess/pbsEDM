@@ -4,8 +4,7 @@
 \alias{util_exclude_indices}
 \title{Exclude Indicies Associated with a Specified Time Index}
 \usage{
-util_exclude_indices(time_ind, pred_dist, lag_size, embed_dim,
-  one_sided = T)
+util_exclude_indices(time_ind, pred_dist, lag_size, embed_dim, one_sided = T)
 }
 \arguments{
 \item{time_ind}{The time index of the focal vector (numeric scalar)}
