@@ -84,14 +84,36 @@ pbs_smap <- function(data_frame,
     distance_matrix[symm_na_matrix] <- NA
   }
   
+  # Make neighbour distance matrix
+  nbr_dst_matrix <- t(apply(distance_matrix, 1, sort, na.last = TRUE))
+  
   # Make neighbour index matrix
   nbr_ind_matrix <- t(apply(distance_matrix, 1, order))
-  nbr_dst_matrix <- t(apply(distance_matrix, 1, sort, na.last = TRUE))
   nbr_ind_matrix[which(is.na(nbr_dst_matrix))] <- NA
-
+  
   # Calculate weight matrix
+  weight_matrix <- t(apply(nbr_dst_matrix, 1, 
+                           function(x, y) exp(-y * x / mean(x, na.rm = TRUE)),
+                           y = local_weight))
+  
+  # Make projected neighbour index matrix
+  pro_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
+  pro_ind_matrix <- pro_ind_matrix + forecast_distance
+  
+  # Make projected neighbour value matrix
+  pro_val_matrix <- t(apply(pro_ind_matrix, 1, function(x, y) y[x, 1],
+                            y = lags_matrix)) # Works because NAs are NA_real_
+  
+  # Calculate the B matrix of row vectors
+  b_matrix <- weight_matrix * pro_val_matrix
+  
+  # Calculate the A array of matrices
+  # a_array <- 
   
   # CONTINUE FROM HERE
+  
+  
+  
   
   
   
