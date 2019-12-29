@@ -91,7 +91,7 @@ pbs_smap <- function(data_frame,
   nbr_ind_matrix <- t(apply(distance_matrix, 1, order))
   nbr_ind_matrix[which(is.na(nbr_dst_matrix))] <- NA
   
-  # Calculate weight matrix
+  # Calculate weight matrix: row gives focal index, column gives ordered nbr
   weight_matrix <- t(apply(nbr_dst_matrix, 1, 
                            function(x, y) exp(-y * x / mean(x, na.rm = TRUE)),
                            y = local_weight))
@@ -100,16 +100,42 @@ pbs_smap <- function(data_frame,
   pro_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
   pro_ind_matrix <- pro_ind_matrix + forecast_distance
   
-  # Make projected neighbour value matrix
+  # Make projected neighbour value matrix: row gives focal, column gives ord nbr
   pro_val_matrix <- t(apply(pro_ind_matrix, 1, function(x, y) y[x, 1],
                             y = lags_matrix)) # Works because NAs are NA_real_
   
-  # Calculate the B matrix of row vectors
-  b_matrix <- weight_matrix * pro_val_matrix
+  # Calculate the B matrix of row vectors. Dimensions correspond to:
+  # - Nearest neighbours ordered relative to focal index
+  # - Focal index
+  b_matrix <- t(weight_matrix * pro_val_matrix)
   
-  # Calculate the A array of matrices
-  # a_array <- 
+  # Compute the W array of matrices. Dimensions correspond to:
+  # - Nearest neighbours ordered relative to focal index
+  # - Lagged row vector index
+  # - Focal index
+  w_array <- sapply(X = seq_len(nrow(weight_matrix)), 
+                    FUN = function(X, w, y) w[X, ] %*% t(rep(1, y)), 
+                    w = weight_matrix,
+                    y = length(lags_unique),
+                    simplify = "array")
   
+  # Compute the L array of lagged row vectors. Dimensions correspond to:
+  # - Nearest neighbours ordered relative to focal index
+  # - Lagged row vector index
+  # - Focal index
+  l_array <- sapply(X = seq_len(nrow(weight_matrix)),
+                    FUN = function(X, l, m) l[m[X, ], ],
+                    l = lags_matrix,
+                    m = nbr_ind_matrix,
+                    simplify = "array")
+  
+  # Compute the A array of matrices. Dimensions correspond to:
+  # - Nearest neighbours ordered relative to focal index
+  # - Lagged row vector index
+  # - Focal index
+  a_array <- w_array * l_array
+  
+
   # CONTINUE FROM HERE
   
   
