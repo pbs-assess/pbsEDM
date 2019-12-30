@@ -135,6 +135,29 @@ pbs_smap <- function(data_frame,
   # - Focal index
   a_array <- w_array * l_array
   
+  # Decompose A matrices by SVD
+  svd_list <- lapply(X = seq_len(nrow(weight_matrix)),
+                     FUN = function(X, a) {
+                       m <- na.omit(a[,, X])
+                       if (all(dim(m) > 0)) {
+                         svd(m)
+                       } else {
+                         list(d = rep(NA, ncol(m)), 
+                              u = matrix(nrow = nrow(m), ncol = ncol(m)), 
+                              v = matrix(nrow = ncol(m), ncol = ncol(m)))
+                       }
+                     },
+                     a = a_array)
+  
+  # Solve for C using Singular Value Decomposition
+  c_matrix <- sapply(X = seq_len(nrow(weight_matrix)),
+                     FUN = function(X, b, s) {
+                       s[[X]]$v %*% diag(1/s[[X]]$d) %*% t(a[[X]]$u) %*% b[, X]
+                     },
+                     b = b_matrix,
+                     s = svd_list)
+
+  
 
   # CONTINUE FROM HERE
   
