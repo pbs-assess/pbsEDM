@@ -104,10 +104,13 @@ pbs_smap <- function(data_frame,
   pro_val_matrix <- t(apply(pro_ind_matrix, 1, function(x, y) y[x, 1],
                             y = lags_matrix)) # Works because NAs are NA_real_
   
-  # Calculate the B matrix of row vectors. Dimensions correspond to:
+  # Calculate the B matrix of column vectors. Dimensions correspond to:
   # - Nearest neighbours ordered relative to focal index
   # - Focal index
   b_matrix <- t(weight_matrix * pro_val_matrix)
+  
+  # Replace NAs by zeros
+  b_matrix[which(is.na(b_matrix))] <- 0
   
   # Compute the W array of matrices. Dimensions correspond to:
   # - Nearest neighbours ordered relative to focal index
@@ -135,37 +138,31 @@ pbs_smap <- function(data_frame,
   # - Focal index
   a_array <- w_array * l_array
   
+  # Replace NAs by zeros
+  a_array[which(is.na(a_array))] <- 0
+  
   # Decompose A matrices by SVD
-  svd_list <- lapply(X = seq_len(nrow(weight_matrix)),
-                     FUN = function(X, a) {
-                       m <- na.omit(a[,, X])
-                       if (all(dim(m) > 0)) {
-                         svd(m)
-                       } else {
-                         list(d = rep(NA, ncol(m)), 
-                              u = matrix(nrow = nrow(m), ncol = ncol(m)), 
-                              v = matrix(nrow = ncol(m), ncol = ncol(m)))
-                       }
-                     },
-                     a = a_array)
+  svd_list <- apply(a_array, 3, svd)
   
-  # Solve for C using Singular Value Decomposition
+  # Simplify
+  vdu_array <- sapply(
+    X = seq_len(nrow(weight_matrix)),
+    FUN = function(X, s) s[[X]]$v %*% diag(1/s[[X]]$d) %*% t(s[[X]]$u),
+    s = svd_list,
+    simplify = "array")
+  
+  # Solve for C matrix
   c_matrix <- sapply(X = seq_len(nrow(weight_matrix)),
-                     FUN = function(X, b, s) {
-                       s[[X]]$v %*% diag(1/s[[X]]$d) %*% t(a[[X]]$u) %*% b[, X]
-                     },
-                     b = b_matrix,
-                     s = svd_list)
+                     FUN = function(X, a, b) a[,, X] %*% b[, X],
+                     a = vdu_array,
+                     b = b_matrix)
 
-  
+  # Make forecasts
+  forecasts <- sapply(X = seq_len(nrow(weight_matrix)),
+                      FUN = function(X, l, m) sum(m[, X] * l[X, ]),
+                      m = c_matrix,
+                      l = lags_matrix)
 
-  # CONTINUE FROM HERE
-  
-  
-  
-  
-  
-  
   # Compute statistics
   rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
   rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
