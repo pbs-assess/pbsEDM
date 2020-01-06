@@ -110,6 +110,9 @@ pbs_smap <- function(data_frame,
   # Make projected neighbour weights matrix
   pro_wts_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
   
+  # Make projected lag matrix
+  pro_lag_matrix <- apply(lags_matrix, 2, dplyr::lag, n = forecast_distance)
+  
   # Calculate the B matrix of column vectors. Dimensions correspond to:
   # - Focal index
   # - Nearest neighbours ordered relative to focal index
@@ -165,9 +168,9 @@ pbs_smap <- function(data_frame,
 
   # Make forecasts
   forecasts <- sapply(X = seq_len(nrow(data_frame)),
-                      FUN = function(X, l, m) sum(m[, X] * l[X - 1, ]),
+                      FUN = function(X, l, m) sum(m[, X] * l[X, ]),
                       m = c_matrix,
-                      l = lags_matrix)
+                      l = pro_lag_matrix)
 
   # Compute statistics
   rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
