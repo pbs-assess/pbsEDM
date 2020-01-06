@@ -97,17 +97,23 @@ pbs_smap <- function(data_frame,
                            y = local_weight))
   
   # Make projected neighbour index matrix
-  pro_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
-  pro_ind_matrix <- pro_ind_matrix + forecast_distance
+  lag_ind_matrix <- apply(nbr_ind_matrix, 2, dplyr::lag, n = forecast_distance)
+  pro_ind_matrix <- lag_ind_matrix + forecast_distance
   
   # Make projected neighbour value matrix: row gives focal, column gives ord nbr
   pro_val_matrix <- t(apply(pro_ind_matrix, 1, function(x, y) y[x, 1],
                             y = lags_matrix)) # Works because NAs are NA_real_
   
+  # Make projected distances matrix
+  pro_dst_matrix <- apply(nbr_dst_matrix, 2, dplyr::lag, n = forecast_distance)
+  
+  # Make projected neighbour weights matrix
+  pro_wts_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
+  
   # Calculate the B matrix of column vectors. Dimensions correspond to:
-  # - Nearest neighbours ordered relative to focal index
   # - Focal index
-  b_matrix <- t(weight_matrix * pro_val_matrix)
+  # - Nearest neighbours ordered relative to focal index
+  b_matrix <- pro_wts_matrix * pro_val_matrix
   
   # Replace NAs by zeros
   b_matrix[which(is.na(b_matrix))] <- 0
@@ -116,9 +122,9 @@ pbs_smap <- function(data_frame,
   # - Nearest neighbours ordered relative to focal index
   # - Lagged row vector index
   # - Focal index
-  w_array <- sapply(X = seq_len(nrow(weight_matrix)), 
+  w_array <- sapply(X = seq_len(nrow(data_frame)), 
                     FUN = function(X, w, y) w[X, ] %*% t(rep(1, y)), 
-                    w = weight_matrix,
+                    w = pro_wts_matrix,
                     y = length(lags_unique),
                     simplify = "array")
   
@@ -126,10 +132,10 @@ pbs_smap <- function(data_frame,
   # - Nearest neighbours ordered relative to focal index
   # - Lagged row vector index
   # - Focal index
-  l_array <- sapply(X = seq_len(nrow(weight_matrix)),
+  l_array <- sapply(X = seq_len(nrow(data_frame)),
                     FUN = function(X, l, m) l[m[X, ], ],
                     l = lags_matrix,
-                    m = nbr_ind_matrix,
+                    m = lag_ind_matrix, # Double check
                     simplify = "array")
   
   # Compute the A array of matrices. Dimensions correspond to:
@@ -146,20 +152,20 @@ pbs_smap <- function(data_frame,
   
   # Simplify
   vdu_array <- sapply(
-    X = seq_len(nrow(weight_matrix)),
+    X = seq_len(nrow(data_frame)),
     FUN = function(X, s) s[[X]]$v %*% diag(1/s[[X]]$d) %*% t(s[[X]]$u),
     s = svd_list,
     simplify = "array")
   
   # Solve for C matrix
-  c_matrix <- sapply(X = seq_len(nrow(weight_matrix)),
-                     FUN = function(X, a, b) a[,, X] %*% b[, X],
+  c_matrix <- sapply(X = seq_len(nrow(data_frame)),
+                     FUN = function(X, a, b) a[,, X] %*% b[X, ],
                      a = vdu_array,
                      b = b_matrix)
 
   # Make forecasts
-  forecasts <- sapply(X = seq_len(nrow(weight_matrix)),
-                      FUN = function(X, l, m) sum(m[, X] * l[X, ]),
+  forecasts <- sapply(X = seq_len(nrow(data_frame)),
+                      FUN = function(X, l, m) sum(m[, X] * l[X - 1, ]),
                       m = c_matrix,
                       l = lags_matrix)
 
@@ -172,7 +178,7 @@ pbs_smap <- function(data_frame,
                  forecasts = list(
                    tibble::tibble(observation = observations,
                                   forecast = forecasts)),
-                 neighbours = list(nbr_ind_matrix), 
-                 distances = list(distance_matrix),
-                 weights = list(weight_matrix))
+                 neighbours = list(pro_ind_matrix), 
+                 distances = list(pro_dst_matrix),
+                 weights = list(pro_wts_matrix))
 }
