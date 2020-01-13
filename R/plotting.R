@@ -159,13 +159,17 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                main = paste0("Time t=", iii))       # empty plot
           if(iii > 1.5)
             {
-               segments( start:(iii-1), pull(Nx.lags.use[start:(iii-1), "Nt"]),
-                       (start+1):iii, pull(Nx.lags.use[(start+1):iii, "Nt"]),
-                        col = col.plot.lines) # lines() will not use vector col
+              segments(start:(iii-1),
+                       dplyr::pull(Nx.lags.use[start:(iii-1), "Nt"]),
+                       (start+1):iii,
+                       dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
+                       col = col.plot.lines) # lines() will not use vector col
             }
-           points(start:iii, pull(Nx.lags.use[start:iii, "Nt"]),
-                  type = pt.type, pch = pch.plot,
-                  col = col.plot)
+          points(start:iii,
+                 dplyr::pull(Nx.lags.use[start:iii, "Nt"]),
+                 type = pt.type,
+                 pch = pch.plot,
+                 col = col.plot)
            # x_t vs t:
           XtLoc = -0.05 * end        # location to plot Xt on a vertical line,
                                      #  needs correcting if start>1
@@ -177,17 +181,22 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
           abline(v = 0.5*XtLoc, col="black")
           if(iii > 1.5)
             {
-               segments( start:(iii-1), pull(Nx.lags.use[start:(iii-1), "Xt"]),
-                       (start+1):iii, pull(Nx.lags.use[(start+1):iii, "Xt"]),
-                        col = col.plot.lines) # lines() will not use vector col
+              segments(start:(iii-1),
+                       dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+                       (start+1):iii,
+                       dplyr::pull(Nx.lags.use[(start+1):iii, "Xt"]),
+                       col = col.plot.lines) # lines() will not use vector col
             }
-           points(start:iii, pull(Nx.lags.use[start:iii, "Xt"]),
-                  type = pt.type, pch = pch.plot,
-                  col = col.plot)
+          points(start:iii,
+                 dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
+                 type = pt.type,
+                 pch = pch.plot,
+                 col = col.plot)
                                                      # '1d phase plot':
-           points(rep(XtLoc, iii-start+1), pull(Nx.lags.use[start:iii, "Xt"]),
-                  type = pt.type, pch = pch.plot,
-                  col = col.plot)
+          points(rep(XtLoc, iii-start+1),
+                 dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
+                 type = pt.type, pch = pch.plot,
+                 col = col.plot)
 
         }                                            # end if(includeTimeSeries)
 
@@ -209,7 +218,8 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
           if(cobwebbing)
             {
               # Do lines for cobwebbin
-              Nvals = rep( pull(Nx.lags.use[start:iii, "Nt"]), each = 2)
+              Nvals = rep(dplyr::pull(Nx.lags.use[start:iii, "Nt"]),
+                          each = 2)
               Nvals = Nvals[-1]
               Nvals = Nvals[-length(Nvals)]
               len = length(Nvals)
@@ -223,17 +233,17 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
             } else
             {
               # Join each point to the next
-              segments(pull(Nx.lags.use[start:(iii-1), "Ntmin1"]),
-                       pull(Nx.lags.use[start:(iii-1), "Nt"]),
-                       pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
-                       pull(Nx.lags.use[(start+1):iii, "Nt"]),
+              segments(dplyr::pull(Nx.lags.use[start:(iii-1), "Ntmin1"]),
+                       dplyr::pull(Nx.lags.use[start:(iii-1), "Nt"]),
+                       dplyr::pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
+                       dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
                        col = col.plot.lines) # lines() will not use vector of col
             }
         }
       if(iii > 1.5)
         {
-          points(pull(Nx.lags.use[start:iii, "Ntmin1"]),
-               pull(Nx.lags.use[start:iii, "Nt"]),
+          points(dplyr::pull(Nx.lags.use[start:iii, "Ntmin1"]),
+               dplyr::pull(Nx.lags.use[start:iii, "Nt"]),
                type = pt.type, pch = pch.plot,
                col = col.plot)          # start row has NA's, gets ignored
         }
@@ -253,7 +263,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
         {
           if(cobwebbing)
             {
-               xvals = rep( pull(Nx.lags.use[start:iii, "Xt"]), each = 2)
+               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "Xt"]), each = 2)
                xvals = xvals[-1]
                xvals = xvals[-length(xvals)]
                lenx = length(xvals)
@@ -264,17 +274,17 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                         col = col.cobweb.lines)
             } else
             {  # Just join consecutive points with lines
-               segments(pull(Nx.lags.use[start:(iii-1), "Xtmin1"]),
-                        pull(Nx.lags.use[start:(iii-1), "Xt"]),
-                        pull(Nx.lags.use[(start+1):iii, "Xtmin1"]),
-                        pull(Nx.lags.use[(start+1):iii, "Xt"]),
+               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "Xtmin1"]),
+                        dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xtmin1"]),
+                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xt"]),
                         col = col.plot.lines)
             }
         }
       if(iii > 1.5)
         {
-          points(pull(Nx.lags.use[start:iii, "Xtmin1"]),
-                 pull(Nx.lags.use[start:iii, "Xt"]),
+          points(dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                 dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
                  type = pt.type, pch = pch.plot,
                  col = col.plot)           # start row has NA's, get ignored
         }
@@ -302,9 +312,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                     col = "lightgrey")
       # Obtain x-y co-ords of points for segments:
       proj.pts = scat$xyz.convert(
-                                  pull(Nx.lags.use[start:iii, "Xtmin2"]),
-                                  pull(Nx.lags.use[start:iii, "Xtmin1"]),
-                                  pull(Nx.lags.use[start:iii, "Xt"]) )
+                                  dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                                  dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                                  dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
       if(iii > 3.5)
         {   # Think the indexing will now be 1:(iii-start), need start value also
             segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
@@ -315,9 +325,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # The points
       if(iii > 2.5)
         {
-          scat$points3d(pull(Nx.lags.use[start:iii, "Xtmin2"]),
-                        pull(Nx.lags.use[start:iii, "Xtmin1"]),
-                        pull(Nx.lags.use[start:iii, "Xt"]),
+          scat$points3d(dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                        dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                        dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
                         type = pt.type, pch = pch.plot,
                         col = col.plot)
         }
