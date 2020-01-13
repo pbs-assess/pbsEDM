@@ -9,7 +9,11 @@
 ##' All code is in here, may want to parse out into individual plots to be able
 ##' to more easily reuse.
 ##' With colours to show the latest points, and star to highlight latest point.
+##' Defaults are for `Nx_lags_orig` example.
 ##'
+##' TODO: change options ot have NULl if depend on earlier things. end may need
+##' to be one less for default.
+##' TODO: change . to _ everywhere
 ##' TODO: options to save as pdf (maybe - used to be for Sweave but now
 ##' superceded) or gif to be in a vignette.
 ##' TODO: adapt to work with Luke's output formats, or just write a wrapper
@@ -63,25 +67,26 @@
 ##'     using the animategraphics latex pacakge. TODO make .gif option also for vignette.
 ##' @export
 ##' @author Andrew Edwards
-plotPanelMovie.df2 = function(Nx.lags,
-                              pdf.filename,
+plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
+                              pdf.filename = "Nx_lags_orig_movie.pdf",
                               rhoForE = NULL,
                               Evec = NULL,
                               Ecols = NA,
                               includeTimeSeries = TRUE,
                               start = 1,
                               end = nrow(Nx.lags),
-                              only.final.plot = FALSE,
+                              only.final.plot = TRUE,
                               cobwebbing = TRUE,
                               late.col = "red",
                               early.col = "black",
                               early.col.lines = "lightgrey",
-                              late.num = 10,
+                              late.num = 3,
                               pt.type = "p",
                               x.lab = expression("x"[t-2]),
                               y.lab = expression("x"[t-1]),
                               z.lab = expression("x"[t]),
-                              figheight = figheight, figwidth = figwidth,
+                              figheight = 9.8,
+                              figwidth = 6.84,
                               open.pdf = TRUE,
                               ...)
   {
