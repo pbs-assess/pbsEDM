@@ -4,13 +4,8 @@
 \alias{make_neighbours}
 \title{Make a Tibble of Nearest Neighbour Indices}
 \usage{
-make_neighbours(
-  from_index,
-  from_local,
-  distance_tibble,
-  max_neighbours,
-  forecast_distance = 1L
-)
+make_neighbours(from_index, from_local, distance_tibble, max_neighbours,
+  forecast_distance = 1L)
 }
 \arguments{
 \item{from_index}{The time index of the focal vector}

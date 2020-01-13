@@ -4,13 +4,8 @@
 \alias{make_local_indices}
 \title{Make Local Allowable Indices for Nearest Neighbour Vectors}
 \usage{
-make_local_indices(
-  from_index,
-  from_global,
-  lags,
-  forecast_distance = 1L,
-  symmetric_exclusion = FALSE
-)
+make_local_indices(from_index, from_global, lags, forecast_distance = 1L,
+  symmetric_exclusion = FALSE)
 }
 \arguments{
 \item{from_index}{Index for the focal vector (numeric scalar)}

@@ -23,6 +23,7 @@ Imports:
     assertthat,
     dplyr,
     magrittr,
+    scatterplot3d,
     tidyr
 Suggests:
     knitr,

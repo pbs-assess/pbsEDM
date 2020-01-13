@@ -4,17 +4,10 @@
 \alias{pbs_edm_1}
 \title{Use EDM to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_edm_1(
-  data_frame,
-  lags,
-  from_user = seq_len(nrow(data_frame)),
-  into_user = seq_len(nrow(data_frame)),
-  forecast_distance = 1L,
-  symmetric_exclusion = FALSE,
-  include_stats = TRUE,
-  include_forecasts = TRUE,
-  include_neighbours = TRUE
-)
+pbs_edm_1(data_frame, lags, from_user = seq_len(nrow(data_frame)),
+  into_user = seq_len(nrow(data_frame)), forecast_distance = 1L,
+  symmetric_exclusion = FALSE, include_stats = TRUE,
+  include_forecasts = TRUE, include_neighbours = TRUE)
 }
 \arguments{
 \item{data_frame}{A data frame with named columns (list of numeric vectors)}

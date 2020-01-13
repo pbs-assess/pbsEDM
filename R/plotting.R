@@ -294,12 +294,19 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Empty plot to get started
       par(mgp = par.mgp.3d)
       par(mai = c(0.1, 0.1, 0.1, 0.1)) # scat..3d resets mar, think mai still has an effect
-      scat = scatterplot3d(0, 0, 0,
-                xlab = x.lab, ylab = y.lab, zlab = z.lab,
-                xlim = Xt.axes.range, ylim = Xt.axes.range, zlim = Xt.axes.range,
-                type = "n", box = FALSE,
-                angle = 40 + iii,
-                mar = par.mar.3d)
+      scat = scatterplot3d::scatterplot3d(0,
+                                          0,
+                                          0,
+                                          xlab = x.lab,
+                                          ylab = y.lab,
+                                          zlab = z.lab,
+                                          xlim = Xt.axes.range,
+                                          ylim = Xt.axes.range,
+                                          zlim = Xt.axes.range,
+                                          type = "n",
+                                          box = FALSE,
+                                          angle = 40 + iii,
+                                          mar = par.mar.3d)
                                               # mar=c(5,3,4,3)+0.1 is default,set
                                               #  within scatterplot3d
                                               # Add axes so can see origin:
@@ -365,4 +372,31 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
        }                           # if(Evec != 0)
   }                                # for(iii in start:end)
   if(open.pdf) dev.off() # close pdf device
+}
+
+
+# Obtain axes ranges, from Uwe Ligges, adapted from
+#
+##' Obtain axes ranges (adapted from function by Uwe Ligges)
+##'
+##' Obtain axes ranges for scatterplot3d plot (and maybe does others), adapted
+##' from http://r.789695.n4.nabble.com/Axis-Limits-in-Scatterplot3d-td892026.html<description>
+##'
+##' @param s3dobject scatterplot3d plot presumably
+##' @return Ranges of x, y and z axes
+##' @export
+##' @author Andrew Edwards (adapted from Uwe Ligges' function)
+##' @examples
+##'   s3d <- scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
+##'   gets3dusr(s3d)
+gets3dusr = function(s3dobject)
+  {
+  es3d = environment(s3dobject$points3d)
+  g3d  = function(name) get(name, envir=es3d)
+  c(c(g3d("x.min"),
+      g3d("x.max")) * g3d("x.scal"),
+    c(0,
+      g3d("y.max")) * g3d("y.scal") + g3d("y.add"),
+    c(g3d("z.min"),
+      g3d("z.max")) * g3d("z.scal"))
 }
