@@ -56,7 +56,7 @@ checks the package builds every time a change is committed to GitHub).
 The trick to showing the movie is to run the code uncommented (you need to
 install the `gifski` package), right-click on the animation in the
 html viewer and save it. I've done that and so am leaving this code commented,
-and will just refer to the saved animation file.
+and will just refer to the saved animation file. TODO - not saved yet since big.
 
 
 ```{r, animation.hook = 'gifski', interval = 1.5}
@@ -79,7 +79,10 @@ The resulting animation is
 ![IBTS_movie.gif](IBTS_movie.gif).
 -->
 
-
+See the bottom of
+https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html
+for making a movie in latex in an .rnw file, though can probably use the tricks
+above to save .Rmd as .pdf.
 
 
 
