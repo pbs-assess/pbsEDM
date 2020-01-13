@@ -36,12 +36,14 @@
 ##'     XtPredEeq1, XtPredEeq2 etc. (Xt predicted with E=1, etc.). If NULL
 ##'     then no predicted vs observed plot is drawn.
 ##' @param Ecols colour coding for E points in predicted vs observed plot
-##' @param includeTimeSeries TRUE to include the time series at the top (FALSE hasn't
-  #     been tested yet TODO)
-##' @param start first time value (row) to use when plotting - not fully implemented
-  #     as the colours aren't correct. Gives warning if != 1. TODO
-##' @param end last time value (row) to use when plotting (so will have end-start
-  #     points plotted) TODO (end-start-1??).
+##' @param includeTimeSeries TRUE to include the time series at the top (FALSE
+##'     hasn't  been tested yet TODO)
+##' @param start first time value (row) to use when plotting - not fully
+##'     implemented as the colours aren't correct. Gives warning if != 1. TODO
+##' @param end last time value (row) to use when plotting (so will have
+##'     end-start points plotted) TODO (end-start-1??).
+##' @param max_time maximum time value to plot (will be different from `end` if
+##'     making a movie using Rmarkdown, since for that `end` will get iterated)
 ##' @param only.final.plot if TRUE then only plot the final plot
 ##' @param cobwebbing whether to join up points in 2d lag plots via cobwebbing;
 ##'    if FALSE then joins consecutive points (TODO?? - should be TRUE?).
@@ -75,6 +77,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                               includeTimeSeries = TRUE,
                               start = 1,
                               end = nrow(Nx.lags),
+                              max_time = NULL,
                               only.final.plot = FALSE,
                               cobwebbing = TRUE,
                               late.col = "red",
@@ -98,10 +101,14 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
   Nx.lags.use = Nx.lags
 
   # Axes ranges:
-  Nt.max.abs = max( abs( range(Nx.lags.use[start:end, "Xt"], na.rm=TRUE) ) )
+  if(is.null(max_time)){ max_time = end }
+  t.axis.range = c(start, max_time)
+
+  Nt.max.abs = max( abs( range(Nx.lags.use[start:max_time, "Xt"],
+                                 na.rm=TRUE) ) )
   Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
 
-  Xt.max.abs = max( abs( range(Nx.lags.use[start:end, "Xt"], na.rm=TRUE) ) )
+  Xt.max.abs = max( abs( range(Nx.lags.use[start:max_time, "Xt"], na.rm=TRUE) ) )
   Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
                                                 #  axs="i" doesn't work for 3d
   if(open.pdf) pdf(pdf.filename, height = figheight, width = figwidth)
@@ -154,7 +161,8 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
           plot(0, 0,
                xlab = expression("Time, t"),
                ylab = expression("N"[t]),
-               xlim = c(start,end), ylim = Nt.axes.range,
+               xlim = t.axis.range,
+               ylim = Nt.axes.range,
                type = "n",
                main = paste0("Time t=", iii))       # empty plot
           if(iii > 1.5)
@@ -171,12 +179,13 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                  pch = pch.plot,
                  col = col.plot)
            # x_t vs t:
-          XtLoc = -0.05 * end        # location to plot Xt on a vertical line,
-                                     #  needs correcting if start>1
+          XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
+                                             #  needs correcting if start>1
           plot(0, 0,
                xlab = expression("Time, t"),
                ylab = expression("x"[t]),
-               xlim = c(XtLoc,end), ylim = Xt.axes.range,
+               xlim = c(XtLoc, max(t.axis.range)),
+               ylim = Xt.axes.range,
                type = "n")                           # empty plot
           abline(v = 0.5*XtLoc, col="black")
           if(iii > 1.5)
@@ -209,7 +218,8 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       plot(0, 0,
            xlab = expression("N"[t-1]),
            ylab = expression("N"[t]),
-           xlim = Nt.axes.range, ylim = Nt.axes.range,
+           xlim = Nt.axes.range,
+           ylim = Nt.axes.range,
            type = "n")
       if(cobwebbing) abline(0, 1, col="darkgrey")
       # Draw lines first so they get overdrawn by points
@@ -256,7 +266,8 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Empty plot to get started:
       plot(0, 0,
            xlab = y.lab, ylab = z.lab,
-           xlim = Xt.axes.range, ylim = Xt.axes.range,
+           xlim = Xt.axes.range,
+           ylim = Xt.axes.range,
            type = "n")
       if(cobwebbing) abline(0, 1, col="darkgrey")
       if(iii > 2.5)
