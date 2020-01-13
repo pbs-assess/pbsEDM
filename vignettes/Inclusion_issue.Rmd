@@ -59,11 +59,11 @@ html viewer and save it. I've done that and so am leaving this code commented,
 and will just refer to the saved animation file.
 
 
-```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 6, fig.height = 9}
+```{r, animation.hook = 'gifski', interval = 1.5}
+# Cannot change fig.width and fig.height hooks unless re-order par() in function
 # fig.width is 0.67 * fig.height
 #```{r, eval=FALSE}
-
-for(i in 1:nrow(Nx_lags_orig))
+ for(i in 1:nrow(Nx_lags_orig))
   {
     plotPanelMovie.df2(end = i,
                        max_time = max(Nx_lags_orig$t),

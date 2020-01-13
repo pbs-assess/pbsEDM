@@ -121,7 +121,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Loops: iii=1 will only have pred vs obs,
       #        iii=2 will only have pred vs obs and 2d plots
       #        iii=3 onwards will have all plots
-      ifelse(includeTimeSeries, par(mfrow = c(3,2)), par(mfrow = c(2,2)))
+      ifelse(includeTimeSeries,
+             par(mfrow = c(3,2)),
+             par(mfrow = c(2,2)))
 #      par.mai = c(0.7, 0.8, 0.1, 0.1)
 #      par(mai = par.mai)# Usually affects all figures but scatterplot3d resets
                         #  so have to set this again later. Actually it affects
@@ -227,7 +229,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
         {
           if(cobwebbing)
             {
-              # Do lines for cobwebbin
+              # Do lines for cobwebbing
               Nvals = rep(dplyr::pull(Nx.lags.use[start:iii, "Nt"]),
                           each = 2)
               Nvals = Nvals[-1]
