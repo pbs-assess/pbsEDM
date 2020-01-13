@@ -20,20 +20,20 @@
 ##' function. Most of this is just looking at data in various ways.
 ##'
 ##' @param Nx.lags Dataframe (Tibble???) with time indexing the row, and columns named
-  #         Nt, Ntmin1, xt, xtmin1, xtmin2 and, if E!=0, columns xtPredEeq1,
-  #         xtPredEeq2, etc.
-  #       This allows xt to equal Nt if want to plot figures
+  #         Nt, Ntmin1, Xt, Xtmin1, Xtmin2 and, if E!=0, columns XtPredEeq1,
+  #         XtPredEeq2, etc.
+  #       This allows Xt to equal Nt if want to plot figures
   #         without the first differencing (basically the 3d plot and the pred
   #         vs obs would be the only new ones). Nt is the original data,
-  #         xt is the first difference, and xt.est is the estimate for xt from
+  #         Xt is the first difference, and Xt.est is the estimate for Xt from
   #         EDM. Row numbers are time, and start at 1.
-  #      Could maybe extend to have multiple xt.est for the different
+  #      Could maybe extend to have multiple Xt.est for the different
   #         embedding dimensions. TODO
 ##' @param pdf.filename filename (including .pdf) to save the movie as if saving
 ##'  as .pdf. Ignored if open.pdf is FALSE.
 ##' @param rhoForE values of rho corrsponding to each E in Evec
 ##' @param Evec vector of E values used to construct columns in Nx.lags called
-##'     xtPredEeq1, xtPredEeq2 etc. (xt predicted with E=1, etc.). If NULL
+##'     XtPredEeq1, XtPredEeq2 etc. (Xt predicted with E=1, etc.). If NULL
 ##'     then no predicted vs observed plot is drawn.
 ##' @param Ecols colour coding for E points in predicted vs observed plot
 ##' @param includeTimeSeries TRUE to include the time series at the top (FALSE hasn't
@@ -98,11 +98,11 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
   Nx.lags.use = Nx.lags
 
   # Axes ranges:
-  Nt.max.abs = max( abs( range(Nx.lags.use[start:end, "xt"], na.rm=TRUE) ) )
+  Nt.max.abs = max( abs( range(Nx.lags.use[start:end, "Xt"], na.rm=TRUE) ) )
   Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
 
-  xt.max.abs = max( abs( range(Nx.lags.use[start:end, "xt"], na.rm=TRUE) ) )
-  xt.axes.range = c(-xt.max.abs, xt.max.abs)    # Make axes symmetric, though
+  Xt.max.abs = max( abs( range(Nx.lags.use[start:end, "Xt"], na.rm=TRUE) ) )
+  Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
                                                 #  axs="i" doesn't work for 3d
   if(open.pdf) pdf(pdf.filename, height = figheight, width = figwidth)
 
@@ -167,25 +167,25 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                   type = pt.type, pch = pch.plot,
                   col = col.plot)
            # x_t vs t:
-          xtLoc = -0.05 * end        # location to plot xt on a vertical line,
+          XtLoc = -0.05 * end        # location to plot Xt on a vertical line,
                                      #  needs correcting if start>1
           plot(0, 0,
                xlab = expression("Time, t"),
                ylab = expression("x"[t]),
-               xlim = c(xtLoc,end), ylim = xt.axes.range,
+               xlim = c(XtLoc,end), ylim = Xt.axes.range,
                type = "n")                           # empty plot
-          abline(v = 0.5*xtLoc, col="black")
+          abline(v = 0.5*XtLoc, col="black")
           if(iii > 1.5)
             {
-               segments( start:(iii-1), pull(Nx.lags.use[start:(iii-1), "xt"]),
-                       (start+1):iii, pull(Nx.lags.use[(start+1):iii, "xt"]),
+               segments( start:(iii-1), pull(Nx.lags.use[start:(iii-1), "Xt"]),
+                       (start+1):iii, pull(Nx.lags.use[(start+1):iii, "Xt"]),
                         col = col.plot.lines) # lines() will not use vector col
             }
-           points(start:iii, pull(Nx.lags.use[start:iii, "xt"]),
+           points(start:iii, pull(Nx.lags.use[start:iii, "Xt"]),
                   type = pt.type, pch = pch.plot,
                   col = col.plot)
                                                      # '1d phase plot':
-           points(rep(xtLoc, iii-start+1), pull(Nx.lags.use[start:iii, "xt"]),
+           points(rep(XtLoc, iii-start+1), pull(Nx.lags.use[start:iii, "Xt"]),
                   type = pt.type, pch = pch.plot,
                   col = col.plot)
 
@@ -246,14 +246,14 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Empty plot to get started:
       plot(0, 0,
            xlab = y.lab, ylab = z.lab,
-           xlim = xt.axes.range, ylim = xt.axes.range,
+           xlim = Xt.axes.range, ylim = Xt.axes.range,
            type = "n")
       if(cobwebbing) abline(0, 1, col="darkgrey")
       if(iii > 2.5)
         {
           if(cobwebbing)
             {
-               xvals = rep( pull(Nx.lags.use[start:iii, "xt"]), each = 2)
+               xvals = rep( pull(Nx.lags.use[start:iii, "Xt"]), each = 2)
                xvals = xvals[-1]
                xvals = xvals[-length(xvals)]
                lenx = length(xvals)
@@ -264,17 +264,17 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                         col = col.cobweb.lines)
             } else
             {  # Just join consecutive points with lines
-               segments(pull(Nx.lags.use[start:(iii-1), "xtmin1"]),
-                        pull(Nx.lags.use[start:(iii-1), "xt"]),
-                        pull(Nx.lags.use[(start+1):iii, "xtmin1"]),
-                        pull(Nx.lags.use[(start+1):iii, "xt"]),
+               segments(pull(Nx.lags.use[start:(iii-1), "Xtmin1"]),
+                        pull(Nx.lags.use[start:(iii-1), "Xt"]),
+                        pull(Nx.lags.use[(start+1):iii, "Xtmin1"]),
+                        pull(Nx.lags.use[(start+1):iii, "Xt"]),
                         col = col.plot.lines)
             }
         }
       if(iii > 1.5)
         {
-          points(pull(Nx.lags.use[start:iii, "xtmin1"]),
-                 pull(Nx.lags.use[start:iii, "xt"]),
+          points(pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                 pull(Nx.lags.use[start:iii, "Xt"]),
                  type = pt.type, pch = pch.plot,
                  col = col.plot)           # start row has NA's, get ignored
         }
@@ -286,7 +286,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       par(mai = c(0.1, 0.1, 0.1, 0.1)) # scat..3d resets mar, think mai still has an effect
       scat = scatterplot3d(0, 0, 0,
                 xlab = x.lab, ylab = y.lab, zlab = z.lab,
-                xlim = xt.axes.range, ylim = xt.axes.range, zlim = xt.axes.range,
+                xlim = Xt.axes.range, ylim = Xt.axes.range, zlim = Xt.axes.range,
                 type = "n", box = FALSE,
                 angle = 40 + iii,
                 mar = par.mar.3d)
@@ -302,9 +302,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                     col = "lightgrey")
       # Obtain x-y co-ords of points for segments:
       proj.pts = scat$xyz.convert(
-                                  pull(Nx.lags.use[start:iii, "xtmin2"]),
-                                  pull(Nx.lags.use[start:iii, "xtmin1"]),
-                                  pull(Nx.lags.use[start:iii, "xt"]) )
+                                  pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                                  pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                                  pull(Nx.lags.use[start:iii, "Xt"]) )
       if(iii > 3.5)
         {   # Think the indexing will now be 1:(iii-start), need start value also
             segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
@@ -315,9 +315,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # The points
       if(iii > 2.5)
         {
-          scat$points3d(pull(Nx.lags.use[start:iii, "xtmin2"]),
-                        pull(Nx.lags.use[start:iii, "xtmin1"]),
-                        pull(Nx.lags.use[start:iii, "xt"]),
+          scat$points3d(pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                        pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                        pull(Nx.lags.use[start:iii, "Xt"]),
                         type = pt.type, pch = pch.plot,
                         col = col.plot)
         }
@@ -329,9 +329,9 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Predictions vs observations for E values in Evec
       if(!is.null(Evec))
         {
-          all.pred = select(Nx.lags.use, starts_with("xtPredEeq"))
+          all.pred = select(Nx.lags.use, starts_with("XtPredEeq"))
           pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
-          pred.max.abs = max(pred.max.abs, xt.max.abs)  # Latter is observed
+          pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
           predObs.axes.range = c(-pred.max.abs, pred.max.abs)
 
           plot(0, 0,
@@ -345,7 +345,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
           leg = vector()
           for(j in 1:length(Evec))
             {
-               points(select(Nx.lags[start:iii,], xt, paste0("xtPredEeq", j)),
+               points(select(Nx.lags[start:iii,], Xt, paste0("XtPredEeq", j)),
                       pch=pch.plot, col=Ecols[j])
                leg = c(leg,
                        paste0("E=", j, ", rho=", round(rhoForE[j], 2)))
