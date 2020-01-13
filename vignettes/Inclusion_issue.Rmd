@@ -27,9 +27,16 @@ with EDM results for embedding dimension 2, using `rEDM` and Andy's original
 function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
 
 <!-- Change what's below based on
-edm-work/code/simulated/egDeyle/tstarLoop2019.rnw
+edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie
+edm-work/code/simulated/egDeyle/egDeyle.rnw (that I used for different tstar,
+for EAFMWG Jan 2020 I used egDeyleT95tstar15.rnw - can generalise once get
+going here.
+edm-work/code/simulated/egDeyle/tstarLoop/tstarLoop2019.rnw
+and
+edm-work/code/simulated/egDeyle/tstarLoop/mwe-2019.r
 -->
 
+Here are the full results (for helping explain some of the later text):
 ```{r fullresults}
 as.data.frame(Nx_lags_orig)
 ```
