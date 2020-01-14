@@ -56,9 +56,11 @@ checks the package builds every time a change is committed to GitHub).
 The trick to showing the movie is to run the code uncommented (you need to
 install the `gifski` package), right-click on the animation in the
 html viewer and save it. I've done that and so am leaving this code commented,
-and will just refer to the saved animation file. TODO - not saved yet since big.
+and will just refer to the saved animation file. TODO:  not saved yet since big.
 
-
+The final panel shows the predicted vs observed from rEDM and from Andy's manual
+calculations. For now this shows how good the predictions are, but highlights
+one obvious discrepancy, to be looked into further below.
 ```{r, animation.hook = 'gifski', interval = 1.5}
 # Cannot change fig.width and fig.height hooks unless re-order par() in function
 # fig.width is 0.67 * fig.height
@@ -85,15 +87,11 @@ for making a movie in latex in an .rnw file, though can probably use the tricks
 above to save .Rmd as .pdf.
 
 
-
-
-
-
-
-
-
-
-
+GOT TO HERE. Next do simple plot comparing my calculations with those of rEDM
+(think mine only do E=2), then compare both with Luke's, then continue with
+sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
+detail for different values of E. Keep this one for visualising the data and
+understanding.
 
 
 TODO: change all this to use the above....

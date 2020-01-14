@@ -387,29 +387,22 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
              type = "n")
         abline(0, 1, col="grey")
         leg = vector()
-
-#      for(j in 1:nrows(Nx.lags))
-#            {
-              points(dplyr::select(Nx.lags[start:iii,],
-                                   Xt,
-                                   rEDM.pred),
-                     pch = compare_pch[1],
-                     col = compare_cols[1])
-              points(dplyr::select(Nx.lags[start:iii,],
-                                   Xt,
-                                   my.pred),
-                     pch = compare_pch[2],
-                     col = compare_cols[2])
-
-#               leg = c(leg,
-#                       paste0("rEDM pred")E=", j, ", rho=", round(rhoForE[j], 2)
-#            }
-      legend("topleft",
-             pch = compare_pch,
-             leg = c("rEDM pred", "Andy pred"),
-             col = compare_cols)
-#             cex = 0.7)
+        points(dplyr::select(Nx.lags[start:iii,],
+                             Xt,
+                             rEDM.pred),
+               pch = compare_pch[1],
+               col = compare_cols[1])
+        points(dplyr::select(Nx.lags[start:iii,],
+                             Xt,
+                             my.pred),
+               pch = compare_pch[2],
+               col = compare_cols[2])
+        legend("topleft",
+               pch = compare_pch,
+               leg = c("rEDM pred", "Andy pred"),
+               col = compare_cols)
       }
+
       # Predictions vs observations for E values in Evec
       if(final_plot == "E_vary")
         if(!is.null(Evec))
