@@ -19,16 +19,17 @@
 ##' TODO: adapt to work with Luke's output formats, or just write a wrapper
 ##' function. Most of this is just looking at data in various ways.
 ##'
-##' @param Nx.lags Dataframe (Tibble???) with time indexing the row, and columns named
-  #         Nt, Ntmin1, Xt, Xtmin1, Xtmin2 and, if E!=0, columns XtPredEeq1,
-  #         XtPredEeq2, etc.
-  #       This allows Xt to equal Nt if want to plot figures
-  #         without the first differencing (basically the 3d plot and the pred
-  #         vs obs would be the only new ones). Nt is the original data,
-  #         Xt is the first difference, and Xt.est is the estimate for Xt from
-  #         EDM. Row numbers are time, and start at 1.
-  #      Could maybe extend to have multiple Xt.est for the different
-  #         embedding dimensions. TODO
+##' @param Nx.lags Dataframe (Tibble???) with time indexing the row, and columns
+##'     named Nt, Ntmin1, Xt, Xtmin1, Xtmin2 and, if E!=0, columns XtPredEeq1,
+##'     XtPredEeq2, etc. TODO - not same now, using saved example but also want
+##'   option for doing Eeq2 etc. from rEDM and from pbsEDM. TODO TODO
+##'     This allows Xt to equal Nt if want to plot figures
+##'     without the first differencing (basically the 3d plot and the pred
+##'     vs obs would be the only new ones). Nt is the original data,
+##'     Xt is the first difference, and Xt.est is the estimate for Xt from
+##'     EDM. Row numbers are time, and start at 1.
+##'     Could maybe extend to have multiple Xt.est for the different
+##'     embedding dimensions. TODO
 ##' @param pdf.filename filename (including .pdf) to save the movie as if saving
 ##'  as .pdf. Ignored if open.pdf is FALSE.
 ##' @param rhoForE values of rho corrsponding to each E in Evec
@@ -38,6 +39,9 @@
 ##' @param Ecols colour coding for E points in predicted vs observed plot
 ##' @param includeTimeSeries TRUE to include the time series at the top (FALSE
 ##'     hasn't  been tested yet TODO)
+##' @param final_plot What the final plot should be. Currently only works for
+##'   `compare` to compare Andy's predictions with rEDM's. Will then extend to
+##'   compare different E values specified in `Evec` with `final_plot` being "E_vary".
 ##' @param start first time value (row) to use when plotting - not fully
 ##'     implemented as the colours aren't correct. Gives warning if != 1. TODO
 ##' @param end last time value (row) to use when plotting (so will have
@@ -75,6 +79,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                               Evec = NULL,
                               Ecols = NA,
                               includeTimeSeries = TRUE,
+                              final_plot = "compare",
                               start = 1,
                               end = nrow(Nx.lags),
                               max_time = NULL,
@@ -98,7 +103,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
   if(start != 1) warning("Not properly implemented yet for start > 1;
                                 colours won't work.")
 
-  Nx.lags.use = Nx.lags
+  Nx.lags.use = Nx.lags  # not sure is needed
 
   # Axes ranges:
   if(is.null(max_time)){ max_time = end }
@@ -356,10 +361,60 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
 #      par(scat$par.mar)    # should do the same as:
       par(mar = par.mar.phase)   # scatterplot3d changes mar
       par(mgp = par.mgp)   # back to usual for 2d figures
+      if(final_plot == "compare")
+      {
+        compare_cols = c("blue", "red")    # compare rEDM pred then Andy's.
+        compare_pch = c(20, 1)
+        pred_obs_max_abs = max( abs( range( c(Nx.lags$Xt,
+                                              Nx.lags$rEDM.pred,
+                                              Nx.lags$my.pred),
+                                           na.rm = TRUE)
+                                    )
+                               )
+        pred_obs_axes = c(-pred_obs_max_abs, pred_obs_max_abs)
+        #  all.pred = dplyr::select(Nx.lags.use, starts_with("XtPredEeq"))
+        #  pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
+        #  pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
+        #  predObs.axes.range = c(-pred.max.abs, pred.max.abs)
+
+        plot(0,
+             0,
+             xlab = expression("Observation of x"[t]),
+             ylab = expression("Prediction of x"[t]),
+             xlim = pred_obs_axes,
+             ylim = pred_obs_axes,
+             asp = 1,
+             type = "n")
+        abline(0, 1, col="grey")
+        leg = vector()
+
+#      for(j in 1:nrows(Nx.lags))
+#            {
+              points(dplyr::select(Nx.lags[start:iii,],
+                                   Xt,
+                                   rEDM.pred),
+                     pch = compare_pch[1],
+                     col = compare_cols[1])
+              points(dplyr::select(Nx.lags[start:iii,],
+                                   Xt,
+                                   my.pred),
+                     pch = compare_pch[2],
+                     col = compare_cols[2])
+
+#               leg = c(leg,
+#                       paste0("rEDM pred")E=", j, ", rho=", round(rhoForE[j], 2)
+#            }
+      legend("topleft",
+             pch = compare_pch,
+             leg = c("rEDM pred", "Andy pred"),
+             col = compare_cols)
+#             cex = 0.7)
+      }
       # Predictions vs observations for E values in Evec
-      if(!is.null(Evec))
+      if(final_plot == "E_vary")
+        if(!is.null(Evec))
         {
-          all.pred = select(Nx.lags.use, starts_with("XtPredEeq"))
+          all.pred = dplyr::select(Nx.lags.use, starts_with("XtPredEeq"))
           pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
           pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
           predObs.axes.range = c(-pred.max.abs, pred.max.abs)
@@ -375,14 +430,14 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
           leg = vector()
           for(j in 1:length(Evec))
             {
-               points(select(Nx.lags[start:iii,], Xt, paste0("XtPredEeq", j)),
+               points(dplyr::select(Nx.lags[start:iii,], Xt, paste0("XtPredEeq", j)),
                       pch=pch.plot, col=Ecols[j])
                leg = c(leg,
                        paste0("E=", j, ", rho=", round(rhoForE[j], 2)))
             }
           legend("topleft", pch=c(20, 20, 20),
                  leg, col=Ecols, cex=0.7)
-       }                           # if(Evec != 0)
+        }                           # if(Evec != 0)
   }                                # for(iii in start:end)
   if(open.pdf) dev.off() # close pdf device
 }
