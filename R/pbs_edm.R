@@ -128,7 +128,10 @@ pbs_edm <- function(data_frame,
   rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
   
   # Return tibble
-  tibble::tibble(lags = lags, rho = rho, rmse = rmse,
+  tibble::tibble(E = length(unlist(lags)),
+                 rho = rho, 
+                 rmse = rmse,
+                 lags = lags, 
                  observations = list(observations = observations),
                  forecasts = list(forecasts = forecasts),
                  neighbours = list(neighbours = nbr_ind_matrix), 
