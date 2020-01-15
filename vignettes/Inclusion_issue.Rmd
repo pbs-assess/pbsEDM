@@ -41,6 +41,8 @@ Here are the full results (for helping explain some of the later text):
 as.data.frame(Nx_lags_orig)
 ```
 
+## Visualise data and some results
+
 Plot of data (before making movie):
 ```{r}
 plotPanelMovie.df2(only.final.plot=TRUE,
@@ -113,6 +115,8 @@ corrected in rEDM so can be ignored). The points are
 different
 ```
 
+## Use Luke's new pbsEDM code
+
 Use new pbsEDM code and compare with rEDM's and then Andy's:
 ```{r pbsEDMcalc}
 pbs_calc <- pbs_edm(Nx_lags_orig,
@@ -166,7 +170,9 @@ testthat::expect_equal(Nx_lags_orig$my.pred, pbs_pred)     # This now passes
 ```
 
 
-GOT TO HERE. Next maybe continue with
+## GOT TO HERE
+
+Next maybe continue with
 sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
 detail for different values of E. Keep this one for visualising the data and
 understanding.
