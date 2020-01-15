@@ -24,7 +24,8 @@ Imports:
     dplyr,
     magrittr,
     scatterplot3d,
-    tidyr
+    tidyr,
+    broom
 Suggests:
     knitr,
     rmarkdown,
