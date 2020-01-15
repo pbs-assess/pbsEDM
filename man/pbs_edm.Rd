@@ -4,9 +4,15 @@
 \alias{pbs_edm}
 \title{Use Empirical Dynamic Modeling to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_edm(data_frame, lags, forecast_distance = 1L,
-  symmetric_exclusion = FALSE, include_stats = TRUE,
-  include_forecasts = TRUE, include_neighbours = TRUE)
+pbs_edm(
+  data_frame,
+  lags,
+  forecast_distance = 1L,
+  symmetric_exclusion = FALSE,
+  include_stats = TRUE,
+  include_forecasts = TRUE,
+  include_neighbours = TRUE
+)
 }
 \arguments{
 \item{data_frame}{A data frame with named columns (list of numeric vectors)}
