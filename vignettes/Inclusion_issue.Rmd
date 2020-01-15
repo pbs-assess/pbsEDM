@@ -115,12 +115,24 @@ different
 
 Use new pbsEDM code and compare with rEDM's and then Andy's:
 ```{r pbsEDMcalc}
-pbs_calc <- pbs_simplex_1(Nx_lags_orig,
-                          col_name = "Xt")    # full output list
-testthat::expect_equal(Nx_lags_orig$Xt,
-                       pbs_calc$pred_tbl$obs$Xt)        # check the indexing is the same
 
-pbs_pred <- pbs_calc$pred_tbl$pred
+# ----------------- Begin: Replaced pbs_simplex_1 by newer pbs_edm LR ---------#
+
+# pbs_calc <- pbs_simplex_1(Nx_lags_orig,
+#                           col_name = "Xt")
+# testthat::expect_equal(Nx_lags_orig$Xt,
+#                        pbs_calc$pred_tbl$obs$Xt)
+
+pbs_calc <- pbs_edm(Nx_lags_orig,
+                    lags = list(Xt = c(0:1))) # Now calls updated function LR
+
+testthat::expect_equal(Nx_lags_orig$Xt,
+                       pbs_calc$observations$observations) # check the indexing is the same
+
+# pbs_pred <- pbs_calc$pred_tbl$pred
+pbs_pred <- pbs_calc$forecasts$forecasts # Now calls updated function LR
+
+# ----------------- End: Replaced pbs_simplex_1 by newer pbs_edm LR -----------#
 
 plot(Nx_lags_orig$rEDM.pred,
      pbs_pred,
@@ -162,15 +174,19 @@ but that alerts us to an NA difference in the final value ):
 
 ```{r}
 # testthat::expect_equal(Nx_lags_orig$my.pred, pbs_pred)     # output is:
-#   Error: Nx_lags_orig$my.pred not equal to `pbs_pred`.
-#   1/100 mismatches
-#   [100] -0.136 - NA == NA
-testthat::expect_equal(Nx_lags_orig$my.pred[1:99], pbs_pred[1:99])   # This passes
-Nx_lags_orig$my.pred[100]
-pbs_pred[100]
+#     Error: Nx_lags_orig$my.pred not equal to `pbs_pred`.
+#     3/100 mismatches (average diff: NaN)
+#     [17] -0.0645 - NA == NA
+#     [29] -0.1021 - NA == NA
+#     [45] -0.0937 - NA == NA
+inds <- setdiff(1:100, c(17, 29, 45))
+testthat::expect_equal(Nx_lags_orig$my.pred[inds], pbs_pred[inds])   # This passes LR
+
+Nx_lags_orig$my.pred[c(17, 29, 45)]
+pbs_pred[c(17, 29, 45)] # All NAs
 length(pbs_pred)
 ```
-So `pbs_pred` gives a different result for the final time step. Presumably it should
+So `pbs_pred` gives NA values for the three time steps. Presumably it should
 make a prediction since it has all the required data. TODO look into with Luke.
 
 
