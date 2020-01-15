@@ -66,6 +66,7 @@ pbs_smap <- function(data_frame,
   distance_matrix[which(seq_len(ncol(distance_matrix)) > threshold), ] <- NA
   
   # Exclude indices that contain the projection of the focal value
+  # TODO: Check whether lags_unique is correct
   indices <- seq_len(nrow(distance_matrix))
   lags_unique <- unique(lag_sizes_vector)
   focal_indices <- rep(indices, each = length(lags_unique))
@@ -75,6 +76,16 @@ pbs_smap <- function(data_frame,
                                          y = exclude_indices[within_range]))
   distance_matrix[exclude_matrix] <- NA
   
+  # Exclude indices that project to a row that contains NAs
+  na_indices <- which(is.na(rowSums(lags_matrix)))
+  exclude_indices <- na_indices - forecast_distance
+  within_range <- which(exclude_indices %in% indices)
+  focal_indices <- rep(indices, each = length(within_range))
+  exclude_matrix <- as.matrix(data.frame(x = focal_indices,
+                                         y = rep(exclude_indices[within_range],
+                                                 length(focal_indices))))
+  distance_matrix[exclude_matrix] <- NA
+
   # Exclude indices symmetrically around the forecast index
   if (symmetric_exclusion == TRUE) {
     symm_na_indices <- focal_indices + forecast_distance - lags_unique
@@ -177,11 +188,14 @@ pbs_smap <- function(data_frame,
   rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
   
   # Return tibble
-  tibble::tibble(lags = lags, theta = local_weight, rho = rho, rmse = rmse,
-                 forecasts = list(
-                   tibble::tibble(observation = observations,
-                                  forecast = forecasts)),
-                 neighbours = list(pro_ind_matrix), 
-                 distances = list(pro_dst_matrix),
-                 weights = list(pro_wts_matrix))
+  tibble::tibble(E = length(unlist(lags)),
+                 theta = local_weight, 
+                 rho = rho, 
+                 rmse = rmse,
+                 lags = lags,
+                 observations = list(observations = observations),
+                 forecasts = list(forecasts = forecasts),
+                 neighbours = list(neighbours = pro_ind_matrix), 
+                 distances = list(distances = pro_dst_matrix),
+                 weights = list(weights = pro_wts_matrix))
 }
