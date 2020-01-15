@@ -110,6 +110,7 @@ pbs_edm <- function(data_frame,
 
   # Make forecasts
   forecasts <- rowSums(pro_val_matrix * pro_wt_matrix) / rowSums(pro_wt_matrix)
+  forecasts <- as.vector(forecasts)
   
   # Compute statistics
   rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
@@ -117,9 +118,8 @@ pbs_edm <- function(data_frame,
   
   # Return tibble
   tibble::tibble(lags = lags, rho = rho, rmse = rmse,
-                 forecasts = list(
-                   tibble::tibble(observation = observations,
-                                  forecast = forecasts)),
+                 observations = list(observations = observations),
+                 forecasts = list(forecasts = forecasts),
                  neighbours = list(nbr_ind_matrix), 
                  distances = list(distance_matrix),
                  weights = list(weight_matrix))
