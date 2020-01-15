@@ -63,6 +63,7 @@ pbs_edm <- function(data_frame,
   distance_matrix[which(seq_len(ncol(distance_matrix)) > threshold), ] <- NA
   
   # Exclude indices that contain the projection of the focal value
+  # TODO: Check whether lags_unique is correct
   indices <- seq_len(nrow(distance_matrix))
   lags_unique <- unique(lag_sizes_vector)
   focal_indices <- rep(indices, each = length(lags_unique))
@@ -70,6 +71,16 @@ pbs_edm <- function(data_frame,
   within_range <- which(exclude_indices %in% indices)
   exclude_matrix <- as.matrix(data.frame(x = focal_indices[within_range],
                                          y = exclude_indices[within_range]))
+  distance_matrix[exclude_matrix] <- NA
+  
+  # Exclude indices that project to a row that contains NAs
+  na_indices <- which(is.na(rowSums(lags_matrix)))
+  exclude_indices <- na_indices - forecast_distance
+  within_range <- which(exclude_indices %in% indices)
+  focal_indices <- rep(indices, each = length(within_range))
+  exclude_matrix <- as.matrix(data.frame(x = focal_indices,
+                                         y = rep(exclude_indices[within_range],
+                                                 length(focal_indices))))
   distance_matrix[exclude_matrix] <- NA
   
   # Exclude indices symmetrically around the forecast index
@@ -120,7 +131,7 @@ pbs_edm <- function(data_frame,
   tibble::tibble(lags = lags, rho = rho, rmse = rmse,
                  observations = list(observations = observations),
                  forecasts = list(forecasts = forecasts),
-                 neighbours = list(nbr_ind_matrix), 
-                 distances = list(distance_matrix),
-                 weights = list(weight_matrix))
+                 neighbours = list(neighbours = nbr_ind_matrix), 
+                 distances = list(distances = distance_matrix),
+                 weights = list(weights = weight_matrix))
 }
