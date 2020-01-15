@@ -448,7 +448,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
 ##' @export
 ##' @author Andrew Edwards (adapted from Uwe Ligges' function)
 ##' @examples
-##'   s3d <- scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
+##'   s3d <- scatterplot3d::scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
 ##'   gets3dusr(s3d)
 gets3dusr = function(s3dobject)
   {

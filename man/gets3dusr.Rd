@@ -17,7 +17,7 @@ Obtain axes ranges for scatterplot3d plot (and maybe does others), adapted
 from http://r.789695.n4.nabble.com/Axis-Limits-in-Scatterplot3d-td892026.html<description>
 }
 \examples{
-  s3d <- scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
+  s3d <- scatterplot3d::scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
   gets3dusr(s3d)
 }
 \author{
