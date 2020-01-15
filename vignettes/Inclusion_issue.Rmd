@@ -86,13 +86,13 @@ https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/
 for making a movie in latex in an .rnw file, though can probably use the tricks
 above to save .Rmd as .pdf.
 
-Plot the rEDM predictions against Andy's manual ones:
+Plot Andy's manual predictions against rEDM predictions:
 ```{r}
 eps = 0.00001      # How different the predictions can be
 plot(Nx_lags_orig$rEDM.pred,
      Nx_lags_orig$my.pred,
-     xlab = "Andy predictions",
-     ylab = "rEDM predictions")
+     xlab = "rEDM predictions",
+     ylab = "Andy predictions")
 abline(a=0,
        b=1,
        col="grey")
@@ -113,11 +113,73 @@ corrected in rEDM so can be ignored). The points are
 different
 ```
 
+Use new pbsEDM code and compare with rEDM's and then Andy's:
+```{r pbsEDMcalc}
+pbs_calc <- pbs_simplex_1(Nx_lags_orig,
+                          col_name = "Xt")    # full output list
+testthat::expect_equal(Nx_lags_orig$Xt,
+                       pbs_calc$pred_tbl$obs$Xt)        # check the indexing is the same
 
-GOT TO HERE. Next compare Andy's and rEDM predictions (only E=2) with Luke's, then continue with
+pbs_pred <- pbs_calc$pred_tbl$pred
+
+plot(Nx_lags_orig$rEDM.pred,
+     pbs_pred,
+     xlab = "rEDM predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+# Colour in red the ones more than eps away
+# different <- dplyr::filter(Nx_lags_orig,
+#              abs(pred.diff) > eps)
+#points(different$rEDM.pred,
+#       different$my.pred,
+#       col = "red",
+#       pch = 20)
+```
+
+Looks promising. Then compare pbsEDM with Andy's:
+```{r}
+plot(Nx_lags_orig$my.pred,
+     pbs_pred,
+     xlab = "Andy predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+max(abs(Nx_lags_orig$my.pred - pbs_pred), na.rm = TRUE)
+```
+
+Conclusion: Andy's original manual calculations and Luke's new function in
+pbsEDM give the
+same answer for this simulated data set, which differs in three places from
+rEDM's. Our code was written independently (though Andy did explain the issue he
+had found out). This is a reassuring test of Luke's new code (which is more
+general than Andy's as can do more than just E=2).
+
+Another check is this (first line produces an error so I've commented it out,
+but that alerts us to an NA difference in the final value ):
+
+```{r}
+# testthat::expect_equal(Nx_lags_orig$my.pred, pbs_pred)     # output is:
+#   Error: Nx_lags_orig$my.pred not equal to `pbs_pred`.
+#   1/100 mismatches
+#   [100] -0.136 - NA == NA
+testthat::expect_equal(Nx_lags_orig$my.pred[1:99], pbs_pred[1:99])   # This passes
+Nx_lags_orig$my.pred[100]
+pbs_pred[100]
+length(pbs_pred)
+```
+So `pbs_pred` gives a different result for the final time step. Presumably it should
+make a prediction since it has all the required data. TODO look into with Luke.
+
+
+GOT TO HERE. Next maybe continue with
 sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
 detail for different values of E. Keep this one for visualising the data and
 understanding.
+
+
 
 
 
