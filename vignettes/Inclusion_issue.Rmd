@@ -63,7 +63,10 @@ and will just refer to the saved animation file. TODO:  not saved yet since big.
 The final panel shows the predicted vs observed from rEDM and from Andy's manual
 calculations. For now this shows how good the predictions are, but highlights
 one obvious discrepancy, to be looked into further below.
-```{r, animation.hook = 'gifski', interval = 1.5}
+
+Comment out gifski to keep Travis happy for now. TODO - proper fix of saving the movie.
+<!--
+# ```{r, animation.hook = 'gifski', interval = 1.5}
 # Cannot change fig.width and fig.height hooks unless re-order par() in function
 # fig.width is 0.67 * fig.height
 #```{r, eval=FALSE}
@@ -76,6 +79,8 @@ one obvious discrepancy, to be looked into further below.
   }
 # ```
 ```
+-->
+
 
 <!--
 The resulting animation is
