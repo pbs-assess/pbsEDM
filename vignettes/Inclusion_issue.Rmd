@@ -86,12 +86,39 @@ https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/
 for making a movie in latex in an .rnw file, though can probably use the tricks
 above to save .Rmd as .pdf.
 
+Plot the rEDM predictions against Andy's manual ones:
+```{r}
+eps = 0.00001      # How different the predictions can be
+plot(Nx_lags_orig$rEDM.pred,
+     Nx_lags_orig$my.pred,
+     xlab = "Andy predictions",
+     ylab = "rEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+# Colour in red the ones more than eps away
+different <- dplyr::filter(Nx_lags_orig,
+              abs(pred.diff) > eps)
+points(different$rEDM.pred,
+       different$my.pred,
+       col = "red",
+       pch = 20)
 
-GOT TO HERE. Next do simple plot comparing my calculations with those of rEDM
-(think mine only do E=2), then compare both with Luke's, then continue with
+```
+
+This shows that three points disagree between Andy's calculations and
+rEDM's by more than `r eps`. (Originally I had another few but they are now
+corrected in rEDM so can be ignored). The points are
+```{r}
+different
+```
+
+
+GOT TO HERE. Next compare Andy's and rEDM predictions (only E=2) with Luke's, then continue with
 sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
 detail for different values of E. Keep this one for visualising the data and
 understanding.
+
 
 
 TODO: change all this to use the above....
