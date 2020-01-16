@@ -23,7 +23,7 @@
 ##' @export
 ##' @author Andrew Edwards
 EDM_pred_E_2 <-  function(Nx.lags,
-                       Efix = 2)
+                          Efix = 2)
   {
   lib.orig = dplyr::select(Nx.lags, Xt, Xtmin1)  # Each row is time t
   usable = lib.orig$Xt * lib.orig$Xtmin1  # to give NA if either unavailable
@@ -52,7 +52,7 @@ EDM_pred_E_2 <-  function(Nx.lags,
       dIsNA = dIsNA[dIsNA > 1]       # else get 0 row in next line;
       lib.temp[dIsNA-1, "d"] = NA
       # Rank the valid ones with repsect to distance from x(t^*)
-      lib.temp = dplyr::mutate(lib.temp, rank = dense_rank(d))
+      lib.temp = dplyr::mutate(lib.temp, rank = dplyr::dense_rank(d))
 
       psivec = rep(NA, Efix+1)
       for(i in 1:length(psivec))

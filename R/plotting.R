@@ -407,7 +407,8 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       if(final_plot == "E_vary")
         if(!is.null(Evec))
         {
-          all.pred = dplyr::select(Nx.lags.use, starts_with("XtPredEeq"))
+          all.pred = dplyr::select(Nx.lags.use,
+                                   dplyr::starts_with("XtPredEeq"))
           pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
           pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
           predObs.axes.range = c(-pred.max.abs, pred.max.abs)
@@ -432,7 +433,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
                  leg, col=Ecols, cex=0.7)
         }                           # if(Evec != 0)
   }                                # for(iii in start:end)
-  if(open.pdf) dev.off() # close pdf device
+  if(open.pdf) grDevices::dev.off() # close pdf device
 }
 
 
