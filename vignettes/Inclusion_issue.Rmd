@@ -182,25 +182,6 @@ testthat::expect_equal(Nx_lags_orig$my.pred, pbs_pred)     # This now passes
 
 ```
 
-
-## GOT TO HERE
-
-Next maybe continue with
-sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
-detail for different values of E. Keep this one for visualising the data and
-understanding.
-
-
-
-
-
-TODO: change all this to use the above....
-
-<!-- based on `mwe-2019.r` and two GitHub issues
- expect_equal(Nx_lags_orig$rEDM.pred, rEDM_points$pred)    is TRUE, so no longer
- need rEDM_points
--->
-
 The issue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
 Deyle et al. (2013) notation that $\bf{x}$ is the vector of lagged values of the
 scalars $X(t)$, where time $t = 1, 2, 3, ..., 99$ in this case, i.e.
@@ -301,3 +282,8 @@ rEDM_points2 = simp_Efix2[,"model_output"][[1]]       # time, obs, pred and pred
 # rEDM_points2 = rbind(c(1, simple_ts[1], NA, NA), rEDM_points2) - only if doing all times
 head(rEDM_points2)
 ```
+
+TODO Andy: Next maybe continue with
+sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
+detail for different values of E. Keep this one for visualising the data and
+understanding.
