@@ -41,6 +41,14 @@ Here are the full results (for helping explain some of the later text):
 as.data.frame(Nx_lags_orig)
 ```
 
+Note that:
+```{r}
+Nx_lags_orig[100, c("rEDM.pred", "my.pred")]
+```
+but we should be able to predict $X(100)$ because we have all the relevent
+information (and it's kind of the whole point to make a prediction - this will
+allow us to calculate $N(101)$ ).
+
 ## Visualise data and some results
 
 Plot of data (before making movie):
@@ -212,9 +220,19 @@ X95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
 X95est
 ```
 
-(That code isn't in a package and isn't really functionalised, so when we have
-Luke's functionalised code run the same calculations with his code to hopefully
-get the same results TODO.)
+That code isn't in a package and isn't really functionalised, so now we have
+Luke's code we can compare the same results:
+```{r}
+pbs_calc$nbr_list[[94]]
+pbs_pred[95]
+```
+which agree with Andy's (usefully these will give build errors if results don't agree):
+```{r}
+testthat::expect_equal(psivec94, pbs_calc$nbr_list[[94]]$nbr_ind)
+testthat::expect_equal(weights94, pbs_calc$nbr_list[[94]]$nbr_ind)
+testthat::expect_equal(X95est, pbs_pred[95])
+```
+
 
 However, `rEDM` gives
 ```{r rEDMninetyfive}
@@ -222,7 +240,7 @@ X95est_rEDM = rEDM_points[95, "pred"]
 X95est_rEDM
 ```
 
-But we can reproduce the `rEDM` result in the manual code by allowing
+But we can reproduce the `rEDM` result in Andy's manual code by allowing
 $\bf{x}(96)$ to be a nearest neighbour of $\bf{x}(94)$,  giving
 ```{r psi94allow}
 psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
@@ -247,15 +265,21 @@ it occurs in $\bf{x}(95)$ and $\bf{x}(96)$, by definition.
 So $\bf{x}(96)$ should not be used to forecast $\bf{x}(95)$, because it
 explicitly contains one of the two components of $\bf{x}(95)$.
 
-The Same issue occurs (with Andy's old code) for $t^*=75$.
+The same issue occurs (with Andy's old code) for $t^*=75$, for which Luke's code
+gives the same answer as shown above (because all values give the same answer).
+
+To summarise -- the issue is that rEDM does not fully take into account that
+$\bf{x}()$ is a vector of lagged values. It's not simple an implementation issue
+(that rEDM is not aware that the $X(t)$ are differences of the $N(t)$).
 
 ## Another attempt with `rEDM`
 
-Had tried this in `rEDM`, to not allow $X(96)$ to be a nearest neighbour
-predicting $X(95)$ from $X(94)$ -- think this isn't possible, since still kind of
+Had tried the following in `rEDM`, to not allow $X(96)$ to be a nearest neighbour
+predicting $X(95)$ from $X(94)$ -- but think this isn't possible, since still
+kind of
 want cross-validation. Had played with `lib` and `pred` but couldn't get answer
 to agree with Andy's original one (may be off with the index by 1). Not running
-this in vignette:
+this in vignette, keeping for reference if needed:
 ```{r rEDMagain, eval=FALSE}
 simp_Efix2 = simplex(simple_ts,
                      E = 2,
