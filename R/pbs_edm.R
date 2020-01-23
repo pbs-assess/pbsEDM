@@ -9,7 +9,7 @@
 #' @param include_forecasts Return forecast and observations? (logical scalar)
 #' @param include_neighbours Return neighbours? (logical scalar)
 #'
-#' @return A tibble with results, forecasts, neighbours, distances, and weights
+#' @return A list with results, forecasts, neighbours, distances, and weights
 #' 
 #' @export
 #'
@@ -23,22 +23,24 @@ pbs_edm <- function(data_frame,
                     # from_user = seq_len(nrow(data_frame)), 
                     # into_user = seq_len(nrow(data_frame)), 
                     forecast_distance = 1L,
-                    symmetric_exclusion = FALSE,
-                    include_stats = TRUE,
-                    include_forecasts = TRUE,
-                    include_neighbours = TRUE) {
+                    first_difference = FALSE,
+                    centre_and_scale = FALSE,
+                    show_calculations = FALSE) {
   
   # Check arguments
-  stopifnot(
+  assertthat::assert_that(
     is.data.frame(data_frame),
     is.list(lags),
     all(is.element(names(lags), names(data_frame))),
-    is.numeric(forecast_distance),
-    is.logical(symmetric_exclusion),
-    is.logical(include_stats),
-    is.logical(include_forecasts),
-    is.logical(include_neighbours)
+    is.count(forecast_distance),
+    is.flag(first_difference),
+    is.flag(centre_and_scale),
+    is.flag(show_calculations)
   )
+  
+  # Calculate Xt from Nt
+  
+  
   
   # Make lags matrix
   lag_sizes_vector <- unlist(lags, use.names = FALSE)
@@ -127,14 +129,32 @@ pbs_edm <- function(data_frame,
   rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
   rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
   
-  # Return tibble
-  tibble::tibble(E = length(unlist(lags)),
-                 rho = rho, 
-                 rmse = rmse,
-                 lags = lags, 
-                 observations = list(observations = observations),
-                 forecasts = list(forecasts = forecasts),
-                 neighbours = list(neighbours = nbr_ind_matrix), 
-                 distances = list(distances = distance_matrix),
-                 weights = list(weights = weight_matrix))
+  # Results tibble
+  results_only <- tibble::tibble(
+    E = length(unlist(lags)),
+    rho = rho,
+    rmse = rmse)
+  
+  # Calculations list
+  results_with_calculations <- list(
+    results = results_only,
+    lags = lags,
+    Nt_observed,
+    Nt_forecast = NULL,
+    Xt_observed,
+    Xt_forecast,
+    nbr_index = nbr_ind_matrix,
+    pro_index = pro_ind_matrix,
+    nbr_distance = round(nbr_dst_matrix, 3),
+    pro_distance = round(pro_dst_matrix, 3),
+    nbr_weights = round(weight_matrix, 3),
+    pro_weights = round(pro_wt_matrix, 3)
+  )
+  
+  # Return value
+  if (show_calculations) {
+    results_with_calculations
+  } else {
+    results_only
+  }
 }
