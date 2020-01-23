@@ -4,16 +4,9 @@
 \alias{pbs_smap}
 \title{Use S-Mapping to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_smap(
-  data_frame,
-  lags,
-  local_weight = 0,
-  forecast_distance = 1L,
-  symmetric_exclusion = FALSE,
-  include_stats = TRUE,
-  include_forecasts = TRUE,
-  include_neighbours = TRUE
-)
+pbs_smap(data_frame, lags, local_weight = 0, forecast_distance = 1L,
+  symmetric_exclusion = FALSE, include_stats = TRUE,
+  include_forecasts = TRUE, include_neighbours = TRUE)
 }
 \arguments{
 \item{data_frame}{A data frame with named columns (list of numeric vectors)}
