@@ -25,10 +25,7 @@ pbs_smap <- function(data_frame,
                      # from_user = seq_len(nrow(data_frame)), 
                      # into_user = seq_len(nrow(data_frame)), 
                      forecast_distance = 1L,
-                     symmetric_exclusion = FALSE,
-                     include_stats = TRUE,
-                     include_forecasts = TRUE,
-                     include_neighbours = TRUE) {
+                     symmetric_exclusion = FALSE) {
   
   # Check arguments
   stopifnot(
@@ -37,10 +34,7 @@ pbs_smap <- function(data_frame,
     is.numeric(local_weight),
     all(is.element(names(lags), names(data_frame))),
     is.numeric(forecast_distance),
-    is.logical(symmetric_exclusion),
-    is.logical(include_stats),
-    is.logical(include_forecasts),
-    is.logical(include_neighbours)
+    is.logical(symmetric_exclusion)
   )
   
   # Make lags matrix
