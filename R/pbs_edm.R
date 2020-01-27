@@ -38,8 +38,49 @@ pbs_edm <- function(data_frame,
     is.flag(show_calculations)
   )
   
-  # Calculate Xt from Nt
+  # 
+  nt_names <- names(lags)
+  nt_matrix <- as.matrix(dplyr::select(tibble::as_tibble(data_frame), nt_names))
   
+  xt_matrix <- nt_matrix
+  
+  if (first_difference) {
+    xt_matrix <- rbind(apply(xt_matrix, 2, diff), NA_real_)
+  }
+  
+  # Fix below here
+  xt_mean <- apply(xt_matrix, 2, mean, na.rm = TRUE)
+  xt_sd <- apply(xt_matrix, 2, sd, na.rm = TRUE)
+  if (centre_and_scale) {
+    xt_matrix <- apply(xt_matrix, 2, function(xt) (xt - xt_mean) / xt_sd)
+  }
+  
+  # Calculate Xt from Nt
+  nt_matrix <- as.matrix(data_frame[, data_names])
+
+  
+  
+  nt <- dplyr::pull(data_frame, var = data_names[1])
+  xt <- nt
+  if (first_difference) {
+    xt <- c(diff(xt), NA_real_)
+  }
+  if (centre_and_scale) {
+    mean_xt <- mean(xt, na.rm = TRUE)
+    sd_xt <- sd(xt, na.rm = TRUE)
+    xt <- (xt - mean_xt) / sd_xt
+  }
+  xt_frame <- data.frame
+  
+  
+  
+  data_frame <- cbind(data.frame(Xt = xt), data_frame)
+  
+  
+  trans_data <- 
+    
+    
+    
   
   
   # Make lags matrix
@@ -143,6 +184,7 @@ pbs_edm <- function(data_frame,
     Nt_forecast = NULL,
     Xt_observed,
     Xt_forecast,
+    lags_matrix = lags_matrix,
     nbr_index = nbr_ind_matrix,
     pro_index = pro_ind_matrix,
     nbr_distance = round(nbr_dst_matrix, 3),
