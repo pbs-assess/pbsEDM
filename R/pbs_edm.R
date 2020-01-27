@@ -4,12 +4,13 @@
 #' @param lags Named list of numeric vectors giving lags to use for each
 #'     column. List names must match column names. (list of numeric vectors)
 #' @param forecast_distance Forecast distance (numeric scalar)
-#' @param symmetric_exclusion Symmetric exclusion radius? (logical scalar)
-#' @param include_stats Return forecast stats? (logical scalar)
-#' @param include_forecasts Return forecast and observations? (logical scalar)
-#' @param include_neighbours Return neighbours? (logical scalar)
+#' @param first_difference Replace Nt by Xt = Nt - Nt+1? (logical)
+#' @param centre_and_scale Replace Nt by Xt = (Nt - mean(Nt)) / sd(Nt)? 
+#' (logical)
+#' @param show_calculations Logical. FALSE: return a tibble of results; TRUE:
+#' return a list including a tibble of results, and calculations.
 #'
-#' @return A list with results, forecasts, neighbours, distances, and weights
+#' @return A tibble or list
 #' 
 #' @export
 #'
@@ -27,61 +28,45 @@ pbs_edm <- function(data_frame,
                     centre_and_scale = FALSE,
                     show_calculations = FALSE) {
   
-  # Check arguments
+  #---------------- Check arguments -------------------------------------------#
+  
   assertthat::assert_that(
     is.data.frame(data_frame),
     is.list(lags),
     all(is.element(names(lags), names(data_frame))),
-    is.count(forecast_distance),
-    is.flag(first_difference),
-    is.flag(centre_and_scale),
-    is.flag(show_calculations)
+    assertthat::is.count(forecast_distance),
+    assertthat::is.flag(first_difference),
+    assertthat::is.flag(centre_and_scale),
+    assertthat::is.flag(show_calculations)
   )
   
-  # 
+  #---------------- Perform time-series transformations -----------------------#
+  
+  data_frame <- data.frame(x = 1:15, y = 21:35, z = 41:55)
+  lags <- list(x = 0:2, y = 0:1, z = 0)
+  
+  # Define the raw time series matrix
   nt_names <- names(lags)
   nt_matrix <- as.matrix(dplyr::select(tibble::as_tibble(data_frame), nt_names))
+  nt <- nt_matrix[, 1]
   
+  # Define the first differenced time series matrix
   xt_matrix <- nt_matrix
-  
   if (first_difference) {
     xt_matrix <- rbind(apply(xt_matrix, 2, diff), NA_real_)
   }
   
-  # Fix below here
+  # Define the centred and scaled time series matrix
   xt_mean <- apply(xt_matrix, 2, mean, na.rm = TRUE)
   xt_sd <- apply(xt_matrix, 2, sd, na.rm = TRUE)
   if (centre_and_scale) {
-    xt_matrix <- apply(xt_matrix, 2, function(xt) (xt - xt_mean) / xt_sd)
+    xt_matrix <- t((t(xt_matrix) - xt_mean) / xt_sd)
   }
   
-  # Calculate Xt from Nt
-  nt_matrix <- as.matrix(data_frame[, data_names])
-
+  # Define data tibble
+  data_frame <- as.data.frame(xt_matrix)
   
-  
-  nt <- dplyr::pull(data_frame, var = data_names[1])
-  xt <- nt
-  if (first_difference) {
-    xt <- c(diff(xt), NA_real_)
-  }
-  if (centre_and_scale) {
-    mean_xt <- mean(xt, na.rm = TRUE)
-    sd_xt <- sd(xt, na.rm = TRUE)
-    xt <- (xt - mean_xt) / sd_xt
-  }
-  xt_frame <- data.frame
-  
-  
-  
-  data_frame <- cbind(data.frame(Xt = xt), data_frame)
-  
-  
-  trans_data <- 
-    
-    
-    
-  
+  #---------------- Construct calucation objects ------------------------------#
   
   # Make lags matrix
   lag_sizes_vector <- unlist(lags, use.names = FALSE)
@@ -126,15 +111,6 @@ pbs_edm <- function(data_frame,
                                                  length(focal_indices))))
   distance_matrix[exclude_matrix] <- NA
   
-  # Exclude indices symmetrically around the forecast index
-  if (symmetric_exclusion == TRUE) {
-    symm_na_indices <- focal_indices + forecast_distance - lags_unique
-    within_range <- which(symm_na_indices %in% indices)
-    symm_na_matrix <- as.matrix(data.frame(x = focal_indices[within_range],
-                                           y = symm_na_indices[within_range]))
-    distance_matrix[symm_na_matrix] <- NA
-  }
-
   # Make neighbour index matrix
   num_nbrs <- length(lags_unique) + 1
   seq_nbrs <- seq_len(num_nbrs)
@@ -162,6 +138,8 @@ pbs_edm <- function(data_frame,
   # Make projected neighbour weight matrix
   pro_wt_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
 
+  #---------------- Prepare output values -------------------------------------#
+  
   # Make forecasts
   forecasts <- rowSums(pro_val_matrix * pro_wt_matrix) / rowSums(pro_wt_matrix)
   forecasts <- as.vector(forecasts)
@@ -180,15 +158,14 @@ pbs_edm <- function(data_frame,
   results_with_calculations <- list(
     results = results_only,
     lags = lags,
-    Nt_observed,
+    Nt_observed = nt,
     Nt_forecast = NULL,
-    Xt_observed,
-    Xt_forecast,
+    Xt_observed = observations,
+    Xt_forecast = forecasts,
     lags_matrix = lags_matrix,
     nbr_index = nbr_ind_matrix,
     pro_index = pro_ind_matrix,
     nbr_distance = round(nbr_dst_matrix, 3),
-    pro_distance = round(pro_dst_matrix, 3),
     nbr_weights = round(weight_matrix, 3),
     pro_weights = round(pro_wt_matrix, 3)
   )
