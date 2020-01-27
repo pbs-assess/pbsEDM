@@ -181,15 +181,34 @@ pbs_smap <- function(data_frame,
   rho <- cor(observations, forecasts, use = "pairwise.complete.obs")
   rmse <- sqrt(mean((observations - forecasts)^2, na.rm = TRUE))
   
-  # Return tibble
-  tibble::tibble(E = length(unlist(lags)),
-                 theta = local_weight, 
-                 rho = rho, 
-                 rmse = rmse,
-                 lags = lags,
-                 observations = list(observations = observations),
-                 forecasts = list(forecasts = forecasts),
-                 neighbours = list(neighbours = pro_ind_matrix), 
-                 distances = list(distances = pro_dst_matrix),
-                 weights = list(weights = pro_wts_matrix))
+  # Results tibble
+  results_only <- tibble::tibble(
+    E = length(unlist(lags)),
+    theta = local_weight, 
+    rho = rho,
+    rmse = rmse)
+  
+  # Calculations list
+  results_with_calculations <- list(
+    results = results_only,
+    lags = lags,
+    Nt_observed,
+    Nt_forecast = NULL,
+    Xt_observed,
+    Xt_forecast,
+    lags_matrix = lags_matrix,
+    nbr_index = nbr_ind_matrix,
+    pro_index = pro_ind_matrix,
+    nbr_distance = round(nbr_dst_matrix, 3),
+    pro_distance = round(pro_dst_matrix, 3),
+    nbr_weights = round(weight_matrix, 3),
+    pro_weights = round(pro_wt_matrix, 3)
+  )
+  
+  # Return value
+  if (show_calculations) {
+    results_with_calculations
+  } else {
+    results_only
+  }
 }
