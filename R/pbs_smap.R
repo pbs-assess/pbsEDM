@@ -5,10 +5,11 @@
 #'     column. List names must match column names. (list of numeric vectors)
 #' @param local_weight State-dependence parameter (numeric scalar)
 #' @param forecast_distance Forecast distance (numeric scalar)
-#' @param symmetric_exclusion Symmetric exclusion radius? (logical scalar)
-#' @param include_stats Return forecast stats? (logical scalar)
-#' @param include_forecasts Return forecast and observations? (logical scalar)
-#' @param include_neighbours Return neighbours? (logical scalar)
+#' @param first_difference Replace Nt by Xt = Nt - Nt+1? (logical)
+#' @param centre_and_scale Replace Nt by Xt = (Nt - mean(Nt)) / sd(Nt)? 
+#' (logical)
+#' @param show_calculations Logical. FALSE: return a tibble of results; TRUE:
+#' return a list including a tibble of results, and calculations.
 #'
 #' @return A tibble with results, forecasts, neighbours, distances, and weights
 #' 
@@ -25,18 +26,48 @@ pbs_smap <- function(data_frame,
                      # from_user = seq_len(nrow(data_frame)), 
                      # into_user = seq_len(nrow(data_frame)), 
                      forecast_distance = 1L,
-                     symmetric_exclusion = FALSE) {
+                     first_difference = FALSE,
+                     centre_and_scale = FALSE,
+                     show_calculations = FALSE) {
+
+  #---------------- Check arguments -------------------------------------------#
   
-  # Check arguments
-  stopifnot(
+  assertthat::assert_that(
     is.data.frame(data_frame),
     is.list(lags),
-    is.numeric(local_weight),
     all(is.element(names(lags), names(data_frame))),
-    is.numeric(forecast_distance),
-    is.logical(symmetric_exclusion)
+    assertthat::is.number(local_weight),
+    assertthat::is.count(forecast_distance),
+    assertthat::is.flag(first_difference),
+    assertthat::is.flag(centre_and_scale),
+    assertthat::is.flag(show_calculations)
   )
   
+  #---------------- Perform time-series transformations -----------------------#
+  
+  # Define the raw time series matrix
+  nt_names <- names(lags)
+  nt_matrix <- as.matrix(dplyr::select(tibble::as_tibble(data_frame), nt_names))
+  nt <- nt_matrix[, 1]
+  
+  # Define the first differenced time series matrix
+  xt_matrix <- nt_matrix
+  if (first_difference) {
+    xt_matrix <- rbind(apply(xt_matrix, 2, diff), NA_real_)
+  }
+  
+  # Define the centred and scaled time series matrix
+  xt_mean <- apply(xt_matrix, 2, mean, na.rm = TRUE)
+  xt_sd <- apply(xt_matrix, 2, sd, na.rm = TRUE)
+  if (centre_and_scale) {
+    xt_matrix <- t((t(xt_matrix) - xt_mean) / xt_sd)
+  }
+  
+  # Define data tibble
+  data_frame <- as.data.frame(xt_matrix)
+  
+  #---------------- Construct calucation objects ------------------------------#
+
   # Make lags matrix
   lag_sizes_vector <- unlist(lags, use.names = FALSE)
   col_names_vector <- rep(names(lags), lengths(lags))
@@ -80,15 +111,6 @@ pbs_smap <- function(data_frame,
                                                  length(focal_indices))))
   distance_matrix[exclude_matrix] <- NA
 
-  # Exclude indices symmetrically around the forecast index
-  if (symmetric_exclusion == TRUE) {
-    symm_na_indices <- focal_indices + forecast_distance - lags_unique
-    within_range <- which(symm_na_indices %in% indices)
-    symm_na_matrix <- as.matrix(data.frame(x = focal_indices[within_range],
-                                           y = symm_na_indices[within_range]))
-    distance_matrix[symm_na_matrix] <- NA
-  }
-  
   # Make neighbour distance matrix
   nbr_dst_matrix <- t(apply(distance_matrix, 1, sort, na.last = TRUE))
   
@@ -192,17 +214,16 @@ pbs_smap <- function(data_frame,
   results_with_calculations <- list(
     results = results_only,
     lags = lags,
-    Nt_observed,
+    Nt_observed = nt,
     Nt_forecast = NULL,
-    Xt_observed,
-    Xt_forecast,
+    Xt_observed = observations,
+    Xt_forecast = forecasts,
     lags_matrix = lags_matrix,
     nbr_index = nbr_ind_matrix,
     pro_index = pro_ind_matrix,
     nbr_distance = round(nbr_dst_matrix, 3),
-    pro_distance = round(pro_dst_matrix, 3),
     nbr_weights = round(weight_matrix, 3),
-    pro_weights = round(pro_wt_matrix, 3)
+    pro_weights = round(pro_wts_matrix, 3)
   )
   
   # Return value
