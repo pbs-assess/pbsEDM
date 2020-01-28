@@ -41,10 +41,7 @@ pbs_edm <- function(data_frame,
   )
   
   #---------------- Perform time-series transformations -----------------------#
-  
-  data_frame <- data.frame(x = 1:15, y = 21:35, z = 41:55)
-  lags <- list(x = 0:2, y = 0:1, z = 0)
-  
+
   # Define the raw time series matrix
   nt_names <- names(lags)
   nt_matrix <- as.matrix(dplyr::select(tibble::as_tibble(data_frame), nt_names))
@@ -136,12 +133,12 @@ pbs_edm <- function(data_frame,
                             y = lags_matrix)) # Works because NAs are NA_real_
   
   # Make projected neighbour weight matrix
-  pro_wt_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
+  pro_wts_matrix <- apply(weight_matrix, 2, dplyr::lag, n = forecast_distance)
 
   #---------------- Prepare output values -------------------------------------#
   
   # Make forecasts
-  forecasts <- rowSums(pro_val_matrix * pro_wt_matrix) / rowSums(pro_wt_matrix)
+  forecasts <- rowSums(pro_val_matrix * pro_wts_matrix) / rowSums(pro_wts_matrix)
   forecasts <- as.vector(forecasts)
   
   # Compute statistics
@@ -167,7 +164,7 @@ pbs_edm <- function(data_frame,
     pro_index = pro_ind_matrix,
     nbr_distance = round(nbr_dst_matrix, 3),
     nbr_weights = round(weight_matrix, 3),
-    pro_weights = round(pro_wt_matrix, 3)
+    pro_weights = round(pro_wts_matrix, 3)
   )
   
   # Return value
