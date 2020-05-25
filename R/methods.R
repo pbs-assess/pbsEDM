@@ -52,7 +52,14 @@ pbsEDM <- function (nt,
 	xt_lags <- pbsLAG(xt[, lags_name], lags_size)
 	colnames(xt_lags) <- paste0(lags_name, "_", lags_size)
 	
-	#----------------- Create computation objects -------------------------------#
+	#----------------- Create distance matrix -----------------------------------#
+	
+	xt_lags_na <- xt_lags
+	xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
+	xt_dist <- as.matrix(dist(xt_lags_na))
+	diag(xt_dist) <- NA
+	
+	#----------------- Exclude indices ------------------------------------------#
 	
 	
 	
