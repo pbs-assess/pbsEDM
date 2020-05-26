@@ -147,6 +147,7 @@ plot(Nx_lags_orig$rEDM.pred,
 abline(a=0,
        b=1,
        col="grey")
+
 # Colour in red the ones more than eps away
 # different <- dplyr::filter(Nx_lags_orig,
 #              abs(pred.diff) > eps)
