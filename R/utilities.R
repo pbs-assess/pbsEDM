@@ -8,10 +8,14 @@
 #'
 #' @examples 
 #' pbsLAG(1:10, 3)
+#' pbsLAG(matrix(rep(1:10, 2), nrow = 10), 3)
 #' pbsLAG(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
 #' 
 pbsLAG <- function (x, n) {
 	m <- as.matrix(x)
+	if (length(n) == 1) {
+		n <- rep(n, ncol(m))
+	}
 	for (i in seq_along(n)) {
 		m[, i] <- c(rep(NA_real_, floor(n[i])), m[, i])[seq_along(m[, i])]
 	}
