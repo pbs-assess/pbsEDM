@@ -5,10 +5,12 @@
 \alias{psi_orig}
 \title{Psi values from a simple simulation model analysed using Andy's
 original independent code}
-\format{Dataframe of size 100x4 with one row for each `tstar`, and columns:
+\format{
+Dataframe of size 100x4 with one row for each `tstar`, and columns:
   * `tstar`
   * `psi1`, `psi2`, `psi3`: values of $\psi_1, \psi_2$ and $\psi_3$ for that
-  $t^*$.}
+  $t^*$.
+}
 \source{
 Generated from Andy running `data-raw/Nx_lags.R`.
 }

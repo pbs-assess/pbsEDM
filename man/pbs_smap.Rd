@@ -4,9 +4,15 @@
 \alias{pbs_smap}
 \title{Use S-Mapping to Perform Out-of-Sample Forecasting}
 \usage{
-pbs_smap(data_frame, lags, local_weight = 0, forecast_distance = 1L,
-  symmetric_exclusion = FALSE, include_stats = TRUE,
-  include_forecasts = TRUE, include_neighbours = TRUE)
+pbs_smap(
+  data_frame,
+  lags,
+  local_weight = 0,
+  forecast_distance = 1L,
+  first_difference = FALSE,
+  centre_and_scale = FALSE,
+  show_calculations = FALSE
+)
 }
 \arguments{
 \item{data_frame}{A data frame with named columns (list of numeric vectors)}
@@ -18,13 +24,13 @@ column. List names must match column names. (list of numeric vectors)}
 
 \item{forecast_distance}{Forecast distance (numeric scalar)}
 
-\item{symmetric_exclusion}{Symmetric exclusion radius? (logical scalar)}
+\item{first_difference}{Replace Nt by Xt = Nt - Nt+1? (logical)}
 
-\item{include_stats}{Return forecast stats? (logical scalar)}
+\item{centre_and_scale}{Replace Nt by Xt = (Nt - mean(Nt)) / sd(Nt)? 
+(logical)}
 
-\item{include_forecasts}{Return forecast and observations? (logical scalar)}
-
-\item{include_neighbours}{Return neighbours? (logical scalar)}
+\item{show_calculations}{Logical. FALSE: return a tibble of results; TRUE:
+return a list including a tibble of results, and calculations.}
 }
 \value{
 A tibble with results, forecasts, neighbours, distances, and weights

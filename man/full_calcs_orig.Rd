@@ -5,11 +5,13 @@
 \alias{full_calcs_orig}
 \title{Full results from a simple simulation model analysed using Andy's
 original independent code}
-\format{List of 100 tibbles, each component `[[tstar]]` for each
+\format{
+List of 100 tibbles, each component `[[tstar]]` for each
   `tstar`. Each tibble is 100x5, and contains the original `Xt` and
   `Xtmin1`, and then the `d`, `rank` and `w` for that
   `tstar`. Tibble `[[1]]` is NULL since calculations can't be done for
-  $t^*=1$, e.g. $N(t-1)$ does not exist.}
+  $t^*=1$, e.g. $N(t-1)$ does not exist.
+}
 \source{
 Generated from Andy running `data-raw/Nx_lags.R`.
 }

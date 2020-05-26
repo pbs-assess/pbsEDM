@@ -5,7 +5,8 @@
 \alias{Nx_lags_orig}
 \title{Summary results from a simple simulation model analysed using `rEDM` and Andy's
 original independent code}
-\format{A 100x14 tibble where each row is a time step (year) and columns
+\format{
+A 100x14 tibble where each row is a time step (year) and columns
   are:
   * `t`: time step, 1, 2, 3, ..., 100.
   * `Nt`: original time series of number of spawners, $N(t)$ at time $t$ from
@@ -25,7 +26,8 @@ original independent code}
   * `pred.diff`: the difference between predictions, i.e. `rEDM.pred - my.pred`
   * `var.diff`: the difference between estimated variances, i.e. `rEDM.var - my.var`
   * `pred.ratio`: ratio of the two estimated predictions, as `rEDM.pred / my.pred`
-  * `var.ratio`: ratio of the two estimated variances, as `rEDM.var / my.var`}
+  * `var.ratio`: ratio of the two estimated variances, as `rEDM.var / my.var`
+}
 \source{
 Generated from Andy running `data-raw/Nx_lags.R`.
 }
