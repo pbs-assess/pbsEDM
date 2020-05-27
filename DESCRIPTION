@@ -1,7 +1,7 @@
 Package: pbsEDM
 Type: Package
 Title: Perform Empirical Dynamic Modeling in R
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     c(person(given = c("Luke", "A."),
              family = "Rogers",
@@ -20,12 +20,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
 Imports:
-    assertthat,
     dplyr,
-    magrittr,
-    scatterplot3d,
-    tidyr,
-    broom
+    scatterplot3d
 Suggests:
     knitr,
     rmarkdown,
