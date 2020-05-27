@@ -68,7 +68,7 @@
 ##' @param open.pdf whether or not to open a new .pdf file for the figure. Use
 ##'       FALSE if .pdf is being opened automatically in knitr (then figheight
 ##'       and figwidth get ignored, and should be set in <<..>>=.
-##' @param ...
+##' @param ... Arguments to be bassed to methods
 ##' @return Creates movie as a .pdf then can then be easily input into Sweave file
 ##'     using the animategraphics latex pacakge. TODO make .gif option also for vignette.
 ##' @export
