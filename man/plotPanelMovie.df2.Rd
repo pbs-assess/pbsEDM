@@ -103,6 +103,8 @@ lagged plots z.lab is the y label and y.lab is the x label.}
 \item{open.pdf}{whether or not to open a new .pdf file for the figure. Use
 FALSE if .pdf is being opened automatically in knitr (then figheight
 and figwidth get ignored, and should be set in <<..>>=.}
+
+\item{...}{Arguments to be passed to methods}
 }
 \value{
 Creates movie as a .pdf then can then be easily input into Sweave file

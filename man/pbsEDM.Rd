@@ -40,10 +40,19 @@ included via `lags = list(..., Salinity = c(0))`.
 nt <- matrix(rep(1:30, 5), ncol = 5)
 colnames(nt) <- c("A", "B", "C", "D", "E")
 lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
+m1 <- pbsEDM(nt, lags)
 
 nt <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
-m1 <- pbsEDM(nt, lags)
+m2 <- pbsEDM(nt, lags)
+
+nt <- data.frame(x = simple_ts)
+lags <- list(x = 0:1)
+m3 <- pbsEDM(nt, lags, first_difference = TRUE)
 
 
+
+}
+\author{
+Luke A. Rogers
 }
