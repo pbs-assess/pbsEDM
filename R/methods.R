@@ -7,21 +7,29 @@
 #' @param centre_and_scale [logical(1)]
 #' @param show_calculations [logical(1)]
 #' 
+#' @return A list
+#' 
 #' @details Only lags and columns explicitly named in `lags` are used. For
 #' example, an unlagged time series in a column named `Salinity` could be 
 #' included via `lags = list(..., Salinity = c(0))`.
 #'
-#' @return A list
+#' @author Luke A. Rogers
 #' @export
 #'
 #' @examples
 #' nt <- matrix(rep(1:30, 5), ncol = 5)
 #' colnames(nt) <- c("A", "B", "C", "D", "E")
 #' lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
+#' m1 <- pbsEDM(nt, lags)
 #' 
 #' nt <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
-#' m1 <- pbsEDM(nt, lags)
+#' m2 <- pbsEDM(nt, lags)
+#' 
+#' nt <- data.frame(x = simple_ts)
+#' lags <- list(x = 0:1)
+#' m3 <- pbsEDM(nt, lags, first_difference = TRUE)
+#' 
 #' 
 #' 
 pbsEDM <- function (nt,
@@ -89,7 +97,7 @@ pbsEDM <- function (nt,
 	# Exclude xt_lags rows that project to rows that contain NAs
 	prj_rows <- (which(is.na(rowSums(xt_lags))) - forecast_distance)
 	na_rows <- prj_rows[which(prj_rows > 0)]
-	xt_dist[na_rows, ] <- NA
+	# xt_dist[na_rows, ] <- NA # Commented to allow forecast from here
 	xt_dist[, na_rows] <- NA
 	
 	# Exclude xt_lags rows that contain a projection of the focal value
@@ -171,13 +179,15 @@ pbsEDM <- function (nt,
 #' example, an unlagged time series in a column named `Salinity` could be 
 #' included via `lags = list(..., Salinity = c(0))`.
 #' 
+#' @author Luke A. Rogers
 #' @export
 #'
 #' @examples
 #' nt <- matrix(rep(1:30, 5), ncol = 5)
 #' colnames(nt) <- c("A", "B", "C", "D", "E")
 #' lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
-#'
+#' m1 <- pbsEDM(nt, lags)
+#' 
 #' nt <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
 #' m2 <- pbsSMAP(nt, lags)
@@ -249,7 +259,7 @@ pbsSMAP <- function (nt,
 	# Exclude xt_lags rows that project to rows that contain NAs
 	prj_rows <- (which(is.na(rowSums(xt_lags))) - forecast_distance)
 	na_rows <- prj_rows[which(prj_rows > 0)]
-	xt_dist[na_rows, ] <- NA
+	# xt_dist[na_rows, ] <- NA
 	xt_dist[, na_rows] <- NA
 	
 	# Exclude xt_lags rows that contain a projection of the focal value
