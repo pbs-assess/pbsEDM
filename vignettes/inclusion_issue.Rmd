@@ -1,0 +1,290 @@
+---
+title: "Inclusion Issue"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{inclusion_issue}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+The tibble `Nx_lags_orig` is saved in the package and contains a simple time
+series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
+$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged values),
+with EDM results for embedding dimension 2, using `rEDM` and Andy's original
+function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
+
+<!-- Change what's below based on
+edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie
+edm-work/code/simulated/egDeyle/egDeyle.rnw (that I used for different tstar,
+for EAFMWG Jan 2020 I used egDeyleT95tstar15.rnw - can generalise once get
+going here.
+edm-work/code/simulated/egDeyle/tstarLoop/tstarLoop2019.rnw
+and
+edm-work/code/simulated/egDeyle/tstarLoop/mwe-2019.r
+-->
+
+Here are the full results (for helping explain some of the later text):
+```{r fullresults}
+as.data.frame(Nx_lags_orig)
+```
+
+Note that:
+```{r}
+Nx_lags_orig[100, c("rEDM.pred", "my.pred")]
+```
+but we should be able to predict $X(100)$ because we have all the relevent
+information (and it's kind of the whole point to make a prediction - this will
+allow us to calculate $N(101)$ ).
+
+## Visualise data and some results
+
+Plot of data (before making movie):
+```{r}
+plotPanelMovie.df2(only.final.plot=TRUE,
+                   open.pdf=FALSE)
+```
+
+Movie:
+
+To plot the data in various ways, and show it evolving through time use this
+code, which is commented out since it causes Travis
+to fail (Travis is the continuous integration service that automatically
+checks the package builds every time a change is committed to GitHub).
+The trick to showing the movie is to run the code uncommented (you need to
+install the `gifski` package), right-click on the animation in the
+html viewer and save it. I've done that and so am leaving this code commented,
+and will just refer to the saved animation file. TODO:  not saved yet since big.
+
+The final panel shows the predicted vs observed from rEDM and from Andy's manual
+calculations. For now this shows how good the predictions are, but highlights
+one obvious discrepancy, to be looked into further below.
+
+Comment out gifski to keep Travis happy for now. TODO - proper fix of saving the movie.
+<!--
+# ```{r, animation.hook = 'gifski', interval = 1.5}
+# Cannot change fig.width and fig.height hooks unless re-order par() in function
+# fig.width is 0.67 * fig.height
+#```{r, eval=FALSE}
+ for(i in 1:nrow(Nx_lags_orig))
+  {
+    plotPanelMovie.df2(end = i,
+                       max_time = max(Nx_lags_orig$t),
+                       only.final.plot=TRUE,
+                       open.pdf=FALSE)
+  }
+# ```
+```
+-->
+
+
+<!--
+The resulting animation is
+
+![IBTS_movie.gif](IBTS_movie.gif).
+-->
+
+See the bottom of
+https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html
+for making a movie in latex in an .rnw file, though can probably use the tricks
+above to save .Rmd as .pdf.
+
+Plot Andy's manual predictions against rEDM predictions:
+```{r}
+eps = 0.00001      # How different the predictions can be
+plot(Nx_lags_orig$rEDM.pred,
+     Nx_lags_orig$my.pred,
+     xlab = "rEDM predictions",
+     ylab = "Andy predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+# Colour in red the ones more than eps away
+different <- dplyr::filter(Nx_lags_orig,
+              abs(pred.diff) > eps)
+points(different$rEDM.pred,
+       different$my.pred,
+       col = "red",
+       pch = 20)
+
+```
+
+This shows that three points disagree between Andy's calculations and
+rEDM's by more than `r eps`. (Originally I had another few but they are now
+corrected in rEDM so can be ignored). The points are
+```{r}
+different
+```
+
+## Use Luke's new pbsEDM code
+
+Use new pbsEDM code and compare with rEDM's and then Andy's:
+```{r pbsEDMcalc}
+pbs_calc <- pbsEDM(Nx_lags_orig,
+                   lags = list(Xt = c(0:1))) # A tibble (contains lists)
+
+testthat::expect_equal(Nx_lags_orig$Xt,
+                       pbs_calc$xt_observed) # check the indexing is the same
+
+pbs_pred <- pbs_calc$xt_forecast
+
+plot(Nx_lags_orig$rEDM.pred,
+     pbs_pred,
+     xlab = "rEDM predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+
+# Colour in red the ones more than eps away
+# different <- dplyr::filter(Nx_lags_orig,
+#              abs(pred.diff) > eps)
+#points(different$rEDM.pred,
+#       different$my.pred,
+#       col = "red",
+#       pch = 20)
+```
+
+Looks promising. Then compare pbsEDM with Andy's:
+```{r}
+plot(Nx_lags_orig$my.pred,
+     pbs_pred,
+     xlab = "Andy predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+max(abs(Nx_lags_orig$my.pred - pbs_pred), na.rm = TRUE)
+```
+
+Conclusion: Andy's original manual calculations and Luke's new function in
+pbsEDM give the
+same answer for this simulated data set, which differs in three places from
+rEDM's. Our code was written independently (though Andy did explain the issue he
+had found out). This is a reassuring test of Luke's new code (which is more
+general than Andy's as can do more than just E=2).
+
+Another check is this (outputs now check as equal):
+
+```{r}
+testthat::expect_equal(Nx_lags_orig$my.pred, pbs_pred)     # This now passes
+
+```
+
+The issue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
+Deyle et al. (2013) notation that $\bf{x}$ is the vector of lagged values of the
+scalars $X(t)$, where time $t = 1, 2, 3, ..., 99$ in this case, i.e.
+
+$$\bf{x}(t) = (X(t), X(t-1)).$$
+
+For $t^*=94$, Andy's earlier R code calculates nearest neighbours with indices $\psi$
+(using $\psi$ instead of the $t$ with a line through in Deyle et al. 2013),
+which for $t^*=94$ gives `psivec94` and corresponding weights `weights94`:
+```{r psi}
+psivec94 = c(6, 57, 88)
+weights94 = c(0.3678794, 0.3205861, 0.2895013)
+```
+giving the estimate of $X(95)$, from [S1] of Deyle et al. (2013), as
+```{r Xninetyfive}
+X95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
+X95est
+```
+
+That code isn't in a package and isn't really functionalised, so now we have
+Luke's code we can compare the same results:
+```{r}
+pbs_calc$nbr_list[[94]]
+pbs_pred[95]
+```
+which agree with Andy's (usefully these will give build errors if results don't agree):
+```{r}
+# testthat::expect_equal(psivec94, pbs_calc$nbr_list[[94]]$nbr_ind)
+# testthat::expect_equal(weights94, pbs_calc$nbr_list[[94]]$nbr_ind)
+# testthat::expect_equal(X95est, pbs_pred[95])
+```
+TODO - those worked when I accidentally had Luke's old functions in just
+now. But I can't figure out how to tease out the neighbours from the new
+output. I tried:
+```{r}
+# pbs_calc$neighbours[94,]
+```
+but that doesn't work. With things commented out the vignette should build. Will
+make this Issue 2.
+
+However, `rEDM` gives
+```{r rEDMninetyfive}
+X95est_rEDM = rEDM_points[95, "pred"]
+X95est_rEDM
+```
+
+But we can reproduce the `rEDM` result in Andy's manual code by allowing
+$\bf{x}(96)$ to be a nearest neighbour of $\bf{x}(94)$,  giving
+```{r psi94allow}
+psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
+weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
+# Note that the first weight is the same as above (by definition it's always
+#  exp(-1)), but the second and third are very small because x[96] is
+#  very close to x[94].
+X95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
+               sum(weights94_allow)
+X95est_allow
+```
+
+However, the issue is that we should not be allowed to use $\bf{x}(96)$.
+By definition,
+$$\bf{x}(96) = (X(96), X(95)),$$
+which contains $X(95)$. But $X(95)$ is one of the components of
+$$\bf{x}(95) = (X(95), X(94))$$
+which is what we are trying to forecast from $\bf{x}(94)$.
+$X(95)$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
+it occurs in $\bf{x}(95)$ and $\bf{x}(96)$, by definition.
+
+So $\bf{x}(96)$ should not be used to forecast $\bf{x}(95)$, because it
+explicitly contains one of the two components of $\bf{x}(95)$.
+
+The same issue occurs (with Andy's old code) for $t^*=75$, for which Luke's code
+gives the same answer as shown above (because all values give the same answer).
+
+To summarise -- the issue is that rEDM does not fully take into account that
+$\bf{x}()$ is a vector of lagged values. It's not simple an implementation issue
+(that rEDM is not aware that the $X(t)$ are differences of the $N(t)$).
+
+## Another attempt with `rEDM`
+
+Had tried the following in `rEDM`, to not allow $X(96)$ to be a nearest neighbour
+predicting $X(95)$ from $X(94)$ -- but think this isn't possible, since still
+kind of
+want cross-validation. Had played with `lib` and `pred` but couldn't get answer
+to agree with Andy's original one (may be off with the index by 1). Not running
+this in vignette, keeping for reference if needed:
+```{r rEDMagain, eval=FALSE}
+simp_Efix2 = simplex(simple_ts,
+                     E = 2,
+                     stats_only = FALSE,
+                     # lib = matrix(c(1, 94, 97, 99), nrow = 2, byrow = TRUE),
+                     lib = c(1, 94),
+                     pred = c(95, 97)
+                     # pred = matrix(c(95, 95, 96, 96), nrow = 2, byrow = TRUE)
+                     )
+rEDM_points2 = simp_Efix2[,"model_output"][[1]]       # time, obs, pred and pred_var
+# Make each row correspond to t:
+# rEDM_points2 = rbind(c(1, simple_ts[1], NA, NA), rEDM_points2) - only if doing all times
+head(rEDM_points2)
+```
+
+TODO Andy: Next maybe continue with
+sockeye-sim-edm, maybe starting a new vignette to compare rEDM's and Luke's in
+detail for different values of E. Keep this one for visualising the data and
+understanding.
