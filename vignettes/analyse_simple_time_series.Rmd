@@ -2,7 +2,7 @@
 title: "Analyse a Simple Time Series"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{inclusion_issue}
+  %\VignetteIndexEntry{simple_time_series}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
