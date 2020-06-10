@@ -1,0 +1,53 @@
+---
+title: "Analyse a Simple Time Series"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{inclusion_issue}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+The tibble `Nx_lags_orig` is saved in the package and contains a simple time
+series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
+$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged values),
+with EDM results for embedding dimension 2, using `rEDM` and Andy's original
+function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
+
+Using that as an example here, see `inclusion_issue.Rmd` vignette for comparison
+of Andy's original results with results from `pbsEDM` and `rEDM`.
+
+## Visualise data
+
+Plot of data (before making movie):
+```{r}
+plotPanelMovie.df2(Nx_lags_orig,
+                   only.final.plot=TRUE,
+                   open.pdf=FALSE)
+```
+
+Movie -- see `inclusion_issue.Rmd` vignette.
+
+The final panel shows the predicted vs observed from rEDM and from Andy's manual
+calculations (not relevant here).
+
+## Analyse with pbsEDM code
+
+```{r pbsEDMcalc}
+calc <- pbsEDM(Nx_lags_orig,
+               lags = list(Xt = c(0:1))) # A list of results
+
+pred <- calc$xt_forecast
+```
