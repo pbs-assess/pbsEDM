@@ -76,7 +76,11 @@ pbsEDM <- function (nt,
 		is.logical(first_difference) && length(first_difference) == 1L,
 		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
 	)
-
+	
+	#----------------- Define nt_observed ---------------------------------------#
+	
+	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
+	
 	#----------------- Transform time series ------------------------------------#
 
 	xt <- as.matrix(nt[, names(lags)])
@@ -173,7 +177,7 @@ pbsEDM <- function (nt,
 	structure(
 		list(
 			nt_results = NULL,
-			nt_observed = NULL,
+			nt_observed = nt_observed,
 			nt_forecast = NULL,
 			xt_results = xt_results,
 			xt_observed = xt_observed,
@@ -272,6 +276,10 @@ pbsSMAP <- function (nt,
 		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
 	)
 
+	#----------------- Define nt_observed ---------------------------------------#
+	
+	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
+	
 	#----------------- Transform time series ------------------------------------#
 
 	xt <- as.matrix(nt[, names(lags)])
@@ -436,7 +444,7 @@ pbsSMAP <- function (nt,
 	structure(
 		list(
 			nt_results = NULL,
-			nt_observed = NULL,
+			nt_observed = nt_observed,
 			nt_forecast = NULL,
 			xt_results = xt_results,
 			xt_observed = xt_observed,
