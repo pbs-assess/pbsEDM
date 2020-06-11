@@ -462,3 +462,127 @@ gets3dusr = function(s3dobject)
     c(g3d("z.min"),
       g3d("z.max")) * g3d("z.scal"))
 }
+
+
+##' @
+##'  <description>
+##'
+##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_pbsEDM = function(obj){
+  stopifnot(attr(obj, "class") == "pbsEDM")
+
+  plot(obj$xt_observed,
+       obj$xt_forecast)
+}
+
+##' Plot values of X(t), X(t-1), X(t-2) in one of various ways
+##'
+##' Adapting from code within plotPanelMovie.df2. Assume raw data are one-dimensional
+##'
+##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param dim number of dimensions to plot: 1 for time series, 2 for X(t) vs X(t-2),
+##'   3 for X(t-2) v X(t-1) v X(t)
+##' @param end last time value (row) to use when plotting (so will have
+##'     end-start-1 points plotted)
+##' @param max_time maximum time value to plot (will be different from `end` if
+##'     making a movie using Rmarkdown, since for that `end` will get iterated)
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_observed = function(obj,
+                         dim = 1,
+                         end = NULL,
+                         max_time = NULL,
+                                                       late.col = "red",
+                              early.col = "black",
+                              early.col.lines = "lightgrey",
+                              late.num = 3,
+                              pt.type = "p",
+                              x.lab = expression("x"[t-2]),
+                              y.lab = expression("x"[t-1]),
+                              z.lab = expression("x"[t])){
+  stopifnot(attr(obj, "class") == "pbsEDM")
+  stopifnot(dim %in% 1:3)
+
+  # First row of everything is t=1
+  if(is.null(end)) end <- length(obj$xt_observed)
+  if(is.null(max_time)) max_time <- end
+
+  start = 1    # start time of plots, only works for 1
+  t.axis.range = c(start, max_time)
+
+  # Nt.max.abs = max( abs( range(Nx.lags.use[start:max_time, "Xt"],
+  #                               na.rm=TRUE) ) )
+  # Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
+
+  Xt.max.abs = max(abs( range(obj$xt_observed[start:max_time], na.rm=TRUE) ),
+                   abs( range(obj$xt_forecast[start:max_time], na.rm=TRUE)) )
+  Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
+                                                #  axs="i" doesn't work for 3d
+  # Set mar, the numbers of lines of margins, default c(5, 4, 4, 2) + 0.1.
+  par.mar.ts = c(3, 3, 1, 1)         # For time series
+  par.mar.phase = c(3, 0, 1, 0)      # For phase plots (3d sets it anyway)
+  par.mar.3d = c(3, 0, 0, 0)
+
+  par.mgp.3d = c(3, 10, 0)
+  par.mgp = c(1.5, 0.5, 0)
+  par("mgp" = par.mgp) # first val sets axis title dist (mex units)
+                       #  to axes, second sets labels
+
+  iii = end - 1    # depends on the type of plot, don't have value of
+                   # Xt[end]. This is how many points to plot.
+
+  # Colour vector for all plots - it will correspond
+  #  to the last late.num times, not points (since different plots have
+  #  different numbers of points). So these now correspond to times from
+  #  start:iii , and so each needs to have length iii-start+1 (maybe not
+  #  lines all get used): - think that may be outdated text,
+  col.plot = c(rep(early.col, max(c(0, iii - late.num))),
+               rep(late.col, min(c(iii, late.num))) )   # colours of points
+  col.plot.lines = col.plot                            # colours of lines
+  col.plot.lines[col.plot.lines == early.col] = early.col.lines
+  pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
+                                        # filled circles for latest
+  pch.plot[length(pch.plot)] = 8     # latest one a star
+
+  # Just do for xt now, not nt yet (see Issue 6).
+
+  # Xt v t, with points also shown on 1-d line
+  if(dim == 1){
+    par(pty = "m")                 # maximal plotting region, not square
+                                   #  like for phase plots
+    par(mar = par.mar.ts)
+
+    XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
+    plot(0, 0,
+         xlab = expression("Time, t"),
+         ylab = expression("x"[t]),
+         xlim = c(XtLoc, max(t.axis.range)),
+         ylim = Xt.axes.range,
+         type = "n")                           # empty plot
+    abline(v = 0.5*XtLoc, col="black")
+
+    if(iii > 1.5){
+      segments(start:(iii-1),
+               obj$xt_observed[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+               (start+1):iii,
+               obj$xt_observed[(start+1):iii],
+               col = col.plot.lines)      # lines() will not use vector col
+    }
+    points(start:iii,
+           obj$xt_observed[start:iii],
+           type = pt.type,
+           pch = pch.plot,
+           col = col.plot)
+
+    # '1d phase plot':
+    points(rep(XtLoc, iii-start+1),
+           obj$xt_observed[start:iii],
+           type = pt.type,
+           pch = pch.plot,
+           col = col.plot)
+  }
+}
