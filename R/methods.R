@@ -436,12 +436,14 @@ pbsSMAP <- function (nt,
 	xt_rho <- cor(xt_observed, xt_forecast, use = "pairwise.complete.obs")
 	xt_rmse <- sqrt(mean((xt_observed - xt_forecast)^2, na.rm = TRUE))
 	xt_dim <- length(lags_size)
-	xt_theta <- local_weight
-	xt_results <- data.frame(xt_dim = xt_dim,
-													 xt_theta = xt_theta,
-													 xt_rho = xt_rho,
-													 xt_rmse = xt_rmse,
-													 stringsAsFactors = FALSE)
+        xt_theta <- local_weight
+        E <- xt_dim - 1
+  xt_results <- data.frame(xt_dim = xt_dim,
+                           E = E,
+                           xt_theta = xt_theta,
+                           xt_rho = xt_rho,
+                           xt_rmse = xt_rmse,
+                           stringsAsFactors = FALSE)
 
 	#----------------- Return a list --------------------------------------------#
 
