@@ -1,7 +1,8 @@
 #' Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling
 #'
 #' @param nt [data.frame()] A data frame with named columns for the raw (unlagged) variables
-#' @param lags [list()] A named list of integer vectors specifying the lags for each variable
+#' @param lags [list()] A named list of integer vectors specifying the lags for
+#'   each of the variables that will be used (other variables are ignored)
 #' @param forecast_distance [integer(1)] The forecast distance
 #' @param first_difference [logical(1)] First difference each variable before lagging?
 #' @param centre_and_scale [logical(1)] Centre and scale each variable before lagging?
@@ -82,7 +83,9 @@ pbsEDM <- function (nt,
 
 	#----------------- Define nt_observed ---------------------------------------#
 
-	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
+  #	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
+  # ANDY commenting out since breaks Travis (vignette). Think we just want it
+  # like I have in the next if statement.
 
 	#----------------- Transform time series ------------------------------------#
 
