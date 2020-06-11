@@ -49,7 +49,7 @@ calculations (not relevant here).
 calc <- pbsEDM(Nx_lags_orig,
                lags = list(Xt = c(0:1))) # A list of results
 
-pred <- calc$xt_forecast
+# pred <- calc$xt_forecast
 
 plot_observed(calc, late.num = 5)
 ```

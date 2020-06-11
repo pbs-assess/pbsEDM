@@ -489,6 +489,14 @@ plot_pbsEDM = function(obj){
 ##'     end-start-1 points plotted)
 ##' @param max_time maximum time value to plot (will be different from `end` if
 ##'     making a movie using Rmarkdown, since for that `end` will get iterated)
+##' @param late.col
+##' @param early.col
+##' @param early.col.lines
+##' @param late.num
+##' @param pt.type
+##' @param x.lab
+##' @param y.lab
+##' @param z.lab
 ##' @return
 ##' @export
 ##' @author Andrew Edwards

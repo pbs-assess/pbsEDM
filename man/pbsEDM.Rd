@@ -33,7 +33,7 @@ Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling
 }
 \details{
 Only lags and columns explicitly named in `lags` are used. For
-example, an unlagged time series in a column named `Salinity` could be 
+example, an unlagged time series in a column named `Salinity` could be
 included via `lags = list(..., Salinity = c(0))`.
 }
 \examples{
