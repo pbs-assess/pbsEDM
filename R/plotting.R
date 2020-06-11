@@ -504,14 +504,14 @@ plot_observed = function(obj,
                          dim = 1,
                          end = NULL,
                          max_time = NULL,
-                                                       late.col = "red",
-                              early.col = "black",
-                              early.col.lines = "lightgrey",
-                              late.num = 3,
-                              pt.type = "p",
-                              x.lab = expression("x"[t-2]),
-                              y.lab = expression("x"[t-1]),
-                              z.lab = expression("x"[t])){
+                         late.col = "red",
+                         early.col = "black",
+                         early.col.lines = "lightgrey",
+                         late.num = 3,
+                         pt.type = "p",
+                         x.lab = expression("x"[t-2]),
+                         y.lab = expression("x"[t-1]),
+                         z.lab = expression("x"[t])){
   stopifnot(attr(obj, "class") == "pbsEDM")
   stopifnot(dim %in% 1:3)
 
@@ -531,7 +531,7 @@ plot_observed = function(obj,
   Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
                                                 #  axs="i" doesn't work for 3d
   # Set mar, the numbers of lines of margins, default c(5, 4, 4, 2) + 0.1.
-  par.mar.ts = c(3, 3, 1, 1)         # For time series
+#  par.mar.ts = c(3, 3, 1, 1)         # For time series
   par.mar.phase = c(3, 0, 1, 0)      # For phase plots (3d sets it anyway)
   par.mar.3d = c(3, 0, 0, 0)
 
@@ -560,35 +560,82 @@ plot_observed = function(obj,
 
   # Xt v t, with points also shown on 1-d line
   if(dim == 1){
-    par(pty = "m")                 # maximal plotting region, not square
-                                   #  like for phase plots
-    par(mar = par.mar.ts)
 
+    plot_time_series(values = obj$xt_observed,
+                     X.or.N = "X",
+                     par.mar.ts = c(3, 3, 1, 1),
+                     y.range = Xt.axes.range,
+                     iii = 50,
+                     col.plot.lines = col.plot.lines
+                     )
+  }
+
+}
+
+##' Plot the observed time series as either Nt or Xt
+##'
+##'  <description>
+##'
+##' @param values
+##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
+##' @param par.mar.ts
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_time_series <- function(values,
+                             X.or.N,
+                             par.mar.ts,
+                             t.axis.range = NA,
+                             iii,
+                             y.range,
+                             col.plot.lines,
+                             start = 1
+
+                             ){
+  if(is.na(t.axis.range)) {
+    t.axis.range <- c(1, length(values))
+  }
+
+  par(pty = "m")                 # maximal plotting region, not square
+                                 #  like for phase plots
+  par(mar = par.mar.ts)
+
+  if(X.or.N == "N"){
+    plot(0, 0,
+         xlab = expression("Time, t"),
+         ylab = expression("N"[t]),
+         xlim = c(0, max(t.axis.range)),
+         ylim = y.range,
+         type = "n")                           # empty plot
+  } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
     plot(0, 0,
          xlab = expression("Time, t"),
-         ylab = expression("x"[t]),
+         ylab = expression("X"[t]),
          xlim = c(XtLoc, max(t.axis.range)),
-         ylim = Xt.axes.range,
+         ylim = y.range,
          type = "n")                           # empty plot
     abline(v = 0.5*XtLoc, col="black")
+  }
 
-    if(iii > 1.5){
-      segments(start:(iii-1),
-               obj$xt_observed[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
-               (start+1):iii,
-               obj$xt_observed[(start+1):iii],
-               col = col.plot.lines)      # lines() will not use vector col
-    }
-    points(start:iii,
-           obj$xt_observed[start:iii],
-           type = pt.type,
-           pch = pch.plot,
-           col = col.plot)
+  if(iii > 1.5){
+    segments(start:(iii-1),
+             values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+             (start+1):iii,
+             values[(start+1):iii],
+             col = col.plot.lines)      # lines() will not use vector col
+  }
 
-    # '1d phase plot':
+  points(start:iii,
+         values[start:iii],
+         type = pt.type,
+         pch = pch.plot,
+         col = col.plot)
+
+  # '1d phase plot':
+  if(X.or.N == "X"){
     points(rep(XtLoc, iii-start+1),
-           obj$xt_observed[start:iii],
+           values[start:iii],
            type = pt.type,
            pch = pch.plot,
            col = col.plot)
