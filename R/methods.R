@@ -3,6 +3,7 @@
 #' @param nt [data.frame()] A data frame with named columns for the raw (unlagged) variables
 #' @param lags [list()] A named list of integer vectors specifying the lags for each variable
 #' @param forecast_distance [integer(1)] The forecast distance
+#' @param first_difference [logical(1)] First difference each variable before lagging?
 #' @param centre_and_scale [logical(1)] Centre and scale each variable before lagging?
 #' @param show_calculations [logical(1)]
 #'

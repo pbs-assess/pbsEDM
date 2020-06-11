@@ -55,13 +55,13 @@ Perform Out-of-Sample Forecasting via S-Mapping
 \details{
 Only lags of variables explicitly named in \code{lags} are used. The
 observed time series whose values are forecast must be specified first. For
-example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity}, 
-the unlagged version of the variable \code{Predator} can be specified as the 
-observed time series by 
+example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity},
+the unlagged version of the variable \code{Predator} can be specified as the
+observed time series by
 
-\code{lags = list(Predator = c(0, ...), ...)}. 
+\code{lags = list(Predator = c(0, ...), ...)}.
 
-The unlagged version of \code{Predator} can be forecast from the first and second lags 
+The unlagged version of \code{Predator} can be forecast from the first and second lags
 of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
 specifying:
 
