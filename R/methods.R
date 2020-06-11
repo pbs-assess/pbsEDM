@@ -1,17 +1,48 @@
 #' Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling
 #'
-#' @param nt [data.frame()] A data frame with named columns
-#' @param lags [list()] A named list of integer vectors
+#' @param nt [data.frame()] A data frame with named columns for the raw (unlagged) variables
+#' @param lags [list()] A named list of integer vectors specifying the lags for each variable
 #' @param forecast_distance [integer(1)] The forecast distance
-#' @param first_difference [logical(1)]
-#' @param centre_and_scale [logical(1)]
-#' @param show_calculations [logical(1)]
+#' @param first_difference [logical(1)] First difference each variable before lagging?
+#' @param centre_and_scale [logical(1)] Centre and scale each variable before lagging?
 #'
-#' @return A list
-#'
-#' @details Only lags and columns explicitly named in `lags` are used. For
-#' example, an unlagged time series in a column named `Salinity` could be
-#' included via `lags = list(..., Salinity = c(0))`.
+#' @details Only lags of variables explicitly named in \code{lags} are used. The
+#' observed time series whose values are forecast must be specified first. For
+#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity}, 
+#' the unlagged version of the variable \code{Predator} can be specified as the 
+#' observed time series by 
+#' 
+#' \code{lags = list(Predator = c(0, ...), ...)}. 
+#' 
+#' The unlagged version of \code{Predator} can be forecast from the first and second lags 
+#' of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
+#' specifying:
+#' 
+#' \code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
+#' 
+#' @return A list containing:
+#' 
+#' \itemize{
+#' 	 \item nt_results = NULL,
+#'   \item nt_observed = NULL,
+#'   \item nt_forecast = NULL,
+#'   \item xt_results [data.frame()] A summary of results
+#'   \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
+#'   \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
+#'   \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
+#'   \item xt_distance [matrix()] Focal index (row), neighbour (column), distance (value)
+#'   \item xt_nbr_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
+#'   \item xt_nbr_value [matrix()] Focal index (row), rank (column), and neighbour value (value)
+#'   \item xt_nbr_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
+#'   \item xt_nbr_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
+#'   \item xt_prj_index [matrix()] Projected index (row), rank (column), and neighbour index (value)
+#'   \item xt_prj_value [matrix()] Projected index (row), rank (column), and neighbour index (value)
+#'   \item xt_prj_weight  [matrix()] Projected index (row), rank (column), and neighbour weight (value)
+#'   \item forecast_distance = [integer(1)]
+#'   \item first_difference = [logical(1)]
+#'   \item centre_and_scale = [logical(1)]
+#' }
+#' 
 #'
 #' @author Luke A. Rogers
 #' @export
@@ -29,8 +60,6 @@
 #' nt <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
 #' m3 <- pbsEDM(nt, lags, first_difference = TRUE)
-#'
-#'
 #'
 pbsEDM <- function (nt,
 										lags,
@@ -157,10 +186,10 @@ pbsEDM <- function (nt,
 			xt_nbr_weight = nbr_wgts,
 			xt_prj_index = prj_inds,
 			xt_prj_value = prj_vals,
-                        xt_prj_weight = prj_wgts,
-                        forecast_distance = forecast_distance,
-                        first_difference = first_difference,
-                        centre_and_scale = centre_and_scale
+			xt_prj_weight = prj_wgts,
+			forecast_distance = as.integer(forecast_distance),
+			first_difference = first_difference,
+			centre_and_scale = centre_and_scale
 		),
 		class = "pbsEDM"
 	)
@@ -176,11 +205,41 @@ pbsEDM <- function (nt,
 #' @param first_difference [logical(1)]
 #' @param centre_and_scale [logical(1)]
 #'
-#' @return A list
-#'
-#' @details Only lags and columns explicitly named in `lags` are used. For
-#' example, an unlagged time series in a column named `Salinity` could be
-#' included via `lags = list(..., Salinity = c(0))`.
+#' @details Only lags of variables explicitly named in \code{lags} are used. The
+#' observed time series whose values are forecast must be specified first. For
+#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity}, 
+#' the unlagged version of the variable \code{Predator} can be specified as the 
+#' observed time series by 
+#' 
+#' \code{lags = list(Predator = c(0, ...), ...)}. 
+#' 
+#' The unlagged version of \code{Predator} can be forecast from the first and second lags 
+#' of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
+#' specifying:
+#' 
+#' \code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
+#' 
+#' @return A list containing:
+#' 
+#' \itemize{
+#' 	 \item nt_results = NULL,
+#'   \item nt_observed = NULL,
+#'   \item nt_forecast = NULL,
+#'   \item xt_results [data.frame()] A summary of results
+#'   \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
+#'   \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
+#'   \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
+#'   \item xt_distance [matrix()] Focal index (row), neighbour (column), distance (value)
+#'   \item xt_nbr_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
+#'   \item xt_nbr_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
+#'   \item xt_nbr_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
+#'   \item xt_prj_index [matrix()] Projected index (row), rank (column), and neighbour index (value)
+#'   \item xt_prj_value [matrix()] Projected index (row), rank (column), and neighbour index (value)
+#'   \item xt_prj_weight  [matrix()] Projected index (row), rank (column), and neighbour weight (value)
+#'   \item forecast_distance = [integer(1)]
+#'   \item first_difference = [logical(1)]
+#'   \item centre_and_scale = [logical(1)]
+#' }
 #'
 #' @author Luke A. Rogers
 #' @export
@@ -389,7 +448,10 @@ pbsSMAP <- function (nt,
 			xt_nbr_weight = nbr_wgts,
 			xt_prj_index = prj_inds,
 			xt_prj_value = prj_vals,
-			xt_prj_weight = prj_wgts
+			xt_prj_weight = prj_wgts,
+			forecast_distance = as.integer(forecast_distance),
+			first_difference = first_difference,
+			centre_and_scale = centre_and_scale
 		),
 		class = "pbsEDM"
 	)
