@@ -522,9 +522,9 @@ plot_observed = function(obj,
   start = 1    # start time of plots, only works for 1
   t.axis.range = c(start, max_time)
 
-  # Nt.max.abs = max( abs( range(Nx.lags.use[start:max_time, "Xt"],
-  #                               na.rm=TRUE) ) )
-  # Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
+  Nt.max.abs = max( abs( range(obj$nt_observed[start:max_time],
+                                na.rm=TRUE) ) )
+  Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
 
   Xt.max.abs = max(abs( range(obj$xt_observed[start:max_time], na.rm=TRUE) ),
                    abs( range(obj$xt_forecast[start:max_time], na.rm=TRUE)) )
@@ -548,7 +548,9 @@ plot_observed = function(obj,
   #  different numbers of points). So these now correspond to times from
   #  start:iii , and so each needs to have length iii-start+1 (maybe not
   #  lines all get used): - think that may be outdated text,
-  col.plot = c(rep(early.col, max(c(0, iii - late.num))),
+  # ***I changed something but can't see on GitHub, need to fix, should not have
+  #  start for Xt plots
+  col.plot = c(rep(early.col, max(c(0, iii - late.num - start + 1))),
                rep(late.col, min(c(iii, late.num))) )   # colours of points
   col.plot.lines = col.plot                            # colours of lines
   col.plot.lines[col.plot.lines == early.col] = early.col.lines
@@ -560,13 +562,24 @@ plot_observed = function(obj,
 
   # Xt v t, with points also shown on 1-d line
   if(dim == 1){
+    par(mfrow=c(1,2))
+
+    plot_time_series(values = obj$nt_observed,
+                     X.or.N = "N",
+                     par.mar.ts = c(3, 3, 1, 1),
+                     y.range = Nt.axes.range,
+                     col.plot = col.plot,
+                     col.plot.lines = col.plot.lines,
+                     pch.plot = pch.plot
+                     )
 
     plot_time_series(values = obj$xt_observed,
                      X.or.N = "X",
                      par.mar.ts = c(3, 3, 1, 1),
                      y.range = Xt.axes.range,
-                     iii = 50,
-                     col.plot.lines = col.plot.lines
+                     col.plot = col.plot,
+                     col.plot.lines = col.plot.lines,
+                     pch.plot = pch.plot
                      )
   }
 
@@ -586,14 +599,19 @@ plot_time_series <- function(values,
                              X.or.N,
                              par.mar.ts,
                              t.axis.range = NA,
-                             iii,
+                             iii = NA,
                              y.range,
+                             col.plot,
                              col.plot.lines,
-                             start = 1
-
+                             pch.plot,
+                             start = 1,
+                             pt.type = "p"
                              ){
   if(is.na(t.axis.range)) {
     t.axis.range <- c(1, length(values))
+  }
+  if(is.na(iii)) {
+    iii = max(t.axis.range)
   }
 
   par(pty = "m")                 # maximal plotting region, not square
