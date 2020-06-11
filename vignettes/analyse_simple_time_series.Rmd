@@ -29,7 +29,7 @@ function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
 Using that as an example here, see `inclusion_issue.Rmd` vignette for comparison
 of Andy's original results with results from `pbsEDM` and `rEDM`.
 
-## Visualise data
+## Visualise data - can prob skip once new function done
 
 Plot of data (before making movie):
 ```{r}
@@ -52,4 +52,26 @@ calc <- pbsEDM(Nx_lags_orig,
 # pred <- calc$xt_forecast
 
 plot_observed(calc, late.num = 5)
+
+# Use original Nt only, do lag of 1:
+calc2 <- pbsEDM(Nx_lags_orig,
+                lags = list(Nt = c(0:1)),
+                first_difference = TRUE)
+
+plot_observed(calc2, late.num = 5)
+
+testthat::expect_equal(calc$xt_forecast, calc2$xt_forecast)
+```
+
+Loop over values of lag (then make into wrapper function):
+```{r loop}
+E_res = list()
+par(mfrow = c(3,2))
+for(E in 1:5){
+  E_res[[E]] <- pbsEDM(Nx_lags_orig,
+                       lags = list(Nt = 0:E),
+                       first_difference = TRUE)
+  plot_observed(E_res[[E]], late.num = 5)
+}
+
 ```

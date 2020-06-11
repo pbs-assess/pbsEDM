@@ -3,25 +3,27 @@
 #' @param nt [data.frame()] A data frame with named columns for the raw (unlagged) variables
 #' @param lags [list()] A named list of integer vectors specifying the lags for each variable
 #' @param forecast_distance [integer(1)] The forecast distance
-#' @param first_difference [logical(1)] First difference each variable before lagging?
 #' @param centre_and_scale [logical(1)] Centre and scale each variable before lagging?
+#' @param show_calculations [logical(1)]
+#'
+#' @return A list
 #'
 #' @details Only lags of variables explicitly named in \code{lags} are used. The
 #' observed time series whose values are forecast must be specified first. For
-#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity}, 
-#' the unlagged version of the variable \code{Predator} can be specified as the 
-#' observed time series by 
-#' 
-#' \code{lags = list(Predator = c(0, ...), ...)}. 
-#' 
-#' The unlagged version of \code{Predator} can be forecast from the first and second lags 
+#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity},
+#' the unlagged version of the variable \code{Predator} can be specified as the
+#' observed time series by
+#'
+#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'
+#' The unlagged version of \code{Predator} can be forecast from the first and second lags
 #' of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
 #' specifying:
-#' 
+#'
 #' \code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
-#' 
+#'
 #' @return A list containing:
-#' 
+#'
 #' \itemize{
 #' 	 \item nt_results = NULL,
 #'   \item nt_observed = NULL,
@@ -42,7 +44,7 @@
 #'   \item first_difference = [logical(1)]
 #'   \item centre_and_scale = [logical(1)]
 #' }
-#' 
+#'
 #'
 #' @author Luke A. Rogers
 #' @export
@@ -76,20 +78,22 @@ pbsEDM <- function (nt,
 		is.logical(first_difference) && length(first_difference) == 1L,
 		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
 	)
-	
+
 	#----------------- Define nt_observed ---------------------------------------#
-	
+
 	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
-	
+
 	#----------------- Transform time series ------------------------------------#
 
 	xt <- as.matrix(nt[, names(lags)])
 	colnames(xt) <- names(lags)
 	# First difference and buffer with NAs
 	if (first_difference) {
-		xt <- rbind(apply(xt, 2, diff), NA_real_)
-	}
-	# Centre and scale
+          nt_observed = xt           # original data before first differencing
+          xt <- rbind(apply(xt, 2, diff), NA_real_)
+	} else {
+          nt_observed = NULL
+        }
 	if (centre_and_scale) {
 		xt_means <- apply(xt, 2, mean, na.rm = TRUE)
 		xt_sds <- apply(xt, 2, sd, na.rm = TRUE)
@@ -211,20 +215,20 @@ pbsEDM <- function (nt,
 #'
 #' @details Only lags of variables explicitly named in \code{lags} are used. The
 #' observed time series whose values are forecast must be specified first. For
-#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity}, 
-#' the unlagged version of the variable \code{Predator} can be specified as the 
-#' observed time series by 
-#' 
-#' \code{lags = list(Predator = c(0, ...), ...)}. 
-#' 
-#' The unlagged version of \code{Predator} can be forecast from the first and second lags 
+#' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity},
+#' the unlagged version of the variable \code{Predator} can be specified as the
+#' observed time series by
+#'
+#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'
+#' The unlagged version of \code{Predator} can be forecast from the first and second lags
 #' of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
 #' specifying:
-#' 
+#'
 #' \code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
-#' 
+#'
 #' @return A list containing:
-#' 
+#'
 #' \itemize{
 #' 	 \item nt_results = NULL,
 #'   \item nt_observed = NULL,
@@ -277,9 +281,9 @@ pbsSMAP <- function (nt,
 	)
 
 	#----------------- Define nt_observed ---------------------------------------#
-	
+
 	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
-	
+
 	#----------------- Transform time series ------------------------------------#
 
 	xt <- as.matrix(nt[, names(lags)])
