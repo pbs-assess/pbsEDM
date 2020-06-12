@@ -15,7 +15,8 @@ pbsEDM(
 \arguments{
 \item{nt}{[data.frame()] A data frame with named columns for the raw (unlagged) variables}
 
-\item{lags}{[list()] A named list of integer vectors specifying the lags for each variable}
+\item{lags}{[list()] A named list of integer vectors specifying the lags for
+each of the variables that will be used (other variables are ignored)}
 
 \item{forecast_distance}{[integer(1)] The forecast distance}
 
@@ -31,10 +32,8 @@ A list
 A list containing:
 
 \itemize{
-	 \item nt_results = NULL,
   \item nt_observed = NULL,
   \item nt_forecast = NULL,
-  \item xt_results [data.frame()] A summary of results
   \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
   \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
   \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
@@ -49,6 +48,7 @@ A list containing:
   \item forecast_distance = [integer(1)]
   \item first_difference = [logical(1)]
   \item centre_and_scale = [logical(1)]
+  \item results [data.frame()] One-row data frame with values of E, rho and rmse.
 }
 }
 \description{

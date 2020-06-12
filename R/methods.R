@@ -27,10 +27,8 @@
 #' @return A list containing:
 #'
 #' \itemize{
-#' 	 \item nt_results = NULL,
 #'   \item nt_observed = NULL,
 #'   \item nt_forecast = NULL,
-#'   \item xt_results [data.frame()] A summary of results
 #'   \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
 #'   \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
 #'   \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
@@ -45,6 +43,7 @@
 #'   \item forecast_distance = [integer(1)]
 #'   \item first_difference = [logical(1)]
 #'   \item centre_and_scale = [logical(1)]
+#'   \item results [data.frame()] One-row data frame with values of E, rho and rmse.
 #' }
 #'
 #'
