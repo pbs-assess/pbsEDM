@@ -501,7 +501,8 @@ plot_pbsEDM = function(obj){
 ##' @export
 ##' @author Andrew Edwards
 plot_observed = function(obj,
-                         dim = 1,
+                         dim = 1,    # TODO remove and put into wrapper function
+                                     # if needed
                          end = NULL,
                          max_time = NULL,
                          late.col = "red",
@@ -659,4 +660,148 @@ plot_time_series <- function(values,
            pch = pch.plot,
            col = col.plot)
   }
+}
+##' @
+##'  <description>
+##'
+##' @param values
+##' @param X.or.N
+##' @param par.mar.ts
+##' @param t.axis.range
+##' @param iii
+##' @param y.range
+##' @param col.plot
+##' @param col.plot.lines
+##' @param pch.plot
+##' @param start
+##' @param pt.type
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_phase_2d <- function(values,
+                          X.or.N,
+                          par.mar.phase = c(3, 0, 1, 0),
+                          axis.range = NA,
+                          iii = NA,
+                          y.range,
+                          col.plot,
+                          col.plot.lines,
+                          pch.plot,
+                          start = 1,
+                          pt.type = "p",
+                          cobwebbing = TRUE,
+                          late.col = "red",
+                          early.col = "black",
+                          early.col.lines = "lightgrey",
+                          late.num = 3
+                          ){
+
+  if(is.na(axis.range)) {
+    axis.range <- c(min(0, min(values)),
+                    max(values))
+  }
+  if(is.na(iii)) {
+    iii = length(values)
+  }
+
+# Copying from plotPanelMovie.df2
+      par(pty="s")             # set following plot types to be square
+                               #  (without this the axes don't seem to
+                               #  be the same, even with the settings below)
+      par(mar = par.mar.phase) # margins
+      # N_t vs N{t-1}:
+      # Empty plot to get started, that's it for iii=0:
+  if(X.or.N == "N"){
+    plot(0, 0,
+         xlab = expression("N"[t-1]),
+         ylab = expression("N"[t]),
+         xlim = Nt.axes.range,
+         ylim = Nt.axes.range,
+         type = "n")
+  } else {
+    plot(0, 0,
+         xlab = y.lab,
+         ylab = z.lab,
+         xlim = Xt.axes.range,
+         ylim = Xt.axes.range,
+         type = "n")
+  }
+
+  if(cobwebbing) abline(0, 1, col="darkgrey")
+
+  # Draw lines first so they get overdrawn by points
+  if(iii > 2.5){
+    if(cobwebbing){
+      # Do lines for cobwebbing
+      Nvals = rep(values[start:iii],
+                  each = 2)
+      Nvals = Nvals[-1]
+      Nvals = Nvals[-length(Nvals)]
+      len = length(Nvals)
+      col.cobweb.lines = rep(early.col.lines, len)
+      col.cobweb.lines[(max( (len - 2*late.num + 1), 1)):len] = late.col
+      segments(Nvals[1:(len-2)],
+               Nvals[2:(len-1)],
+               Nvals[2:(len-1)],
+               Nvals[3:len],
+               col = col.cobweb.lines)
+    } else {
+      # Join each point to the next   (N(5), N(6)) to (N(6), N(7))
+      #  Not checked.
+      segments(
+        # dplyr::pull(Nx.lags.use[start:(iii-1), "Ntmin1"]),
+        # dplyr::pull(Nx.lags.use[start:(iii-1), "Nt"]),
+        # dplyr::pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
+        # dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
+        pbsLAG(values)[start:(iii-1)],   # N(t-1)
+        values[start:(iii-1)],
+        pbsLAG(values)[(start+1):iii],
+        values[(start+1):iii],
+        col = col.plot.lines) # lines() will not use vector of col
+    }
+  }
+  if(iii > 1.5){
+    points(pbsLAG(values)[start:iii],
+           values[start:iii],
+           type = pt.type,
+           pch = pch.plot,
+           col = col.plot)          # start row has NA's, gets ignored
+  }
+      # legend("topright", legend=paste0("Time t=", iii), box.col = "white",
+      #        inset = 0.01)  # inset to stop white overwriting outer box
+
+
+      # x_t vs x{t-1}:
+
+#      if(iii > 2.5)
+#        {
+#          if(cobwebbing)
+#            {
+#               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "Xt"]), each = 2)
+#               xvals = xvals[-1]
+#               xvals = xvals[-length(xvals)]
+#               lenx = length(xvals)
+#              segments(xvals[1:(lenx-2)],
+#                        xvals[2:(lenx-1)],
+#                       xvals[2:(lenx-1)],
+#                        xvals[3:lenx],
+#                        col = col.cobweb.lines)
+#           } else
+#           {  # Just join consecutive points with lines
+#               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "Xtmin1"]),
+#                        dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xtmin1"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xt"]),
+#                        col = col.plot.lines)
+#            }
+#        }
+#      if(iii > 1.5)
+#        {
+#          points(dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+#                 dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
+#                 type = pt.type, pch = pch.plot,
+#                 col = col.plot)           # start row has NA's, get ignored
+#        }
+      # legend("topleft", legend=paste("Time", iii), border = NULL)
+
 }

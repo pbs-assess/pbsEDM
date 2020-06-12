@@ -3,16 +3,21 @@
 #' @param x [matrix()] A vector or column matrix
 #' @param n [integer()] The lag sizes
 #'
-#' @return A matrix or vector
+#' @return A matrix or vector. If `x` is a vector then returns a vector `length(x)`
+#'   with `NA` for the first `n` values then the first `length(x) - n` values of
+#'   `x`.
+#' If `x` is a matrix then TODO [Andy thinks it does the
+#'   obvious thing].
 #' @export
 #'
-#' @examples 
+#' @examples
 #' pbsLAG(1:10, 3)
 #' pbsLAG(matrix(rep(1:10, 2), nrow = 10), 3)
 #' pbsLAG(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
-#' 
-pbsLAG <- function (x, n) {
-	
+#'
+pbsLAG <- function (x,
+                    n = 1) {
+
 	# Check arguments
 	stopifnot(
 		is.matrix(x) || is.numeric(x),
