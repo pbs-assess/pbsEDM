@@ -176,24 +176,20 @@ pbsEDM <- function (nt,
 
   xt_observed <- xt_lags[, 1]
   xt_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
-  xt_rho <- cor(xt_observed, xt_forecast, use = "pairwise.complete.obs")
-  xt_rmse <- sqrt(mean((xt_observed - xt_forecast)^2, na.rm = TRUE))
-  xt_dim <- length(lags_size)
-  E <- xt_dim
-  xt_results <- data.frame(xt_dim = xt_dim,
-                           E = E,
-                           xt_rho = xt_rho,
-                           xt_rmse = xt_rmse,
-                           stringsAsFactors = FALSE)
+  rho <- cor(xt_observed, xt_forecast, use = "pairwise.complete.obs")
+  rmse <- sqrt(mean((xt_observed - xt_forecast)^2, na.rm = TRUE))
+  E <- length(lags_size)
+  results <- data.frame(E = E,
+                        rho = rho,
+                        rmse = rmse,
+                        stringsAsFactors = FALSE)
 
   #----------------- Return a list --------------------------------------------#
 
   structure(
     list(
-      nt_results = NULL,
       nt_observed = nt_observed,
       nt_forecast = NULL,
-      xt_results = xt_results,
       xt_observed = xt_observed,
       xt_forecast = xt_forecast,
       xt_lags = xt_lags,
@@ -207,7 +203,8 @@ pbsEDM <- function (nt,
       xt_prj_weight = prj_wgts,
       forecast_distance = as.integer(forecast_distance),
       first_difference = first_difference,
-      centre_and_scale = centre_and_scale
+      centre_and_scale = centre_and_scale,
+      results = results
     ),
     class = "pbsEDM"
   )
