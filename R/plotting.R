@@ -522,9 +522,11 @@ plot_observed = function(obj,
   start = 1    # start time of plots, only works for 1
   t.axis.range = c(start, max_time)
 
-  Nt.max.abs = max( abs( range(obj$nt_observed[start:max_time],
-                                na.rm=TRUE) ) )
-  Nt.axes.range = c(0, Nt.max.abs*1.04)         # Expand else points can hit edge
+  if(!is.null(calc$nt_observed)){
+    Nt.max.abs = max( abs( range(obj$nt_observed[start:max_time],
+                                 na.rm=TRUE) ) )
+    Nt.axes.range = c(0, Nt.max.abs*1.04)    # Expand else points can hit edge
+  }
 
   Xt.max.abs = max(abs( range(obj$xt_observed[start:max_time], na.rm=TRUE) ),
                    abs( range(obj$xt_forecast[start:max_time], na.rm=TRUE)) )
@@ -558,20 +560,20 @@ plot_observed = function(obj,
                                         # filled circles for latest
   pch.plot[length(pch.plot)] = 8     # latest one a star
 
-  # Just do for xt now, not nt yet (see Issue 6).
-
-  # Xt v t, with points also shown on 1-d line
+  # Nt v t (if available) and Xt v t, with Xt points also shown on 1-d line
   if(dim == 1){
-    par(mfrow=c(1,2))
+    if(!is.null(calc$nt_observed)){
+      par(mfrow=c(1,2))       # Will have to generalise this
 
-    plot_time_series(values = obj$nt_observed,
-                     X.or.N = "N",
-                     par.mar.ts = c(3, 3, 1, 1),
-                     y.range = Nt.axes.range,
-                     col.plot = col.plot,
-                     col.plot.lines = col.plot.lines,
-                     pch.plot = pch.plot
-                     )
+      plot_time_series(values = obj$nt_observed,
+                       X.or.N = "N",
+                       par.mar.ts = c(3, 3, 1, 1),
+                       y.range = Nt.axes.range,
+                       col.plot = col.plot,
+                       col.plot.lines = col.plot.lines,
+                       pch.plot = pch.plot
+                       )
+    }
 
     plot_time_series(values = obj$xt_observed,
                      X.or.N = "X",
@@ -582,7 +584,6 @@ plot_observed = function(obj,
                      pch.plot = pch.plot
                      )
   }
-
 }
 
 ##' Plot the observed time series as either Nt or Xt
