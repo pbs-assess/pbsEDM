@@ -683,7 +683,6 @@ plot_phase_2d <- function(values,
                           par.mar.phase = c(3, 0, 1, 0),
                           axis.range = NA,
                           iii = NA,
-                          y.range,
                           # col.plot = ,
                           # col.plot.lines,
                           # pch.plot,
@@ -693,12 +692,14 @@ plot_phase_2d <- function(values,
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
-                          late.num = 3
+                          late.num = 3,
+                          y.lab = expression("x"[t-1]),
+                          z.lab = expression("x"[t])
                           ){
 
   if(is.na(axis.range)) {
-    axis.range <- c(min(0, min(values)),
-                    max(values))
+    axis.range <- c(min(0, min(values, na.rm = TRUE)),
+                    max(values, na.rm = TRUE))   # for Nt or Xt
   }
   if(is.na(iii)) {
     iii = length(values)
@@ -730,15 +731,15 @@ plot_phase_2d <- function(values,
     plot(0, 0,
          xlab = expression("N"[t-1]),
          ylab = expression("N"[t]),
-         xlim = Nt.axes.range,
-         ylim = Nt.axes.range,
+         xlim = axis.range,
+         ylim = axis.range,
          type = "n")
   } else {
     plot(0, 0,
          xlab = y.lab,
          ylab = z.lab,
-         xlim = Xt.axes.range,
-         ylim = Xt.axes.range,
+         xlim = axis.range,
+         ylim = axis.range,
          type = "n")
   }
 
