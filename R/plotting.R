@@ -522,7 +522,7 @@ plot_observed = function(obj,
   start = 1    # start time of plots, only works for 1
   t.axis.range = c(start, max_time)
 
-  if(!is.null(calc$nt_observed)){
+  if(!is.null(obj$nt_observed)){
     Nt.max.abs = max( abs( range(obj$nt_observed[start:max_time],
                                  na.rm=TRUE) ) )
     Nt.axes.range = c(0, Nt.max.abs*1.04)    # Expand else points can hit edge
@@ -562,7 +562,7 @@ plot_observed = function(obj,
 
   # Nt v t (if available) and Xt v t, with Xt points also shown on 1-d line
   if(dim == 1){
-    if(!is.null(calc$nt_observed)){
+    if(!is.null(obj$nt_observed)){
       par(mfrow=c(1,2))       # Will have to generalise this
 
       plot_time_series(values = obj$nt_observed,
