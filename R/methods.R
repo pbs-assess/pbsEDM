@@ -66,147 +66,150 @@
 #' m3 <- pbsEDM(nt, lags, first_difference = TRUE)
 #'
 pbsEDM <- function (nt,
-										lags,
-										forecast_distance = 1L,
-										first_difference = FALSE,
-										centre_and_scale = FALSE) {
+                    lags,
+                    forecast_distance = 1L,
+                    first_difference = FALSE,
+                    centre_and_scale = FALSE) {
 
-	#----------------- Check arguments ------------------------------------------#
+  #----------------- Check arguments ------------------------------------------#
 
-	stopifnot(
-		is.numeric(nt) || is.matrix(nt) || is.data.frame(nt),
-		is.list(lags),
-		is.integer(forecast_distance) && length(forecast_distance) == 1L,
-		is.logical(first_difference) && length(first_difference) == 1L,
-		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
-	)
+  stopifnot(
+    is.numeric(nt) || is.matrix(nt) || is.data.frame(nt),
+    is.list(lags),
+    is.integer(forecast_distance) && length(forecast_distance) == 1L,
+    is.logical(first_difference) && length(first_difference) == 1L,
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+  )
 
-	#----------------- Define nt_observed ---------------------------------------#
+  #----------------- Define nt_observed ---------------------------------------#
 
   #	nt_observed <- pbsLAG(as.vector(nt[, names(lags)[1]]), lags[[1]][1])
   # ANDY commenting out since breaks Travis (vignette). Think we just want it
   # like I have in the next if statement.
 
-	#----------------- Transform time series ------------------------------------#
+  #----------------- Transform time series ------------------------------------#
 
-	xt <- as.matrix(nt[, names(lags)])
-	colnames(xt) <- names(lags)
-	# First difference and buffer with NAs
-	if (first_difference) {
-          nt_observed = xt           # original data before first differencing
-          xt <- rbind(apply(xt, 2, diff), NA_real_)
-	} else {
-          nt_observed = NULL
-        }
-	if (centre_and_scale) {
-		xt_means <- apply(xt, 2, mean, na.rm = TRUE)
-		xt_sds <- apply(xt, 2, sd, na.rm = TRUE)
-		xt <- t((t(xt) - xt_means) / xt_sds)
-	}
+  xt <- as.matrix(nt[, names(lags)])
+  colnames(xt) <- names(lags)
+  # First difference and buffer with NAs
+  if (first_difference) {
+    nt_observed = xt           # original data before first differencing
+    xt <- rbind(apply(xt, 2, diff), NA_real_)
+  } else {
+    nt_observed = NULL
+  }
 
-	#----------------- Create lagged matrix -------------------------------------#
+  if (centre_and_scale) {
+    xt_means <- apply(xt, 2, mean, na.rm = TRUE)
+    xt_sds <- apply(xt, 2, sd, na.rm = TRUE)
+    xt <- t((t(xt) - xt_means) / xt_sds)
+  }
 
-	# xt_lags is a matrix of named lagged column vectors
-	lags_size <- unlist(lags, use.names = FALSE)
-	lags_name <- rep(names(lags), lengths(lags))
-	xt_lags <- pbsLAG(xt[, lags_name], lags_size)
-	colnames(xt_lags) <- paste0(lags_name, "_", lags_size)
+  #----------------- Create lagged matrix -------------------------------------#
 
-	#----------------- Create distance matrix -----------------------------------#
+  # xt_lags is a matrix of named lagged column vectors
+  lags_size <- unlist(lags, use.names = FALSE)
+  lags_name <- rep(names(lags), lengths(lags))
+  xt_lags <- pbsLAG(xt[, lags_name], lags_size)
+  colnames(xt_lags) <- paste0(lags_name, "_", lags_size)
 
-	# xt_dist[i, j] is the distance between row vectors i and j in xt_lags
-	xt_lags_na <- xt_lags
-	xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
-	xt_dist <- as.matrix(dist(xt_lags_na))
+  #----------------- Create distance matrix -----------------------------------#
 
-	#----------------- Exclude elements from the distance matrix ----------------#
+  # xt_dist[i, j] is the distance between row vectors i and j in xt_lags
+  xt_lags_na <- xt_lags
+  xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
+  xt_dist <- as.matrix(dist(xt_lags_na))
 
-	# Exclude the xt_lags focal row vector
-	diag(xt_dist) <- NA
+  #----------------- Exclude elements from the distance matrix ----------------#
 
-	# Exclude xt_lags row vectors that contain NAs
-	na_rows <- which(is.na(rowSums(xt_lags)))
-	xt_dist[na_rows, ] <- NA
-	xt_dist[, na_rows] <- NA
+  # Exclude the xt_lags focal row vector
+  diag(xt_dist) <- NA
 
-	# Exclude xt_lags rows that project beyond xt_lags
-	seq_rows <- seq_len(nrow(xt_lags))
-	na_rows <- which((seq_rows + forecast_distance) > max(seq_rows))
-	xt_dist[na_rows, ] <- NA
-	xt_dist[, na_rows] <- NA
+  # Exclude xt_lags row vectors that contain NAs
+  na_rows <- which(is.na(rowSums(xt_lags)))
+  xt_dist[na_rows, ] <- NA
+  xt_dist[, na_rows] <- NA
 
-	# Exclude xt_lags rows that project to rows that contain NAs
-	prj_rows <- (which(is.na(rowSums(xt_lags))) - forecast_distance)
-	na_rows <- prj_rows[which(prj_rows > 0)]
-	# xt_dist[na_rows, ] <- NA # Commented to allow forecast from here
-	xt_dist[, na_rows] <- NA
+  # Exclude xt_lags rows that project beyond xt_lags
+  seq_rows <- seq_len(nrow(xt_lags))
+  na_rows <- which((seq_rows + forecast_distance) > max(seq_rows))
+  xt_dist[na_rows, ] <- NA
+  xt_dist[, na_rows] <- NA
 
-	# Exclude xt_lags rows that contain a projection of the focal value
-	rep_rows <- rep(seq_rows, each = length(lags[[1]]))
-	prj_rows <- rep_rows + forecast_distance + lags[[1]]
-	na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(xt_lags)),]
-	xt_dist[na_mat] <- NA # Specify [row, col] pairs
+  # Exclude xt_lags rows that project to rows that contain NAs
+  prj_rows <- (which(is.na(rowSums(xt_lags))) - forecast_distance)
+  na_rows <- prj_rows[which(prj_rows > 0)]
+  # xt_dist[na_rows, ] <- NA # Commented to allow forecast from here
+  xt_dist[, na_rows] <- NA
 
-	#----------------- Create neighbour index matrix ----------------------------#
+  # Exclude xt_lags rows that contain a projection of the focal value
+  rep_rows <- rep(seq_rows, each = length(lags[[1]]))
+  prj_rows <- rep_rows + forecast_distance + lags[[1]]
+  na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(xt_lags)),]
+  xt_dist[na_mat] <- NA # Specify [row, col] pairs
 
-	# nbr_inds is an nrow(xt_lags) x num_nbrs matrix of xt_lags row indices
-	num_nbrs <- length(lags_size) + 1
-	seq_nbrs <- seq_len(num_nbrs)
-	nbr_inds <- t(apply(xt_dist, 1, order))[, seq_nbrs]
-	nbr_inds[which(rowSums(!is.na(xt_dist)) < num_nbrs), ] <- NA
+  #----------------- Create neighbour index matrix ----------------------------#
 
-	#----------------- Create neighbour matrices --------------------------------#
+  # nbr_inds is an nrow(xt_lags) x num_nbrs matrix of xt_lags row indices
+  num_nbrs <- length(lags_size) + 1
+  seq_nbrs <- seq_len(num_nbrs)
+  nbr_inds <- t(apply(xt_dist, 1, order))[, seq_nbrs]
+  nbr_inds[which(rowSums(!is.na(xt_dist)) < num_nbrs), ] <- NA
 
-	# nbr_vals is a matrix of values from xt_lags[, 1] corresponding to nbr_inds
-	nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = xt_lags))
-	nbr_dist <- t(apply(xt_dist, 1, sort, na.last = T))[, seq_nbrs]
-	nbr_wgts <- t(apply(nbr_dist, 1, function(x) exp(-x / x[1])))
+  #----------------- Create neighbour matrices --------------------------------#
 
-	#----------------- Project neighbour matrices -------------------------------#
+  # nbr_vals is a matrix of values from xt_lags[, 1] corresponding to nbr_inds
+  nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = xt_lags))
+  nbr_dist <- t(apply(xt_dist, 1, sort, na.last = T))[, seq_nbrs]
+  nbr_wgts <- t(apply(nbr_dist, 1, function(x) exp(-x / x[1])))
 
-	prj_inds <- pbsLAG(nbr_inds, forecast_distance) + forecast_distance
-	prj_vals <- t(apply(prj_inds, 1, function(x, y) y[x, 1], y = xt_lags))
-	prj_wgts <- pbsLAG(nbr_wgts, forecast_distance)
+  #----------------- Project neighbour matrices -------------------------------#
 
-	#----------------- Prepare return values ------------------------------------#
+  prj_inds <- pbsLAG(nbr_inds, forecast_distance) + forecast_distance
+  prj_vals <- t(apply(prj_inds,
+                      1,
+                      function(x, y) y[x, 1],
+                      y = xt_lags))
+  prj_wgts <- pbsLAG(nbr_wgts, forecast_distance)
 
-	xt_observed <- xt_lags[, 1]
-	xt_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
-	xt_rho <- cor(xt_observed, xt_forecast, use = "pairwise.complete.obs")
-	xt_rmse <- sqrt(mean((xt_observed - xt_forecast)^2, na.rm = TRUE))
-	xt_dim <- length(lags_size)
-	xt_results <- data.frame(xt_dim = xt_dim,
-													 xt_rho = xt_rho,
-													 xt_rmse = xt_rmse,
-													 stringsAsFactors = FALSE)
+  #----------------- Prepare return values ------------------------------------#
 
-	#----------------- Return a list --------------------------------------------#
+  xt_observed <- xt_lags[, 1]
+  xt_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
+  xt_rho <- cor(xt_observed, xt_forecast, use = "pairwise.complete.obs")
+  xt_rmse <- sqrt(mean((xt_observed - xt_forecast)^2, na.rm = TRUE))
+  xt_dim <- length(lags_size)
+  xt_results <- data.frame(xt_dim = xt_dim,
+                           xt_rho = xt_rho,
+                           xt_rmse = xt_rmse,
+                           stringsAsFactors = FALSE)
 
-	structure(
-		list(
-			nt_results = NULL,
-			nt_observed = nt_observed,
-			nt_forecast = NULL,
-			xt_results = xt_results,
-			xt_observed = xt_observed,
-			xt_forecast = xt_forecast,
-			xt_lags = xt_lags,
-			xt_distance = xt_dist,
-			xt_nbr_index = nbr_inds,
-			xt_nbr_value = nbr_vals,
-			xt_nbr_distance = nbr_dist,
-			xt_nbr_weight = nbr_wgts,
-			xt_prj_index = prj_inds,
-			xt_prj_value = prj_vals,
-			xt_prj_weight = prj_wgts,
-			forecast_distance = as.integer(forecast_distance),
-			first_difference = first_difference,
-			centre_and_scale = centre_and_scale
-		),
-		class = "pbsEDM"
-	)
+  #----------------- Return a list --------------------------------------------#
+
+  structure(
+    list(
+      nt_results = NULL,
+      nt_observed = nt_observed,
+      nt_forecast = NULL,
+      xt_results = xt_results,
+      xt_observed = xt_observed,
+      xt_forecast = xt_forecast,
+      xt_lags = xt_lags,
+      xt_distance = xt_dist,
+      xt_nbr_index = nbr_inds,
+      xt_nbr_value = nbr_vals,
+      xt_nbr_distance = nbr_dist,
+      xt_nbr_weight = nbr_wgts,
+      xt_prj_index = prj_inds,
+      xt_prj_value = prj_vals,
+      xt_prj_weight = prj_wgts,
+      forecast_distance = as.integer(forecast_distance),
+      first_difference = first_difference,
+      centre_and_scale = centre_and_scale
+    ),
+    class = "pbsEDM"
+  )
 }
-
 
 #' Perform Out-of-Sample Forecasting via S-Mapping
 #'
