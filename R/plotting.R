@@ -684,9 +684,9 @@ plot_phase_2d <- function(values,
                           axis.range = NA,
                           iii = NA,
                           y.range,
-                          col.plot,
-                          col.plot.lines,
-                          pch.plot,
+                          # col.plot = ,
+                          # col.plot.lines,
+                          # pch.plot,
                           start = 1,
                           pt.type = "p",
                           cobwebbing = TRUE,
@@ -703,6 +703,21 @@ plot_phase_2d <- function(values,
   if(is.na(iii)) {
     iii = length(values)
   }
+
+      # Copying here for now, may want to generalise; want same size axes in
+      # each figure.
+      # Colour vector for all plots - it will correspond
+      #  to the last late.num times, not points (since different plots have
+      #  different numbers of points). So these now correspond to times from
+      #  start:iii , and so each needs to have length iii-start+1 (maybe not
+      #  lines all get used):
+      col.plot = c( rep(early.col, max(c(0, iii-late.num-start+1))),
+                    rep(late.col, min(c(iii, late.num))) )   # colours of points
+      col.plot.lines = col.plot                            # colours of lines
+      col.plot.lines[col.plot.lines == early.col] = early.col.lines
+      pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
+                                         # filled circles for latest
+      pch.plot[length(pch.plot)] = 8     # latest one a star
 
 # Copying from plotPanelMovie.df2
       par(pty="s")             # set following plot types to be square
