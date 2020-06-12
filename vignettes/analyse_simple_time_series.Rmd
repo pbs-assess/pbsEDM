@@ -65,6 +65,16 @@ plot_observed(calc2, late.num = 5)
 testthat::expect_equal(calc$xt_forecast, calc2$xt_forecast)
 ```
 
+```{r cobweb}
+# cobweb plots
+par(mfrow=c(1,2))
+plot_phase_2d(values = calc2$nt_observed,
+                       X.or.N = "N")
+
+plot_phase_2d(values = calc2$xt_observed,
+                       X.or.N = "X")
+```
+
 Loop over values of lag (then make into wrapper function):
 ```{r loop}
 E_res = list()

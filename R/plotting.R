@@ -666,20 +666,22 @@ plot_time_series <- function(values,
 ##'
 ##' @param values
 ##' @param X.or.N
-##' @param par.mar.ts
-##' @param t.axis.range
+##' @param par.mar.phase
+##' @param axis.range
 ##' @param iii
-##' @param y.range
-##' @param col.plot
-##' @param col.plot.lines
-##' @param pch.plot
-##' @param start
 ##' @param pt.type
+##' @param cobwebbing
+##' @param late.col
+##' @param early.col
+##' @param early.col.lines
+##' @param late.num
+##' @param y.lab
+##' @param z.lab
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
 plot_phase_2d <- function(values,
-                          X.or.N,
+                          X.or.N = "X",
                           par.mar.phase = c(3, 0, 1, 0),
                           axis.range = NA,
                           iii = NA,
@@ -714,7 +716,7 @@ plot_phase_2d <- function(values,
       #  lines all get used):
       col.plot = c( rep(early.col, max(c(0, iii-late.num-start+1))),
                     rep(late.col, min(c(iii, late.num))) )   # colours of points
-      col.plot.lines = col.plot                            # colours of lines
+      col.plot.lines = col.plot                              # colours of lines
       col.plot.lines[col.plot.lines == early.col] = early.col.lines
       pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
                                          # filled circles for latest
