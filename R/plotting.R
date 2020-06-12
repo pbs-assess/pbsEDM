@@ -550,7 +550,7 @@ plot_observed = function(obj,
   #  lines all get used): - think that may be outdated text,
   # ***I changed something but can't see on GitHub, need to fix, should not have
   #  start for Xt plots
-  col.plot = c(rep(early.col, max(c(0, iii - late.num - start + 1))),
+  col.plot = c(rep(early.col, max(c(0, iii - late.num + 1))),
                rep(late.col, min(c(iii, late.num))) )   # colours of points
   col.plot.lines = col.plot                            # colours of lines
   col.plot.lines[col.plot.lines == early.col] = early.col.lines
