@@ -4,7 +4,7 @@
 \alias{pbsLAG}
 \title{Return a Lagged Matrix}
 \usage{
-pbsLAG(x, n)
+pbsLAG(x, n = 1)
 }
 \arguments{
 \item{x}{[matrix()] A vector or column matrix}
@@ -12,7 +12,11 @@ pbsLAG(x, n)
 \item{n}{[integer()] The lag sizes}
 }
 \value{
-A matrix or vector
+A matrix or vector. If `x` is a vector then returns a vector `length(x)`
+  with `NA` for the first `n` values then the first `length(x) - n` values of
+  `x`.
+If `x` is a matrix then TODO [Andy thinks it does the
+  obvious thing].
 }
 \description{
 Return a Lagged Matrix
