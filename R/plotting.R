@@ -136,9 +136,7 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
       # Set mar, the numbers of lines of margins, default c(5, 4, 4, 2) + 0.1.
       par.mar.ts = c(3, 3, 1, 1)         # For time series
       par.mar.phase = c(3, 0, 1, 0)      # For phase plots (3d sets it anyway)
-      par.mar.3d = c(3, 0, 0, 0)
 
-      par.mgp.3d = c(3, 10, 0)
       par.mgp = c(1.5, 0.5, 0)
       par("mgp" = par.mgp) # first val sets axis title dist (mex units)
                            #  to axes, second sets labels
@@ -487,6 +485,9 @@ plot.pbsEDM = function(obj,
 
   plot_phase_2d(values = calc2$xt_observed,
                 X.or.N = "X")
+
+  plot_phase_3d(obj)
+
 }
 
 ##' Plot values of X(t), X(t-1), X(t-2) in one of various ways
@@ -545,7 +546,7 @@ plot_observed = function(obj,
   Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
                                                 #  axs="i" doesn't work for 3d
   # Set mar, the numbers of lines of margins, default c(5, 4, 4, 2) + 0.1.
-#  par.mar.ts = c(3, 3, 1, 1)         # For time series
+  #  par.mar.ts = c(3, 3, 1, 1)         # For time series
   par.mar.phase = c(3, 0, 1, 0)      # For phase plots (3d sets it anyway)
   par.mar.3d = c(3, 0, 0, 0)
 
@@ -833,4 +834,125 @@ plot_phase_2d <- function(values,
 #        }
       # legend("topleft", legend=paste("Time", iii), border = NULL)
 
+}
+
+##'  3d plot of x_t vs x_{t-1} vs x_{t-2}:
+##'
+##' <description>
+##'
+##' @param obj
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_lags_3d <- function(obj,
+                         par.mgp.3d = c(3, 10, 0),
+                         par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
+                         par.mar.3d = c(3, 0, 0, 0),
+                         x.lab = expression("x"[t-2]),
+                         y.lab = expression("x"[t-1]),
+                         z.lab = expression("x"[t]),
+                         axis.range = NA,
+                         iii = NA
+                         ){
+
+  if(is.na(axis.range)) {
+    axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),
+                    max(obj$xt_observed, na.rm = TRUE))   # for Nt or Xt
+  }
+  if(is.na(iii)) {
+    iii = length(values)
+  }
+
+  # Empty plot to get started
+  par(mgp = par.mgp.3d)
+  par(mai = par.mai.3d)  # scat..3d resets mar, think mai still has an effect
+  scat = scatterplot3d::scatterplot3d(0,
+                                      0,
+                                      0,
+                                      xlab = x.lab,
+                                      ylab = y.lab,
+                                      zlab = z.lab,
+                                      xlim = Xt.axes.range,
+                                      ylim = Xt.axes.range,
+                                      zlim = Xt.axes.range,
+                                      type = "n",
+                                      box = FALSE,
+                                      angle = 40 + iii,
+                                      mar = par.mar.3d)
+                                              # mar=c(5,3,4,3)+0.1 is default,set
+                                              #  within scatterplot3d
+                                              # Add axes so can see origin:
+      actual.axes.ranges = gets3dusr(scat)    # Get the actual values used
+      scat$points3d(actual.axes.ranges[1:2], c(0,0), c(0,0), type = "l",
+                    col = "lightgrey")
+      scat$points3d(c(0,0), actual.axes.ranges[3:4], c(0,0), type = "l",
+                    col = "lightgrey")
+      scat$points3d(c(0,0), c(0,0), actual.axes.ranges[5:6], type = "l",
+                    col = "lightgrey")
+      # Obtain x-y co-ords of points for segments:
+**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                                  dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                                  dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
+      if(iii > 3.5)
+        {   # Think the indexing will now be 1:(iii-start), need start value also
+            segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
+                    proj.pts$x[2:(iii-start+1)], proj.pts$y[2:(iii-start+1)],
+                    col = col.plot.lines) # lines() will not use vector
+                                          #  of col
+        }
+      # The points
+      if(iii > 2.5)
+        {
+          scat$points3d(dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
+                        dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+                        dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
+                        type = pt.type, pch = pch.plot,
+                        col = col.plot)
+        }
+
+
+#      par(scat$par.mar)    # should do the same as:
+      par(mar = par.mar.phase)   # scatterplot3d changes mar
+      par(mgp = par.mgp)   # back to usual for 2d figures
+      if(final_plot == "compare")
+      {
+        compare_cols = c("blue", "red")    # compare rEDM pred then Andy's.
+        compare_pch = c(20, 1)
+        pred_obs_max_abs = max( abs( range( c(Nx.lags$Xt,
+                                              Nx.lags$rEDM.pred,
+                                              Nx.lags$my.pred),
+                                           na.rm = TRUE)
+                                    )
+                               )
+        pred_obs_axes = c(-pred_obs_max_abs, pred_obs_max_abs)
+        #  all.pred = dplyr::select(Nx.lags.use, starts_with("XtPredEeq"))
+        #  pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
+        #  pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
+        #  predObs.axes.range = c(-pred.max.abs, pred.max.abs)
+
+        plot(0,
+             0,
+             xlab = expression("Observation of x"[t]),
+             ylab = expression("Prediction of x"[t]),
+             xlim = pred_obs_axes,
+             ylim = pred_obs_axes,
+             asp = 1,
+             type = "n")
+        abline(0, 1, col="grey")
+        leg = vector()
+        points(dplyr::select(Nx.lags[start:iii,],
+                             Xt,
+                             rEDM.pred),
+               pch = compare_pch[1],
+               col = compare_cols[1])
+        points(dplyr::select(Nx.lags[start:iii,],
+                             Xt,
+                             my.pred),
+               pch = compare_pch[2],
+               col = compare_cols[2])
+        legend("topleft",
+               pch = compare_pch,
+               leg = c("rEDM pred", "Andy pred"),
+               col = compare_cols)
+      }
 }
