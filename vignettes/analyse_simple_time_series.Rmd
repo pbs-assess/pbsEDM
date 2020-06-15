@@ -60,19 +60,15 @@ calc2 <- pbsEDM(Nx_lags_orig,
                 lags = list(Nt = c(0:1)),
                 first_difference = TRUE)
 
-plot_observed(calc2, late.num = 5)
+# plot_observed(calc2, late.num = 5)
 
 testthat::expect_equal(calc$xt_forecast, calc2$xt_forecast)
 ```
 
-```{r cobweb}
-# cobweb plots
-par(mfrow=c(1,2))
-plot_phase_2d(values = calc2$nt_observed,
-                       X.or.N = "N")
+Plot time series and cobweb plots
 
-plot_phase_2d(values = calc2$xt_observed,
-                       X.or.N = "X")
+```{r cobweb}
+plot(calc2)
 ```
 
 Loop over values of lag (then make into wrapper function):

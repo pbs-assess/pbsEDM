@@ -464,18 +464,29 @@ gets3dusr = function(s3dobject)
 }
 
 
-##' @
-##'  <description>
+##' Plot data and results of an object of class `pbsEDM`
+##'
+##' Only working if nt_observed values are in there
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param late.num
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
-plot_pbsEDM = function(obj){
+plot.pbsEDM = function(obj,
+                       late.num = 5){
   stopifnot(attr(obj, "class") == "pbsEDM")
 
-  plot(obj$xt_observed,
-       obj$xt_forecast)
+  par(mfrow = c(3,2))
+
+  plot_observed(obj,
+                late.num = late.num)
+
+  plot_phase_2d(values = calc2$nt_observed,
+                X.or.N = "N")
+
+  plot_phase_2d(values = calc2$xt_observed,
+                X.or.N = "X")
 }
 
 ##' Plot values of X(t), X(t-1), X(t-2) in one of various ways
@@ -564,7 +575,7 @@ plot_observed = function(obj,
   # Nt v t (if available) and Xt v t, with Xt points also shown on 1-d line
   if(dim == 1){
     if(!is.null(obj$nt_observed)){
-      par(mfrow=c(1,2))       # Will have to generalise this
+    #  par(mfrow=c(1,2))       # Will have to generalise this
 
       plot_time_series(values = obj$nt_observed,
                        X.or.N = "N",
