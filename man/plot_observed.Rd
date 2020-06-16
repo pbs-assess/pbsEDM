@@ -12,7 +12,7 @@ plot_observed(
   late.col = "red",
   early.col = "black",
   early.col.lines = "lightgrey",
-  late.num = 5,
+  late.num = 3,
   pt.type = "p",
   x.lab = expression("x"[t - 2]),
   y.lab = expression("x"[t - 1]),

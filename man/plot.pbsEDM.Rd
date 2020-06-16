@@ -4,14 +4,15 @@
 \alias{plot.pbsEDM}
 \title{Plot data and results of an object of class `pbsEDM`}
 \usage{
-\method{plot}{pbsEDM}(obj, late.num = 5, ...)
+\method{plot}{pbsEDM}(obj, ...)
 }
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
 
 \item{...}{additiontal arguments to be passed onto other plotting functions,
 in particular `last.time.to.plot` to plot only up to that time step (to
-loop through in a movie).}
+loop through in a movie), and late.num to plot the final number of time
+steps in a different colour}
 }
 \value{
 

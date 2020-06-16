@@ -470,15 +470,14 @@ gets3dusr = function(s3dobject)
 ##' Only working if nt_observed values are in there
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
-##' @param last.time.to.plot
 ##' @param ... additiontal arguments to be passed onto other plotting functions,
 ##'   in particular `last.time.to.plot` to plot only up to that time step (to
-##'   loop through in a movie).
+##'   loop through in a movie), and late.num to plot the final number of time
+##'   steps in a different colour
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
 plot.pbsEDM = function(obj,
-                       late.num = 5,
                        ...){
   stopifnot(attr(obj, "class") == "pbsEDM")
 
@@ -488,7 +487,6 @@ plot.pbsEDM = function(obj,
                                             # though last will have NA # not
                                             # incorporated fully yet
   plot_observed(obj,
-                late.num = late.num,
                 ...)
 #                end = last.time.to.plot)
 
@@ -500,8 +498,8 @@ plot.pbsEDM = function(obj,
                 X.or.N = "X",
                 ...)
 
-  plot_phase_3d(obj)
-
+  plot_phase_3d(obj,
+                ...)
 }
 
 ##' Plot values of X(t), X(t-1), X(t-2) in one of various ways
@@ -535,7 +533,7 @@ plot_observed = function(obj,
                          late.col = "red",
                          early.col = "black",
                          early.col.lines = "lightgrey",
-                         late.num = 5,
+                         late.num = 3,
                          pt.type = "p",
                          x.lab = expression("x"[t-2]),
                          y.lab = expression("x"[t-1]),
@@ -735,7 +733,7 @@ plot_phase_2d <- function(values,
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
-                          late.num = 5,
+                          late.num = 3,
                           y.lab = expression("x"[t-1]),
                           z.lab = expression("x"[t]),
                           ...
@@ -872,6 +870,20 @@ plot_phase_2d <- function(values,
 ##' <description>
 ##'
 ##' @param obj `pbsEDM` object
+##' @param par.mgp.3d
+##' @param par.mai.3d
+##' @param par.mar.3d
+##' @param x.lab
+##' @param y.lab
+##' @param z.lab
+##' @param axis.range
+##' @param late.num
+##' @param pt.type
+##' @param late.col
+##' @param early.col
+##' @param early.col.lines
+##' @param axes.col
+##' @param par.mar.phase
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
@@ -882,33 +894,31 @@ plot_phase_3d <- function(obj,
                           x.lab = expression("x"[t-2]),
                           y.lab = expression("x"[t-1]),
                           z.lab = expression("x"[t]),
-                          axis.range = NA,
                           last.time.to.plot = NULL,
-                          iii = NA,
-                          late.num = 5,
+                          axis.range = NA,
+                          late.num = 3,
                           pt.type = "p",
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
                           axes.col = "darkblue",
                           par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
-                          par.mgp = c(1.5, 0.5, 0)
+                          par.mgp = c(1.5, 0.5, 0),
+                          ...
                           ){
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),
                     max(obj$xt_observed, na.rm = TRUE))
   }
 
-  if(is.null(last.time.to.plot)) {
-    last.time.to.plot = length(obj$xt_observed) #
-  }
+  if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$xt_observed)
 
   start = 1     # currently only works for 1
 
   if(last.time.to.plot > 2){
     values.to.plot <- obj$xt_observed[start:(last.time.to.plot-1)]   # can't use N[last...])
   } else {
-    values <- NA          # nothing to plot
+    values.to.plot <- NA          # nothing to plot
   }
 
   # Copied from plot_observed:
@@ -961,53 +971,33 @@ plot_phase_3d <- function(obj,
 #                              pbsLAG(obj$xt_observed,
 #                                     1)[start:iii],  # "Xtmin1"
   #                              pbsLAG(obj$xt_observed)[start:iii])  # "Xt"
-  proj.pts = scat$xyz.convert(pbsLAG(values.to.plot,
-                                     2),  # "Xtmin2", index wrong?
-                              pbsLAG(values.to.plot,
-                                     1),  # "Xtmin1"
-                              values.to.plot)  # "Xt"
-  if(last.time.to.plot > 3.5)
-        {   # Think the indexing will now be 1:(iii-start), need start value also
-#           segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
-#                   proj.pts$x[2:(iii-start+1)], proj.pts$y[2:(iii-start+1)],
-#                    col = col.plot.lines) # lines() will not use vector
-           #  of col
-#           segments(proj.pts$x[1:(iii-start)],
-#                    proj.pts$y[1:(iii-start)],
-#                    proj.pts$x[2:(iii-start+1)],
-#                    proj.pts$y[2:(iii-start+1)],
-#                   col = col.plot.lines) # lines() will not use vector
-           segments(proj.pts$x[1:(last.time.to.plot - start)],
-                    proj.pts$y[1:(last.time.to.plot - start)],
-                    proj.pts$x[2:(last.time.to.plot - start + 1)],
-                    proj.pts$y[2:(last.time.to.plot - start + 1)],
-                    col = col.plot.lines) # lines() will not use vector
+  if(all(!is.na(values.to.plot))){
+    proj.pts = scat$xyz.convert(pbsLAG(values.to.plot,
+                                       2),  # "Xtmin2"
+                                pbsLAG(values.to.plot,
+                                       1),  # "Xtmin1"
+                                values.to.plot)  # "Xt"
+    if(last.time.to.plot > 3.5){
+      segments(proj.pts$x[1:(last.time.to.plot - start)],
+               proj.pts$y[1:(last.time.to.plot - start)],
+               proj.pts$x[2:(last.time.to.plot - start + 1)],
+               proj.pts$y[2:(last.time.to.plot - start + 1)],
+               col = col.plot.lines) # lines() will not use vector
+    }
 
-        }
-      # The points
-      if(last.time.to.plot > 2.5)
-        {
-#          scat$points3d(pbsLAG(obj$xt_observed,
-#                               2)[start:iii],  # "Xtmin2"
-#                        pbsLAG(obj$xt_observed,
-#                               1)[start:iii],  # "Xtmin1"
-#                        pbsLAG(obj$xt_observed)[start:iii],  # "Xt"
-          scat$points3d(pbsLAG(values.to.plot,
-                               2),  # "Xtmin2"
-                        pbsLAG(values.to.plot,
-                               1),  # "Xtmin1"
-                        values.to.plot,  # "Xt"
-                        type = pt.type,
-                        pch = pch.plot,
-                        col = col.plot)
+    # The points
+    if(last.time.to.plot > 2.5){
+      scat$points3d(pbsLAG(values.to.plot,
+                           2),  # "Xtmin2"
+                    pbsLAG(values.to.plot,
+                           1),  # "Xtmin1"
+                    values.to.plot,  # "Xt"
+                    type = pt.type,
+                    pch = pch.plot,
+                    col = col.plot)
+    }
+  }
 
- #                dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
- #                       dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
-          #                       dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
-        }
-
-
-#      par(scat$par.mar)    # should do the same as:
-      par(mar = par.mar.phase)   # scatterplot3d changes mar
-      par(mgp = par.mgp)        # back to usual for 2d figures
+  par(mar = par.mar.phase)   # scatterplot3d changes mar
+  par(mgp = par.mgp)        # back to usual for 2d figures
 }
