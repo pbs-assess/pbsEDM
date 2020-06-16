@@ -746,11 +746,10 @@ plot_phase_2d <- function(values,
                     max(values, na.rm = TRUE))   # for Nt or Xt
   }
   if(is.null(last.time.to.plot)) {
-    last.time.to.plot = length(values) #
+    last.time.to.plot = length(values)
   }
 
   # Now copying from plot_observed:
-
   col.plot = c(rep(early.col,
                    max(c(0, last.time.to.plot - late.num))),
                rep(late.col,
@@ -884,28 +883,39 @@ plot_phase_3d <- function(obj,
                           y.lab = expression("x"[t-1]),
                           z.lab = expression("x"[t]),
                           axis.range = NA,
+                          last.time.to.plot = NULL,
                           iii = NA,
                           late.num = 5,
                           pt.type = "p",
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
+                          axes.col = "darkblue",
                           par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
                           par.mgp = c(1.5, 0.5, 0)
                           ){
-
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),
-                    max(obj$xt_observed, na.rm = TRUE))   # for Nt or Xt
-  }
-  if(is.na(iii)) {
-    iii = length(obj$xt_observed)-1    # MAY want -1 since all last is NA anyway
+                    max(obj$xt_observed, na.rm = TRUE))
   }
 
-  start = 1
+  if(is.null(last.time.to.plot)) {
+    last.time.to.plot = length(obj$xt_observed) #
+  }
+
+  start = 1     # currently only works for 1
+
+  if(last.time.to.plot > 2){
+    values.to.plot <- obj$xt_observed[start:(last.time.to.plot-1)]   # can't use N[last...])
+  } else {
+    values <- NA          # nothing to plot
+  }
+
   # Copied from plot_observed:
-  col.plot = c(rep(early.col, max(c(0, iii - late.num + 1))),
-               rep(late.col, min(c(iii, late.num))) )   # colours of points
+  col.plot = c(rep(early.col,
+                   max(c(0, last.time.to.plot - late.num))),
+               rep(late.col,
+                   min(c(last.time.to.plot, late.num))) )   # colours of points
   col.plot.lines = col.plot                            # colours of lines
   col.plot.lines[col.plot.lines == early.col] = early.col.lines
   pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
@@ -927,18 +937,18 @@ plot_phase_3d <- function(obj,
                                       zlim = axis.range,
                                       type = "n",
                                       box = FALSE,
-                                      angle = 40 + iii,
+                                      angle = 40 + last.time.to.plot,
                                       mar = par.mar.3d)
                                               # mar=c(5,3,4,3)+0.1 is default,set
                                               #  within scatterplot3d
                                               # Add axes so can see origin:
       actual.axes.ranges = gets3dusr(scat)    # Get the actual values used
       scat$points3d(actual.axes.ranges[1:2], c(0,0), c(0,0), type = "l",
-                    col = "lightgrey")
+                    col = axes.col)
       scat$points3d(c(0,0), actual.axes.ranges[3:4], c(0,0), type = "l",
-                    col = "lightgrey")
+                    col = axes.col)
       scat$points3d(c(0,0), c(0,0), actual.axes.ranges[5:6], type = "l",
-                    col = "lightgrey")
+                    col = axes.col)
       # Obtain x-y co-ords of points for segments:
 #**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii,
 #                                                            "Xtmin2"]),
@@ -946,33 +956,47 @@ plot_phase_3d <- function(obj,
 #                                                            "Xtmin1"]),
   #                                    dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
   # maybe this is okay with NA's:
-  proj.pts = scat$xyz.convert(pbsLAG(obj$xt_observed,
-                                     2)[start:iii],  # "Xtmin2", index wrong?
-                              pbsLAG(obj$xt_observed,
-                                     1)[start:iii],  # "Xtmin1"
-                              pbsLAG(obj$xt_observed)[start:iii])  # "Xt"
-
-      if(iii > 3.5)
+#  proj.pts = scat$xyz.convert(pbsLAG(obj$xt_observed,
+#                                     2)[start:iii],  # "Xtmin2", index wrong?
+#                              pbsLAG(obj$xt_observed,
+#                                     1)[start:iii],  # "Xtmin1"
+  #                              pbsLAG(obj$xt_observed)[start:iii])  # "Xt"
+  proj.pts = scat$xyz.convert(pbsLAG(values.to.plot,
+                                     2),  # "Xtmin2", index wrong?
+                              pbsLAG(values.to.plot,
+                                     1),  # "Xtmin1"
+                              values.to.plot)  # "Xt"
+  if(last.time.to.plot > 3.5)
         {   # Think the indexing will now be 1:(iii-start), need start value also
 #           segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
 #                   proj.pts$x[2:(iii-start+1)], proj.pts$y[2:(iii-start+1)],
 #                    col = col.plot.lines) # lines() will not use vector
            #  of col
-           segments(proj.pts$x[1:(iii-start)],
-                    proj.pts$y[1:(iii-start)],
-                    proj.pts$x[2:(iii-start+1)],
-                    proj.pts$y[2:(iii-start+1)],
+#           segments(proj.pts$x[1:(iii-start)],
+#                    proj.pts$y[1:(iii-start)],
+#                    proj.pts$x[2:(iii-start+1)],
+#                    proj.pts$y[2:(iii-start+1)],
+#                   col = col.plot.lines) # lines() will not use vector
+           segments(proj.pts$x[1:(last.time.to.plot - start)],
+                    proj.pts$y[1:(last.time.to.plot - start)],
+                    proj.pts$x[2:(last.time.to.plot - start + 1)],
+                    proj.pts$y[2:(last.time.to.plot - start + 1)],
                     col = col.plot.lines) # lines() will not use vector
 
         }
       # The points
-      if(iii > 2.5)
+      if(last.time.to.plot > 2.5)
         {
-          scat$points3d(pbsLAG(obj$xt_observed,
-                               2)[start:iii],  # "Xtmin2"
-                        pbsLAG(obj$xt_observed,
-                               1)[start:iii],  # "Xtmin1"
-                        pbsLAG(obj$xt_observed)[start:iii],  # "Xt"
+#          scat$points3d(pbsLAG(obj$xt_observed,
+#                               2)[start:iii],  # "Xtmin2"
+#                        pbsLAG(obj$xt_observed,
+#                               1)[start:iii],  # "Xtmin1"
+#                        pbsLAG(obj$xt_observed)[start:iii],  # "Xt"
+          scat$points3d(pbsLAG(values.to.plot,
+                               2),  # "Xtmin2"
+                        pbsLAG(values.to.plot,
+                               1),  # "Xtmin1"
+                        values.to.plot,  # "Xt"
                         type = pt.type,
                         pch = pch.plot,
                         col = col.plot)
