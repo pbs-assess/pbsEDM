@@ -7,28 +7,29 @@
 plot_observed(
   obj,
   dim = 1,
-  end = NULL,
+  last.time.to.plot = NULL,
   max_time = NULL,
   late.col = "red",
   early.col = "black",
   early.col.lines = "lightgrey",
-  late.num = 3,
+  late.num = 5,
   pt.type = "p",
   x.lab = expression("x"[t - 2]),
   y.lab = expression("x"[t - 1]),
-  z.lab = expression("x"[t])
+  z.lab = expression("x"[t]),
+  ...
 )
 }
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
 
 \item{dim}{number of dimensions to plot: 1 for time series, 2 for X(t) vs X(t-2),
-3 for X(t-2) v X(t-1) v X(t)}
+3 for X(t-2) v X(t-1) v X(t) - not now TODO}
 
-\item{end}{last time value (row) to use when plotting (so will have
-end-start-1 points plotted)}
+\item{last.time.to.plot}{last time value of N[t] to use when plotting, so
+final X[t] used is X[t-1] (since X[t] uses N[t+1])}
 
-\item{max_time}{maximum time value to plot (will be different from `end` if
+\item{max_time}{maximum time value for the time axis (will be different from `end` if
 making a movie using Rmarkdown, since for that `end` will get iterated)}
 }
 \value{

@@ -8,8 +8,8 @@ plot_time_series(
   values,
   X.or.N,
   par.mar.ts,
-  t.axis.range = NA,
-  iii = NA,
+  t.axis.range = NULL,
+  last.time.to.plot = NA,
   y.range,
   col.plot,
   col.plot.lines,
@@ -20,6 +20,8 @@ plot_time_series(
 }
 \arguments{
 \item{X.or.N}{"N" if raw non-differenced data, "X" for differenced data}
+
+\item{iii}{time value to plot up to}
 }
 \value{
 

@@ -493,10 +493,12 @@ plot.pbsEDM = function(obj,
 #                end = last.time.to.plot)
 
   plot_phase_2d(values = calc2$nt_observed,
-                X.or.N = "N")
+                X.or.N = "N",
+                ...)
 
   plot_phase_2d(values = calc2$xt_observed,
-                X.or.N = "X")
+                X.or.N = "X",
+                ...)
 
   plot_phase_3d(obj)
 
@@ -573,12 +575,7 @@ plot_observed = function(obj,
 
   # Colour vector for all plots - it will correspond
   #  to the last late.num times, not points (since different plots have
-  #  different numbers of points). So these now correspond to times from
-  #  start:iii , and so each needs to have length iii-start+1 (maybe not
-  #  lines all get used): - think that may be outdated text,
-  # ***I changed something but can't see on GitHub, need to fix, should not have
-  #  start for Xt plots
-
+  #  different numbers of points).
   # Redoing 16/6/20 - may be different to my old way. So plot the data up to
   # time last.time.to.plot, but in the sense of using N[last.time.to.plot] but
   # not X[last.time.to.plot] because that uses N[last.time.to.plot + 1]
@@ -604,7 +601,8 @@ plot_observed = function(obj,
                        y.range = Nt.axes.range,
                        col.plot = col.plot,
                        col.plot.lines = col.plot.lines,
-                       pch.plot = pch.plot
+                       pch.plot = pch.plot,
+                       last.time.to.plot = last.time.to.plot   # For title
                        )
     }
 
@@ -642,7 +640,7 @@ plot_time_series <- function(values,
                              X.or.N,
                              par.mar.ts,
                              t.axis.range = NULL,
-                             iii = NA,
+                             last.time.to.plot = NA,
                              y.range,
                              col.plot,
                              col.plot.lines,
@@ -653,8 +651,8 @@ plot_time_series <- function(values,
   if(is.null(t.axis.range)) {
     t.axis.range <- c(1, length(values))
   }
-  if(is.na(iii)) {
-    iii = max(t.axis.range)
+  if(is.na(last.time.to.plot)) {
+    last.time.to.plot = max(t.axis.range)
   }
 
   par(pty = "m")                 # maximal plotting region, not square
@@ -668,7 +666,7 @@ plot_time_series <- function(values,
          xlim = c(0, max(t.axis.range)),
          ylim = y.range,
          type = "n",                           # empty plot
-         main = paste0("Time t=", iii))
+         main = paste0("Time t=", last.time.to.plot))
   } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
     plot(0, 0,
@@ -680,6 +678,7 @@ plot_time_series <- function(values,
     abline(v = 0.5*XtLoc, col="black")
   }
 
+  iii = last.time.to.plot             # needs replacing when I have time
   if(iii > 1.5){
     segments(start:(iii-1),
              values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
@@ -719,6 +718,9 @@ plot_time_series <- function(values,
 ##' @param late.num
 ##' @param y.lab
 ##' @param z.lab
+##' @param ... additiontal arguments,
+##'   in particular `last.time.to.plot` to plot only up to that time step (to
+##'   loop through in a movie).
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
@@ -726,51 +728,48 @@ plot_phase_2d <- function(values,
                           X.or.N = "X",
                           par.mar.phase = c(3, 0, 1, 0),
                           axis.range = NA,
-                          iii = NA,
-                          # col.plot = ,
-                          # col.plot.lines,
-                          # pch.plot,
                           start = 1,
+                          last.time.to.plot = NULL,
                           pt.type = "p",
                           cobwebbing = TRUE,
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
-                          late.num = 3,
+                          late.num = 5,
                           y.lab = expression("x"[t-1]),
-                          z.lab = expression("x"[t])
+                          z.lab = expression("x"[t]),
+                          ...
                           ){
 
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
                     max(values, na.rm = TRUE))   # for Nt or Xt
   }
-  if(is.na(iii)) {
-    iii = length(values)
+  if(is.null(last.time.to.plot)) {
+    last.time.to.plot = length(values) #
   }
 
-      # Copying here for now, may want to generalise; want same size axes in
-      # each figure.
-      # Colour vector for all plots - it will correspond
-      #  to the last late.num times, not points (since different plots have
-      #  different numbers of points). So these now correspond to times from
-      #  start:iii , and so each needs to have length iii-start+1 (maybe not
-      #  lines all get used):
-      col.plot = c( rep(early.col, max(c(0, iii-late.num-start+1))),
-                    rep(late.col, min(c(iii, late.num))) )   # colours of points
-      col.plot.lines = col.plot                              # colours of lines
-      col.plot.lines[col.plot.lines == early.col] = early.col.lines
-      pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
-                                         # filled circles for latest
-      pch.plot[length(pch.plot)] = 8     # latest one a star
+  # Now copying from plot_observed:
 
-# Copying from plotPanelMovie.df2
-      par(pty="s")             # set following plot types to be square
-                               #  (without this the axes don't seem to
-                               #  be the same, even with the settings below)
-      par(mar = par.mar.phase) # margins
-      # N_t vs N{t-1}:
-      # Empty plot to get started, that's it for iii=0:
+  col.plot = c(rep(early.col,
+                   max(c(0, last.time.to.plot - late.num))),
+               rep(late.col,
+                   min(c(last.time.to.plot, late.num))) )   # colours of points
+  col.plot.lines = col.plot                            # colours of lines
+  col.plot.lines[col.plot.lines == early.col] = early.col.lines
+  pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
+                                        # filled circles for latest
+  pch.plot[length(pch.plot)] = 8     # latest one a star
+
+  # Copying from plotPanelMovie.df2
+
+  par(pty="s")             # set following plot types to be square
+                           #  (without this the axes don't seem to
+                           #  be the same, even with the settings below)
+  par(mar = par.mar.phase) # margins
+
+  # N_t vs N{t-1}:
+  # Empty plot to get started
   if(X.or.N == "N"){
     plot(0, 0,
          xlab = expression("N"[t-1]),
@@ -778,6 +777,7 @@ plot_phase_2d <- function(values,
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
+    values.to.plot <- values[start:last.time.to.plot]
   } else {
     plot(0, 0,
          xlab = y.lab,
@@ -785,15 +785,16 @@ plot_phase_2d <- function(values,
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
+    values.to.plot <- values[start:(last.time.to.plot-1)] # Not use X[last..]
   }
 
   if(cobwebbing) abline(0, 1, col="darkgrey")
 
   # Draw lines first so they get overdrawn by points
-  if(iii > 2.5){
+  if(last.time.to.plot > 2.5){
     if(cobwebbing){
       # Do lines for cobwebbing
-      Nvals = rep(values[start:iii],
+      Nvals = rep(values.to.plot,
                   each = 2)
       Nvals = Nvals[-1]
       Nvals = Nvals[-length(Nvals)]
@@ -813,16 +814,17 @@ plot_phase_2d <- function(values,
         # dplyr::pull(Nx.lags.use[start:(iii-1), "Nt"]),
         # dplyr::pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
         # dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
-        pbsLAG(values)[start:(iii-1)],   # N(t-1)
-        values[start:(iii-1)],
-        pbsLAG(values)[(start+1):iii],
-        values[(start+1):iii],
+        # not fully tested:
+        pbsLAG(values.to.plot)[-length(values.to.plot)],   # N(t-1)
+        values.to.plot[-length(values.to.plot)],
+        pbsLAG(values.to.plot)[-1],
+        values.to.plot[-1],
         col = col.plot.lines) # lines() will not use vector of col
     }
   }
-  if(iii > 1.5){
-    points(pbsLAG(values)[start:iii],
-           values[start:iii],
+  if(last.time.to.plot > 1.5){
+    points(pbsLAG(values.to.plot),
+           values.to.plot,
            type = pt.type,
            pch = pch.plot,
            col = col.plot)          # start row has NA's, gets ignored
@@ -883,7 +885,7 @@ plot_phase_3d <- function(obj,
                           z.lab = expression("x"[t]),
                           axis.range = NA,
                           iii = NA,
-                          late.num = 3,
+                          late.num = 5,
                           pt.type = "p",
                           late.col = "red",
                           early.col = "black",

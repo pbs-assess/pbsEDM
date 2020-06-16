@@ -9,17 +9,23 @@ plot_phase_2d(
   X.or.N = "X",
   par.mar.phase = c(3, 0, 1, 0),
   axis.range = NA,
-  iii = NA,
   start = 1,
+  last.time.to.plot = NULL,
   pt.type = "p",
   cobwebbing = TRUE,
   late.col = "red",
   early.col = "black",
   early.col.lines = "lightgrey",
-  late.num = 3,
+  late.num = 5,
   y.lab = expression("x"[t - 1]),
-  z.lab = expression("x"[t])
+  z.lab = expression("x"[t]),
+  ...
 )
+}
+\arguments{
+\item{...}{additiontal arguments,
+in particular `last.time.to.plot` to plot only up to that time step (to
+loop through in a movie).}
 }
 \value{
 

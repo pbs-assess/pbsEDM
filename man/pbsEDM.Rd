@@ -27,8 +27,6 @@ each of the variables that will be used (other variables are ignored)}
 \item{show_calculations}{[logical(1)]}
 }
 \value{
-A list
-
 A list containing:
 
 \itemize{
