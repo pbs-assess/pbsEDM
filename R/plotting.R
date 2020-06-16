@@ -470,25 +470,27 @@ gets3dusr = function(s3dobject)
 ##' Only working if nt_observed values are in there
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
-##' @param last.time.plot last time value to plot, to loop round in a movie, can
-##'   maybe subsume into ...
-##' @param late.num
+##' @param last.time.to.plot
+##' @param ... additiontal arguments to be passed onto other plotting functions,
+##'   in particular `last.time.to.plot` to plot only up to that time step (to
+##'   loop through in a movie).
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
 plot.pbsEDM = function(obj,
-                       last.time.to.plot = NULL,
-                       late.num = 5){
+                       late.num = 5,
+                       ...){
   stopifnot(attr(obj, "class") == "pbsEDM")
 
   par(mfrow = c(3,2))
 
-  if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$xt_observed)
+  if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$xt_observed)
                                             # though last will have NA # not
                                             # incorporated fully yet
   plot_observed(obj,
                 late.num = late.num,
-                end = last.time.to.plot)
+                ...)
+#                end = last.time.to.plot)
 
   plot_phase_2d(values = calc2$nt_observed,
                 X.or.N = "N")
@@ -507,10 +509,6 @@ plot.pbsEDM = function(obj,
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param dim number of dimensions to plot: 1 for time series, 2 for X(t) vs X(t-2),
 ##'   3 for X(t-2) v X(t-1) v X(t) - not now TODO
-##' @param end last time value (row) to use when plotting (so will have
-##'     end-start-1 points plotted)
-##' @param max_time maximum time value to plot (will be different from `end` if
-##'     making a movie using Rmarkdown, since for that `end` will get iterated)
 ##' @param late.col
 ##' @param early.col
 ##' @param early.col.lines
@@ -519,28 +517,34 @@ plot.pbsEDM = function(obj,
 ##' @param x.lab
 ##' @param y.lab
 ##' @param z.lab
+##' @param ...
+##' @param last.time.to.plot last time value of N[t] to use when plotting, so
+##'   final X[t] used is X[t-1] (since X[t] uses N[t+1])
+##' @param max_time maximum time value for the time axis (will be different from `end` if
+##'     making a movie using Rmarkdown, since for that `end` will get iterated)
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
 plot_observed = function(obj,
                          dim = 1,    # TODO remove and put into wrapper function
                                      # if needed
-                         end = NULL,
+                         last.time.to.plot = NULL,
                          max_time = NULL,
                          late.col = "red",
                          early.col = "black",
                          early.col.lines = "lightgrey",
-                         late.num = 3,
+                         late.num = 5,
                          pt.type = "p",
                          x.lab = expression("x"[t-2]),
                          y.lab = expression("x"[t-1]),
-                         z.lab = expression("x"[t])){
+                         z.lab = expression("x"[t]),
+                         ...){
   stopifnot(attr(obj, "class") == "pbsEDM")
   stopifnot(dim %in% 1:3)
 
   # First row of everything is t=1
   if(is.null(max_time)) max_time <- length(obj$xt_observed)
-  if(is.null(end)) end <- max_time
+  if(is.null(last.time.to.plot)) last.time.to.plot <- max_time
 
   start = 1    # start time of plots, only works for 1
   t.axis.range = c(start, max_time)
@@ -553,8 +557,7 @@ plot_observed = function(obj,
 
   Xt.max.abs = max(abs( range(obj$xt_observed[start:max_time], na.rm=TRUE) ),
                    abs( range(obj$xt_forecast[start:max_time], na.rm=TRUE)) )
-  Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)    # Make axes symmetric, though
-                                                #  axs="i" doesn't work for 3d
+  Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)
   # Set mar, the numbers of lines of margins, default c(5, 4, 4, 2) + 0.1.
   #  par.mar.ts = c(3, 3, 1, 1)         # For time series
   par.mar.phase = c(3, 0, 1, 0)      # For phase plots (3d sets it anyway)
@@ -565,8 +568,8 @@ plot_observed = function(obj,
   par("mgp" = par.mgp) # first val sets axis title dist (mex units)
                        #  to axes, second sets labels
 
-  iii = end - 1    # depends on the type of plot, don't have value of
-                   # Xt[end]. This is how many points to plot.
+  # iii = last.time.to.plot - 1    # depends on the type of plot, don't have value of
+                   # Xt[last.time.to.plot]. This is how many points to plot.
 
   # Colour vector for all plots - it will correspond
   #  to the last late.num times, not points (since different plots have
@@ -575,8 +578,14 @@ plot_observed = function(obj,
   #  lines all get used): - think that may be outdated text,
   # ***I changed something but can't see on GitHub, need to fix, should not have
   #  start for Xt plots
-  col.plot = c(rep(early.col, max(c(0, iii - late.num + 1))),
-               rep(late.col, min(c(iii, late.num))) )   # colours of points
+
+  # Redoing 16/6/20 - may be different to my old way. So plot the data up to
+  # time last.time.to.plot, but in the sense of using N[last.time.to.plot] but
+  # not X[last.time.to.plot] because that uses N[last.time.to.plot + 1]
+  col.plot = c(rep(early.col,
+                   max(c(0, last.time.to.plot - late.num))),
+               rep(late.col,
+                   min(c(last.time.to.plot, late.num))) )   # colours of points
   col.plot.lines = col.plot                            # colours of lines
   col.plot.lines[col.plot.lines == early.col] = early.col.lines
   pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
@@ -588,9 +597,10 @@ plot_observed = function(obj,
     if(!is.null(obj$nt_observed)){
     #  par(mfrow=c(1,2))       # Will have to generalise this
 
-      plot_time_series(values = obj$nt_observed,
+      plot_time_series(values = obj$nt_observed[start:last.time.to.plot],
                        X.or.N = "N",
                        par.mar.ts = c(3, 3, 1, 1),
+                       t.axis.range = t.axis.range,
                        y.range = Nt.axes.range,
                        col.plot = col.plot,
                        col.plot.lines = col.plot.lines,
@@ -598,9 +608,10 @@ plot_observed = function(obj,
                        )
     }
 
-    plot_time_series(values = obj$xt_observed,
+    plot_time_series(values = obj$xt_observed[start:(last.time.to.plot-1)], # don't want to use N[last.time.to.plot]
                      X.or.N = "X",
                      par.mar.ts = c(3, 3, 1, 1),
+                     t.axis.range = t.axis.range,
                      y.range = Xt.axes.range,
                      col.plot = col.plot,
                      col.plot.lines = col.plot.lines,
@@ -630,7 +641,7 @@ plot_observed = function(obj,
 plot_time_series <- function(values,
                              X.or.N,
                              par.mar.ts,
-                             t.axis.range = NA,
+                             t.axis.range = NULL,
                              iii = NA,
                              y.range,
                              col.plot,
@@ -639,7 +650,7 @@ plot_time_series <- function(values,
                              start = 1,
                              pt.type = "p"
                              ){
-  if(is.na(t.axis.range)) {
+  if(is.null(t.axis.range)) {
     t.axis.range <- c(1, length(values))
   }
   if(is.na(iii)) {

@@ -90,9 +90,9 @@ and will just refer to the saved animation file.
 ```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 5.36, fig.height = 8}
 # fig.width is 0.67 * fig.height (which is 8)
 #
-for(iii in 1:length(Nx_lags_orig$Nt)){
+for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot(calc2,
-       last.time.to.plot = iii)
+       last.time.to.plot = iiii)
 }
 
   #    ISD_bin_plot(data.year = data.year.list[[i]],

@@ -8,8 +8,6 @@
 #' @param centre_and_scale [logical(1)] Centre and scale each variable before lagging?
 #' @param show_calculations [logical(1)]
 #'
-#' @return A list
-#'
 #' @details Only lags of variables explicitly named in \code{lags} are used. The
 #' observed time series whose values are forecast must be specified first. For
 #' example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity},
