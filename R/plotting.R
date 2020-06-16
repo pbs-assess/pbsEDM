@@ -840,28 +840,45 @@ plot_phase_2d <- function(values,
 ##'
 ##' <description>
 ##'
-##' @param obj
+##' @param obj `pbsEDM` object
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
-plot_lags_3d <- function(obj,
-                         par.mgp.3d = c(3, 10, 0),
-                         par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
-                         par.mar.3d = c(3, 0, 0, 0),
-                         x.lab = expression("x"[t-2]),
-                         y.lab = expression("x"[t-1]),
-                         z.lab = expression("x"[t]),
-                         axis.range = NA,
-                         iii = NA
-                         ){
+plot_phase_3d <- function(obj,
+                          par.mgp.3d = c(3, 10, 0),
+                          par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
+                          par.mar.3d = c(3, 0, 0, 0),
+                          x.lab = expression("x"[t-2]),
+                          y.lab = expression("x"[t-1]),
+                          z.lab = expression("x"[t]),
+                          axis.range = NA,
+                          iii = NA,
+                          late.num = 3,
+                          pt.type = "p",
+                          late.col = "red",
+                          early.col = "black",
+                          early.col.lines = "lightgrey",
+                          par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
+                          par.mgp = c(1.5, 0.5, 0)
+                          ){
 
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),
                     max(obj$xt_observed, na.rm = TRUE))   # for Nt or Xt
   }
   if(is.na(iii)) {
-    iii = length(values)
+    iii = length(obj$xt_observed)    # MAY want -1 since all last is NA anyway
   }
+
+  start = 1
+  # Copied from plot_observed:
+  col.plot = c(rep(early.col, max(c(0, iii - late.num + 1))),
+               rep(late.col, min(c(iii, late.num))) )   # colours of points
+  col.plot.lines = col.plot                            # colours of lines
+  col.plot.lines[col.plot.lines == early.col] = early.col.lines
+  pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
+                                        # filled circles for latest
+  pch.plot[length(pch.plot)] = 8     # latest one a star
 
   # Empty plot to get started
   par(mgp = par.mgp.3d)
@@ -872,9 +889,9 @@ plot_lags_3d <- function(obj,
                                       xlab = x.lab,
                                       ylab = y.lab,
                                       zlab = z.lab,
-                                      xlim = Xt.axes.range,
-                                      ylim = Xt.axes.range,
-                                      zlim = Xt.axes.range,
+                                      xlim = axis.range,
+                                      ylim = axis.range,
+                                      zlim = axis.range,
                                       type = "n",
                                       box = FALSE,
                                       angle = 40 + iii,
@@ -890,69 +907,50 @@ plot_lags_3d <- function(obj,
       scat$points3d(c(0,0), c(0,0), actual.axes.ranges[5:6], type = "l",
                     col = "lightgrey")
       # Obtain x-y co-ords of points for segments:
-**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
-                                  dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
-                                  dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
+#**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii,
+#                                                            "Xtmin2"]),
+#                                    dplyr::pull(Nx.lags.use[start:iii,
+#                                                            "Xtmin1"]),
+  #                                    dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
+  # maybe this is okay with NA's:
+  proj.pts = scat$xyz.convert(pbsLAG(obj$xt_observed,
+                                     2)[start:iii],  # "Xtmin2", index wrong?
+                              pbsLAG(obj$xt_observed,
+                                     1)[start:iii],  # "Xtmin1"
+                              pbsLAG(obj$xt_observed)[start:iii])  # "Xt"
+
       if(iii > 3.5)
         {   # Think the indexing will now be 1:(iii-start), need start value also
-            segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
-                    proj.pts$x[2:(iii-start+1)], proj.pts$y[2:(iii-start+1)],
+#           segments(proj.pts$x[1:(iii-start)], proj.pts$y[1:(iii-start)],
+#                   proj.pts$x[2:(iii-start+1)], proj.pts$y[2:(iii-start+1)],
+#                    col = col.plot.lines) # lines() will not use vector
+           #  of col
+           segments(proj.pts$x[1:(iii-start)],
+                    proj.pts$y[1:(iii-start)],
+                    proj.pts$x[2:(iii-start+1)],
+                    proj.pts$y[2:(iii-start+1)],
                     col = col.plot.lines) # lines() will not use vector
-                                          #  of col
+
         }
       # The points
       if(iii > 2.5)
         {
-          scat$points3d(dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
-                        dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
-                        dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
-                        type = pt.type, pch = pch.plot,
+          scat$points3d(pbsLAG(obj$xt_observed,
+                               2)[start:iii],  # "Xtmin2"
+                        pbsLAG(obj$xt_observed,
+                               1)[start:iii],  # "Xtmin1"
+                        pbsLAG(obj$xt_observed)[start:iii],  # "Xt"
+                        type = pt.type,
+                        pch = pch.plot,
                         col = col.plot)
+
+ #                dplyr::pull(Nx.lags.use[start:iii, "Xtmin2"]),
+ #                       dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
+          #                       dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
         }
 
 
 #      par(scat$par.mar)    # should do the same as:
       par(mar = par.mar.phase)   # scatterplot3d changes mar
-      par(mgp = par.mgp)   # back to usual for 2d figures
-      if(final_plot == "compare")
-      {
-        compare_cols = c("blue", "red")    # compare rEDM pred then Andy's.
-        compare_pch = c(20, 1)
-        pred_obs_max_abs = max( abs( range( c(Nx.lags$Xt,
-                                              Nx.lags$rEDM.pred,
-                                              Nx.lags$my.pred),
-                                           na.rm = TRUE)
-                                    )
-                               )
-        pred_obs_axes = c(-pred_obs_max_abs, pred_obs_max_abs)
-        #  all.pred = dplyr::select(Nx.lags.use, starts_with("XtPredEeq"))
-        #  pred.max.abs = max( abs( range(all.pred, na.rm=TRUE) ) )
-        #  pred.max.abs = max(pred.max.abs, Xt.max.abs)  # Latter is observed
-        #  predObs.axes.range = c(-pred.max.abs, pred.max.abs)
-
-        plot(0,
-             0,
-             xlab = expression("Observation of x"[t]),
-             ylab = expression("Prediction of x"[t]),
-             xlim = pred_obs_axes,
-             ylim = pred_obs_axes,
-             asp = 1,
-             type = "n")
-        abline(0, 1, col="grey")
-        leg = vector()
-        points(dplyr::select(Nx.lags[start:iii,],
-                             Xt,
-                             rEDM.pred),
-               pch = compare_pch[1],
-               col = compare_cols[1])
-        points(dplyr::select(Nx.lags[start:iii,],
-                             Xt,
-                             my.pred),
-               pch = compare_pch[2],
-               col = compare_cols[2])
-        legend("topleft",
-               pch = compare_pch,
-               leg = c("rEDM pred", "Andy pred"),
-               col = compare_cols)
-      }
+      par(mgp = par.mgp)        # back to usual for 2d figures
 }
