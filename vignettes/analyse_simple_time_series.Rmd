@@ -94,22 +94,17 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot(calc2,
        last.time.to.plot = iiii)
 }
-
-  #    ISD_bin_plot(data.year = data.year.list[[i]],
-#                 b.MLE = dplyr::filter(MLEbins.res, Year == fullYears[i])$b,
-#                 b.confMin = dplyr::filter(MLEbins.res, Year ==
-#                                                      fullYears[i])$confMin,
-#                 b.confMax = dplyr::filter(MLEbins.res, Year ==
-#                                                      fullYears[i])$confMax,
-#                 year = fullYears[i],
-#                 xlim = xlim.global,
-#                 xmin = dplyr::filter(MLEbins.res, Year ==
-#                                                      fullYears[i])$xmin,
-#                 xmax = dplyr::filter(MLEbins.res, Year ==
-#                                                   fullYears[i])$xmax
-#                 )
-# }
 ```
+
+And again in landscape mode (for presentations):
+```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 8, fig.height = 5.36}
+for(iiii in 1:length(Nx_lags_orig$Nt)){
+  plot(calc2,
+       last.time.to.plot = iiii,
+       portrait = FALSE)
+}
+```
+
 
 <!-- The resulting animation is
 
