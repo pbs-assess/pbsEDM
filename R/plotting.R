@@ -308,8 +308,11 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
 
       # 3d plot of x_t vs x_{t-1} vs x_{t-2}:
       # Empty plot to get started
+      par.mgp.3d = c(3, 10, 0)
       par(mgp = par.mgp.3d)
-      par(mai = c(0.1, 0.1, 0.1, 0.1)) # scat..3d resets mar, think mai still has an effect
+      par(mai = c(0.1, 0.1, 0.1, 0.1)) # scat..3d resets mar, think mai still
+      # has an effect
+      par.mar.3d = c(3, 0, 0, 0)
       scat = scatterplot3d::scatterplot3d(0,
                                           0,
                                           0,
@@ -883,6 +886,7 @@ plot_phase_3d <- function(obj,
   # Empty plot to get started
   par(mgp = par.mgp.3d)
   par(mai = par.mai.3d)  # scat..3d resets mar, think mai still has an effect
+  par.mar.3d = c(3, 0, 0, 0)
   scat = scatterplot3d::scatterplot3d(0,
                                       0,
                                       0,
