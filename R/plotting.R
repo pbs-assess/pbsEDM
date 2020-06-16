@@ -791,17 +791,18 @@ plot_phase_2d <- function(values,
   if(last.time.to.plot > 2.5){
     if(cobwebbing){
       # Do lines for cobwebbing
-      Nvals = rep(values.to.plot,
-                  each = 2)
-      Nvals = Nvals[-1]
-      Nvals = Nvals[-length(Nvals)]
-      len = length(Nvals)
+      vals = rep(values.to.plot,
+                 each = 2)
+      vals = vals[-1]
+      vals = vals[-length(vals)]
+      len = length(vals)
       col.cobweb.lines = rep(early.col.lines, len)
-      col.cobweb.lines[(max( (len - 2*late.num + 1), 1)):len] = late.col
-      segments(Nvals[1:(len-2)],
-               Nvals[2:(len-1)],
-               Nvals[2:(len-1)],
-               Nvals[3:len],
+      col.cobweb.lines[(max(len - 2*late.num + 1 + 2*(X.or.N == "X"),
+                            1)):len] = late.col
+      segments(vals[1:(len-2)],
+               vals[2:(len-1)],
+               vals[2:(len-1)],
+               vals[3:len],
                col = col.cobweb.lines)
     } else {
       # Join each point to the next   (N(5), N(6)) to (N(6), N(7))
