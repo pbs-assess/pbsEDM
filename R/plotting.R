@@ -470,18 +470,25 @@ gets3dusr = function(s3dobject)
 ##' Only working if nt_observed values are in there
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param last.time.plot last time value to plot, to loop round in a movie, can
+##'   maybe subsume into ...
 ##' @param late.num
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
 plot.pbsEDM = function(obj,
+                       last.time.to.plot = NULL,
                        late.num = 5){
   stopifnot(attr(obj, "class") == "pbsEDM")
 
   par(mfrow = c(3,2))
 
+  if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$xt_observed)
+                                            # though last will have NA # not
+                                            # incorporated fully yet
   plot_observed(obj,
-                late.num = late.num)
+                late.num = late.num,
+                end = last.time.to.plot)
 
   plot_phase_2d(values = calc2$nt_observed,
                 X.or.N = "N")
@@ -499,7 +506,7 @@ plot.pbsEDM = function(obj,
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param dim number of dimensions to plot: 1 for time series, 2 for X(t) vs X(t-2),
-##'   3 for X(t-2) v X(t-1) v X(t)
+##'   3 for X(t-2) v X(t-1) v X(t) - not now TODO
 ##' @param end last time value (row) to use when plotting (so will have
 ##'     end-start-1 points plotted)
 ##' @param max_time maximum time value to plot (will be different from `end` if
@@ -532,8 +539,8 @@ plot_observed = function(obj,
   stopifnot(dim %in% 1:3)
 
   # First row of everything is t=1
-  if(is.null(end)) end <- length(obj$xt_observed)
-  if(is.null(max_time)) max_time <- end
+  if(is.null(max_time)) max_time <- length(obj$xt_observed)
+  if(is.null(end)) end <- max_time
 
   start = 1    # start time of plots, only works for 1
   t.axis.range = c(start, max_time)
@@ -609,6 +616,14 @@ plot_observed = function(obj,
 ##' @param values
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
 ##' @param par.mar.ts
+##' @param t.axis.range
+##' @param iii time value to plot up to
+##' @param y.range
+##' @param col.plot
+##' @param col.plot.lines
+##' @param pch.plot
+##' @param start
+##' @param pt.type
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
@@ -641,7 +656,8 @@ plot_time_series <- function(values,
          ylab = expression("N"[t]),
          xlim = c(0, max(t.axis.range)),
          ylim = y.range,
-         type = "n")                           # empty plot
+         type = "n",                           # empty plot
+         main = paste0("Time t=", iii))
   } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
     plot(0, 0,
@@ -870,7 +886,7 @@ plot_phase_3d <- function(obj,
                     max(obj$xt_observed, na.rm = TRUE))   # for Nt or Xt
   }
   if(is.na(iii)) {
-    iii = length(obj$xt_observed)    # MAY want -1 since all last is NA anyway
+    iii = length(obj$xt_observed)-1    # MAY want -1 since all last is NA anyway
   }
 
   start = 1
