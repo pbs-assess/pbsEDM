@@ -4,10 +4,13 @@
 \alias{plot.pbsEDM}
 \title{Plot data and results of an object of class `pbsEDM`}
 \usage{
-\method{plot}{pbsEDM}(obj, ...)
+\method{plot}{pbsEDM}(obj, portrait = TRUE, ...)
 }
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
+
+\item{portrait}{if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
+landscape (2x3, filled columnwise) for presentations.}
 
 \item{...}{additiontal arguments to be passed onto other plotting functions,
 in particular `last.time.to.plot` to plot only up to that time step (to

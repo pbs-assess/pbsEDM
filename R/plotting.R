@@ -470,6 +470,8 @@ gets3dusr = function(s3dobject)
 ##' Only working if nt_observed values are in there
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
+##'   landscape (2x3, filled columnwise) for presentations.
 ##' @param ... additiontal arguments to be passed onto other plotting functions,
 ##'   in particular `last.time.to.plot` to plot only up to that time step (to
 ##'   loop through in a movie), and late.num to plot the final number of time
@@ -478,10 +480,13 @@ gets3dusr = function(s3dobject)
 ##' @export
 ##' @author Andrew Edwards
 plot.pbsEDM = function(obj,
+                       portrait = TRUE,
                        ...){
   stopifnot(attr(obj, "class") == "pbsEDM")
 
-  par(mfrow = c(3,2))
+  ifelse(portrait,
+         par(mfrow = c(3,2)),
+         par(mfcol = c(2,3)))
 
   if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$xt_observed)
                                             # though last will have NA # not
