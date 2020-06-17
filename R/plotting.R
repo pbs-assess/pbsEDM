@@ -509,6 +509,106 @@ plot.pbsEDM = function(obj,
                 ...)
 }
 
+##' Plot output from pbsEDM_Evec as six panel plot including final forecast v
+##'  observed for each E
+##'
+##'  <description>
+##'
+##' @return Six panel plot
+##' @export
+##' @author Andrew Edwards
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @examples
+##' \donttest{
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   plot.pbsEDM_Evec(aa)
+##' }
+plot.pbsEDM_Evec <- function(E_res,
+                             ...){
+  # The data are the same for each value of E, and so use one for the first five panels:
+  plot.pbsEDM(E_res[[1]],
+              ...)
+
+  plot_pred_obs(E_res,
+                ...)
+}
+
+##' Plot predictions of X[t] versus the observations for list of `pbsEDM` objects
+##'
+##' <description>
+##'
+##' @return
+##' @export
+##' @author Andrew Edwards
+##' @param E_res A list of `pbsEDM` objects
+##' @param E_components How many of the first E_res components to show
+##' @param E_cols Vector of colours, one for each value of E
+##' @examples
+##' \donttest{
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   plot_pred_obs(aa)
+##' }
+plot_pred_obs <- function(E_res,
+                          E_components = 5,
+                          E_cols = c("orange",
+                                     "blue",
+                                     "green",
+                                     "red",
+                                     "black"),
+                          last.time.to.plot = NULL,
+                          ...
+                          ){
+
+  stopifnot("Need more distinct colours in E_cols"=
+              length(E_cols) <= E_components)
+
+  if(is.null(last.time.to.plot)) last.time.to.plot <- length(E_res[[1]]$xt_observed)
+
+  # Determine range for axes
+  obs.max.abs = max( abs( range(E_res[[1]]$xt_observed,
+                                na.rm=TRUE) ) ) # max abs observed value
+  forecast.max.abs = 0         # max abs forecast value
+  for(j in 1:E_components){
+    forecast.max.abs = max(c(forecast.max.abs,
+                             abs( range( range(E_res[[j]]$xt_forecast,
+                                               na.rm=TRUE) ) ) ) )
+  }
+
+  max.abs = max(obs.max.abs, forecast.max.abs)
+  axes.range = c(- max.abs, max.abs)
+
+  plot(0, 0,
+       xlab = expression("Observation of x"[t]),
+       ylab = expression("Prediction of x"[t]),
+       xlim = axes.range,
+       ylim = axes.range,
+       asp = 1,
+       type = "n")
+  abline(0, 1, col="grey")
+  leg = vector()
+
+  for(j in 1:E_components){
+    points(E_res[[j]]$xt_observed[1:(last.time.to.plot-1)],
+           E_res[[j]]$xt_forecast[1:(last.time.to.plot-1)],
+           pch = 16, # could note the final one differently (but not a star,
+                     # since that's last N[t] not X[t])
+           col = E_cols[j])
+    leg = c(leg,
+            paste0("E=",
+                   E_res[[j]]$results$E,
+                   ", rho=",
+                   round(E_res[[j]]$results$rho,
+                         2)))
+  }
+
+  legend("topleft",
+         pch=c(20, 20, 20),
+         leg,
+         col=E_cols,
+         cex=0.7)
+}
+
+
 ##' Plot values of X(t), X(t-1), X(t-2) in one of various ways
 ##'
 ##' Adapting from code within plotPanelMovie.df2. Assume raw data are one-dimensional
