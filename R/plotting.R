@@ -523,7 +523,7 @@ plot.pbsEDM = function(obj,
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
 ##'   plot.pbsEDM_Evec(aa)
 ##' }
-plot.pbsEDM.Evec <- function(E_res,
+plot_pbsEDM_Evec <- function(E_res,
                              ...){
   # The data are the same for each value of E, and so use one for the first five panels:
   plot.pbsEDM(E_res[[1]],
@@ -547,7 +547,7 @@ plot.pbsEDM.Evec <- function(E_res,
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
 ##'   plot.rho.Evec(aa)
 ##' }
-plot.rho.Evec <- function(E_res,
+plot_rho_Evec <- function(E_res,
                           ...){
   rho <- vector()
   E <- vector()
