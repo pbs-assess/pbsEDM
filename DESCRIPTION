@@ -21,7 +21,8 @@ LazyData: true
 RoxygenNote: 7.1.0
 Imports:
     dplyr,
-    scatterplot3d
+    scatterplot3d,
+    igraph
 Suggests:
     knitr,
     rmarkdown,

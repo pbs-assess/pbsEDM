@@ -1143,3 +1143,148 @@ plot_phase_3d <- function(obj,
   par(mar = par.mar.phase)   # scatterplot3d changes mar
   par(mgp = par.mgp)        # back to usual for 2d figures
 }
+
+##' 2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM
+##'
+##' Highlights a point to be projected, its nearest `E+1` neighbours, and then
+##' draw arrows to show where they go and so where the projection goes. Very
+##' useful for understanding and checking what EDM is doing. Call this multiple
+##' times using TODO to make a movie.
+##'
+##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param tstar the time index (x(t)) of the target point for which to make a
+##'   projection from
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_explain_edm <- function(obj,
+                             tstar,
+                             x.lab = expression("X(t-1)"),
+                             y.lab = expression("X(t)"),
+                             main = "All the points in lagged space",
+                             tstar.col = "blue",
+                             tstar.pch = 1,
+                             tstar.cex = 1,
+                             psivec = NULL,
+                             neigh.plot = FALSE,
+                             neigh.proj = FALSE,
+                             pred.plot = FALSE,
+                             pred.rEDM = FALSE,
+                             true.val = FALSE,
+                             legend.plot = TRUE){
+  par(pty="s")
+
+  Xt <- obj$xt_lags[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
+  Xtmin1 <- obj$xt_lags[, "Nt_1"]
+
+  Xt.max.abs = max(abs( range( c(Xt,
+                                 Xtmin1,
+                                 obj$xt_forecast),
+                              na.rm=TRUE)))
+  Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)
+
+  # Plot all the points
+  plot(Xtmin1,
+       Xt,
+       xlab = x.lab,
+       ylab = y.lab,
+       xlim = Xt.axes.range,
+       ylim = Xt.axes.range,
+       main = main)
+
+  # Highlight x[tstar]
+  points(Xtmin1[tstar],
+         Xt[tstar],
+         col = tstar.col,
+         pch = tstar.pch,
+         cex = tstar.cex)
+
+  psi_vec <- obj$xt_nbr_index[tstar,]     #  vector of indices of points closest
+                                        #  to x[tstar]
+
+  if(neigh.plot){
+    points(Xtmin1[psi_vec],
+           Xt[psi_vec],
+           pch = 19,
+           col = "red")
+  }
+
+
+  if(neigh.proj){
+    points(Xtmin1[psi_vec + 1],
+           Xt[psi_vec + 1],
+           pch = 19,
+           col = "purple",
+           cex = 0.5)
+
+    for(i in 1:length(psi_vec)){
+      igraph:::igraph.iArrows(Xtmin1[psi_vec],
+                              Xt[psi_vec],
+                              Xtmin1[psi_vec + 1],
+                              Xt[psi_vec + 1],
+                              curve = 1,
+                              size = 0.7,
+                              h.lwd = 2,
+                              sh.lwd = 2,
+                              width = 1,
+                              sh.col = "purple")
+               # Example:
+               # iArrows(0, 0, 4, 4, curve = 1, size = 0.7, h.lwd = 2,
+      #  sh.lwd=2, width = 1, sh.col="red")
+    }
+  }
+
+
+  if(pred.plot){
+    points(Xt[tstar],
+           obj$xt_forecast[tstar],    # CHECK not tstar+1, think it's correct
+           col = tstar.col,
+           pch = 8)
+
+    igraph:::igraph.iArrows(Xtmin1[tstar],
+                            Xt[tstar],
+                            Xt[tstar],
+                            obj$xt_forecast[tstar],
+                            curve = 1,
+                            size = 0.7,
+                            h.lwd = 2,
+                            sh.lwd = 2,
+                            width = 1,
+                            sh.col = "lightgrey")
+
+    abline(h = Xt[psi_vec + 1],
+           col = "lightgrey")
+  }
+
+  if(pred.rEDM){
+    points(Xt[tstar],
+           dplyr::pull(Nx_lags_orig[tstar, "rEDM.pred"]),
+           col = "red",
+           cex = 1.5,
+           lwd = 2)
+  }
+
+  if(true.val){
+    points(Xtmin1[tstar + 1],
+           Xt[tstar + 1],
+           cex = 1.5,
+           lwd = 2,
+           col = "darkgreen")
+  }
+
+  if(legend.plot){
+    legend("bottomleft",
+           pch=c(tstar.pch, 19, 8, 1, 1),
+           leg=c("x(t*)",
+                 "neighbours",
+                 "x(t*+1) pred (wt avge)",
+                 "rEDM pred",
+                 "true x(t*+1)"),
+           col=c(tstar.col,
+                 "red",
+                 tstar.col,
+                 "red",
+                 "darkgreen"),
+           cex=0.85)
+  }
+}

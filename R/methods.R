@@ -30,9 +30,12 @@
 #'   \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
 #'   \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
 #'   \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
-#'   \item xt_distance [matrix()] Focal index (row), neighbour (column), distance (value)
+#'   \item xt_distance [matrix()] Focal index (row), neighbour (column),
+#'   distance (value); large square matrix with \code{dim = nrow(nt)}
 #'   \item xt_nbr_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
-#'   \item xt_nbr_value [matrix()] Focal index (row), rank (column), and neighbour value (value)
+#'   \item xt_nbr_value [matrix()] Focal index (row), rank (column), and
+#'   neighbour value (value)  TODO Andy not quite sure what this is, don't you
+#'   need X(t) and X(t-1) if, say, E=2?
 #'   \item xt_nbr_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
 #'   \item xt_nbr_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
 #'   \item xt_prj_index [matrix()] Projected index (row), rank (column), and neighbour index (value)

@@ -78,3 +78,93 @@ EDM_pred_E_2 <-  function(Nx.lags,
   return(list("Nx.lags" = Nx.lags, "my.full.calcs" = my.full.calcs,
               "psi.values" = psi.values))
   }
+
+# Used in edm-work/code/simulated/egDeyle/egDeyle.rnw to do movie of how EDM
+# works, and to show incorrect rEDM results. Don't want it in package though, so
+# maybe just temporarily here, and making plot_explain_edm().
+simplexPlot = function(Nx.lags, library, tstar,
+                       cobwebbing = TRUE,
+                       x.lab = expression("X(t-1)"),
+                       y.lab = expression("X(t)"),
+                       main = "All the points in lagged space",
+                       tstar.col = "blue", tstar.pch = 1, tstar.cex = 1,
+                       psivec = NULL, neigh.plot = FALSE, neigh.proj = FALSE,
+                       pred.plot = FALSE, pred.rEDM = FALSE, true.val = FALSE,
+                       legend.plot = TRUE)
+    {
+      # Create figure for animation to demonstrate the steps in simplex
+      #  projection.
+      # Args:
+      #   Nx.lags: dataframe with time indexing the row, and columns named
+      #         Nt, Ntmin1, Xt, Xtmin1, Xtmin2 and, if E!=0, columns XtPredEeq1,
+      #         XtPredEeq2, etc. If the old xt etc. names they get converted
+      #         to Xt.
+      #   library: dataframe stemming from Nx.lags but with dist from x(tstar)
+      #    and resulting rank and weight. Has NA for x(tstar) row.
+      #   pred.plot: plot predicted value from manual calculations
+      #   pred.rEDM: plot predicted value from rEDM
+      #   true.val: plot the true next value
+      #   legend.plot: include a legend or not
+
+      # if(tstar.plot)
+      #    { toPlot = Nx.lags} else
+      #    { toPlot = library}
+      Nx.lags = Nx.to.NX.format(Nx.lags) # convert older xt headings to Xt
+      par(pty="s")
+      plot(Nx.lags$Xtmin1, Nx.lags$Xt,
+           xlab = x.lab, ylab = y.lab,
+           xlim = Xt.axes.range, ylim = Xt.axes.range,
+           main = main)
+      points(Nx.lags[c(tstar), c("Xtmin1", "Xt")], col = tstar.col,
+              pch = tstar.pch, cex = tstar.cex)
+      if(neigh.plot) points(library[psivec, c("Xtmin1", "Xt")],
+            pch = 19, col = "red")
+      if(neigh.proj)
+        {  points(library[psivec+1, c("Xtmin1", "Xt")],
+                  pch = 19, col = "purple", cex = 0.5)  # smaller
+           for(i in 1:length(psivec))
+             {
+
+               iArrows(pull(library[psivec, "Xtmin1"]),
+                       pull(library[psivec, "Xt"]),
+                       pull(library[psivec+1, "Xtmin1"]),
+                       pull(library[psivec+1, "Xt"]),
+                       curve = 1, size = 0.7, h.lwd = 2, sh.lwd = 2,
+                       width = 1, sh.col = "purple")
+               # Example:
+               # iArrows(0, 0, 4, 4, curve = 1, size = 0.7, h.lwd = 2,
+               #  sh.lwd=2, width = 1, sh.col="red")
+             }
+        }
+      if(pred.plot)
+        {
+          points(Nx.lags[tstar, "Xt"], XtstarPlus1, col = tstar.col,
+            pch = 8)
+          iArrows(pull(Nx.lags[tstar, "Xtmin1"]),
+                       pull(Nx.lags[tstar, "Xt"]),
+                       pull(Nx.lags[tstar, "Xt"]),
+                       XtstarPlus1,
+                       curve = 1, size = 0.7, h.lwd = 2, sh.lwd = 2,
+                       width = 1, sh.col = tstar.col)
+          abline(h = pull(library[psivec+1, "Xt"]), col = "lightgrey")
+        }
+      if(pred.rEDM)
+        {
+          points(Nx.lags[tstar, "Xt"], Nx.lags[tstar+1, "XtPredEeq2"],
+            col = "red", cex = 1.5, lwd = 2)
+        }
+      if(true.val)
+        {
+          points(Nx.lags[tstar+1, c("Xtmin1", "Xt")],
+                 cex = 1.5, lwd = 2, col = "darkgreen")
+        }
+      if(legend.plot)
+        {
+          legend("bottomleft",
+                 pch=c(tstar.pch, 19, 8, 1, 1),
+                 leg=c("x(t*)", "neighbours", "x(t*+1) pred (wt avge)",
+                       "rEDM pred", "true x(t*+1)"),
+                 col=c(tstar.col, "red", tstar.col, "red", "darkgreen"),
+                 cex=0.85)
+        }
+   }
