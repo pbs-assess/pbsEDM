@@ -1149,7 +1149,7 @@ plot_phase_3d <- function(obj,
 ##' Highlights a point to be projected, its nearest `E+1` neighbours, and then
 ##' draw arrows to show where they go and so where the projection goes. Very
 ##' useful for understanding and checking what EDM is doing. Call this multiple
-##' times using TODO to make a movie.
+##' times using TODO to make a movie. Type `plot_explain_edm_movie` for example calls.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param tstar the time index (x(t)) of the target point for which to make a
@@ -1202,6 +1202,7 @@ plot_explain_edm <- function(obj,
   psi_vec <- obj$xt_nbr_index[tstar,]     #  vector of indices of points closest
                                         #  to x[tstar]
 
+  # Highlight neighbours
   if(neigh.plot){
     points(Xtmin1[psi_vec],
            Xt[psi_vec],
@@ -1209,7 +1210,7 @@ plot_explain_edm <- function(obj,
            col = "red")
   }
 
-
+  # Highlight projections of neighbours
   if(neigh.proj){
     points(Xtmin1[psi_vec + 1],
            Xt[psi_vec + 1],
@@ -1218,10 +1219,10 @@ plot_explain_edm <- function(obj,
            cex = 0.5)
 
     for(i in 1:length(psi_vec)){
-      igraph:::igraph.iArrows(Xtmin1[psi_vec],
-                              Xt[psi_vec],
-                              Xtmin1[psi_vec + 1],
-                              Xt[psi_vec + 1],
+      igraph:::igraph.Arrows(Xtmin1[psi_vec[i]],
+                              Xt[psi_vec[i]],
+                              Xtmin1[psi_vec[i] + 1],
+                              Xt[psi_vec[i] + 1],
                               curve = 1,
                               size = 0.7,
                               h.lwd = 2,
@@ -1241,16 +1242,16 @@ plot_explain_edm <- function(obj,
            col = tstar.col,
            pch = 8)
 
-    igraph:::igraph.iArrows(Xtmin1[tstar],
-                            Xt[tstar],
-                            Xt[tstar],
-                            obj$xt_forecast[tstar],
-                            curve = 1,
-                            size = 0.7,
-                            h.lwd = 2,
-                            sh.lwd = 2,
-                            width = 1,
-                            sh.col = "lightgrey")
+    igraph:::igraph.Arrows(Xtmin1[tstar],
+                           Xt[tstar],
+                           Xt[tstar],
+                           obj$xt_forecast[tstar],
+                           curve = 1,
+                           size = 0.7,
+                           h.lwd = 2,
+                           sh.lwd = 2,
+                           width = 1,
+                           sh.col = "darkblue")
 
     abline(h = Xt[psi_vec + 1],
            col = "lightgrey")
@@ -1294,26 +1295,26 @@ plot_explain_edm <- function(obj,
 ##' Use with gifski in .Rmd - see vignette.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
-##' @param ...
+##' @param ... needs to include tstar
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
+##' \donttest{
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   plot_explain_edm_movie(aa, tstar = 15)
+##' }
 plot_explain_edm_movie <- function(obj,
                                    ...){
-
-    stopifnot("Need more distinct colours in E_cols"=
-              length(E_cols) <= E_components)
-
 
   stopifnot("Need to specify tstar" =
               exists("tstar"))
 
   plot_explain_edm(obj,
-                   t.star.col = "black"
+                   tstar.col = "black",
                    ...)    # tstar should get carried through
 
   plot_explain_edm(obj,
-                   t.star.col = "blue",
+                   tstar.col = "blue",,
                    main = paste0(
                      "Remove vector x(tstar), where tstar=", tstar,
                      ", from library"),
@@ -1325,7 +1326,7 @@ plot_explain_edm_movie <- function(obj,
 # TODO ADD THAT IN HERE
 
   plot_explain_edm(obj,
-                   t.star.col = "white",   # to hide it
+                   tstar.col = "white",   # to hide it
                    main = paste0(
                      "Want to predict where it goes, i.e. predict vec x(tstar+1)"),
                    tstar.cex = 2.5,
@@ -1346,36 +1347,45 @@ plot_explain_edm_movie <- function(obj,
                    neigh.plot = TRUE,
                    ...)
 
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "See where neighbours go"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE,
+                   ...)
 
-GOT TO HERE
-simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
-            main = paste0(
-            "See where neighbours go"),
-            tstar.pch = 19, tstar.cex = 1.2,
-            neigh.plot = TRUE, psivec = psivec,
-            neigh.proj = TRUE)
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "and take a weighted average of X(t) to be the predicted value"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE,
+                   pred.plot = TRUE,
+                   ...)
 
-simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
-            main = paste0(
-            "and take a weighted average of X(t) to be the predicted value"),
-            tstar.pch = 19, tstar.cex = 1.2,
-            neigh.plot = TRUE, psivec = psivec,
-            neigh.proj = TRUE, pred.plot = TRUE)
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "which should agree with prediction from rEDM"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE,
+                   pred.plot = TRUE,
+                   pred.rEDM = TRUE,
+                   ...)
 
-simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
-            main = paste0(
-            "which should agree with prediction from rEDM"),
-            tstar.pch = 19, tstar.cex = 1.2,
-            neigh.plot = TRUE, psivec = psivec,
-            neigh.proj = TRUE, pred.plot = TRUE, pred.rEDM = TRUE)
-
-simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
-            main = paste0(
-            "and is hopefully close to the true value"),
-            tstar.pch = 19, tstar.cex = 1.2,
-            neigh.plot = TRUE, psivec = psivec,
-            neigh.proj = TRUE, pred.plot = TRUE, pred.rEDM = TRUE,
-            true.val = TRUE)
-
-
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "and is hopefully close to the true value"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE,
+                   pred.plot = TRUE,
+                   pred.rEDM = TRUE,
+                   true.val = TRUE,
+                   ...)
 }
