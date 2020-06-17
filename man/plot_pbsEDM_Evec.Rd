@@ -19,7 +19,7 @@ Six panel plot
 \examples{
 \donttest{
   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-  plot.pbsEDM_Evec(aa)
+  plot_pbsEDM_Evec(aa)
 }
 }
 \author{

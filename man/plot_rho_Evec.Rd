@@ -20,7 +20,7 @@ Plot rho versus E for output from pbsEDM_Evec
 \examples{
 \donttest{
   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-  plot.rho.Evec(aa)
+  plot_rho_Evec(aa)
 }
 }
 \author{

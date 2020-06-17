@@ -497,11 +497,11 @@ plot.pbsEDM = function(obj,
                 ...)
 #                end = last.time.to.plot)
 
-  plot_phase_2d(values = calc2$nt_observed,
+  plot_phase_2d(values = obj$nt_observed,
                 X.or.N = "N",
                 ...)
 
-  plot_phase_2d(values = calc2$xt_observed,
+  plot_phase_2d(values = obj$xt_observed,
                 X.or.N = "X",
                 ...)
 
@@ -521,7 +521,7 @@ plot.pbsEDM = function(obj,
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-##'   plot.pbsEDM_Evec(aa)
+##'   plot_pbsEDM_Evec(aa)
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
                              ...){
@@ -545,7 +545,7 @@ plot_pbsEDM_Evec <- function(E_res,
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-##'   plot.rho.Evec(aa)
+##'   plot_rho_Evec(aa)
 ##' }
 plot_rho_Evec <- function(E_res,
                           ...){
