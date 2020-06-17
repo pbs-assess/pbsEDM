@@ -2,6 +2,7 @@
 
 S3method(plot,pbsEDM)
 S3method(plot,pbsEDM.Evec)
+S3method(plot,rho.Evec)
 export(EDM_pred_E_2)
 export(gets3dusr)
 export(pbsEDM)

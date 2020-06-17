@@ -533,6 +533,40 @@ plot.pbsEDM.Evec <- function(E_res,
                 ...)
 }
 
+##' Plot rho versus E for output from pbsEDM_Evec
+
+##'  <description>
+##'
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param ...
+##' @return plot of rho versus E
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   plot.rho.Evec(aa)
+##' }
+plot.rho.Evec <- function(E_res,
+                          ...){
+  rho <- vector()
+  E <- vector()
+  for(i in 1:length(E_res)){
+    rho[i] <- E_res[[i]]$results$rho
+    E[i] <- E_res[[i]]$results$E
+  }
+
+  plot(E,
+       rho,
+       ylim = c(0,1),
+       xlab = "Embedding Dimension (E)",
+       ylab = "Forecast Skill (rho)",
+       ...
+       )
+  # see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
+}
+
+
 ##' Plot predictions of X[t] versus the observations for list of `pbsEDM` objects
 ##'
 ##' <description>

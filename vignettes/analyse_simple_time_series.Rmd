@@ -127,3 +127,8 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
        portrait = FALSE)
 }
 ```
+
+See how the forecast skill (correlation coefficient $rho$) varies with $E$:
+```{r rhoE}
+plot.rho.Evec(E_results)
+```
