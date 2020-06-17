@@ -221,7 +221,9 @@ pbsEDM <- function (nt,
 ##' @param E_vec The vector of embedding dimensions to try.
 ##' @param ...
 ##' @examples
-##' # pbsEDM_Evec(Nx_lags_orig$Nt)
+##' \donttest{
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##' }
 pbsEDM_Evec <- function(Nt,
                      E_vec = 1:10,
                      ...){

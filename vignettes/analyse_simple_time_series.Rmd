@@ -110,14 +110,20 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 
 ![IBTS_movie.gif](IBTS_movie.gif). -->
 
-Loop over values of lag (then make into wrapper function):
-```{r loop}
-E_res = list()
-par(mfrow = c(3,2))
-for(E in 1:5){
-  E_res[[E]] <- pbsEDM(Nx_lags_orig,
-                       lags = list(Nt = 0:E),
-                       first_difference = TRUE)
-#  plot_observed(E_res[[E]], late.num = 5)
+## Make forecasts using different values of E
+
+Using the simplex algorithm for different values of embedding dimension $E$
+($E=2$ uses values $X_t$ and $X_{t-1}$).
+```{r Eres}
+E_results <- pbsEDM_Evec(Nx_lags_orig$Nt)
+plot.pbsEDM.Evec(E_results)
+```
+
+And a movie of that:
+```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 8, fig.height = 5.36}
+for(iiii in 1:length(Nx_lags_orig$Nt)){
+  plot.pbsEDM.Evec(E_results,
+       last.time.to.plot = iiii,
+       portrait = FALSE)
 }
 ```

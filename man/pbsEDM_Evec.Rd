@@ -21,7 +21,9 @@ Only works for one variable, non-differenced N(t), for now, as I haven't thought
 the lags variable properly yet.
 }
 \examples{
-# pbsEDM_Evec(Nx_lags_orig$Nt)
+\donttest{
+  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+}
 }
 \author{
 Andrew Edwards
