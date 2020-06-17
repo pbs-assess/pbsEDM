@@ -1288,3 +1288,94 @@ plot_explain_edm <- function(obj,
            cex=0.85)
   }
 }
+
+##' Create movie to explain EDM
+##'
+##' Use with gifski in .Rmd - see vignette.
+##'
+##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param ...
+##' @return
+##' @export
+##' @author Andrew Edwards
+plot_explain_edm_movie <- function(obj,
+                                   ...){
+
+    stopifnot("Need more distinct colours in E_cols"=
+              length(E_cols) <= E_components)
+
+
+  stopifnot("Need to specify tstar" =
+              exists("tstar"))
+
+  plot_explain_edm(obj,
+                   t.star.col = "black"
+                   ...)    # tstar should get carried through
+
+  plot_explain_edm(obj,
+                   t.star.col = "blue",
+                   main = paste0(
+                     "Remove vector x(tstar), where tstar=", tstar,
+                     ", from library"),
+                   tstar.pch = 4,
+                   tstar.cex = 2.5,
+                   ...)
+
+  # DON'T we want to remove tstar+1 also - whole point of my error finding!
+# TODO ADD THAT IN HERE
+
+  plot_explain_edm(obj,
+                   t.star.col = "white",   # to hide it
+                   main = paste0(
+                     "Want to predict where it goes, i.e. predict vec x(tstar+1)"),
+                   tstar.cex = 2.5,
+                   ...)
+
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "So predict where vector x(tstar) will go ..."),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   ...)
+
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "... based on three (E+1) nearest neighbours"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   ...)
+
+
+GOT TO HERE
+simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
+            main = paste0(
+            "See where neighbours go"),
+            tstar.pch = 19, tstar.cex = 1.2,
+            neigh.plot = TRUE, psivec = psivec,
+            neigh.proj = TRUE)
+
+simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
+            main = paste0(
+            "and take a weighted average of X(t) to be the predicted value"),
+            tstar.pch = 19, tstar.cex = 1.2,
+            neigh.plot = TRUE, psivec = psivec,
+            neigh.proj = TRUE, pred.plot = TRUE)
+
+simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
+            main = paste0(
+            "which should agree with prediction from rEDM"),
+            tstar.pch = 19, tstar.cex = 1.2,
+            neigh.plot = TRUE, psivec = psivec,
+            neigh.proj = TRUE, pred.plot = TRUE, pred.rEDM = TRUE)
+
+simplexPlot(Nx.lags = Nx.lags, library = library, tstar = tstar,
+            main = paste0(
+            "and is hopefully close to the true value"),
+            tstar.pch = 19, tstar.cex = 1.2,
+            neigh.plot = TRUE, psivec = psivec,
+            neigh.proj = TRUE, pred.plot = TRUE, pred.rEDM = TRUE,
+            true.val = TRUE)
+
+
+}
