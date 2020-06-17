@@ -104,18 +104,18 @@ E_results <- pbsEDM_Evec(Nx_lags_orig$Nt)
 plot.pbsEDM.Evec(E_results)
 ```
 
-And a movie of that (commented out else Travis fails, see [here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html) for an explanation):
+And a movie of that (not run here as gifski causes Travis fails, see [here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html) for an explanation):
 <!-- # made width 9 not 8 to see axis labels better-->
-```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
+```{r, eval=FALSE, echo=FALSE}
+# ```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
 for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot.pbsEDM.Evec(E_results,
        last.time.to.plot = iiii,
        portrait = FALSE)
 }
 ```
-<!-- The resulting animation is
 
-![IBTS_movie.gif](IBTS_movie.gif). -->
+![pbsEDM_movie_1.gif](pbsEDM_movie_1.gif).
 
 See how the forecast skill (correlation coefficient $\rho$) varies with $E$:
 ```{r rhoE}
