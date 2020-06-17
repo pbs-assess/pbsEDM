@@ -21,7 +21,9 @@ steps in a different colour}
 
 }
 \description{
-Only working if nt_observed values are in there
+Only working if nt_observed values are in there (needs another switch if
+not). And very likely only works for univariate time series for now, not
+pred-prey for example.
 }
 \author{
 Andrew Edwards

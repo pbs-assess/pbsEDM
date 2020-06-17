@@ -110,9 +110,6 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 
 ![IBTS_movie.gif](IBTS_movie.gif). -->
 
-
-
-
 Loop over values of lag (then make into wrapper function):
 ```{r loop}
 E_res = list()

@@ -467,7 +467,9 @@ gets3dusr = function(s3dobject)
 
 ##' Plot data and results of an object of class `pbsEDM`
 ##'
-##' Only working if nt_observed values are in there
+##' Only working if nt_observed values are in there (needs another switch if
+##' not). And very likely only works for univariate time series for now, not
+##' pred-prey for example.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is

@@ -207,6 +207,34 @@ pbsEDM <- function (nt,
   )
 }
 
+##' Do the `pbsEDM()` calculation for vector of `E` values
+##'
+##' Only works for one variable, non-differenced N(t), for now, as I haven't thought how to incorporate
+##' the lags variable properly yet.
+##'
+##' @return List of `pbsEDM` lists, each main component corresponds to a value
+##'   of `E`, given by `results$E`
+##' @export
+##' @author Andrew Edwards
+##' @param Nt [vector] Vector of non-differenced values N(t), with time assumed
+##'   to be `1:length(Nt)`.
+##' @param E_vec The vector of embedding dimensions to try.
+##' @param ...
+##' @examples
+##' # pbsEDM_Evec(Nx_lags_orig$Nt)
+pbsEDM_Evec <- function(Nt,
+                     E_vec = 1:10,
+                     ...){
+  E_res <- list()
+  for(i in 1:length(E_vec)){
+    E_res[[i]] <- pbsEDM(data.frame(Nt = Nt),
+                         lags = list(Nt = 0:E_vec[i]),
+                         first_difference = TRUE)
+  }
+  return(E_res)    # could make it class pbsEDM_Evec to automate plot.pbsEDM_Evec
+}
+
+
 #' Perform Out-of-Sample Forecasting via S-Mapping
 #'
 #' @param nt [data.frame()] A data frame with named columns
