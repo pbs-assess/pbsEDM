@@ -124,8 +124,16 @@ plot_rho_Evec(E_results)
 
 ## Movie to demonstrate how EDM works
 
-```{r, eval = FALSE}
-# ```{r, EDMmovie, animation.hook = 'gifski', interval = 5}
+With $t^* = 15$, shows the idea:
+<!-- ```{r, eval = FALSE} -->
+```{r, EDMmovie, animation.hook = 'gifski', interval = 5}
 plot_explain_edm_movie(calc2,
-                       tstar = 15)   # 75, 94 seem biggest difference to rEDM
+                       tstar = 15)  # 15 shows the idea nicely
+                                    # 75, 94 seem biggest difference to rEDM
 ```
+
+Now with $t^* = 75$ get difference to rEDM (bit hard to see though):
+```{r, EDMmovie2, animation.hook = 'gifski', interval = 5}
+plot_explain_edm_movie(calc2,
+                       tstar = 75)  # 15 shows the idea nicely
+                                    # 75, 94 seem biggest difference to rEDM

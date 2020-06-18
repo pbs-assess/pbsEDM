@@ -1287,6 +1287,11 @@ plot_explain_edm <- function(obj,
                  "red",
                  "darkgreen"),
            cex=0.85)
+
+    legend("topleft",
+           leg = paste0("t*=", tstar),
+           col = "white",
+           bty = "n")
   }
 }
 
