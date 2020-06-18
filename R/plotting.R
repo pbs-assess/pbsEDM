@@ -612,8 +612,8 @@ plot_pred_obs <- function(E_res,
   axes.range = c(- max.abs, max.abs)
 
   plot(0, 0,
-       xlab = expression("Observation of x"[t]),
-       ylab = expression("Prediction of x"[t]),
+       xlab = expression("Observation of X"[t]),
+       ylab = expression("Prediction of X"[t]),
        xlim = axes.range,
        ylim = axes.range,
        asp = 1,
@@ -676,9 +676,9 @@ plot_observed = function(obj,
                          early.col.lines = "lightgrey",
                          late.num = 3,
                          pt.type = "p",
-                         x.lab = expression("x"[t-2]),
-                         y.lab = expression("x"[t-1]),
-                         z.lab = expression("x"[t]),
+                         x.lab = expression("X"[t-2]),
+                         y.lab = expression("X"[t-1]),
+                         z.lab = expression("X"[t]),
                          ...){
   stopifnot(attr(obj, "class") == "pbsEDM")
   stopifnot(dim %in% 1:3)
