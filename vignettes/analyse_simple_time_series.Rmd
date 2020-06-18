@@ -121,3 +121,10 @@ See how the forecast skill (correlation coefficient $\rho$) varies with $E$:
 ```{r rhoE}
 plot_rho_Evec(E_results)
 ```
+
+## Movie to demonstrate how EDM works
+
+```{r, EDMmovie, animation.hook = 'gifski', interval = 5}
+plot_explain_edm_movie(calc2,
+                       tstar = 15)
+```

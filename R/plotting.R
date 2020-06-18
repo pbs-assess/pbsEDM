@@ -1238,20 +1238,20 @@ plot_explain_edm <- function(obj,
 
   if(pred.plot){
     points(Xt[tstar],
-           obj$xt_forecast[tstar],    # CHECK not tstar+1, think it's correct
+           obj$xt_forecast[tstar + 1],    # CHECK not tstar+1, think it's correct
            col = tstar.col,
            pch = 8)
 
     igraph:::igraph.Arrows(Xtmin1[tstar],
                            Xt[tstar],
                            Xt[tstar],
-                           obj$xt_forecast[tstar],
+                           obj$xt_forecast[tstar + 1],
                            curve = 1,
                            size = 0.7,
                            h.lwd = 2,
                            sh.lwd = 2,
                            width = 1,
-                           sh.col = "darkblue")
+                           sh.col = "darkgrey")
 
     abline(h = Xt[psi_vec + 1],
            col = "lightgrey")
@@ -1259,7 +1259,7 @@ plot_explain_edm <- function(obj,
 
   if(pred.rEDM){
     points(Xt[tstar],
-           dplyr::pull(Nx_lags_orig[tstar, "rEDM.pred"]),
+           dplyr::pull(Nx_lags_orig[tstar+1, "rEDM.pred"]),
            col = "red",
            cex = 1.5,
            lwd = 2)
@@ -1305,36 +1305,36 @@ plot_explain_edm <- function(obj,
 ##' }
 plot_explain_edm_movie <- function(obj,
                                    ...){
-
-  stopifnot("Need to specify tstar" =
-              exists("tstar"))
+#browser()
+#  stopifnot("Need to specify tstar" =
+#              exists("tstar"))   # think this fails as it can't be used in THIS function
 
   plot_explain_edm(obj,
                    tstar.col = "black",
                    ...)    # tstar should get carried through
 
-  plot_explain_edm(obj,
-                   tstar.col = "blue",,
-                   main = paste0(
-                     "Remove vector x(tstar), where tstar=", tstar,
-                     ", from library"),
-                   tstar.pch = 4,
-                   tstar.cex = 2.5,
-                   ...)
+  #plot_explain_edm(obj,
+  #                 tstar.col = "blue",,
+  #                 main = paste0(
+  #                   "Remove vector x(tstar) from library"),
+  #                   # where tstar=", tstar,
+  #                 tstar.pch = 4,
+  #                 tstar.cex = 2.5,
+  #                 ...)
 
   # DON'T we want to remove tstar+1 also - whole point of my error finding!
 # TODO ADD THAT IN HERE
 
-  plot_explain_edm(obj,
-                   tstar.col = "white",   # to hide it
-                   main = paste0(
-                     "Want to predict where it goes, i.e. predict vec x(tstar+1)"),
-                   tstar.cex = 2.5,
-                   ...)
+  #plot_explain_edm(obj,
+  #                 tstar.col = "white",   # to hide it
+  #                 main = paste0(
+  #                   "Want to predict where it goes, i.e. predict vec x(tstar+1)"),
+  #                 tstar.cex = 2.5,
+  #                 ...)
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "So predict where vector x(tstar) will go ..."),
+                     "Want to predict where vector x(tstar) will go ..."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    ...)
@@ -1358,7 +1358,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "and take a weighted average of X(t) to be the predicted value"),
+                     "and take weighted average of X(t) to be predicted value"),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
