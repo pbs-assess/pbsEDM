@@ -2,7 +2,7 @@
 # more general functions. EDM_pred_E_2() was originally in edm-work/code as
 # myEDMpred().
 
-# Mostly adapted now in plotting.R, still need for vignette.
+# Mostly adapted now in plotting.R, now taken out of analyse_simple... vignette.
 ##' Plot a movie of data (and EDM results if available) with panels showing data
 ##'  in various ways
 ##'

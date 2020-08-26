@@ -22,54 +22,60 @@ library(pbsEDM)
 
 The tibble `Nx_lags_orig` is saved in the package and contains a simple time
 series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
-$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged values),
-with EDM results for embedding dimension 2, using `rEDM` and Andy's original
+$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged
+values). Also has results for embedding dimension 2, using both `rEDM` and Andy's original
 function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
 
 Using that as an example here, see `inclusion_issue.Rmd` vignette for comparison
 of Andy's original results with results from `pbsEDM` and `rEDM`.
 
-## Visualise data - can prob skip once new function done
-
-Plot of data (before making movie):
-```{r}
-plotPanelMovie.df2(Nx_lags_orig,
-                   only.final.plot=TRUE,
-                   open.pdf=FALSE)
-```
-
-Movie -- see `inclusion_issue.Rmd` vignette.
-
-The final panel shows the predicted vs observed from rEDM and from Andy's manual
-calculations (not relevant here).
-
 ## Analyse with pbsEDM code
+
+Use only the `Xt` first-difference values from `Nx_lags_orig` and apply EDM
+calculations using lags of 0 and 1:
 
 ```{r pbsEDMcalc}
 calc <- pbsEDM(Nx_lags_orig,
-               lags = list(Xt = c(0:1))) # A list of results
+               lags = list(Xt = c(0:1)))
+```
+Creates a list of results (see `?pbsEDM` for full details):
+```{r pbsEDMres}
+summary(calc)
+```
 
-# pred <- calc$xt_forecast
+Several plotting functions are available, such as plotting the observed data
 
+```{r plotobs}
 plot_observed(calc, late.num = 5)
 ```
 
+Maybe remove the above as a bit confusing, or just use it to check....
+
+Use only the `Nt` raw data column from `Nx_lags_orig` and apply EDM
+calculations using lags of 0 and 1 with first differencing:
 ```{r calc2}
-# Use original Nt only, do lag of 1:
 calc2 <- pbsEDM(Nx_lags_orig,
                 lags = list(Nt = c(0:1)),
                 first_difference = TRUE)
+```
+Creates a list of results (see `?pbsEDM` for full details):
+```{r res}
+summary(calc2)
+```
+which can be used to plot the data in various useful ways:
+```{r plotres}
+plot(calc2)
+```
 
+TODO add caption
+
+```{r stillneed}
 # plot_observed(calc2, late.num = 5)
 
 testthat::expect_equal(calc$xt_forecast, calc2$xt_forecast)
 ```
 
-Plot time series and cobweb plots
 
-```{r cobweb}
-plot(calc2)
-```
 
 Can also do a movie (see below, since it includes results also).
 
