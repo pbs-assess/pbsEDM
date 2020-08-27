@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r start, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -20,52 +20,43 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
-The tibble `Nx_lags_orig` is saved in the package and contains a simple time
-series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
+The tibble `Nx_lags_orig` is saved in the package and contains several columns,
+though we are only going to use the original time series of simulated population numbers,
+$N(t)$, which has column name `Nt`. See `?Nx_lags_orig` for full details, and
+the `inclusion_issue.Rmd` vignette for comparison our step-by-step calculations
+with results from the functions in `pbsEDM` and `rEDM`.
+
+<!-- , the lagged value $N(t-1)$ as `Ntmin1`, and first difference
 $X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged
 values). Also has results for embedding dimension 2, using both `rEDM` and Andy's original
-function `EDM_pred_E_2()`. See `?Nx_lags_orig` for full details.
+function `EDM_pred_E_2()`.-->
 
-Using that as an example here, see `inclusion_issue.Rmd` vignette for comparison
-of Andy's original results with results from `pbsEDM` and `rEDM`.
 
 ## Analyse with pbsEDM code
 
-Use only the `Nt` raw data column from `Nx_lags_orig` and apply EDM
-calculations using lags of 0 and 1 with first differencing:
+Use only the `Nt` column from `Nx_lags_orig` and apply EDM
+calculations using lags of 0 and 1 ($E = 2$) with first differencing:
 ```{r calc2}
 calc2 <- pbsEDM(Nx_lags_orig,
                 lags = list(Nt = c(0:1)),
                 first_difference = TRUE)
 ```
-Creates a list of results (see `?pbsEDM` for full details):
+This creates a `pbsEDM` object which is a list of results (see `?pbsEDM` for full details):
 ```{r res}
 summary(calc2)
 ```
-which can be used to plot the data in various useful ways:
+For now we'll just use that to plot the data in various useful ways:
 ```{r plotres, fig.width = 9, fig.height = 5.36}
 plot(calc2,
      portrait = FALSE)
 ```
+The figure shows, before doing EDM, the data in various ways: time series of $N_t$ and $X_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $X_t$ vs $X_{t-1}$ (as used for $E=2$) and $X_t$ vs $X_{t-1}$ vs $X_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $X_t$ time series panel, the values of $X_t$ are also plotted in a vertical line (to the left of $t10$) which is the one-dimensional equivalent of a phase plot for $E=1$.
 
-TODO add caption
-
-
-```{r, eval=FALSE, echo=FALSE}
-# ```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 5.36, fig.height = 8}
-## fig.width is 0.67 * fig.height (which is 8)
-
-for(iiii in 1:length(Nx_lags_orig$Nt)){
-  plot(calc2,
-       last.time.to.plot = iiii)
-}
-```
-
-Instructive to have as a movie, just showing the data for now:
-<!--
-And again in landscape mode (for presentations):-->
-```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
-# ```{r, eval=FALSE, echo=FALSE}
+An animated movie (with EDM results) is shown later below; to create the movie
+without the results use this code in an Rmarkdown document:
+```{r datamovie, eval=FALSE, echo=TRUE}
+{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
+## or for portrait use fig.width = 5.36, fig.height = 8
 for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot(calc2,
        last.time.to.plot = iiii,
@@ -73,48 +64,82 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 }
 ```
 
-
+A lot of information is saved in the `calc2` list. See `?pbsEDM::pbsEDM`
+for full details, but, for example, useful summary statistics are given by
+```{r useful}
+calc2$results
+```
+giving the embedding dimension $E$ (which is 2 here because we used lags of 0
+and 1), forecast skill (correlation coefficient $\rho$) and root-mean-square
+error between the observations and the predictions.
 
 ## Make forecasts using different values of E
 
-Using the simplex algorithm for different values of embedding dimension $E$
-($E=2$ uses first-difference values $X_t$ and $X_{t-1}$).
-```{r Eres, fig.width = 9, fig.height = 5.36}
+Now use the simplex algorithm for different values of embedding dimension $E$,
+where, for example $E=2$ uses first-difference values $X_t$ and $X_{t-1}$:
+```{r Eres}
 E_results <- pbsEDM_Evec(Nx_lags_orig$Nt)
+```
+The result is a list containing a `pbsEDM` object (as above) for each value of $E$, the
+default being values $E = 2, 3, ..., 11$:
+```{r Eresres}
+summary(E_results)
+```
+
+There is a plotting function for the results, showing the data (as above) plus,
+in the final panel, the predicted value of each data point, for different values of $E$:
+```{r Eresplot, fig.width = 9, fig.height = 5.36}
 plot_pbsEDM_Evec(E_results,
                  portrait = FALSE)
 ```
+The value $\rho$ is the correlation coefficient (TODO check terminology) between
+the observed and predicted values, interpreted as the forecast skill.
 
-And a movie of that (not run here as gifski causes Travis fails, see [here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html) for an explanation):
-<!-- # made width 9 not 8 to see axis labels better-->
+A movie of that is run using:
+```{r, eval=FALSE, echo=TRUE}
 ```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
-# ```{r, eval=FALSE, echo=FALSE}
 for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot_pbsEDM_Evec(E_results,
        last.time.to.plot = iiii,
        portrait = FALSE)
 }
 ```
+![pbsEDM_movie_1.gif](pbsEDM_movie_1.gif).
 
-<!-- ![pbsEDM_movie_1.gif](pbsEDM_movie_1.gif).-->
+(The version shown here is a saved version to post on GitHub to avoid Travis
+issues -- see
+[here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html)
+if you want an explanation why).
 
-See how the forecast skill (correlation coefficient $\rho$) varies with $E$:
+Now see how the forecast skill (correlation coefficient $\rho$) varies with $E$:
 ```{r rhoE}
 plot_rho_Evec(E_results)
 ```
 
+Each `E_results` component corresponds to a value of $E$), for example
+```{r usefulE}
+calc2$results
+E_results[[1]]$results
+E_results[[2]]$results
+E_results[[3]]$results
+```
+
+The conclusion from the figure would be that $E = 3$ gives the highest value of
+$\rho$, and so is best used for predictions.
+
 ## Movie to demonstrate how EDM works
 
-With $t^* = 39$, shows the idea:
+Understanding of how EDM works can be enhanced with a specific animated
+example. With $t^* = 39$, shows the idea:
 <!-- ```{r, eval = FALSE} -->
-```{r, EDMmovie, animation.hook = 'gifski', interval = 8}
+```{r EDMmovie, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(calc2,
                        tstar = 39)  # 15 shows the idea nicely
                                     # 75, 94 seem biggest difference to rEDM
 ```
 
 Now with $t^* = 75$ get difference to rEDM (bit hard to see though):
-```{r, EDMmovie2, animation.hook = 'gifski', interval = 5}
+```{r EDMmovie2, animation.hook = 'gifski', interval = 5}
 plot_explain_edm_movie(calc2,
                        tstar = 75)  # 15 shows the idea nicely
                                     # 75, 94 seem biggest difference to rEDM
