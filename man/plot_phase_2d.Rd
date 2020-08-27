@@ -17,8 +17,8 @@ plot_phase_2d(
   early.col = "black",
   early.col.lines = "lightgrey",
   late.num = 3,
-  y.lab = expression("x"[t - 1]),
-  z.lab = expression("x"[t]),
+  y.lab = expression("X"[t - 1]),
+  z.lab = expression("X"[t]),
   ...
 )
 }

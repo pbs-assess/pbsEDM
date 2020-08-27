@@ -7,8 +7,8 @@
 plot_explain_edm(
   obj,
   tstar,
-  x.lab = expression("X(t-1)"),
-  y.lab = expression("X(t)"),
+  x.lab = expression("X"[t - 1]),
+  y.lab = expression("X"[t]),
   main = "All the points in lagged space",
   tstar.col = "blue",
   tstar.pch = 1,
