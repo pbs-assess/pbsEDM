@@ -222,7 +222,7 @@ pbsEDM <- function (nt,
 ##' @param Nt [vector] Vector of non-differenced values N(t), with time assumed
 ##'   to be `1:length(Nt)`.
 ##' @param E_vec The vector of embedding dimensions to try.
-##' @param ...
+##' @param ... Further options to pass to `pbsEDM()`.
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
@@ -234,7 +234,8 @@ pbsEDM_Evec <- function(Nt,
   for(i in 1:length(E_vec)){
     E_res[[i]] <- pbsEDM(data.frame(Nt = Nt),
                          lags = list(Nt = 0:E_vec[i]),
-                         first_difference = TRUE)
+                         first_difference = TRUE,
+                         ...)
   }
   return(E_res)    # could make it class pbsEDM_Evec to automate plot.pbsEDM_Evec
 }

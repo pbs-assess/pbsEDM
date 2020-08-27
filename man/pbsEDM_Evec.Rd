@@ -11,6 +11,8 @@ pbsEDM_Evec(Nt, E_vec = 1:10, ...)
 to be `1:length(Nt)`.}
 
 \item{E_vec}{The vector of embedding dimensions to try.}
+
+\item{...}{Further options to pass to `pbsEDM()`.}
 }
 \value{
 List of `pbsEDM` lists, each main component corresponds to a value
