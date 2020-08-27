@@ -95,9 +95,9 @@ plot_pbsEDM_Evec(E_results,
 The value $\rho$ is the correlation coefficient (TODO check terminology) between
 the observed and predicted values, interpreted as the forecast skill.
 
-A movie of that is run using:
+A movie of that is run in an Rmarkdown file (uncomment the commented line) using:
 ```{r, eval=FALSE, echo=TRUE}
-```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
+# ```{r movietime, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
 for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot_pbsEDM_Evec(E_results,
        last.time.to.plot = iiii,
@@ -138,8 +138,16 @@ plot_explain_edm_movie(calc2,
                                     # 75, 94 seem biggest difference to rEDM
 ```
 
-Now with $t^* = 75$ get difference to rEDM (bit hard to see though):
+Now with $t^* = 75$ we get a different answer to that from rEDM (bit hard to see though):
 ```{r EDMmovie2, animation.hook = 'gifski', interval = 5}
 plot_explain_edm_movie(calc2,
-                       tstar = 75)  # 15 shows the idea nicely
-                                    # 75, 94 seem biggest difference to rEDM
+                       tstar = 75)
+```
+
+Similarly for $t^* = 94$:
+```{r EDMmovie3, animation.hook = 'gifski', interval = 5}
+plot_explain_edm_movie(calc2,
+                       tstar = 94)
+```
+
+Such a movie is useful for checking any single prediction.
