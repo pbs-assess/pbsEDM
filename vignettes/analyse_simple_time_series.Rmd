@@ -87,13 +87,12 @@ summary(E_results)
 ```
 
 There is a plotting function for the results, showing the data (as above) plus,
-in the final panel, the predicted value of each data point, for different values of $E$:
+in the final panel, the predicted value of each data point and the $\rho$ for
+each different value of $E$:
 ```{r Eresplot, fig.width = 9, fig.height = 5.36}
 plot_pbsEDM_Evec(E_results,
                  portrait = FALSE)
 ```
-The value $\rho$ is the correlation coefficient (TODO check terminology) between
-the observed and predicted values, interpreted as the forecast skill.
 
 A movie of that is run in an Rmarkdown file (uncomment the commented line) using:
 ```{r, eval=FALSE, echo=TRUE}
@@ -107,8 +106,8 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 ![pbsEDM_movie_1.gif](pbsEDM_movie_1.gif).
 
 (The version shown here is a saved version to post on GitHub to avoid Travis
-issues -- see
-[here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html)
+issues -- see the text above the movie on
+[this page](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html)
 if you want an explanation why).
 
 Now see how the forecast skill (correlation coefficient $\rho$) varies with $E$:
@@ -131,23 +130,28 @@ $\rho$, and so is best used for predictions.
 
 Understanding of how EDM works can be enhanced with a specific animated
 example. With $t^* = 39$, shows the idea:
-<!-- ```{r, eval = FALSE} -->
-```{r EDMmovie, animation.hook = 'gifski', interval = 8}
+```{r EDMmovie, eval = FALSE}
+# ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(calc2,
                        tstar = 39)  # 15 shows the idea nicely
                                     # 75, 94 seem biggest difference to rEDM
 ```
+![pbsEDM_movie_tstar_39.gif](pbsEDM_movie_tstar_39.gif).
 
 Now with $t^* = 75$ we get a different answer to that from rEDM (bit hard to see though):
-```{r EDMmovie2, animation.hook = 'gifski', interval = 5}
+```{r EDMmovie2, eval = FALSE}
+# ```{r EDMmovie2, animation.hook = 'gifski', interval = 5}
 plot_explain_edm_movie(calc2,
                        tstar = 75)
 ```
+![pbsEDM_movie_tstar_75.gif](pbsEDM_movie_tstar_75.gif).
 
 Similarly for $t^* = 94$:
-```{r EDMmovie3, animation.hook = 'gifski', interval = 5}
+```{r EDMmovie3, eval = FALSE}
+# ```{r EDMmovie3, animation.hook = 'gifski', interval = 5}
 plot_explain_edm_movie(calc2,
                        tstar = 94)
 ```
+![pbsEDM_movie_tstar_94.gif](pbsEDM_movie_tstar_94.gif).
 
 Such a movie is useful for checking any single prediction.
