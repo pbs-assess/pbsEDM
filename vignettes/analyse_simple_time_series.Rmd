@@ -31,26 +31,6 @@ of Andy's original results with results from `pbsEDM` and `rEDM`.
 
 ## Analyse with pbsEDM code
 
-Use only the `Xt` first-difference values from `Nx_lags_orig` and apply EDM
-calculations using lags of 0 and 1:
-
-```{r pbsEDMcalc}
-calc <- pbsEDM(Nx_lags_orig,
-               lags = list(Xt = c(0:1)))
-```
-Creates a list of results (see `?pbsEDM` for full details):
-```{r pbsEDMres}
-summary(calc)
-```
-
-Several plotting functions are available, such as plotting the observed data
-
-```{r plotobs}
-plot_observed(calc, late.num = 5)
-```
-
-Maybe remove the above as a bit confusing, or just use it to check....
-
 Use only the `Nt` raw data column from `Nx_lags_orig` and apply EDM
 calculations using lags of 0 and 1 with first differencing:
 ```{r calc2}
@@ -63,21 +43,13 @@ Creates a list of results (see `?pbsEDM` for full details):
 summary(calc2)
 ```
 which can be used to plot the data in various useful ways:
-```{r plotres}
-plot(calc2)
+```{r plotres, fig.width = 9, fig.height = 5.36}
+plot(calc2,
+     portrait = FALSE)
 ```
 
 TODO add caption
 
-```{r stillneed}
-# plot_observed(calc2, late.num = 5)
-
-testthat::expect_equal(calc$xt_forecast, calc2$xt_forecast)
-```
-
-
-
-Can also do a movie (see below, since it includes results also).
 
 ```{r, eval=FALSE, echo=FALSE}
 # ```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 5.36, fig.height = 8}
@@ -89,9 +61,10 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 }
 ```
 
+Instructive to have as a movie, just showing the data for now:
 <!--
 And again in landscape mode (for presentations):-->
-```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 8, fig.height = 5.36}
+```{r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
 # ```{r, eval=FALSE, echo=FALSE}
 for(iiii in 1:length(Nx_lags_orig$Nt)){
   plot(calc2,
@@ -100,13 +73,16 @@ for(iiii in 1:length(Nx_lags_orig$Nt)){
 }
 ```
 
+
+
 ## Make forecasts using different values of E
 
 Using the simplex algorithm for different values of embedding dimension $E$
-($E=2$ uses values $X_t$ and $X_{t-1}$).
-```{r Eres}
+($E=2$ uses first-difference values $X_t$ and $X_{t-1}$).
+```{r Eres, fig.width = 9, fig.height = 5.36}
 E_results <- pbsEDM_Evec(Nx_lags_orig$Nt)
-plot_pbsEDM_Evec(E_results)
+plot_pbsEDM_Evec(E_results,
+                 portrait = FALSE)
 ```
 
 And a movie of that (not run here as gifski causes Travis fails, see [here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html) for an explanation):
