@@ -20,6 +20,15 @@ Dynamic Modeling
 devtools::install_github("luke-a-rogers/pbsEDM")
 ```
 
+## Notation
+
+Where possible we have followed the useful notation in Deyle et al. (2013), namely:
+
+| $t$ | Time, taking integer values 1, 2, 3, ... |
+| $N(t)$ | Population at time $t$ |
+| $X(t)| First difference: $X(t) = N(t+1) - N(t)$, $t = 1, 2, 3, ...$ |
+
+
 ## Functionality
 
 TBA

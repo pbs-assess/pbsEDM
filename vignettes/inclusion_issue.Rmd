@@ -20,6 +20,14 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
+## Introduction
+
+This vignette shows the code used to demonstrate the issue we found with the calculations
+`rEDM` package, which inappropriately uses nearest neighbours in the projection
+calculations. We verified this using manual code written by Andrew Edwards, and
+then functionalised code (in the `pbsEDM` package) written independenltly by
+Luke Rogers.
+
 The tibble `Nx_lags_orig` is saved in the package and contains a simple time
 series $N(t)$ as `Nt`, the lagged value $N(t-1)$ as `Ntmin1`, and first difference
 $X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged values),
