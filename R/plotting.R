@@ -96,7 +96,7 @@ plot_pbsEDM_Evec <- function(E_res,
 ##'  <description>
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
-##' @param ...
+##' @param ... Extra arguments to pass to `plot()`
 ##' @return plot of rho versus E
 ##' @export
 ##' @author Andrew Edwards
@@ -135,6 +135,8 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_res A list of `pbsEDM` objects
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
+##' @param last.time.to.plot Last time value of `N[t]` to use when plotting.
+##' @param ... Extra arguments to pass to `plot()`
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
@@ -175,7 +177,8 @@ plot_pred_obs <- function(E_res,
        xlim = axes.range,
        ylim = axes.range,
        asp = 1,
-       type = "n")
+       type = "n",
+       ...)
   abline(0, 1, col="grey")
   leg = vector()
 
