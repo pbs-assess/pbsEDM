@@ -51,9 +51,20 @@ plot.pbsEDM = function(obj,
   if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$xt_observed)
                                             # though last will have NA # not
                                             # incorporated fully yet
-  plot_observed(obj,
-                ...)
+
+# REPLACING THIS
+#  plot_observed(obj,
+#                ...)
 #                end = last.time.to.plot)
+
+# WITH
+  plot_time_series(values = obj$nt_observed,
+                   X.or.N = "N",
+                   ...)
+
+  plot_time_series(values = obj$xt_observed,
+                   X.or.N = "X",
+                   ...)
 
   plot_phase_2d(values = obj$nt_observed,
                 X.or.N = "N",
@@ -296,7 +307,6 @@ plot_observed = function(obj,
 
       plot_time_series(values = obj$nt_observed[start:last.time.to.plot],
                        X.or.N = "N",
-                       par.mar.ts = c(3, 3, 1, 1),
                        t.axis.range = t.axis.range,
                        y.range = Nt.axes.range,
                        col.plot = col.plot,
@@ -308,7 +318,6 @@ plot_observed = function(obj,
 
     plot_time_series(values = obj$xt_observed[start:(last.time.to.plot-1)], # don't want to use N[last.time.to.plot]
                      X.or.N = "X",
-                     par.mar.ts = c(3, 3, 1, 1),
                      t.axis.range = t.axis.range,
                      y.range = Xt.axes.range,
                      col.plot = col.plot,
@@ -320,7 +329,7 @@ plot_observed = function(obj,
 
 ##' Plot the observed time series as either Nt or Xt
 ##'
-##'  <description>
+##' First value must be `t=1` <description>
 ##'
 ##' @param values
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
@@ -338,47 +347,73 @@ plot_observed = function(obj,
 ##' @author Andrew Edwards
 plot_time_series <- function(values,
                              X.or.N,
-                             par.mar.ts,
+                             par.mar.ts = c(3, 3, 1, 1),
+                             max_time = NULL,
                              t.axis.range = NULL,
-                             last.time.to.plot = NA,
-                             y.range,
-                             col.plot,
-                             col.plot.lines,
-                             pch.plot,
-                             start = 1,
-                             pt.type = "p"
+                             last.time.to.plot = NULL,
+                             late.num = 3,
+                             late.col = "red",
+                             early.col = "black",
+                             early.col.lines = "lightgrey",
+                             start = 1, # may not work for others
+                             pt.type = "p",
+                             par.mgp = c(1.5, 0.5, 0)
                              ){
+
+  if(is.null(max_time)) max_time <- length(values)
+  if(is.null(last.time.to.plot)) last.time.to.plot <- max_time
+
   if(is.null(t.axis.range)) {
-    t.axis.range <- c(1, length(values))
-  }
-  if(is.na(last.time.to.plot)) {
-    last.time.to.plot = max(t.axis.range)
+      t.axis.range <- c(start, max_time)
   }
 
+  par("mgp" = par.mgp) # first val sets axis title dist (mex units)
+                       #  to axes, second sets labels
   par(pty = "m")                 # maximal plotting region, not square
                                  #  like for phase plots
   par(mar = par.mar.ts)
 
+  col.plot = c(rep(early.col,
+                   max(c(0, last.time.to.plot - late.num))),
+               rep(late.col,
+                   min(c(last.time.to.plot, late.num))) )   # colours of points
+  col.plot.lines = col.plot                            # colours of lines
+  col.plot.lines[col.plot.lines == early.col] = early.col.lines
+  pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
+                                        # filled circles for latest
+  pch.plot[length(pch.plot)] = 8     # latest one a star
+
+
   if(X.or.N == "N"){
+    Nt.max.abs = max( abs( range(values[start:max_time],
+                                 na.rm=TRUE) ) )
+    Nt.axes.range = c(0, Nt.max.abs*1.04)    # Expand else points can hit edge
+
     plot(0, 0,
          xlab = expression("Time, t"),
          ylab = expression("N"[t]),
          xlim = c(0, max(t.axis.range)),
-         ylim = y.range,
+         ylim = Nt.axes.range,
          type = "n",                           # empty plot
          main = paste0("Time t=", last.time.to.plot))
   } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
+    Xt.max.abs = max(abs( range(values[start:max_time],
+                                na.rm=TRUE) ),
+                     abs( range(values[start:max_time],
+                                na.rm=TRUE)) )
+    Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)
+
     plot(0, 0,
          xlab = expression("Time, t"),
          ylab = expression("X"[t]),
          xlim = c(XtLoc, max(t.axis.range)),
-         ylim = y.range,
+         ylim = Xt.axes.range,
          type = "n")                           # empty plot
     abline(v = 0.5*XtLoc, col="black")
   }
 
-  iii = last.time.to.plot             # needs replacing when I have time
+  iii = last.time.to.plot             # needs replacing when I have time ****
   if(iii > 1.5){
     segments(start:(iii-1),
              values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
@@ -402,6 +437,7 @@ plot_time_series <- function(values,
            col = col.plot)
   }
 }
+
 ##' @
 ##'  <description>
 ##'
