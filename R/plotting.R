@@ -52,13 +52,8 @@ plot.pbsEDM = function(obj,
                                             # though last will have NA # not
                                             # incorporated fully yet
 
-# REPLACING THIS
-#  plot_observed(obj,
-#                ...)
-#                end = last.time.to.plot)
-
-# WITH
   plot_time_series(values = obj$nt_observed,
+                                        # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
                    ...)
 
@@ -327,21 +322,24 @@ plot_observed = function(obj,
   }
 }
 
-##' Plot the observed time series as either Nt or Xt
+##' Plot the observed time series as either `N(t)` or `X(t)`
 ##'
 ##' First value must be `t=1` <description>
 ##'
-##' @param values
+##' @param values vector of values to be plotted
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
-##' @param par.mar.ts
+##' @param par.mar.ts `par(mar)` values
+##' @param max_time maximum time value for the time axis
 ##' @param t.axis.range
-##' @param iii time value to plot up to
-##' @param y.range
-##' @param col.plot
-##' @param col.plot.lines
-##' @param pch.plot
+##' @param last.time.to.plot
+##' @param late.num
+##' @param late.col
+##' @param early.col
+##' @param early.col.lines
 ##' @param start
 ##' @param pt.type
+##' @param par.mgp
+##' @param iii time value to plot up to
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
