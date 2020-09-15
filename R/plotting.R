@@ -342,7 +342,7 @@ plot_time_series <- function(values,
 ##' @param early.col colour in which to plot earlier time step points
 ##' @param early.col.lines colour in which to plot earlier time step points
 ##' @param late.num final number of `N[t]` time steps to plot in a different colour
-##' @return
+##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
 plot_phase_2d <- function(values,
@@ -487,26 +487,34 @@ plot_phase_2d <- function(values,
 
 }
 
-##'  3d plot of x_t vs x_{t-1} vs x_{t-2}:
+##' Plot 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`
 ##'
-##' <description>
+##' Shows the first-differenced values in three-dimensional phase space, as
+##'   points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
+##'   to the next point in the time series.
 ##'
 ##' @param obj `pbsEDM` object
-##' @param par.mgp.3d
-##' @param par.mai.3d
-##' @param par.mar.3d
-##' @param x.lab
-##' @param y.lab
-##' @param z.lab
-##' @param axis.range
-##' @param late.num
-##' @param pt.type
-##' @param late.col
-##' @param early.col
-##' @param early.col.lines
-##' @param axes.col
-##' @param par.mar.phase
-##' @return
+##' @param par.mgp.3d `par(mgp)` values
+##' @param par.mai.3d `par(mai)` values
+##' @param par.mar.3d `par(mar)` values
+##' @param x.lab x axis label
+##' @param y.lab y axis label
+##' @param z.lab z axis label
+##' @param last.time.to.plot last time value of N[t] to use when plotting, so
+##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
+##' @param axis.range range of axes, if NA then calculated from values; all
+##'   three axes have the same range
+##' @param late.num final number of `N(t)` time steps to plot in a different
+##'   colour; not showing `N(t)` here but keeping consistency with other plots
+##' @param pt.type `type` value for `points()`
+##' @param late.col colour in which to plot final `late.num` time steps
+##' @param early.col colour in which to plot earlier time step points
+##' @param early.col.lines colour in which to plot earlier time step points
+##' @param axes.col colour of orthogonal origin axes that go through (0, 0, 0)
+##' @param par.mar.phase `par(mar)` to reset to after plotting 3d figure
+##' @param par.mgp `par(mgp)` to reset to after plotting 3d figure
+##'
+##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
 plot_phase_3d <- function(obj,
@@ -525,8 +533,7 @@ plot_phase_3d <- function(obj,
                           early.col.lines = "lightgrey",
                           axes.col = "darkblue",
                           par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
-                          par.mgp = c(1.5, 0.5, 0),
-                          ...
+                          par.mgp = c(1.5, 0.5, 0)
                           ){
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),

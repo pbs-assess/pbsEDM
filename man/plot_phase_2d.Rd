@@ -46,7 +46,7 @@ final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
 \item{late.num}{final number of `N[t]` time steps to plot in a different colour}
 }
 \value{
-
+Plots figure to current device
 }
 \description{
 Shows the values in two-dimensional phase space (first differenced or not)

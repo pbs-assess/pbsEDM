@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_phase_3d}
 \alias{plot_phase_3d}
-\title{3d plot of x_t vs x_{t-1} vs x_{t-2}:}
+\title{Plot 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`}
 \usage{
 plot_phase_3d(
   obj,
@@ -21,18 +21,54 @@ plot_phase_3d(
   early.col.lines = "lightgrey",
   axes.col = "darkblue",
   par.mar.phase = c(3, 0, 1, 0),
-  par.mgp = c(1.5, 0.5, 0),
-  ...
+  par.mgp = c(1.5, 0.5, 0)
 )
 }
 \arguments{
 \item{obj}{`pbsEDM` object}
+
+\item{par.mgp.3d}{`par(mgp)` values}
+
+\item{par.mai.3d}{`par(mai)` values}
+
+\item{par.mar.3d}{`par(mar)` values}
+
+\item{x.lab}{x axis label}
+
+\item{y.lab}{y axis label}
+
+\item{z.lab}{z axis label}
+
+\item{last.time.to.plot}{last time value of N[t] to use when plotting, so
+final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+
+\item{axis.range}{range of axes, if NA then calculated from values; all
+three axes have the same range}
+
+\item{late.num}{final number of `N(t)` time steps to plot in a different
+colour; not showing `N(t)` here but keeping consistency with other plots}
+
+\item{pt.type}{`type` value for `points()`}
+
+\item{late.col}{colour in which to plot final `late.num` time steps}
+
+\item{early.col}{colour in which to plot earlier time step points}
+
+\item{early.col.lines}{colour in which to plot earlier time step points}
+
+\item{axes.col}{colour of orthogonal origin axes that go through (0, 0, 0)}
+
+\item{par.mar.phase}{`par(mar)` to reset to after plotting 3d figure}
+
+\item{par.mgp}{`par(mgp)` to reset to after plotting 3d figure}
 }
 \value{
-
+Plots figure to current device
 }
 \description{
-<description>
+Shows the first-differenced values in three-dimensional phase space, as
+  points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
+  to the next point in the time series.
 }
 \author{
 Andrew Edwards
