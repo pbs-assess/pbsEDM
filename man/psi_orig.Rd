@@ -8,8 +8,8 @@ original independent code}
 \format{
 Dataframe of size 100x4 with one row for each `tstar`, and columns:
   * `tstar`
-  * `psi1`, `psi2`, `psi3`: values of $\psi_1, \psi_2$ and $\psi_3$ for that
-  $t^*$.
+  * `psi1`, `psi2`, `psi3`: values of \eqn{psi_1, \psi_2} and \eqn{\psi_3} for that
+  \eqn{t^*}.
 }
 \source{
 Generated from Andy running `data-raw/Nx_lags.R`.
@@ -18,9 +18,9 @@ Generated from Andy running `data-raw/Nx_lags.R`.
 psi_orig
 }
 \description{
-For each $t^*$, contains values of $\psi_1, \psi_2$ and $\psi_3$ which are
+For each \eqn{t^*}, hello contains values of \eqn{\psi_1, \psi_2} and \eqn{\psi_3} which are
 the time indices of the nearest, second-nearest and third-nearest neighbours
-in $\bf{x}$-space (vector $\bf{x}$, so in lagged difference space). There
-are three nearest neighbours since embedding dimension $E=2$.
+in \eqn{\bf{x}}-space (vector \eqn{\bf{x}}, so in lagged difference space). There
+are three nearest neighbours since embedding dimension \eqn{E=2}.
 }
 \keyword{datasets}

@@ -10,6 +10,8 @@ plot_pbsEDM_Evec(E_res, ...)
 }
 \arguments{
 \item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
+
+\item{...}{extra arguments to `plot.pbsEDM()` and `plot_pred_obs()`}
 }
 \value{
 Six-panel figure in current plot environment

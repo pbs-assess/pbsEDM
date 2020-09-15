@@ -94,7 +94,7 @@ plot.pbsEDM = function(obj,
 ##' of `E`. See vignette "Analyse a simple time series" for full details.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
-##' @param ...
+##' @param ... extra arguments to `plot.pbsEDM()` and `plot_pred_obs()`
 ##' @return Six-panel figure in current plot environment
 ##' @export
 ##' @author Andrew Edwards
