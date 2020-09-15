@@ -727,9 +727,9 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    if(!expect_equal(obj$xt_observed, Nx_lags_orig$Xt)){
-      stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
-    }
+    expect_equal(obj$xt_observed, Nx_lags_orig$Xt)
+    #  ideally want this message:
+    #  stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
   }
 
   par(pty="s")
@@ -879,7 +879,6 @@ plot_explain_edm <- function(obj,
 ##' }
 plot_explain_edm_movie <- function(obj,
                                    ...){
-  #browser()
   # Need to specify tstar, but plot_explain_edm() will give automatic error anyway
   # if(!exists("tstar")){
   #   stop("Need to specify tstar")

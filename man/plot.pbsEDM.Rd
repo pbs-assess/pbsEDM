@@ -2,7 +2,8 @@
 % Please edit documentation in R/plotting.R
 \name{plot.pbsEDM}
 \alias{plot.pbsEDM}
-\title{Plot data and results of an object of class `pbsEDM`}
+\title{Plot data and results of an object of class `pbsEDM` as time series and
+phase plots}
 \usage{
 \method{plot}{pbsEDM}(obj, portrait = TRUE, ...)
 }
@@ -18,12 +19,23 @@ loop through in a movie), and late.num to plot the final number of time
 steps in a different colour}
 }
 \value{
-
+Five panels in 2x3 or 3x2 format, in current plot environment
 }
 \description{
-Only working if nt_observed values are in there (needs another switch if
+Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
+and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
+See vignette "Analyse a simple time series".
+Only working if `nt_observed` values are in there (needs another switch if
 not). And very likely only works for univariate time series for now, not
-pred-prey for example.
+pred-prey for example. TODO, update if necessary.
+}
+\examples{
+\donttest{
+ aa <- pbsEDM(Nx_lags_orig,
+              lags = list(Nt = 0:1),
+              first_difference = TRUE)
+ plot(aa)
+}
 }
 \author{
 Andrew Edwards

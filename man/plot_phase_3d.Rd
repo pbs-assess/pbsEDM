@@ -70,6 +70,14 @@ Shows the first-differenced values in three-dimensional phase space, as
   points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
   to the next point in the time series.
 }
+\examples{
+\donttest{
+ aa <- pbsEDM(Nx_lags_orig,
+              lags = list(Nt = 0:1),
+              first_difference = TRUE)
+  plot_phase_3d(aa)
+}
+}
 \author{
 Andrew Edwards
 }

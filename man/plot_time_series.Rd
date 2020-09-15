@@ -52,7 +52,16 @@ final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
 
 }
 \description{
-First value must be `t=1` <description>
+First value must be `t=1`. For non-differenced values `N(t)`, shows the time
+series with the final values in a different colour, and a title showing the
+final time step. For first-differenced values `X(t)`, shows the time series
+of those, plus a one-dimensional phase plot.
+}
+\examples{
+\donttest{
+  plot_time_series(Nx_lags_orig$Nt, X.or.N = "N")
+  plot_time_series(Nx_lags_orig$Xt, X.or.N = "X")
+}
 }
 \author{
 Andrew Edwards

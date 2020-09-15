@@ -9,18 +9,26 @@ plot_explain_edm_movie(obj, ...)
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
 
-\item{...}{needs to include tstar}
+\item{...}{extra values to use in calls to `plot_explain_edm()`; needs to include tstar}
 }
 \value{
-
+movie (if used with gifski) to explain EDM; if combined with
+  `par(mfrow=c(4,2))` (and not gifski) then will give multiple panels, but
+  borders etc have not been set up properly for this and will need adjusting
 }
 \description{
-Use with gifski in .Rmd - see vignette.
+Use with gifski in .Rmd - see `analyse_simple_time_series` vignette.
+}
+\examples{
+\donttest{
+  aa <- pbsEDM(Nx_lags_orig,
+              lags = list(Nt = 0:1),
+              first_difference = TRUE)
+  plot_explain_edm_movie(aa, tstar = 15) # will only show last panel; see
+                                         # `analyse_simple_time_series`
+                                         #  vignette.
+}
 }
 \author{
 Andrew Edwards
-\donttest{
-  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-  plot_explain_edm_movie(aa, tstar = 15)
-}
 }

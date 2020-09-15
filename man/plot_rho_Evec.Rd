@@ -2,8 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_rho_Evec}
 \alias{plot_rho_Evec}
-\title{Plot rho versus E for output from pbsEDM_Evec
- <description>}
+\title{Plot rho versus `E` for output from `pbsEDM_Evec()`}
 \usage{
 plot_rho_Evec(E_res, ...)
 }
@@ -16,8 +15,7 @@ plot_rho_Evec(E_res, ...)
 plot of rho versus E
 }
 \description{
-Plot rho versus E for output from pbsEDM_Evec
- <description>
+Plot correlation coefficient against `E`.
 }
 \examples{
 \donttest{

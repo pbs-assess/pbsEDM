@@ -2,8 +2,9 @@
 % Please edit documentation in R/plotting.R
 \name{plot_pbsEDM_Evec}
 \alias{plot_pbsEDM_Evec}
-\title{Plot output from pbsEDM_Evec as six panel plot including final forecast v
- observed for each E}
+\title{Plot output from `pbsEDM_Evec()` as six panel plot, with data showns the
+ same as for `plot.pbsEDM()` and sixth panel with predictions vs observation
+ for each `E`}
 \usage{
 plot_pbsEDM_Evec(E_res, ...)
 }
@@ -11,10 +12,13 @@ plot_pbsEDM_Evec(E_res, ...)
 \item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
 }
 \value{
-Six panel plot
+Six-panel figure in current plot environment
 }
 \description{
-<description>
+Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
+and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs
+`X(t-2)`. Sixth panel shows predictions vs observations for different values
+of `E`. See vignette "Analyse a simple time series" for full details.
 }
 \examples{
 \donttest{

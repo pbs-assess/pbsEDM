@@ -53,6 +53,12 @@ Shows the values in two-dimensional phase space (first differenced or not)
   with lag of 1. Cobwebbing shows how one point iterates to the next point
   in the time series.
 }
+\examples{
+\donttest{
+  plot_phase_2d(Nx_lags_orig$Nt, X.or.N = "N")
+  plot_phase_2d(Nx_lags_orig$Xt, X.or.N = "X")
+}
+}
 \author{
 Andrew Edwards
 }

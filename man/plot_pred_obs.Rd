@@ -2,7 +2,8 @@
 % Please edit documentation in R/plotting.R
 \name{plot_pred_obs}
 \alias{plot_pred_obs}
-\title{Plot predictions of X[t] versus the observations for list of `pbsEDM` objects}
+\title{Plot predictions versus observed values of `X(t)` for list of `pbsEDM`
+objects, for various values of `E`}
 \usage{
 plot_pred_obs(
   E_res,
@@ -24,10 +25,11 @@ plot_pred_obs(
 \item{...}{Extra arguments to pass to `plot()`}
 }
 \value{
-
+Figure in the current plot enivironment
 }
 \description{
-<description>
+Plot the predicted versus observed values of `X(t)` for various values
+of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
 }
 \examples{
 \donttest{

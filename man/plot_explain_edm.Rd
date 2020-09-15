@@ -13,7 +13,6 @@ plot_explain_edm(
   tstar.col = "blue",
   tstar.pch = 1,
   tstar.cex = 1,
-  psivec = NULL,
   neigh.plot = FALSE,
   neigh.proj = FALSE,
   pred.plot = FALSE,
@@ -25,17 +24,60 @@ plot_explain_edm(
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
 
-\item{tstar}{the time index (x(t)) of the target point for which to make a
+\item{tstar}{the time index, `t*` for `x(t*)` of the target point for which to make a
 projection from}
+
+\item{x.lab}{label for x axis}
+
+\item{y.lab}{label for x axis}
+
+\item{main}{main title}
+
+\item{tstar.col}{colour for `x(t*)`}
+
+\item{tstar.pch}{pch value (point style) for `x(t*)`}
+
+\item{tstar.cex}{cex value (size) for `x(t*)`}
+
+\item{neigh.plot}{if TRUE then highlight neighbours to `x(t*)`}
+
+\item{neigh.proj}{if TRUE then highlight projections of neighbours to `x(t*)`}
+
+\item{pred.plot}{if TRUE then highlight forecasted value `x(t*+1)`}
+
+\item{pred.rEDM}{if TRUE then show predictions from `rEDM` for
+`Nx_lags_orig` saved values; obj must be `Nx_lags_orig` TODO do a test as
+may not work}
+
+\item{true.val}{if TRUE then plot the true value of `x(t*+1)`}
+
+\item{legend.plot}{if TRUE then do a legend and print value of `t*`}
 }
 \value{
-
+single plot that explains one part of EDM, link together in a movie
+  using `pbs_explain_edm_movie()`
 }
 \description{
 Highlights a point to be projected, its nearest `E+1` neighbours, and then
 draw arrows to show where they go and so where the projection goes. Very
 useful for understanding and checking what EDM is doing. Call this multiple
 times using TODO to make a movie. Type `plot_explain_edm_movie` for example calls.
+}
+\examples{
+\donttest{
+  aa <- pbsEDM(Nx_lags_orig,
+              lags = list(Nt = 0:1),
+              first_difference = TRUE)
+  plot_explain_edm(aa,
+                   tstar = 15,
+                   main = paste0(
+                           "See where neighbours go"),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE)
+# Type plot_explain_edm_movie to see other examples
+}
 }
 \author{
 Andrew Edwards
