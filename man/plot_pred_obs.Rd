@@ -18,6 +18,10 @@ plot_pred_obs(
 \item{E_components}{How many of the first E_res components to show}
 
 \item{E_cols}{Vector of colours, one for each value of E}
+
+\item{last.time.to.plot}{Last time value of `N[t]` to use when plotting.}
+
+\item{...}{Extra arguments to pass to `plot()`}
 }
 \value{
 

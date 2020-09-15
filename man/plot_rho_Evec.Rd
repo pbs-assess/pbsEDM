@@ -9,6 +9,8 @@ plot_rho_Evec(E_res, ...)
 }
 \arguments{
 \item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
+
+\item{...}{Extra arguments to pass to `plot()`}
 }
 \value{
 plot of rho versus E

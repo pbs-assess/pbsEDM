@@ -2,32 +2,55 @@
 % Please edit documentation in R/plotting.R
 \name{plot_time_series}
 \alias{plot_time_series}
-\title{Plot the observed time series as either Nt or Xt}
+\title{Plot the observed time series as either `N(t)` or `X(t)`}
 \usage{
 plot_time_series(
   values,
   X.or.N,
-  par.mar.ts,
+  par.mar.ts = c(3, 3, 1, 1),
+  max_time = NULL,
   t.axis.range = NULL,
-  last.time.to.plot = NA,
-  y.range,
-  col.plot,
-  col.plot.lines,
-  pch.plot,
+  last.time.to.plot = NULL,
+  late.num = 3,
+  late.col = "red",
+  early.col = "black",
+  early.col.lines = "lightgrey",
   start = 1,
-  pt.type = "p"
+  pt.type = "p",
+  par.mgp = c(1.5, 0.5, 0)
 )
 }
 \arguments{
+\item{values}{vector of values to be plotted}
+
 \item{X.or.N}{"N" if raw non-differenced data, "X" for differenced data}
 
-\item{iii}{time value to plot up to}
+\item{par.mar.ts}{`par(mar)` values}
+
+\item{max_time}{maximum time value for the time axis}
+
+\item{last.time.to.plot}{last time value of N[t] to use when plotting, so
+final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+
+\item{late.num}{final number of `N[t]` time steps to plot in a different colour}
+
+\item{late.col}{colour in which to plot final `late.num` time steps}
+
+\item{early.col}{colour in which to plot earlier time step points}
+
+\item{early.col.lines}{colour in which to plot earlier time step points}
+
+\item{start}{first time step (must be 1)}
+
+\item{pt.type}{`type` value for `points()`}
+
+\item{par.mgp}{`par("mgp")` values}
 }
 \value{
 
 }
 \description{
-<description>
+First value must be `t=1` <description>
 }
 \author{
 Andrew Edwards
