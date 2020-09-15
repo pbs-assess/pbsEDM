@@ -23,11 +23,15 @@ gets3dusr = function(s3dobject)
 }
 
 
-##' Plot data and results of an object of class `pbsEDM`
+##' Plot data and results of an object of class `pbsEDM` as time series and
+##' phase plots
 ##'
-##' Only working if nt_observed values are in there (needs another switch if
+##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
+##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
+##' See vignette "Analyse a simple time series".
+##' Only working if `nt_observed` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
-##' pred-prey for example.
+##' pred-prey for example. TODO, update if necessary.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
@@ -36,9 +40,16 @@ gets3dusr = function(s3dobject)
 ##'   in particular `last.time.to.plot` to plot only up to that time step (to
 ##'   loop through in a movie), and late.num to plot the final number of time
 ##'   steps in a different colour
-##' @return
+##' @return Five panels in 2x3 or 3x2 format, in current plot environment
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'  aa <- pbsEDM(Nx_lags_orig,
+##'               lags = list(Nt = 0:1),
+##'               first_difference = TRUE)
+##'  plot(aa)
+##' }
 plot.pbsEDM = function(obj,
                        portrait = TRUE,
                        ...){
@@ -73,15 +84,20 @@ plot.pbsEDM = function(obj,
                 ...)
 }
 
-##' Plot output from pbsEDM_Evec as six panel plot including final forecast v
-##'  observed for each E
+##' Plot output from `pbsEDM_Evec()` as six panel plot, with data showns the
+##'  same as for `plot.pbsEDM()` and sixth panel with predictions vs observation
+##'  for each `E`
 ##'
-##'  <description>
+##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
+##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs
+##' `X(t-2)`. Sixth panel shows predictions vs observations for different values
+##' of `E`. See vignette "Analyse a simple time series" for full details.
 ##'
-##' @return Six panel plot
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param ...
+##' @return Six-panel figure in current plot environment
 ##' @export
 ##' @author Andrew Edwards
-##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
@@ -97,9 +113,9 @@ plot_pbsEDM_Evec <- function(E_res,
                 ...)
 }
 
-##' Plot rho versus E for output from pbsEDM_Evec
-
-##'  <description>
+##' Plot rho versus `E` for output from `pbsEDM_Evec()`
+##'
+##' Plot correlation coefficient against `E`.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
 ##' @param ... Extra arguments to pass to `plot()`
@@ -127,22 +143,24 @@ plot_rho_Evec <- function(E_res,
        ylab = "Forecast Skill (rho)",
        ...
        )
-  # see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
+  # TODO see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
 }
 
 
-##' Plot predictions of X[t] versus the observations for list of `pbsEDM` objects
+##' Plot predictions versus observed values of `X(t)` for list of `pbsEDM`
+##' objects, for various values of `E`
 ##'
-##' <description>
+##' Plot the predicted versus observed values of `X(t)` for various values
+##' of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
 ##'
-##' @return
-##' @export
-##' @author Andrew Edwards
 ##' @param E_res A list of `pbsEDM` objects
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
 ##' @param last.time.to.plot Last time value of `N[t]` to use when plotting.
 ##' @param ... Extra arguments to pass to `plot()`
+##' @return Figure in the current plot enivironment
+##' @export
+##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
@@ -211,7 +229,10 @@ plot_pred_obs <- function(E_res,
 
 ##' Plot the observed time series as either `N(t)` or `X(t)`
 ##'
-##' First value must be `t=1` <description>
+##' First value must be `t=1`. For non-differenced values `N(t)`, shows the time
+##' series with the final values in a different colour, and a title showing the
+##' final time step. For first-differenced values `X(t)`, shows the time series
+##' of those, plus a one-dimensional phase plot.
 ##'
 ##' @param values vector of values to be plotted
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
@@ -230,6 +251,11 @@ plot_pred_obs <- function(E_res,
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   plot_time_series(Nx_lags_orig$Nt, X.or.N = "N")
+##'   plot_time_series(Nx_lags_orig$Xt, X.or.N = "X")
+##' }
 plot_time_series <- function(values,
                              X.or.N,
                              par.mar.ts = c(3, 3, 1, 1),
@@ -345,6 +371,11 @@ plot_time_series <- function(values,
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   plot_phase_2d(Nx_lags_orig$Nt, X.or.N = "N")
+##'   plot_phase_2d(Nx_lags_orig$Xt, X.or.N = "X")
+##' }
 plot_phase_2d <- function(values,
                           X.or.N = "X",
                           par.mar.phase = c(3, 0, 1, 0),
@@ -517,6 +548,13 @@ plot_phase_2d <- function(values,
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'  aa <- pbsEDM(Nx_lags_orig,
+##'               lags = list(Nt = 0:1),
+##'               first_difference = TRUE)
+##'   plot_phase_3d(aa)
+##' }
 plot_phase_3d <- function(obj,
                           par.mgp.3d = c(3, 10, 0),
                           par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
@@ -628,7 +666,7 @@ plot_phase_3d <- function(obj,
   }
 
   par(mar = par.mar.phase)   # scatterplot3d changes mar
-  par(mgp = par.mgp)        # back to usual for 2d figures
+  par(mgp = par.mgp)         #  so set back to usual for 2d figures
 }
 
 ##' 2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM
@@ -639,11 +677,41 @@ plot_phase_3d <- function(obj,
 ##' times using TODO to make a movie. Type `plot_explain_edm_movie` for example calls.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
-##' @param tstar the time index (x(t)) of the target point for which to make a
+##' @param tstar the time index, `t*` for `x(t*)` of the target point for which to make a
 ##'   projection from
-##' @return
+##' @param x.lab label for x axis
+##' @param y.lab label for x axis
+##' @param main main title
+##' @param tstar.col colour for `x(t*)`
+##' @param tstar.pch pch value (point style) for `x(t*)`
+##' @param tstar.cex cex value (size) for `x(t*)`
+##' @param neigh.plot if TRUE then highlight neighbours to `x(t*)`
+##' @param neigh.proj if TRUE then highlight projections of neighbours to `x(t*)`
+##' @param pred.plot if TRUE then highlight forecasted value `x(t*+1)`
+##' @param pred.rEDM if TRUE then show predictions from `rEDM` for
+##'   `Nx_lags_orig` saved values; obj must be `Nx_lags_orig` TODO do a test as
+##'   may not work
+##' @param true.val if TRUE then plot the true value of `x(t*+1)`
+##' @param legend.plot if TRUE then do a legend and print value of `t*`
+##' @return single plot that explains one part of EDM, link together in a movie
+##'   using `pbs_explain_edm_movie()`
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   aa <- pbsEDM(Nx_lags_orig,
+##'               lags = list(Nt = 0:1),
+##'               first_difference = TRUE)
+##'   plot_explain_edm(aa,
+##'                    tstar = 15,
+##'                    main = paste0(
+##'                            "See where neighbours go"),
+##'                    tstar.pch = 19,
+##'                    tstar.cex = 1.2,
+##'                    neigh.plot = TRUE,
+##'                    neigh.proj = TRUE)
+##' # Type plot_explain_edm_movie to see other examples
+##' }
 plot_explain_edm <- function(obj,
                              tstar,
                              x.lab = expression("X"[t-1]),
@@ -652,13 +720,18 @@ plot_explain_edm <- function(obj,
                              tstar.col = "blue",
                              tstar.pch = 1,
                              tstar.cex = 1,
-                             psivec = NULL,
                              neigh.plot = FALSE,
                              neigh.proj = FALSE,
                              pred.plot = FALSE,
                              pred.rEDM = FALSE,
                              true.val = FALSE,
                              legend.plot = TRUE){
+  if(pred.rEDM){
+    if(!expect_equal(obj$xt_observed, Nx_lags_orig$Xt)){
+      stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
+    }
+  }
+
   par(pty="s")
 
   Xt <- obj$xt_lags[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
@@ -718,11 +791,11 @@ plot_explain_edm <- function(obj,
                               sh.col = "purple")
                # Example:
                # iArrows(0, 0, 4, 4, curve = 1, size = 0.7, h.lwd = 2,
-      #  sh.lwd=2, width = 1, sh.col="red")
+               #         sh.lwd=2, width = 1, sh.col="red")
     }
   }
 
-
+  # plot forecast value
   if(pred.plot){
     points(Xt[tstar],
            obj$xt_forecast[tstar + 1],    # CHECK not tstar+1, think it's correct
@@ -744,6 +817,7 @@ plot_explain_edm <- function(obj,
            col = "lightgrey")
   }
 
+  # show predicted value from rEDM
   if(pred.rEDM){
     points(Xt[tstar],
            dplyr::pull(Nx_lags_orig[tstar+1, "rEDM.pred"]),
@@ -752,6 +826,7 @@ plot_explain_edm <- function(obj,
            lwd = 2)
   }
 
+  # plot the true value of xt(t^*+1)
   if(true.val){
     points(Xtmin1[tstar + 1],
            Xt[tstar + 1],
@@ -784,22 +859,31 @@ plot_explain_edm <- function(obj,
 
 ##' Create movie to explain EDM
 ##'
-##' Use with gifski in .Rmd - see vignette.
+##' Use with gifski in .Rmd - see `analyse_simple_time_series` vignette.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
-##' @param ... needs to include tstar
-##' @return
+##' @param ... extra values to use in calls to `plot_explain_edm()`; needs to include tstar
+##' @return movie (if used with gifski) to explain EDM; if combined with
+##'   `par(mfrow=c(4,2))` (and not gifski) then will give multiple panels, but
+##'   borders etc have not been set up properly for this and will need adjusting
 ##' @export
 ##' @author Andrew Edwards
+##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-##'   plot_explain_edm_movie(aa, tstar = 15)
+##'   aa <- pbsEDM(Nx_lags_orig,
+##'               lags = list(Nt = 0:1),
+##'               first_difference = TRUE)
+##'   plot_explain_edm_movie(aa, tstar = 15) # will only show last panel; see
+##'                                          # `analyse_simple_time_series`
+##'                                          #  vignette.
 ##' }
 plot_explain_edm_movie <- function(obj,
                                    ...){
-#browser()
-#  stopifnot("Need to specify tstar" =
-#              exists("tstar"))   # think this fails as it can't be used in THIS function
+  #browser()
+  # Need to specify tstar, but plot_explain_edm() will give automatic error anyway
+  # if(!exists("tstar")){
+  #   stop("Need to specify tstar")
+  # }
 
   plot_explain_edm(obj,
                    tstar.col = "black",
