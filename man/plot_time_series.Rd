@@ -29,6 +29,8 @@ plot_time_series(
 
 \item{max_time}{maximum time value for the time axis}
 
+\item{t.axis.range}{range of time axis}
+
 \item{last.time.to.plot}{last time value of N[t] to use when plotting, so
 final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
 

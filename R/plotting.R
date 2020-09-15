@@ -217,7 +217,7 @@ plot_pred_obs <- function(E_res,
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
 ##' @param par.mar.ts `par(mar)` values
 ##' @param max_time maximum time value for the time axis
-##' @param t.axis.range
+##' @param t.axis.range range of time axis
 ##' @param last.time.to.plot last time value of N[t] to use when plotting, so
 ##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
 ##' @param late.num final number of `N[t]` time steps to plot in a different colour
