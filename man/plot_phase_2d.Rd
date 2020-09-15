@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_phase_2d}
 \alias{plot_phase_2d}
-\title{<description>}
+\title{Plot 2d phase plot of `N(t)` vs `N(t-1)` or `X(t)` vs `X(t-1)`}
 \usage{
 plot_phase_2d(
   values,
@@ -16,22 +16,42 @@ plot_phase_2d(
   late.col = "red",
   early.col = "black",
   early.col.lines = "lightgrey",
-  late.num = 3,
-  y.lab = expression("X"[t - 1]),
-  z.lab = expression("X"[t]),
-  ...
+  late.num = 3
 )
 }
 \arguments{
-\item{...}{additiontal arguments,
-in particular `last.time.to.plot` to plot only up to that time step (to
-loop through in a movie).}
+\item{values}{vector of `N(t)` or `X(t)` values}
+
+\item{X.or.N}{"N" if raw non-differenced data, "X" for differenced data}
+
+\item{par.mar.phase}{`par(mar)` values}
+
+\item{axis.range}{range of axes, if NA then calculated from values}
+
+\item{start}{first time step to plot (currently must be 1)}
+
+\item{last.time.to.plot}{last time value of N[t] to use when plotting, so
+final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+
+\item{pt.type}{`type` value for `points()`}
+
+\item{cobwebbing}{if TRUE then add cobwebbing lines to phase plot}
+
+\item{late.col}{colour in which to plot final `late.num` time steps}
+
+\item{early.col}{colour in which to plot earlier time step points}
+
+\item{early.col.lines}{colour in which to plot earlier time step points}
+
+\item{late.num}{final number of `N[t]` time steps to plot in a different colour}
 }
 \value{
 
 }
 \description{
-<description>
+Shows the values in two-dimensional phase space (first differenced or not)
+  with lag of 1. Cobwebbing shows how one point iterates to the next point
+  in the time series.
 }
 \author{
 Andrew Edwards

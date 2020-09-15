@@ -323,25 +323,25 @@ plot_time_series <- function(values,
   }
 }
 
-##' @
-##'  <description>
+##' Plot 2d phase plot of `N(t)` vs `N(t-1)` or `X(t)` vs `X(t-1)`
 ##'
-##' @param values
-##' @param X.or.N
-##' @param par.mar.phase
-##' @param axis.range
-##' @param iii
-##' @param pt.type
-##' @param cobwebbing
-##' @param late.col
-##' @param early.col
-##' @param early.col.lines
-##' @param late.num
-##' @param y.lab
-##' @param z.lab
-##' @param ... additiontal arguments,
-##'   in particular `last.time.to.plot` to plot only up to that time step (to
-##'   loop through in a movie).
+##' Shows the values in two-dimensional phase space (first differenced or not)
+##'   with lag of 1. Cobwebbing shows how one point iterates to the next point
+##'   in the time series.
+##'
+##' @param values vector of `N(t)` or `X(t)` values
+##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
+##' @param par.mar.phase `par(mar)` values
+##' @param axis.range range of axes, if NA then calculated from values
+##' @param start first time step to plot (currently must be 1)
+##' @param last.time.to.plot last time value of N[t] to use when plotting, so
+##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
+##' @param pt.type `type` value for `points()`
+##' @param cobwebbing if TRUE then add cobwebbing lines to phase plot
+##' @param late.col colour in which to plot final `late.num` time steps
+##' @param early.col colour in which to plot earlier time step points
+##' @param early.col.lines colour in which to plot earlier time step points
+##' @param late.num final number of `N[t]` time steps to plot in a different colour
 ##' @return
 ##' @export
 ##' @author Andrew Edwards
@@ -356,10 +356,7 @@ plot_phase_2d <- function(values,
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
-                          late.num = 3,
-                          y.lab = expression("X"[t-1]),
-                          z.lab = expression("X"[t]),
-                          ...
+                          late.num = 3
                           ){
 
   if(is.na(axis.range)) {
@@ -370,6 +367,7 @@ plot_phase_2d <- function(values,
     last.time.to.plot = length(values)
   }
 
+  stopifnot(start == 1)
   # Now copying from plot_observed:
   col.plot = c(rep(early.col,
                    max(c(0, last.time.to.plot - late.num))),
@@ -400,8 +398,8 @@ plot_phase_2d <- function(values,
     values.to.plot <- values[start:last.time.to.plot]
   } else {
     plot(0, 0,
-         xlab = y.lab,
-         ylab = z.lab,
+         xlab = expression("X"[t-1]),
+         ylab = expression("X"[t]),
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
