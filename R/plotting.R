@@ -729,7 +729,7 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    expect_equal(obj$xt_observed, Nx_lags_orig$Xt)
+    testthat::expect_equal(obj$xt_observed, Nx_lags_orig$Xt)
     #  ideally want this message:
     #  stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
   }
