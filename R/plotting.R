@@ -8,8 +8,10 @@
 ##' @export
 ##' @author Andrew Edwards (adapted from Uwe Ligges' function)
 ##' @examples
+##' \donttest{
 ##'   s3d <- scatterplot3d::scatterplot3d(rnorm(5), rnorm(5), rnorm(5))
 ##'   gets3dusr(s3d)
+##' }
 gets3dusr = function(s3dobject)
   {
   es3d = environment(s3dobject$points3d)
