@@ -38,7 +38,7 @@ gets3dusr = function(s3dobject)
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
 ##'   landscape (2x3, filled columnwise) for presentations.
-##' @param ... additiontal arguments to be passed onto other plotting functions,
+##' @param ... additional arguments to be passed onto other plotting functions,
 ##'   in particular `last.time.to.plot` to plot only up to that time step (to
 ##'   loop through in a movie), and late.num to plot the final number of time
 ##'   steps in a different colour
@@ -96,7 +96,7 @@ plot.pbsEDM = function(obj,
 ##' of `E`. See vignette "Analyse a simple time series" for full details.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
-##' @param ... extra arguments to `plot.pbsEDM()` and `plot_pred_obs()`
+##' @param ... extra arguments to `plot.pbsEDM()`
 ##' @return Six-panel figure in current plot environment
 ##' @export
 ##' @author Andrew Edwards
@@ -111,8 +111,7 @@ plot_pbsEDM_Evec <- function(E_res,
   plot.pbsEDM(E_res[[1]],
               ...)
 
-  plot_pred_obs(E_res,
-                ...)
+  plot_pred_obs(E_res)
 }
 
 ##' Plot rho versus `E` for output from `pbsEDM_Evec()`
@@ -159,7 +158,6 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
 ##' @param last.time.to.plot Last time value of `N[t]` to use when plotting.
-##' @param ... Extra arguments to pass to `plot()`
 ##' @return Figure in the current plot enivironment
 ##' @export
 ##' @author Andrew Edwards
@@ -175,8 +173,7 @@ plot_pred_obs <- function(E_res,
                                      "green",
                                      "red",
                                      "black"),
-                          last.time.to.plot = NULL,
-                          ...
+                          last.time.to.plot = NULL
                           ){
 
   stopifnot("Need more distinct colours in E_cols"=
@@ -203,8 +200,7 @@ plot_pred_obs <- function(E_res,
        xlim = axes.range,
        ylim = axes.range,
        asp = 1,
-       type = "n",
-       ...)
+       type = "n")
   abline(0, 1, col="grey")
   leg = vector()
 
