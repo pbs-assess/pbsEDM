@@ -9,8 +9,7 @@ plot_pred_obs(
   E_res,
   E_components = 5,
   E_cols = c("orange", "blue", "green", "red", "black"),
-  last.time.to.plot = NULL,
-  ...
+  last.time.to.plot = NULL
 )
 }
 \arguments{
@@ -21,8 +20,6 @@ plot_pred_obs(
 \item{E_cols}{Vector of colours, one for each value of E}
 
 \item{last.time.to.plot}{Last time value of `N[t]` to use when plotting.}
-
-\item{...}{Extra arguments to pass to `plot()`}
 }
 \value{
 Figure in the current plot enivironment

@@ -13,7 +13,7 @@ phase plots}
 \item{portrait}{if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
 landscape (2x3, filled columnwise) for presentations.}
 
-\item{...}{additiontal arguments to be passed onto other plotting functions,
+\item{...}{additional arguments to be passed onto other plotting functions,
 in particular `last.time.to.plot` to plot only up to that time step (to
 loop through in a movie), and late.num to plot the final number of time
 steps in a different colour}

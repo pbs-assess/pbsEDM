@@ -2,7 +2,7 @@
 % Please edit documentation in R/earlier_functions.R
 \name{EDM_pred_E_2}
 \alias{EDM_pred_E_2}
-\title{Simplex prediction for embedding dimension E=2}
+\title{Simplex prediction only for `E=2`, only used to run `data-raw/Nx_lags_orig.R`}
 \usage{
 EDM_pred_E_2(Nx.lags, Efix = 2)
 }
@@ -24,9 +24,12 @@ List containing
   `psi_3`, since `Efix`=2), one row for each `t*`.
 }
 \description{
-Simple code to estimate X(t^*+1) and of its variance, for
- all valid values of t^* for a tbl_df Nx.lags. Only for embedding dimension
- E=2.
+Simple early code to estimate \eqn{X(t^*+1)} and its variance, for
+ all valid values of \eqn{t^*} for a `tbl_df` `Nx.lags`. Only for embedding dimension
+ \eqn{E=2}. Was original older code, keeping in package to demonstrate what
+ was done, and that this code is independent to the `pbsEDM()`
+ function. Probably no need to make this code consistent with final
+ notation, as this code is not mean to be used again.
 }
 \author{
 Andrew Edwards

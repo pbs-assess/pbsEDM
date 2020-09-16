@@ -11,7 +11,7 @@ plot_pbsEDM_Evec(E_res, ...)
 \arguments{
 \item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
 
-\item{...}{extra arguments to `plot.pbsEDM()` and `plot_pred_obs()`}
+\item{...}{extra arguments to `plot.pbsEDM()`}
 }
 \value{
 Six-panel figure in current plot environment
@@ -24,8 +24,8 @@ of `E`. See vignette "Analyse a simple time series" for full details.
 }
 \examples{
 \donttest{
-  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-  plot_pbsEDM_Evec(aa)
+  aa_Evec <- pbsEDM_Evec(Nx_lags_orig$Nt)
+  plot_pbsEDM_Evec(aa_Evec)
 }
 }
 \author{
