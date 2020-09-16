@@ -25,4 +25,9 @@ test_that("plotting functions run on simple examples",{
   aa_Evec <- pbsEDM_Evec(Nx_lags_orig$Nt)
   expect_null(plot_pbsEDM_Evec(aa_Evec))
   expect_null(plot_rho_Evec(aa_Evec))
+
+  expect_is(plot_explain_edm_movie(aa,
+                                   tstar = 15),
+            "list")
+
 })
