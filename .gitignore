@@ -25,6 +25,9 @@
 # Emacs backup files
 *~
 
+# Directories that get created but don't need to be pushed
+#  lib arises from running covr::report(.....)
 inst/doc
 doc
 Meta
+lib
