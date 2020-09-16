@@ -102,8 +102,8 @@ plot.pbsEDM = function(obj,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
-##'   plot_pbsEDM_Evec(aa)
+##'   aa_Evec <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   plot_pbsEDM_Evec(aa_Evec)
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
                              ...){
@@ -227,6 +227,7 @@ plot_pred_obs <- function(E_res,
          leg,
          col=E_cols,
          cex=0.7)
+  return()
 }
 
 ##' Plot the observed time series as either `N(t)` or `X(t)`
@@ -669,6 +670,7 @@ plot_phase_3d <- function(obj,
 
   par(mar = par.mar.phase)   # scatterplot3d changes mar
   par(mgp = par.mgp)         #  so set back to usual for 2d figures
+  return()                   # else returns the above line instead of NULL
 }
 
 ##' 2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM
