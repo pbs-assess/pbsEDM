@@ -443,11 +443,14 @@ plotPanelMovie.df2 = function(Nx.lags = Nx_lags_orig,
 }
 
 
-##' Simplex prediction for embedding dimension E=2
+##' Simplex prediction only for `E=2`, only used to run `data-raw/Nx_lags_orig.R`
 ##'
-##' Simple code to estimate X(t^*+1) and of its variance, for
-##'  all valid values of t^* for a tbl_df Nx.lags. Only for embedding dimension
-##'  E=2.
+##' Simple early code to estimate \eqn{X(t^*+1)} and its variance, for
+##'  all valid values of \eqn{t^*} for a `tbl_df` `Nx.lags`. Only for embedding dimension
+##'  \eqn{E=2}. Was original older code, keeping in package to demonstrate what
+##'  was done, and that this code is independent to the `pbsEDM()`
+##'  function. Probably no need to make this code consistent with final
+##'  notation, as this code is not mean to be used again.
 ##'
 ##' @param Nx.lags tbl_df with time indexing the row, and columns
 ##'   Nt, Ntmin1, Xt, Xtmin1, Xtmin2, rEDM.pred and rEDM.var (though only Xt and

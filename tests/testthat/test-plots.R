@@ -29,5 +29,4 @@ test_that("plotting functions run on simple examples",{
   expect_is(plot_explain_edm_movie(aa,
                                    tstar = 15),
             "list")
-
 })
