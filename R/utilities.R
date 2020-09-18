@@ -11,11 +11,11 @@
 #' @export
 #'
 #' @examples
-#' pbsLAG(1:10, 3)
-#' pbsLAG(matrix(rep(1:10, 2), nrow = 10), 3)
-#' pbsLAG(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
+#' pbsLag(1:10, 3)
+#' pbsLag(matrix(rep(1:10, 2), nrow = 10), 3)
+#' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
 #'
-pbsLAG <- function (x,
+pbsLag <- function (x,
                     n = 1) {
 
 	# Check arguments
