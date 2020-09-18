@@ -4,21 +4,15 @@
 \alias{pbsEDM}
 \title{Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling}
 \usage{
-pbsEDM(
-  nt,
-  lags,
-  forecast_distance = 1L,
-  first_difference = FALSE,
-  centre_and_scale = FALSE
-)
+pbsEDM(N, lags, p = 1L, first_difference = FALSE, centre_and_scale = FALSE)
 }
 \arguments{
-\item{nt}{[data.frame()] A data frame with named columns for the raw (unlagged) variables}
+\item{N}{[data.frame()] A data frame with named columns for the raw (unlagged) variables}
 
 \item{lags}{[list()] A named list of integer vectors specifying the lags for
 each of the variables that will be used (other variables are ignored)}
 
-\item{forecast_distance}{[integer(1)] The forecast distance}
+\item{p}{[integer(1)] The forecast distance}
 
 \item{first_difference}{[logical(1)] First difference each variable before lagging?}
 
@@ -32,21 +26,21 @@ A list containing:
 \itemize{
   \item nt_observed = NULL,
   \item nt_forecast = NULL,
-  \item xt_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(nt)}
-  \item xt_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(nt)}
-  \item xt_lags [matrix()] A column matrix of lagged variables with \code{nrow = nrow(nt)}
-  \item xt_distance [matrix()] Focal index (row), neighbour (column),
-  distance (value); large square matrix with \code{dim = nrow(nt)}
-  \item xt_nbr_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
-  \item xt_nbr_value [matrix()] Focal index (row), rank (column), and
+  \item X_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(N)}
+  \item X_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(N)}
+  \item X [matrix()] A column matrix of lagged variables with \code{nrow = nrow(N)}
+  \item X_distance [matrix()] Focal index (row), neighbour (column),
+  distance (value); large square matrix with \code{dim = nrow(N)}
+  \item neighbour_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
+  \item neighbour_value [matrix()] Focal index (row), rank (column), and
   neighbour value (value)  TODO Andy not quite sure what this is, don't you
   need X(t) and X(t-1) if, say, E=2?
-  \item xt_nbr_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
-  \item xt_nbr_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
-  \item xt_prj_index [matrix()] Projected index (row), rank (column), and neighbour index (value)
-  \item xt_prj_value [matrix()] Projected index (row), rank (column), and neighbour index (value)
-  \item xt_prj_weight  [matrix()] Projected index (row), rank (column), and neighbour weight (value)
-  \item forecast_distance = [integer(1)]
+  \item neighbour_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
+  \item neighbour_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
+  \item projected_index [matrix()] Projected index (row), rank (column), and neighbour index (value)
+  \item projected_value [matrix()] Projected index (row), rank (column), and neighbour index (value)
+  \item projected_weight  [matrix()] Projected index (row), rank (column), and neighbour weight (value)
+  \item p = [integer(1)]
   \item first_difference = [logical(1)]
   \item centre_and_scale = [logical(1)]
   \item results [data.frame()] One-row data frame with values of E, rho and rmse.
@@ -71,18 +65,18 @@ specifying:
 \code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
 }
 \examples{
-nt <- matrix(rep(1:30, 5), ncol = 5)
-colnames(nt) <- c("A", "B", "C", "D", "E")
+N <- matrix(rep(1:30, 5), ncol = 5)
+colnames(N) <- c("A", "B", "C", "D", "E")
 lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
-m1 <- pbsEDM(nt, lags)
+m1 <- pbsEDM(N, lags)
 
-nt <- data.frame(x = simple_ts)
+N <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
-m2 <- pbsEDM(nt, lags)
+m2 <- pbsEDM(N, lags)
 
-nt <- data.frame(x = simple_ts)
+N <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
-m3 <- pbsEDM(nt, lags, first_difference = TRUE)
+m3 <- pbsEDM(N, lags, first_difference = TRUE)
 
 }
 \author{
