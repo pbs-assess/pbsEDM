@@ -2,67 +2,76 @@
 % Please edit documentation in R/methods.R
 \name{pbsEDM}
 \alias{pbsEDM}
-\title{Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling}
+\title{Forecast via Empirical Dynamic Modelling}
 \usage{
 pbsEDM(N, lags, p = 1L, first_difference = FALSE, centre_and_scale = FALSE)
 }
 \arguments{
-\item{N}{[data.frame()] A data frame with named columns for the raw (unlagged) variables}
+\item{N}{[data.frame()] A data frame with named columns for the response 
+variable and covariate time series}
 
-\item{lags}{[list()] A named list of integer vectors specifying the lags for
-each of the variables that will be used (other variables are ignored)}
+\item{lags}{[list()] A named list of integer vectors specifying the lags to
+use for each time series in \code{N}}
 
-\item{p}{[integer(1)] The forecast distance}
+\item{p}{[integer()] The forecast distance}
 
-\item{first_difference}{[logical(1)] First difference each variable before lagging?}
+\item{first_difference}{[logical()] First difference each time series?}
 
-\item{centre_and_scale}{[logical(1)] Centre and scale each variable before lagging?}
-
-\item{show_calculations}{[logical(1)]}
+\item{centre_and_scale}{[logical()] Centre and scale each time series?}
 }
 \value{
-A list containing:
+A list of class \code{pbsEDM} containing:
 
 \itemize{
-  \item nt_observed = NULL,
-  \item nt_forecast = NULL,
-  \item X_observed [numeric()] Observed (possibly transformed) with \code{length = nrow(N)}
-  \item X_forecast [numeric()] Forecast (of possibly transformed) with \code{length = nrow(N)}
-  \item X [matrix()] A column matrix of lagged variables with \code{nrow = nrow(N)}
-  \item X_distance [matrix()] Focal index (row), neighbour (column),
-  distance (value); large square matrix with \code{dim = nrow(N)}
-  \item neighbour_index [matrix()] Focal index (row), rank (column), and neighbour index (value)
-  \item neighbour_value [matrix()] Focal index (row), rank (column), and
-  neighbour value (value)  TODO Andy not quite sure what this is, don't you
-  need X(t) and X(t-1) if, say, E=2?
-  \item neighbour_distance [matrix()] Focal index (row), rank (column), and neighbour distance (value)
-  \item neighbour_weight [matrix()] Focal index (row), rank (column), and neighbour weight (value)
-  \item projected_index [matrix()] Projected index (row), rank (column), and neighbour index (value)
-  \item projected_value [matrix()] Projected index (row), rank (column), and neighbour index (value)
-  \item projected_weight  [matrix()] Projected index (row), rank (column), and neighbour weight (value)
-  \item p = [integer(1)]
-  \item first_difference = [logical(1)]
-  \item centre_and_scale = [logical(1)]
-  \item results [data.frame()] One-row data frame with values of E, rho and rmse.
+  \item \code{N} [matrix()] Response variable and unlagged covariates as columns
+  \item \code{N_observed} [vector()] Response variable time series
+  \item \code{N_forecast} [vector()] Forecast of response variable time series
+  \item \code{X} [matrix()] Unlagged and lagged state variables as columns
+  \item \code{X_observed} [vector()] Transformed response variable time series
+  \item \code{X_forecast} [vector()] Forecast of transformed response variable
+  \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of 
+  points in state space (pairs of rows in \code{X})
+  \item \code{neighbour_distance} [matrix()] Distance by focal time (row) and rank
+  (column)
+  \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and 
+  distance rank (column)
+  \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and 
+  distance rank (column)
+  \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and 
+  distance rank (column)
+  \item \code{projected_index} [matrix()] Projected neighbour index by projected 
+  time (row) and neighbour distance rank (column)
+  \item \code{projected_value} [matrix()] Projected neighbour value by projected 
+  time (row) and neighbour distance rank (column)
+  \item \code{projected_weight} [matrix()] Projected neighbour weight by projected 
+  time (row) and neighbour distance rank (column)
+  \item \code{lags} [list()] A named list of integer vectors specifying the lags to
+  use for each time series in \code{N}
+  \item \code{p} [integer()] The forecast distance
+  \item \code{first_difference} [logical()] First difference each time series?
+  \item \code{centre_and_scale} [logical()] Centre and scale each time series?
+  \item \code{results} [data.frame()] A summary of forecast accuracy
 }
 }
 \description{
-Perform Out-of-Sample Forecasting via Empirical Dynamic Modelling
+Forecast via Empirical Dynamic Modelling
 }
 \details{
-Only lags of variables explicitly named in \code{lags} are used. The
-observed time series whose values are forecast must be specified first. For
-example, given a data frame with variables \code{Predator}, \code{Prey} and \code{Salinity},
-the unlagged version of the variable \code{Predator} can be specified as the
-observed time series by
+The name of the first element in \code{lags} must match the name of 
+the response variable in \code{N}. Unlagged time series, including the 
+response variable, must be specified by a zero in the corresponding named
+vector in \code{lags}. For example, given a \code{data.frame} with named
+columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator} 
+can be specified as the unlagged response variable by 
 
-\code{lags = list(Predator = c(0, ...), ...)}.
+\code{lags = list(Predator = c(0, ...), ...)}. 
 
-The unlagged version of \code{Predator} can be forecast from the first and second lags
-of \code{Predator}, unlagged and second lag of \code{Prey}, and unlagged \code{Salinity} by
-specifying:
+This places the unlagged time series of \code{Predator} abundance along the
+first axis of the reconstructed state space. To predict \code{Predator}
+abundance from its first two lags, and from the unlagged and first lags of
+\code{Prey} and \code{Temperature}, \code{lags} can be specified as
 
-\code{lags = list(Predator = c(0:2), Prey = c(0, 2), Salinity = c(0))}.
+\code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
 }
 \examples{
 N <- matrix(rep(1:30, 5), ncol = 5)
