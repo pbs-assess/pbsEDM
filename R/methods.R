@@ -82,7 +82,7 @@ pbsEDM <- function (N,
                     centre_and_scale = FALSE) {
 
   #----------------- Check arguments ------------------------------------------#
-
+  # TODO: Update
   stopifnot(
     is.numeric(N) || is.matrix(N) || is.data.frame(N),
     is.list(lags),
@@ -91,40 +91,41 @@ pbsEDM <- function (N,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L
   )
 
-  #----------------- Define nt_observed ---------------------------------------#
-
-  #	nt_observed <- pbsLag(as.vector(N[, names(lags)[1]]), lags[[1]][1])
-  # ANDY commenting out since breaks Travis (vignette). Think we just want it
-  # like I have in the next if statement.
-
-  #----------------- Transform time series ------------------------------------#
-
-  xt <- as.matrix(N[, names(lags)])
-  colnames(xt) <- names(lags)
-  # First difference and buffer with NAs
+  #----------------- Redefine N -----------------------------------------------#
+    
+  N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
+  N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
+  colnames(N) <- names(lags) # TODO: Fails test without this - why?
+  
+  #----------------- Define D -------------------------------------------------#
+  
   if (first_difference) {
-    nt_observed = xt           # original data before first differencing
-    xt <- rbind(apply(xt, 2, diff), NA_real_)
+    # D <- rbind(apply(N, 2, diff), NA_real_)
+    D <- diff(N)
   } else {
-    nt_observed = NULL
+    D <- N
   }
-
+  D_means <- apply(D, 2, mean, na.rm = TRUE)
+  D_sds <- apply(D, 2, sd, na.rm = TRUE)
+  
+  #----------------- Define Y -------------------------------------------------#
+  
   if (centre_and_scale) {
-    xt_means <- apply(xt, 2, mean, na.rm = TRUE)
-    xt_sds <- apply(xt, 2, sd, na.rm = TRUE)
-    xt <- t((t(xt) - xt_means) / xt_sds)
+    Y <- t((t(D) - D_means) / D_sds) # TODO: Print warning if divides by zero
+  } else {
+    Y <- D
   }
-
-  #----------------- Create lagged matrix -------------------------------------#
-
-  # X is a matrix of named lagged column vectors
+  
+  #----------------- Define X -------------------------------------------------#
+  
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
-  X <- pbsLag(xt[, lags_name], lags_size)
+  X <- pbsLag(Y[, lags_name], lags_size)
   colnames(X) <- paste0(lags_name, "_", lags_size)
 
   #----------------- Create distance matrix -----------------------------------#
-
+  # TODO: Update notation from here onward
+  
   # xt_dist[i, j] is the distance between row vectors i and j in X
   xt_lags_na <- X
   xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
@@ -194,13 +195,33 @@ pbsEDM <- function (N,
                         rmse = rmse,
                         stringsAsFactors = FALSE)
 
-  #----------------- Return a list --------------------------------------------#
+  #----------------- Compute N_forecast ---------------------------------------#
+  
+  if (centre_and_scale) {
+    D_forecast <- D_means[1] + X_forecast * D_sds[1] # X_forecast == Y_forecast
+  } else {
+    D_forecast <- X_forecast
+  }
+  
+  if (first_difference) {
+    num_nas <- max(lags_size) + p
+    N_f_nas <- rep(NA_real_, num_zeros)
+    D_f_len <- length(D_forecast)
+    N_f_abs <- mean(diffinv(D[, 1]) - N[, 1], na.rm = TRUE) # Should be equal
+    N_f_dnv <- diffinv(D_forecast[(num_nas + 1):D_f_len], xi = N_f_abs)
+    N_forecast <- c(N_f_nas, N_f_dnv)
+  } else {
+    N_forecast <- D_forecast
+  }
+  
+
+  #----------------- Return a list of class pbsEDM ----------------------------#
 
   structure(
     list(
       N = N,
       N_observed = N[,1], # Check that response var. is in first column
-      N_forecast = NULL, # TODO: recover raw forecast from centred & scaled
+      N_forecast = N_forecast,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
