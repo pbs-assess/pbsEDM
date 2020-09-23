@@ -112,7 +112,7 @@ points(different$rEDM.pred,
 ```
 
 This shows that three points disagree between Andy's calculations and
-rEDM's by more than `r eps`. (Originally there were a few moe but they are now
+rEDM's by more than $`r eps`$. (Originally there were a few moe but they are now
 corrected in rEDM so can be ignored). The points are
 ```{r}
 different
@@ -226,9 +226,9 @@ Y95est_allow
 
 However, the problem is that we should not be allowed to use $\bf{x}_{96}$.
 By definition,
-$$\bf{x}_{96} = (Y_{96}, Y_{95}),$$
+$$\bf{x}_{96} = [Y_{96}, Y_{95}],$$
 which contains $Y_{95}$. But $Y_{95}$ is one of the components of
-$$\bf{x}_{95} = (Y_{95}, Y_{94})$$
+$$\bf{x}_{95} = [Y_{95}, Y_{94}]$$
 which is what we are trying to forecast from $\bf{x}_{94}$.
 $Y_{95}$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
 it occurs in $\bf{x}_{95}$ and $\bf{x}_{96}$, by definition.
