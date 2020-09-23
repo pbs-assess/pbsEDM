@@ -25,9 +25,10 @@ Five panels in 2x3 or 3x2 format, in current plot environment
 Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
 and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
 See vignette "Analyse a simple time series".
-Only working if `nt_observed` values are in there (needs another switch if
+Only working if `N$Nt` values are in there (needs another switch if
 not). And very likely only works for univariate time series for now, not
-pred-prey for example. TODO, update if necessary.
+pred-prey for example. TODO, update if necessary. Works on `Nx_lags_orig`
+but likely need to generalise.
 }
 \examples{
 \donttest{

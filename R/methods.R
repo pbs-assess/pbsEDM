@@ -1,6 +1,6 @@
 #' Forecast via Empirical Dynamic Modelling
 #'
-#' @param N [data.frame()] A data frame with named columns for the response 
+#' @param N [data.frame()] A data frame with named columns for the response
 #' variable and covariate time series
 #' @param lags [list()] A named list of integer vectors specifying the lags to
 #' use for each time series in \code{N}
@@ -8,22 +8,22 @@
 #' @param first_difference [logical()] First difference each time series?
 #' @param centre_and_scale [logical()] Centre and scale each time series?
 #'
-#' @details The name of the first element in \code{lags} must match the name of 
-#' the response variable in \code{N}. Unlagged time series, including the 
+#' @details The name of the first element in \code{lags} must match the name of
+#' the response variable in \code{N}. Unlagged time series, including the
 #' response variable, must be specified by a zero in the corresponding named
 #' vector in \code{lags}. For example, given a \code{data.frame} with named
-#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator} 
-#' can be specified as the unlagged response variable by 
-#' 
-#' \code{lags = list(Predator = c(0, ...), ...)}. 
-#' 
+#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator}
+#' can be specified as the unlagged response variable by
+#'
+#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'
 #' This places the unlagged time series of \code{Predator} abundance along the
 #' first axis of the reconstructed state space. To predict \code{Predator}
 #' abundance from its first two lags, and from the unlagged and first lags of
 #' \code{Prey} and \code{Temperature}, \code{lags} can be specified as
-#' 
-#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}. 
-#' 
+#'
+#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
+#'
 #'
 #' @return A list of class \code{pbsEDM} containing:
 #'
@@ -34,21 +34,21 @@
 #'   \item \code{X} [matrix()] Unlagged and lagged state variables as columns
 #'   \item \code{X_observed} [vector()] Transformed response variable time series
 #'   \item \code{X_forecast} [vector()] Forecast of transformed response variable
-#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of 
+#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of
 #'   points in state space (pairs of rows in \code{X})
 #'   \item \code{neighbour_distance} [matrix()] Distance by focal time (row) and rank
 #'   (column)
-#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and 
+#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and 
+#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and 
+#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected 
+#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected
 #'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected 
+#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected
 #'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected 
+#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected
 #'   time (row) and neighbour distance rank (column)
 #'   \item \code{lags} [list()] A named list of integer vectors specifying the lags to
 #'   use for each time series in \code{N}
@@ -283,31 +283,31 @@ pbsEDM_Evec <- function(Nt,
 
 
 #' Forecast via S-Mapping
-#' 
-#' @param N [data.frame()] A data frame with named columns for the response 
+#'
+#' @param N [data.frame()] A data frame with named columns for the response
 #' variable and covariate time series
 #' @param lags [list()] A named list of integer vectors specifying the lags to
 #' use for each time series in \code{N}
-#' @param theta [numeric()] Local weighting parameter 
+#' @param theta [numeric()] Local weighting parameter
 #' @param p [integer()] The forecast distance
 #' @param first_difference [logical()] First difference each time series?
 #' @param centre_and_scale [logical()] Centre and scale each time series?
 #'
-#' @details The name of the first element in \code{lags} must match the name of 
-#' the response variable in \code{N}. Unlagged time series, including the 
+#' @details The name of the first element in \code{lags} must match the name of
+#' the response variable in \code{N}. Unlagged time series, including the
 #' response variable, must be specified by a zero in the corresponding named
 #' vector in \code{lags}. For example, given a \code{data.frame} with named
-#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator} 
-#' can be specified as the unlagged response variable by 
-#' 
-#' \code{lags = list(Predator = c(0, ...), ...)}. 
-#' 
+#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator}
+#' can be specified as the unlagged response variable by
+#'
+#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'
 #' This places the unlagged time series of \code{Predator} abundance along the
 #' first axis of the reconstructed state space. To predict \code{Predator}
 #' abundance from its first two lags, and from the unlagged and first lags of
 #' \code{Prey} and \code{Temperature}, \code{lags} can be specified as
-#' 
-#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}. 
+#'
+#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
 #'
 #' @return A list of class \code{pbsEDM} containing:
 #'
@@ -318,31 +318,31 @@ pbsEDM_Evec <- function(Nt,
 #'   \item \code{X} [matrix()] Unlagged and lagged state variables as columns
 #'   \item \code{X_observed} [vector()] Transformed response variable time series
 #'   \item \code{X_forecast} [vector()] Forecast of transformed response variable
-#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of 
+#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of
 #'   points in state space (pairs of rows in \code{X})
 #'   \item \code{neighbour_distance} [matrix()] Distance by focal time (row) and rank
 #'   (column)
-#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and 
+#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and 
+#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and 
+#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and
 #'   distance rank (column)
-#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected 
+#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected
 #'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected 
+#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected
 #'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected 
+#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected
 #'   time (row) and neighbour distance rank (column)
 #'   \item \code{lags} [list()] A named list of integer vectors specifying the lags to
 #'   use for each time series in \code{N}
-#'   \item \code{theta} [numeric()] Local weighting parameter 
+#'   \item \code{theta} [numeric()] Local weighting parameter
 #'   \item \code{p} [integer()] The forecast distance
 #'   \item \code{first_difference} [logical()] First difference each time series?
 #'   \item \code{centre_and_scale} [logical()] Centre and scale each time series?
 #'   \item \code{results} [data.frame()] A summary of forecast accuracy
-#' } 
-#' 
+#' }
+#'
 #'
 #' @author Luke A. Rogers
 #' @export
