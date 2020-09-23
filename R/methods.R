@@ -253,28 +253,28 @@ pbsEDM <- function (N,
 
 ##' Do the `pbsEDM()` calculation for vector of `E` values
 ##'
-##' Only works for one variable, non-differenced N(t), for now, as I haven't thought how to incorporate
+##' Only works for one variable, non-differenced $N_t$, for now, as I haven't thought how to incorporate
 ##' the lags variable properly yet.
 ##'
 ##' @return List of `pbsEDM` lists, each main component corresponds to a value
 ##'   of `E`, given by `results$E`
 ##' @export
 ##' @author Andrew Edwards
-##' @param Nt [vector] Vector of non-differenced values N(t), with time assumed
-##'   to be `1:length(Nt)`.
+##' @param N_t [vector] Vector of non-differenced values $N_t$, with time assumed
+##'   to be `1:length(N_t)`.
 ##' @param E_vec The vector of embedding dimensions to try.
 ##' @param ... Further options to pass to `pbsEDM()`.
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   aa <- pbsEDM_Evec(NY_lags_example$N_t)
 ##' }
-pbsEDM_Evec <- function(Nt,
-                     E_vec = 1:10,
-                     ...){
+pbsEDM_Evec <- function(N_t,
+                        E_vec = 1:10,
+                        ...){
   E_res <- list()
   for(i in 1:length(E_vec)){
-    E_res[[i]] <- pbsEDM(data.frame(Nt = Nt),
-                         lags = list(Nt = 0:E_vec[i]),
+    E_res[[i]] <- pbsEDM(data.frame(N_t = N_t),
+                         lags = list(N_t = 0:E_vec[i]),
                          first_difference = TRUE,
                          ...)
   }

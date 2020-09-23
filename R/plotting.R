@@ -33,7 +33,7 @@ gets3dusr = function(s3dobject)
 ##' See vignette "Analyse a simple time series".
 ##' Only working if `N$N_t` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
-##' pred-prey for example. TODO, update if necessary. Works on `Nx_lags_orig`
+##' pred-prey for example. TODO, update if necessary. Works on `NY_lags_example`
 ##' but likely need to generalise.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
@@ -48,7 +48,7 @@ gets3dusr = function(s3dobject)
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'  aa <- pbsEDM(Nx_lags_orig,
+##'  aa <- pbsEDM(NY_lags_example,
 ##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'  plot(aa)
@@ -104,7 +104,7 @@ plot.pbsEDM = function(obj,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa_Evec <- pbsEDM_Evec(Nx_lags_orig$N_t)
+##'   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
 ##'   plot_pbsEDM_Evec(aa_Evec)
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
@@ -128,7 +128,7 @@ plot_pbsEDM_Evec <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$N_t)
+##'   aa <- pbsEDM_Evec(NY_lags_example$N_t)
 ##'   plot_rho_Evec(aa)
 ##' }
 plot_rho_Evec <- function(E_res,
@@ -161,13 +161,13 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_res A list of `pbsEDM` objects
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
-##' @param last.time.to.plot Last time value of `N[t]` to use when plotting.
+##' @param last.time.to.plot Last time value of `N_t` to use when plotting.
 ##' @return Figure in the current plot enivironment
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$N_t)
+##'   aa <- pbsEDM_Evec(NY_lags_example$N_t)
 ##'   plot_pred_obs(aa)
 ##' }
 plot_pred_obs <- function(E_res,
@@ -256,8 +256,8 @@ plot_pred_obs <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   plot_time_series(Nx_lags_orig$N_t, X.or.N = "N")
-##'   plot_time_series(Nx_lags_orig$X_t, X.or.N = "X")
+##'   plot_time_series(NY_lags_example$N_t, X.or.N = "N")
+##'   plot_time_series(NY_lags_example$X_t, X.or.N = "X")
 ##' }
 plot_time_series <- function(values,
                              X.or.N,
@@ -377,8 +377,8 @@ plot_time_series <- function(values,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   plot_phase_2d(Nx_lags_orig$N_t, X.or.N = "N")
-##'   plot_phase_2d(Nx_lags_orig$X_t, X.or.N = "X")
+##'   plot_phase_2d(NY_lags_example$N_t, X.or.N = "N")
+##'   plot_phase_2d(NY_lags_example$X_t, X.or.N = "X")
 ##' }
 plot_phase_2d <- function(values,
                           X.or.N = "X",
@@ -554,7 +554,7 @@ plot_phase_2d <- function(values,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'  aa <- pbsEDM(Nx_lags_orig,
+##'  aa <- pbsEDM(NY_lags_example,
 ##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_phase_3d(aa)
@@ -694,7 +694,7 @@ plot_phase_3d <- function(obj,
 ##' @param neigh.proj if TRUE then highlight projections of neighbours to `x(t*)`
 ##' @param pred.plot if TRUE then highlight forecasted value `x(t*+1)`
 ##' @param pred.rEDM if TRUE then show predictions from `rEDM` for
-##'   `Nx_lags_orig` saved values; obj must be `Nx_lags_orig` TODO do a test as
+##'   `NY_lags_example` saved values; obj must be `NY_lags_example` TODO do a test as
 ##'   may not work
 ##' @param true.val if TRUE then plot the true value of `x(t*+1)`
 ##' @param legend.plot if TRUE then do a legend and print value of `t*`
@@ -704,7 +704,7 @@ plot_phase_3d <- function(obj,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM(Nx_lags_orig,
+##'   aa <- pbsEDM(NY_lags_example,
 ##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_explain_edm(aa,
@@ -732,9 +732,9 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    testthat::expect_equal(obj$X_observed, Nx_lags_orig$X_t)
+    testthat::expect_equal(obj$X_observed, NY_lags_example$X_t)
     #  ideally want this message:
-    #  stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
+    #  stop("pred.rEDM can only be TRUE when plotting NY_lags_example")
   }
 
   par(pty="s")
@@ -825,7 +825,7 @@ plot_explain_edm <- function(obj,
   # show predicted value from rEDM
   if(pred.rEDM){
     points(Xt[tstar],
-           dplyr::pull(Nx_lags_orig[tstar+1, "rEDM.pred"]),
+           dplyr::pull(NY_lags_example[tstar+1, "rEDM.pred"]),
            col = "red",
            cex = 1.5,
            lwd = 2)
@@ -875,7 +875,7 @@ plot_explain_edm <- function(obj,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM(Nx_lags_orig,
+##'   aa <- pbsEDM(NY_lags_example,
 ##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_explain_edm_movie(aa, tstar = 15) # will only show last panel; see
