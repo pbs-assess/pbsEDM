@@ -85,6 +85,7 @@ plot.pbsEDM = function(obj,
 
   plot_phase_3d(obj,
                 ...)
+  invisible()
 }
 
 ##' Plot output from `pbsEDM_Evec()` as six panel plot, with data showns the
@@ -113,6 +114,7 @@ plot_pbsEDM_Evec <- function(E_res,
               ...)
 
   plot_pred_obs(E_res)
+  invisible()
 }
 
 ##' Plot rho versus `E` for output from `pbsEDM_Evec()`
@@ -146,6 +148,7 @@ plot_rho_Evec <- function(E_res,
        ...
        )
   # TODO see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
+  invisible()
 }
 
 
@@ -224,7 +227,7 @@ plot_pred_obs <- function(E_res,
          leg,
          col=E_cols,
          cex=0.7)
-  return()
+  invisible()
 }
 
 ##' Plot the observed time series as either `N(t)` or `X(t)`
@@ -347,6 +350,7 @@ plot_time_series <- function(values,
            pch = pch.plot,
            col = col.plot)
   }
+  invisible()
 }
 
 ##' Plot 2d phase plot of `N(t)` vs `N(t-1)` or `X(t)` vs `X(t-1)`
@@ -515,7 +519,7 @@ plot_phase_2d <- function(values,
 #                 col = col.plot)           # start row has NA's, get ignored
 #        }
       # legend("topleft", legend=paste("Time", iii), border = NULL)
-
+  invisible()
 }
 
 ##' Plot 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`
@@ -667,7 +671,7 @@ plot_phase_3d <- function(obj,
 
   par(mar = par.mar.phase)   # scatterplot3d changes mar
   par(mgp = par.mgp)         #  so set back to usual for 2d figures
-  return()                   # else returns the above line instead of NULL
+  invisible()                   # else returns the above line
 }
 
 ##' 2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM
