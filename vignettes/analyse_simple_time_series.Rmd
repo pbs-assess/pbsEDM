@@ -20,7 +20,8 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
-NB: Andy to update notation with new notation; code runs though.
+TODO: Axes in code are updated to be $Y_t$ not $X_t$ etc., but have to manually
+save the movies to GitHub, so not doing that now in case they change again.
 
 The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
