@@ -732,15 +732,16 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    testthat::expect_equal(obj$X_observed, NY_lags_example$X_t)
+    testthat::expect_equal(obj$X_observed, NY_lags_example$Y_t)
     #  ideally want this message:
     #  stop("pred.rEDM can only be TRUE when plotting NY_lags_example")
   }
 
   par(pty="s")
-                             # NOT CHANGED THESE (yet) in notation update
-  Xt <- obj$X[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
-  Xtmin1 <- obj$X[, "Nt_1"]
+                             # TODO maybe. Andy NOT CHANGED THESE (yet) in notation update
+  Xt <- obj$X[, "N_t_0"]      # Should change Nt in pbsEDM() as confusing. Luke
+                              # was still tweaking that.
+  Xtmin1 <- obj$X[, "N_t_1"]
 
   Xt.max.abs = max(abs( range( c(Xt,
                                  Xtmin1,
