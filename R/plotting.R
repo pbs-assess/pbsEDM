@@ -136,7 +136,7 @@ plot_rho_Evec <- function(E_res,
   rho <- vector()
   E <- vector()
   for(i in 1:length(E_res)){
-    rho[i] <- E_res[[i]]$results$rho
+    rho[i] <- E_res[[i]]$results$X_rho
     E[i] <- E_res[[i]]$results$E
   }
 
@@ -218,7 +218,7 @@ plot_pred_obs <- function(E_res,
             paste0("E=",
                    E_res[[j]]$results$E,
                    ", rho=",
-                   round(E_res[[j]]$results$rho,
+                   round(E_res[[j]]$results$X_rho,
                          2)))
   }
 
