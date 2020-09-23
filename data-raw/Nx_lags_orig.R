@@ -4,6 +4,7 @@
 #  Andy running once (no need for others
 #  to run, hence the hardwired pathnames), based on
 #  edm-work/code/simulated/egDeyle/tStarLoop/tStarLoop19.rnw.
+#  See code at end for updating column names with new notation.
 
 rm(list=ls())
 load_all()
@@ -109,3 +110,9 @@ usethis::use_data(psi_orig, overwrite = TRUE)
 
 # These are the ones that are different:
 # dplyr::filter(Nx_lags_orig, abs(pred.diff) > 0.0000001)
+
+
+# This is run after, for the new notation.
+NY_lags_example <- Nx_lags_orig
+names(NY_lags_example)[2:6] <- c("N_t", "N_tmin1", "Y_t", "Y_tmin1", "Y_tmin2")
+usethis::use_data(NY_lags_example, overwrite = TRUE)

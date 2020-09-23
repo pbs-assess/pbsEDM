@@ -22,9 +22,9 @@ library(pbsEDM)
 
 NB: Andy to update notation with new notation; code runs though.
 
-The tibble `Nx_lags_orig` is saved in the package and contains several columns,
+The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
-$N(t)$, which has column name `Nt`. See `?Nx_lags_orig` for full details, and
+$N_t$, which has column name `N_t`. See `?NY_lags_example` for full details, and
 the `inclusion_issue.Rmd` vignette for comparison our step-by-step calculations
 with results from the functions in `pbsEDM` and `rEDM`.
 
@@ -36,11 +36,11 @@ function `EDM_pred_E_2()`.-->
 
 ## Analyse with pbsEDM code
 
-Use only the `Nt` column from `Nx_lags_orig` and apply EDM
+Use only the `N_t` column from `NY_lags_example` and apply EDM
 calculations using lags of 0 and 1 ($E = 2$) with first differencing:
 ```{r calc2}
-calc2 <- pbsEDM(Nx_lags_orig,
-                lags = list(Nt = c(0:1)),
+calc2 <- pbsEDM(NY_lags_example,
+                lags = list(N_t = c(0:1)),
                 first_difference = TRUE)
 ```
 This creates a `pbsEDM` object which is a list of results (see `?pbsEDM` for full details):
@@ -52,14 +52,14 @@ For now we'll just use that to plot the data in various useful ways:
 plot(calc2,
      portrait = FALSE)
 ```
-The figure shows, before doing EDM, the data in various ways: time series of $N_t$ and $X_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $X_t$ vs $X_{t-1}$ (as used for $E=2$) and $X_t$ vs $X_{t-1}$ vs $X_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $X_t$ time series panel, the values of $X_t$ are also plotted in a vertical line (to the left of $t10$) which is the one-dimensional equivalent of a phase plot for $E=1$.
+The figure shows, before doing EDM, the data in various ways: time series of $N_t$ and $Y_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $Y_t$ vs $Y_{t-1}$ (as used for $E=2$) and $Y_t$ vs $Y_{t-1}$ vs $Y_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $Y_t$ time series panel, the values of $Y_t$ are also plotted in a vertical line (to the left of $t=0$) which is the one-dimensional equivalent of a phase plot for $E=1$.
 
 An animated movie (with EDM results) is shown later below; to create the movie
 without the results use this code in an Rmarkdown document:
 ```{r datamovie, eval=FALSE, echo=TRUE}
 {r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
 ## or for portrait use fig.width = 5.36, fig.height = 8
-for(iiii in 1:length(Nx_lags_orig$Nt)){
+for(iiii in 1:length(NY_lags_example$N_t)){
   plot(calc2,
        last.time.to.plot = iiii,
        portrait = FALSE)
@@ -78,9 +78,9 @@ error between the observations and the predictions.
 ## Make forecasts using different values of E
 
 Now use the simplex algorithm for different values of embedding dimension $E$,
-where, for example $E=2$ uses first-difference values $X_t$ and $X_{t-1}$:
+where, for example $E=2$ uses first-difference values $Y_t$ and $Y_{t-1}$:
 ```{r Eres}
-E_results <- pbsEDM_Evec(Nx_lags_orig$Nt)
+E_results <- pbsEDM_Evec(NY_lags_example$N_t)
 ```
 The result is a list containing a `pbsEDM` object (as above) for each value of $E$, the
 default being values $E = 2, 3, ..., 11$:
@@ -99,7 +99,7 @@ plot_pbsEDM_Evec(E_results,
 A movie of that is run in an Rmarkdown file (uncomment the commented line) using:
 ```{r, eval=FALSE, echo=TRUE}
 # ```{r movietime, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
-for(iiii in 1:length(Nx_lags_orig$Nt)){
+for(iiii in 1:length(NY_lags_example$N_t)){
   plot_pbsEDM_Evec(E_results,
        last.time.to.plot = iiii,
        portrait = FALSE)

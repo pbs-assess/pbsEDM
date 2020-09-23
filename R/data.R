@@ -1,6 +1,6 @@
 ## Descriptions of saved data objects.
 
-##' Simple example time series TODO can remove this at some point
+##' Simple example time series
 ##'
 ##' Example simulation results originally from Carrie's salmonTraj() function,
 ##' that end up some discrepancies in results between `rEDM` and our own EDM
@@ -14,7 +14,7 @@
 "simple_ts"
 
 ##' Summary results from a simple simulation model analysed using `rEDM` and Andy's
-##' original independent code
+##' original independent code - now using NY_lags_example with new notation
 ##'
 ##' Contains the original times series of populations `Nt`, simple lagged values
 ##' and differences, and then calculations from `rEDM::simplex()` and Andy's
@@ -47,8 +47,43 @@
 ##' @source Generated from Andy running `data-raw/Nx_lags.R`.
 "Nx_lags_orig"
 
-##' Full results from a simple simulation model analysed using Andy's
+##' Summary results from a simple simulation model analysed using `rEDM` and Andy's
 ##' original independent code
+##'
+##' Contains the original times series of populations `N_t`, simple lagged values
+##' and differences, and then calculations from `rEDM::simplex()` and Andy's
+##' original independent code. This was independent code originally done to understand
+##' EDM, but revealed discrepancies between those results and those of `rEDM()`.
+##' See `full_calcs_orig` and `psi_orig` for full results.
+##'
+##' @format A 100x14 tibble where each row is a time step (year) and columns
+##'   are:
+##'   * `t`: time step, 1, 2, 3, ..., 100.
+##'   * `N_t`: original time series of number of spawners, $N_t$ at time $t$ from
+##'   Carrie's `salmonTraj()` function.
+##'   * `N_tmin1`: $N_{t-1}$, the number at the previous time step (value for
+##'      `t=1` is therefore `NA`).
+##'   * `Y_t`: First difference $Y_t = N_{t+1} - N_t$; (value for `t=100` is
+##'   therefore `NA`).
+##'   * `Ytmin1`: $Y_{t-1}$
+##'   * `Ytmin2`: $Y_{t-2}$
+##'   * `rEDM.pred`: predicted value from `rEDM::simplex()` with embedding
+##'   dimension $E=2$.
+##'   * `rEDM.var`: estimated variance of `rEDM.pred` (from `rEDM::simplex()`).
+##'   * `my.pred`: predicted value from Andy's `EDM_pred_E_2()` function (saved
+##'   in `PBSedm`)
+##'   * `my.var`: estimated variance of `my.pred`
+##'   * `pred.diff`: the difference between predictions, i.e. `rEDM.pred - my.pred`
+##'   * `var.diff`: the difference between estimated variances, i.e. `rEDM.var - my.var`
+##'   * `pred.ratio`: ratio of the two estimated predictions, as `rEDM.pred / my.pred`
+##'   * `var.ratio`: ratio of the two estimated variances, as `rEDM.var / my.var`
+##'
+##' @source Generated from Andy running `data-raw/Nx_lags.R`.
+"NY_lags_example"
+
+
+##' Full results from a simple simulation model analysed using Andy's
+##' original independent code (still has `Xt` notation not `Y_t`)
 ##'
 ##' Contains a list of dataframes from running `EDM_pred_E_2` on the simple time series.
 ##'

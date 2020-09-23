@@ -31,7 +31,7 @@ gets3dusr = function(s3dobject)
 ##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
 ##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
 ##' See vignette "Analyse a simple time series".
-##' Only working if `N$Nt` values are in there (needs another switch if
+##' Only working if `N$N_t` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
 ##' pred-prey for example. TODO, update if necessary. Works on `Nx_lags_orig`
 ##' but likely need to generalise.
@@ -49,7 +49,7 @@ gets3dusr = function(s3dobject)
 ##' @examples
 ##' \donttest{
 ##'  aa <- pbsEDM(Nx_lags_orig,
-##'               lags = list(Nt = 0:1),
+##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'  plot(aa)
 ##' }
@@ -66,7 +66,7 @@ plot.pbsEDM = function(obj,
                                             # though last will have NA # not
                                             # incorporated fully yet
 
-  plot_time_series(values = obj$N$Nt,
+  plot_time_series(values = obj$N$N_t,
                                         # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
                    ...)
@@ -75,7 +75,7 @@ plot.pbsEDM = function(obj,
                    X.or.N = "X",
                    ...)
 
-  plot_phase_2d(values = obj$N$Nt,
+  plot_phase_2d(values = obj$N$N_t,
                 X.or.N = "N",
                 ...)
 
@@ -104,7 +104,7 @@ plot.pbsEDM = function(obj,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa_Evec <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   aa_Evec <- pbsEDM_Evec(Nx_lags_orig$N_t)
 ##'   plot_pbsEDM_Evec(aa_Evec)
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
@@ -128,7 +128,7 @@ plot_pbsEDM_Evec <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$N_t)
 ##'   plot_rho_Evec(aa)
 ##' }
 plot_rho_Evec <- function(E_res,
@@ -167,7 +167,7 @@ plot_rho_Evec <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+##'   aa <- pbsEDM_Evec(Nx_lags_orig$N_t)
 ##'   plot_pred_obs(aa)
 ##' }
 plot_pred_obs <- function(E_res,
@@ -256,8 +256,8 @@ plot_pred_obs <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   plot_time_series(Nx_lags_orig$Nt, X.or.N = "N")
-##'   plot_time_series(Nx_lags_orig$Xt, X.or.N = "X")
+##'   plot_time_series(Nx_lags_orig$N_t, X.or.N = "N")
+##'   plot_time_series(Nx_lags_orig$X_t, X.or.N = "X")
 ##' }
 plot_time_series <- function(values,
                              X.or.N,
@@ -330,7 +330,7 @@ plot_time_series <- function(values,
   iii = last.time.to.plot             # use iii since simpler
   if(iii > 1.5){
     segments(start:(iii-1),
-             values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
+             values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "X_t"]),
              (start+1):iii,
              values[(start+1):iii],
              col = col.plot.lines)      # lines() will not use vector col
@@ -377,8 +377,8 @@ plot_time_series <- function(values,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   plot_phase_2d(Nx_lags_orig$Nt, X.or.N = "N")
-##'   plot_phase_2d(Nx_lags_orig$Xt, X.or.N = "X")
+##'   plot_phase_2d(Nx_lags_orig$N_t, X.or.N = "N")
+##'   plot_phase_2d(Nx_lags_orig$X_t, X.or.N = "X")
 ##' }
 plot_phase_2d <- function(values,
                           X.or.N = "X",
@@ -396,7 +396,7 @@ plot_phase_2d <- function(values,
 
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
-                    max(values, na.rm = TRUE))   # for Nt or Xt
+                    max(values, na.rm = TRUE))   # for N_t or X_t
   }
   if(is.null(last.time.to.plot)) {
     last.time.to.plot = length(values)
@@ -464,10 +464,10 @@ plot_phase_2d <- function(values,
       # Join each point to the next   (N(5), N(6)) to (N(6), N(7))
       #  Not checked.
       segments(
-        # dplyr::pull(Nx.lags.use[start:(iii-1), "Ntmin1"]),
-        # dplyr::pull(Nx.lags.use[start:(iii-1), "Nt"]),
-        # dplyr::pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
-        # dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
+        # dplyr::pull(Nx.lags.use[start:(iii-1), "N_tmin1"]),
+        # dplyr::pull(Nx.lags.use[start:(iii-1), "N_t"]),
+        # dplyr::pull(Nx.lags.use[(start+1):iii, "N_tmin1"]),
+        # dplyr::pull(Nx.lags.use[(start+1):iii, "N_t"]),
         # not fully tested:
         pbsLag(values.to.plot)[-length(values.to.plot)],   # N(t-1)
         values.to.plot[-length(values.to.plot)],
@@ -493,7 +493,7 @@ plot_phase_2d <- function(values,
 #        {
 #          if(cobwebbing)
 #            {
-#               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "Xt"]), each = 2)
+#               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "X_t"]), each = 2)
 #               xvals = xvals[-1]
 #               xvals = xvals[-length(xvals)]
 #               lenx = length(xvals)
@@ -504,17 +504,17 @@ plot_phase_2d <- function(values,
 #                        col = col.cobweb.lines)
 #           } else
 #           {  # Just join consecutive points with lines
-#               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "Xtmin1"]),
-#                        dplyr::pull(Nx.lags.use[start:(iii-1), "Xt"]),
-#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xtmin1"]),
-#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Xt"]),
+#               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "X_tmin1"]),
+#                        dplyr::pull(Nx.lags.use[start:(iii-1), "X_t"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "X_tmin1"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "X_t"]),
 #                        col = col.plot.lines)
 #            }
 #        }
 #      if(iii > 1.5)
 #        {
-#          points(dplyr::pull(Nx.lags.use[start:iii, "Xtmin1"]),
-#                 dplyr::pull(Nx.lags.use[start:iii, "Xt"]),
+#          points(dplyr::pull(Nx.lags.use[start:iii, "X_tmin1"]),
+#                 dplyr::pull(Nx.lags.use[start:iii, "X_t"]),
 #                 type = pt.type, pch = pch.plot,
 #                 col = col.plot)           # start row has NA's, get ignored
 #        }
@@ -555,7 +555,7 @@ plot_phase_2d <- function(values,
 ##' @examples
 ##' \donttest{
 ##'  aa <- pbsEDM(Nx_lags_orig,
-##'               lags = list(Nt = 0:1),
+##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_phase_3d(aa)
 ##' }
@@ -632,22 +632,22 @@ plot_phase_3d <- function(obj,
                     col = axes.col)
       # Obtain x-y co-ords of points for segments:
 #**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii,
-#                                                            "Xtmin2"]),
+#                                                            "X_tmin2"]),
 #                                    dplyr::pull(Nx.lags.use[start:iii,
-#                                                            "Xtmin1"]),
-  #                                    dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
+#                                                            "X_tmin1"]),
+  #                                    dplyr::pull(Nx.lags.use[start:iii, "X_t"]) )
   # maybe this is okay with NA's:
 #  proj.pts = scat$xyz.convert(pbsLag(obj$X_observed,
-#                                     2)[start:iii],  # "Xtmin2", index wrong?
+#                                     2)[start:iii],  # "X_tmin2", index wrong?
 #                              pbsLag(obj$X_observed,
-#                                     1)[start:iii],  # "Xtmin1"
-  #                              pbsLag(obj$X_observed)[start:iii])  # "Xt"
+#                                     1)[start:iii],  # "X_tmin1"
+  #                              pbsLag(obj$X_observed)[start:iii])  # "X_t"
   if(all(!is.na(values.to.plot))){
     proj.pts = scat$xyz.convert(pbsLag(values.to.plot,
-                                       2),  # "Xtmin2"
+                                       2),  # "X_tmin2"
                                 pbsLag(values.to.plot,
-                                       1),  # "Xtmin1"
-                                values.to.plot)  # "Xt"
+                                       1),  # "X_tmin1"
+                                values.to.plot)  # "X_t"
     if(last.time.to.plot > 3.5){
       segments(proj.pts$x[1:(last.time.to.plot - start)],
                proj.pts$y[1:(last.time.to.plot - start)],
@@ -659,10 +659,10 @@ plot_phase_3d <- function(obj,
     # The points
     if(last.time.to.plot > 2.5){
       scat$points3d(pbsLag(values.to.plot,
-                           2),  # "Xtmin2"
+                           2),  # "X_tmin2"
                     pbsLag(values.to.plot,
-                           1),  # "Xtmin1"
-                    values.to.plot,  # "Xt"
+                           1),  # "X_tmin1"
+                    values.to.plot,  # "X_t"
                     type = pt.type,
                     pch = pch.plot,
                     col = col.plot)
@@ -705,7 +705,7 @@ plot_phase_3d <- function(obj,
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM(Nx_lags_orig,
-##'               lags = list(Nt = 0:1),
+##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_explain_edm(aa,
 ##'                    tstar = 15,
@@ -732,13 +732,13 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    testthat::expect_equal(obj$X_observed, Nx_lags_orig$Xt)
+    testthat::expect_equal(obj$X_observed, Nx_lags_orig$X_t)
     #  ideally want this message:
     #  stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
   }
 
   par(pty="s")
-
+                             # NOT CHANGED THESE (yet) in notation update
   Xt <- obj$X[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
   Xtmin1 <- obj$X[, "Nt_1"]
 
@@ -876,7 +876,7 @@ plot_explain_edm <- function(obj,
 ##' @examples
 ##' \donttest{
 ##'   aa <- pbsEDM(Nx_lags_orig,
-##'               lags = list(Nt = 0:1),
+##'               lags = list(N_t = 0:1),
 ##'               first_difference = TRUE)
 ##'   plot_explain_edm_movie(aa, tstar = 15) # will only show last panel; see
 ##'                                          # `analyse_simple_time_series`
