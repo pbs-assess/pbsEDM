@@ -31,9 +31,10 @@ gets3dusr = function(s3dobject)
 ##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
 ##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
 ##' See vignette "Analyse a simple time series".
-##' Only working if `nt_observed` values are in there (needs another switch if
+##' Only working if `N$Nt` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
-##' pred-prey for example. TODO, update if necessary.
+##' pred-prey for example. TODO, update if necessary. Works on `Nx_lags_orig`
+##' but likely need to generalise.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
@@ -61,24 +62,24 @@ plot.pbsEDM = function(obj,
          par(mfrow = c(3,2)),
          par(mfcol = c(2,3)))
 
-  if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$xt_observed)
+  if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$X_observed)
                                             # though last will have NA # not
                                             # incorporated fully yet
 
-  plot_time_series(values = obj$nt_observed,
+  plot_time_series(values = obj$N$Nt,
                                         # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
                    ...)
 
-  plot_time_series(values = obj$xt_observed,
+  plot_time_series(values = obj$X_observed,
                    X.or.N = "X",
                    ...)
 
-  plot_phase_2d(values = obj$nt_observed,
+  plot_phase_2d(values = obj$N$Nt,
                 X.or.N = "N",
                 ...)
 
-  plot_phase_2d(values = obj$xt_observed,
+  plot_phase_2d(values = obj$X_observed,
                 X.or.N = "X",
                 ...)
 
@@ -179,15 +180,15 @@ plot_pred_obs <- function(E_res,
   stopifnot("Need more distinct colours in E_cols"=
               length(E_cols) <= E_components)
 
-  if(is.null(last.time.to.plot)) last.time.to.plot <- length(E_res[[1]]$xt_observed)
+  if(is.null(last.time.to.plot)) last.time.to.plot <- length(E_res[[1]]$X_observed)
 
   # Determine range for axes
-  obs.max.abs = max( abs( range(E_res[[1]]$xt_observed,
+  obs.max.abs = max( abs( range(E_res[[1]]$X_observed,
                                 na.rm=TRUE) ) ) # max abs observed value
   forecast.max.abs = 0         # max abs forecast value
   for(j in 1:E_components){
     forecast.max.abs = max(c(forecast.max.abs,
-                             abs( range( range(E_res[[j]]$xt_forecast,
+                             abs( range( range(E_res[[j]]$X_forecast,
                                                na.rm=TRUE) ) ) ) )
   }
 
@@ -205,8 +206,8 @@ plot_pred_obs <- function(E_res,
   leg = vector()
 
   for(j in 1:E_components){
-    points(E_res[[j]]$xt_observed[1:(last.time.to.plot-1)],
-           E_res[[j]]$xt_forecast[1:(last.time.to.plot-1)],
+    points(E_res[[j]]$X_observed[1:(last.time.to.plot-1)],
+           E_res[[j]]$X_forecast[1:(last.time.to.plot-1)],
            pch = 16, # could note the final one differently (but not a star,
                      # since that's last N[t] not X[t])
            col = E_cols[j])
@@ -464,15 +465,15 @@ plot_phase_2d <- function(values,
         # dplyr::pull(Nx.lags.use[(start+1):iii, "Ntmin1"]),
         # dplyr::pull(Nx.lags.use[(start+1):iii, "Nt"]),
         # not fully tested:
-        pbsLAG(values.to.plot)[-length(values.to.plot)],   # N(t-1)
+        pbsLag(values.to.plot)[-length(values.to.plot)],   # N(t-1)
         values.to.plot[-length(values.to.plot)],
-        pbsLAG(values.to.plot)[-1],
+        pbsLag(values.to.plot)[-1],
         values.to.plot[-1],
         col = col.plot.lines) # lines() will not use vector of col
     }
   }
   if(last.time.to.plot > 1.5){
-    points(pbsLAG(values.to.plot),
+    points(pbsLag(values.to.plot),
            values.to.plot,
            type = pt.type,
            pch = pch.plot,
@@ -573,16 +574,16 @@ plot_phase_3d <- function(obj,
                           par.mgp = c(1.5, 0.5, 0)
                           ){
   if(is.na(axis.range)) {
-    axis.range <- c(min(0, min(obj$xt_observed, na.rm = TRUE)),
-                    max(obj$xt_observed, na.rm = TRUE))
+    axis.range <- c(min(0, min(obj$X_observed, na.rm = TRUE)),
+                    max(obj$X_observed, na.rm = TRUE))
   }
 
-  if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$xt_observed)
+  if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$X_observed)
 
   start = 1     # currently only works for 1
 
   if(last.time.to.plot > 2){
-    values.to.plot <- obj$xt_observed[start:(last.time.to.plot-1)]   # can't use N[last...])
+    values.to.plot <- obj$X_observed[start:(last.time.to.plot-1)]   # can't use N[last...])
   } else {
     values.to.plot <- NA          # nothing to plot
   }
@@ -632,15 +633,15 @@ plot_phase_3d <- function(obj,
 #                                                            "Xtmin1"]),
   #                                    dplyr::pull(Nx.lags.use[start:iii, "Xt"]) )
   # maybe this is okay with NA's:
-#  proj.pts = scat$xyz.convert(pbsLAG(obj$xt_observed,
+#  proj.pts = scat$xyz.convert(pbsLag(obj$X_observed,
 #                                     2)[start:iii],  # "Xtmin2", index wrong?
-#                              pbsLAG(obj$xt_observed,
+#                              pbsLag(obj$X_observed,
 #                                     1)[start:iii],  # "Xtmin1"
-  #                              pbsLAG(obj$xt_observed)[start:iii])  # "Xt"
+  #                              pbsLag(obj$X_observed)[start:iii])  # "Xt"
   if(all(!is.na(values.to.plot))){
-    proj.pts = scat$xyz.convert(pbsLAG(values.to.plot,
+    proj.pts = scat$xyz.convert(pbsLag(values.to.plot,
                                        2),  # "Xtmin2"
-                                pbsLAG(values.to.plot,
+                                pbsLag(values.to.plot,
                                        1),  # "Xtmin1"
                                 values.to.plot)  # "Xt"
     if(last.time.to.plot > 3.5){
@@ -653,9 +654,9 @@ plot_phase_3d <- function(obj,
 
     # The points
     if(last.time.to.plot > 2.5){
-      scat$points3d(pbsLAG(values.to.plot,
+      scat$points3d(pbsLag(values.to.plot,
                            2),  # "Xtmin2"
-                    pbsLAG(values.to.plot,
+                    pbsLag(values.to.plot,
                            1),  # "Xtmin1"
                     values.to.plot,  # "Xt"
                     type = pt.type,
@@ -727,19 +728,19 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE){
   if(pred.rEDM){
-    testthat::expect_equal(obj$xt_observed, Nx_lags_orig$Xt)
+    testthat::expect_equal(obj$X_observed, Nx_lags_orig$Xt)
     #  ideally want this message:
     #  stop("pred.rEDM can only be TRUE when plotting Nx_lags_orig")
   }
 
   par(pty="s")
 
-  Xt <- obj$xt_lags[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
-  Xtmin1 <- obj$xt_lags[, "Nt_1"]
+  Xt <- obj$X[, "Nt_0"]      # Should change Nt in pbsEDM() as confusing
+  Xtmin1 <- obj$X[, "Nt_1"]
 
   Xt.max.abs = max(abs( range( c(Xt,
                                  Xtmin1,
-                                 obj$xt_forecast),
+                                 obj$X_forecast),
                               na.rm=TRUE)))
   Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)
 
@@ -759,7 +760,7 @@ plot_explain_edm <- function(obj,
          pch = tstar.pch,
          cex = tstar.cex)
 
-  psi_vec <- obj$xt_nbr_index[tstar,]     #  vector of indices of points closest
+  psi_vec <- obj$neighbour_index[tstar,]     #  vector of indices of points closest
                                         #  to x[tstar]
 
   # Highlight neighbours
@@ -798,14 +799,14 @@ plot_explain_edm <- function(obj,
   # plot forecast value
   if(pred.plot){
     points(Xt[tstar],
-           obj$xt_forecast[tstar + 1],    # CHECK not tstar+1, think it's correct
+           obj$X_forecast[tstar + 1],    # CHECK not tstar+1, think it's correct
            col = tstar.col,
            pch = 8)
 
     igraph:::igraph.Arrows(Xtmin1[tstar],
                            Xt[tstar],
                            Xt[tstar],
-                           obj$xt_forecast[tstar + 1],
+                           obj$X_forecast[tstar + 1],
                            curve = 1,
                            size = 0.7,
                            h.lwd = 2,
