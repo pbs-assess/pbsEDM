@@ -22,7 +22,8 @@ library(pbsEDM)
 
 ## Introduction
 
-NB: This runs but text needs updating with new notation.
+TODO: Has been updated with new notation, still needs a careful read through and
+thinking about.
 
 This vignette shows the code used to demonstrate the issue we found with the calculations
 `rEDM` package, which inappropriately uses nearest neighbours in the projection
@@ -33,9 +34,9 @@ Luke Rogers.
 For a summary of notation used, see our write up in TODO - probably in a manuscript.
 
 The tibble `NY_lags_example` is saved in the package and contains a simple time
-series $N(t)$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
-lagged values $N(t-1)$ as `Ntmin1`, and first differences $X(t) = N(t+1) - N(t)$
-as `Y_t`, with lagged values $X(t-1)$ as `Y_tmin1` and $X(t-2)$ as `Y_tmin2`. Also
+series $N_t$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
+lagged values $N_{t-1}$ as `Ntmin1`, and first differences $Y_t = N_{t+1} - N_t$
+as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`. Also
 included are EDM results for embedding dimension 2, using `rEDM` (`rEDM.pred`
 for the predicted value and `rEDM.var` for its variance) and Andy's original
 function `EDM_pred_E_2()` (saved as `my.pred` and `my.var`). See `?NY_lags_example` for full details.
@@ -59,8 +60,8 @@ Note that:
 ```{r}
 NY_lags_example[100, c("rEDM.pred", "my.pred")]
 ```
-such that `rEDM` does not predict $X(100) = N(101) - N(100)$, but that is the
-value we want so that we can predict $N(101)$.
+such that `rEDM` does not predict $Y_{100} = Y_{101} - Y_{100}$, but that is the
+value we want so that we can predict $N_{101}$.
 We should be able to predict it because we have all the relevent
 information.
 
@@ -170,11 +171,12 @@ testthat::expect_equal(NY_lags_example$my.pred, pbs_pred)
 
 ## Explaining the issue
 
-The issue is that `rEDM` seems to use $\bf{x}(t^*+2)$ as a nearest neighbour, using the
-Deyle et al. (2013) notation that $\bf{x}$ is the vector of lagged values of the
-scalars $X(t)$, where time $t = 1, 2, 3, ..., 99$ in this case, i.e.
+The issue is that `rEDM` seems to use $\bf{x}_{t^*+2}$ as a nearest neighbour,
+where, extending Deyle et al.'s (2013) notation
+$\bf{x}_t$ is the vector of lagged values of the
+scalars $Y_t$, where time $t = 1, 2, 3, ..., 99$ in this case, and.
 
-$$\bf{x}(t) = [X(t), ~X(t-1)].$$
+$$\bf{x}_t = [Y_t, ~Y_{t-1}].$$
 
 For $t^*=94$, Andy's R code calculates nearest neighbours with indices $\psi$,
 which for $t^*=94$ gives `psivec94` and corresponding weights `weights94`:
@@ -182,10 +184,10 @@ which for $t^*=94$ gives `psivec94` and corresponding weights `weights94`:
 psivec94 = c(6, 57, 88)
 weights94 = c(0.3678794, 0.3205861, 0.2895013)
 ```
-giving the estimate of $X(95)$, from [S1] of Deyle et al. (2013), as
-```{r Xninetyfive}
-X95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
-X95est
+giving the estimate of $Y_{95}$, from [S1] of Deyle et al. (2013), as
+```{r Yninetyfive}
+Y95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
+Y95est
 ```
 
 That code isn't in a package and isn't really functionalised, so now we have
@@ -199,53 +201,53 @@ which agree with Andy's (the following will give errors if results don't agree):
 ```{r test}
 testthat::expect_equal(psivec94, pbs_calc$neighbour_index[94, ])
 testthat::expect_equal(weights94, pbs_calc$neighbour_weight[94, ], tolerance = 0.000001)
-testthat::expect_equal(X95est, pbs_calc$X_forecast[95])
+testthat::expect_equal(Y95est, pbs_calc$X_forecast[95])
 ```
 However, `rEDM` gives
 ```{r rEDMninetyfive}
-X95est_rEDM = rEDM_points[95, "pred"]
-X95est_rEDM
+Y95est_rEDM = rEDM_points[95, "pred"]
+Y95est_rEDM
 ```
 
 ## Manually reproduce `rEDM` result
 
 But we can reproduce the `rEDM` result by adapting Andy's manual code to allow
-$\bf{x}(96)$ to be a nearest neighbour of $\bf{x}(94)$,  giving
+$\bf{x}_{96}$ to be a nearest neighbour of $\bf{x}_{94}$,  giving
 ```{r psi94allow}
 psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
 weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
 # Note that the first weight is the same as above (by definition it's always
 #  exp(-1)), but the second and third are very small because x[96] is
 #  very close to x[94].
-X95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
+Y95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
                    sum(weights94_allow)
-X95est_allow
+Y95est_allow
 ```
 
-However, the problem is that we should not be allowed to use $\bf{x}(96)$.
+However, the problem is that we should not be allowed to use $\bf{x}_{96}$.
 By definition,
-$$\bf{x}(96) = (X(96), X(95)),$$
-which contains $X(95)$. But $X(95)$ is one of the components of
-$$\bf{x}(95) = (X(95), X(94))$$
-which is what we are trying to forecast from $\bf{x}(94)$.
-$X(95)$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
-it occurs in $\bf{x}(95)$ and $\bf{x}(96)$, by definition.
+$$\bf{x}_{96} = (Y_{96}, Y_{95}),$$
+which contains $Y_{95}$. But $Y_{95}$ is one of the components of
+$$\bf{x}_{95} = (Y_{95}, Y_{94})$$
+which is what we are trying to forecast from $\bf{x}_{94}$.
+$Y_{95}$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
+it occurs in $\bf{x}_{95}$ and $\bf{x}_{96}$, by definition.
 
-So $\bf{x}(96)$ should not be used to forecast $\bf{x}(95)$, because it
-explicitly contains one of the two components of $\bf{x}(95)$.
+So $\bf{x}_{96}$ should not be used to forecast $\bf{x}_{95}$, because it
+explicitly contains one of the two components of $\bf{x}_{95}$.
 
 The same issue occurs (with Andy's manual code) for $t^*=75$, for which Luke's code
 gives the same answer as shown above (because all values give the same answer).
 
 To summarise -- the issue is that rEDM does not fully take into account that
-$\bf{x}()$ is a vector of lagged values.
+$\bf{x}_t$ is a vector of lagged values.
 <!-- Not sure what I meant by this: It's not simply an implementation issue
-(that `rEDM` is unaware that the $X(t)$ are differences of the $N(t)$). -->
+(that `rEDM` is unaware that the $X_t$ are differences of the $N_t$). -->
 
 ## Another attempt with `rEDM`
 
-Andy tried the following in `rEDM`, to not allow $X(96)$ to be a nearest neighbour
-predicting $X(95)$ from $X(94)$ -- but think this isn't possible, since it still
+Andy tried the following in `rEDM`, to not allow $Y_{96}$ to be a nearest neighbour
+predicting $Y_{95}$ from $Y_{94}$ -- but think this isn't possible, since it still
 kind of wants cross-validation. Had played with `lib` and `pred` but couldn't get answer
 to agree with Andy's original one. Not running
 this in vignette, keeping for reference if needed:
