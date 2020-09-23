@@ -182,20 +182,17 @@ pbsEDM <- function (N,
                       function(x, y) y[x, 1],
                       y = X))
   prj_wgts <- pbsLag(nbr_wgts, p)
-
-  #----------------- Prepare return values ------------------------------------#
-
+  
+  #----------------- Store observed as vectors --------------------------------#
+  
   X_observed <- X[, 1]
-  X_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
-  rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
-  rmse <- sqrt(mean((X_observed - X_forecast)^2, na.rm = TRUE))
-  E <- length(lags_size)
-  results <- data.frame(E = E,
-                        rho = rho,
-                        rmse = rmse,
-                        stringsAsFactors = FALSE)
+  N_observed <- N[, 1]  # Check that response var. is in first column
+  
+  #----------------- Compute X_forecast ---------------------------------------#
 
-  #----------------- Compute N_forecast ---------------------------------------#
+  X_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
+  
+  #----------------- Compute D_forecast ---------------------------------------#
   
   if (centre_and_scale) {
     D_forecast <- D_means[1] + X_forecast * D_sds[1] # X_forecast == Y_forecast
@@ -203,24 +200,35 @@ pbsEDM <- function (N,
     D_forecast <- X_forecast
   }
   
+  #----------------- Compute N_forecast ---------------------------------------#
+  
   if (first_difference) {
-    num_nas <- max(lags_size) + p
-    N_f_nas <- rep(NA_real_, num_zeros)
-    D_f_len <- length(D_forecast)
-    N_f_abs <- mean(diffinv(D[, 1]) - N[, 1], na.rm = TRUE) # Should be equal
-    N_f_dnv <- diffinv(D_forecast[(num_nas + 1):D_f_len], xi = N_f_abs)
-    N_forecast <- c(N_f_nas, N_f_dnv)
+    # N_fore_{t} = N_obs_{t-1} + D_fore_{t-1}
+    N_forecast <- pbsLag(N_observed) + pbsLag(c(D_forecast, NA_real_))
   } else {
     N_forecast <- D_forecast
   }
   
-
+  #----------------- Prepare return values ------------------------------------#
+  
+  N_rho <- cor(N_observed, N_forecast, use = "pairwise.complete.obs")
+  N_rmse <- sqrt(mean((N_observed - N_forecast)^2, na.rm = TRUE))
+  X_rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
+  X_rmse <- sqrt(mean((X_observed - X_forecast)^2, na.rm = TRUE))
+  E <- length(lags_size)
+  results <- data.frame(E = E,
+                        N_rho = N_rho,
+                        N_rmse = N_rmse,
+                        X_rho = X_rho,
+                        X_rmse = X_rmse,
+                        stringsAsFactors = FALSE)
+  
   #----------------- Return a list of class pbsEDM ----------------------------#
 
   structure(
     list(
       N = N,
-      N_observed = N[,1], # Check that response var. is in first column
+      N_observed = N_observed,
       N_forecast = N_forecast,
       X = X,
       X_observed = X_observed,
