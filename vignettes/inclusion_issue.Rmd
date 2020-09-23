@@ -22,6 +22,8 @@ library(pbsEDM)
 
 ## Introduction
 
+NB: This runs but text needs updating with new notation.
+
 This vignette shows the code used to demonstrate the issue we found with the calculations
 `rEDM` package, which inappropriately uses nearest neighbours in the projection
 calculations. We verified this using manual code written by Andrew Edwards, and
@@ -127,7 +129,7 @@ pbs_calc <- pbsEDM(Nx_lags_orig,
 testthat::expect_equal(Nx_lags_orig$Xt,
                        pbs_calc$X_observed) # check the indexing is the same
 
-pbs_pred <- pbs_calc$X_observed
+pbs_pred <- pbs_calc$X_forecast
 
 plot(Nx_lags_orig$rEDM.pred,
      pbs_pred,
@@ -189,15 +191,15 @@ X95est
 That code isn't in a package and isn't really functionalised, so now we have
 Luke's code we can compare the same results:
 ```{r}
-pbs_calc$xt_nbr_index[94, ]
-pbs_calc$xt_nbr_weight[94, ]
-pbs_calc$xt_forecast[95]
+pbs_calc$neighbour_index[94, ]
+pbs_calc$neighbour_weight[94, ]
+pbs_calc$X_forecast[95]
 ```
 which agree with Andy's (the following will give errors if results don't agree):
 ```{r test}
-testthat::expect_equal(psivec94, pbs_calc$xt_nbr_index[94, ])
-testthat::expect_equal(weights94, pbs_calc$xt_nbr_weight[94, ], tolerance = 0.000001)
-testthat::expect_equal(X95est, pbs_calc$xt_forecast[95])
+testthat::expect_equal(psivec94, pbs_calc$neighbour_index[94, ])
+testthat::expect_equal(weights94, pbs_calc$neighbour_weight[94, ], tolerance = 0.000001)
+testthat::expect_equal(X95est, pbs_calc$X_forecast[95])
 ```
 However, `rEDM` gives
 ```{r rEDMninetyfive}
