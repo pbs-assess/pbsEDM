@@ -66,7 +66,7 @@ plot.pbsEDM = function(obj,
                                             # though last will have NA # not
                                             # incorporated fully yet
 
-  plot_time_series(values = obj$N$N_t,
+  plot_time_series(values = obj$N,  # $N_t,
                                         # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
                    ...)
@@ -75,7 +75,7 @@ plot.pbsEDM = function(obj,
                    X.or.N = "X",
                    ...)
 
-  plot_phase_2d(values = obj$N$N_t,
+  plot_phase_2d(values = obj$N,    # $N_t,
                 X.or.N = "N",
                 ...)
 
