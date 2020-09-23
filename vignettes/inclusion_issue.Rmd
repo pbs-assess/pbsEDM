@@ -125,9 +125,9 @@ pbs_calc <- pbsEDM(Nx_lags_orig,
                    lags = list(Xt = c(0:1))) # A tibble (contains lists)
 
 testthat::expect_equal(Nx_lags_orig$Xt,
-                       pbs_calc$xt_observed) # check the indexing is the same
+                       pbs_calc$X_observed) # check the indexing is the same
 
-pbs_pred <- pbs_calc$xt_forecast
+pbs_pred <- pbs_calc$X_observed
 
 plot(Nx_lags_orig$rEDM.pred,
      pbs_pred,

@@ -20,6 +20,8 @@ knitr::opts_chunk$set(
 library(pbsEDM)
 ```
 
+NB: Andy to update notation with new notation; code runs though.
+
 The tibble `Nx_lags_orig` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
 $N(t)$, which has column name `Nt`. See `?Nx_lags_orig` for full details, and
@@ -115,7 +117,7 @@ Now see how the forecast skill (correlation coefficient $\rho$) varies with $E$:
 plot_rho_Evec(E_results)
 ```
 
-Each `E_results` component corresponds to a value of $E$), for example
+Each `E_results` component corresponds to a value of $E$, for example
 ```{r usefulE}
 calc2$results
 E_results[[1]]$results
