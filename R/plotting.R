@@ -28,8 +28,8 @@ gets3dusr = function(s3dobject)
 ##' Plot data and results of an object of class `pbsEDM` as time series and
 ##' phase plots
 ##'
-##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
-##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
+##' Plots time series of `N_t` and `Y_t`, 2d phase plots of `N_t` vs `N_{t-1}`
+##' and `Y_t` vs `Y_{t-1}`, and 3d phase plot of `Y_t` vs `Y_{t-1}` vs `Y_{t-2}`.
 ##' See vignette "Analyse a simple time series".
 ##' Only working if `N$N_t` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
@@ -92,9 +92,9 @@ plot.pbsEDM = function(obj,
 ##'  same as for `plot.pbsEDM()` and sixth panel with predictions vs observation
 ##'  for each `E`
 ##'
-##' Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
-##' and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs
-##' `X(t-2)`. Sixth panel shows predictions vs observations for different values
+##' Plots time series of `N_t` and `Y_t`, 2d phase plots of `N_t` vs `N_{t-1}`
+##' and `Y_t` vs `Y_{t-1}`, and 3d phase plot of `Y_t` vs `Y_{t-1}` vs
+##' `Y_{t-2}`. Sixth panel shows predictions vs observations for different values
 ##' of `E`. See vignette "Analyse a simple time series" for full details.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
@@ -152,10 +152,10 @@ plot_rho_Evec <- function(E_res,
 }
 
 
-##' Plot predictions versus observed values of `X(t)` for list of `pbsEDM`
+##' Plot predictions versus observed values of `Y_t` for list of `pbsEDM`
 ##' objects, for various values of `E`
 ##'
-##' Plot the predicted versus observed values of `X(t)` for various values
+##' Plot the predicted versus observed values of `Y_t` for various values
 ##' of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
 ##'
 ##' @param E_res A list of `pbsEDM` objects
@@ -199,8 +199,8 @@ plot_pred_obs <- function(E_res,
   axes.range = c(- max.abs, max.abs)
 
   plot(0, 0,
-       xlab = expression("Observation of X"[t]),
-       ylab = expression("Prediction of X"[t]),
+       xlab = expression("Observation of Y"[t]),
+       ylab = expression("Prediction of Y"[t]),
        xlim = axes.range,
        ylim = axes.range,
        asp = 1,
@@ -212,7 +212,7 @@ plot_pred_obs <- function(E_res,
     points(E_res[[j]]$X_observed[1:(last.time.to.plot-1)],
            E_res[[j]]$X_forecast[1:(last.time.to.plot-1)],
            pch = 16, # could note the final one differently (but not a star,
-                     # since that's last N[t] not X[t])
+                     # since that's last N[t] not Y[t])
            col = E_cols[j])
     leg = c(leg,
             paste0("E=",
@@ -230,11 +230,11 @@ plot_pred_obs <- function(E_res,
   invisible()
 }
 
-##' Plot the observed time series as either `N(t)` or `X(t)`
+##' Plot the observed time series as either `N_t` or `Y_t`
 ##'
-##' First value must be `t=1`. For non-differenced values `N(t)`, shows the time
+##' First value must be `t=1`. For non-differenced values `N_t`, shows the time
 ##' series with the final values in a different colour, and a title showing the
-##' final time step. For first-differenced values `X(t)`, shows the time series
+##' final time step. For first-differenced values `Y_t`, shows the time series
 ##' of those, plus a one-dimensional phase plot.
 ##'
 ##' @param values vector of values to be plotted
@@ -243,7 +243,7 @@ plot_pred_obs <- function(E_res,
 ##' @param max_time maximum time value for the time axis
 ##' @param t.axis.range range of time axis
 ##' @param last.time.to.plot last time value of N[t] to use when plotting, so
-##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
+##'   final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])
 ##' @param late.num final number of `N[t]` time steps to plot in a different colour
 ##' @param late.col colour in which to plot final `late.num` time steps
 ##' @param early.col colour in which to plot earlier time step points
@@ -257,7 +257,7 @@ plot_pred_obs <- function(E_res,
 ##' @examples
 ##' \donttest{
 ##'   plot_time_series(NY_lags_example$N_t, X.or.N = "N")
-##'   plot_time_series(NY_lags_example$X_t, X.or.N = "X")
+##'   plot_time_series(NY_lags_example$Y_t, X.or.N = "X")
 ##' }
 plot_time_series <- function(values,
                              X.or.N,
@@ -320,7 +320,7 @@ plot_time_series <- function(values,
 
     plot(0, 0,
          xlab = expression("Time, t"),
-         ylab = expression("X"[t]),
+         ylab = expression("Y"[t]),
          xlim = c(XtLoc, max(t.axis.range)),
          ylim = Xt.axes.range,
          type = "n")                           # empty plot
@@ -330,7 +330,7 @@ plot_time_series <- function(values,
   iii = last.time.to.plot             # use iii since simpler
   if(iii > 1.5){
     segments(start:(iii-1),
-             values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "X_t"]),
+             values[start:(iii-1)],    # dplyr::pull(Nx.lags.use[start:(iii-1), "Y_t"]),
              (start+1):iii,
              values[(start+1):iii],
              col = col.plot.lines)      # lines() will not use vector col
@@ -353,19 +353,19 @@ plot_time_series <- function(values,
   invisible()
 }
 
-##' Plot 2d phase plot of `N(t)` vs `N(t-1)` or `X(t)` vs `X(t-1)`
+##' Plot 2d phase plot of `N_t` vs `N_{t-1}` or `Y_t` vs `Y_{t-1}`
 ##'
 ##' Shows the values in two-dimensional phase space (first differenced or not)
 ##'   with lag of 1. Cobwebbing shows how one point iterates to the next point
 ##'   in the time series.
 ##'
-##' @param values vector of `N(t)` or `X(t)` values
+##' @param values vector of `N_t` or `Y_t` values
 ##' @param X.or.N "N" if raw non-differenced data, "X" for differenced data
 ##' @param par.mar.phase `par(mar)` values
 ##' @param axis.range range of axes, if NA then calculated from values
 ##' @param start first time step to plot (currently must be 1)
 ##' @param last.time.to.plot last time value of N[t] to use when plotting, so
-##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
+##'   final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])
 ##' @param pt.type `type` value for `points()`
 ##' @param cobwebbing if TRUE then add cobwebbing lines to phase plot
 ##' @param late.col colour in which to plot final `late.num` time steps
@@ -378,7 +378,7 @@ plot_time_series <- function(values,
 ##' @examples
 ##' \donttest{
 ##'   plot_phase_2d(NY_lags_example$N_t, X.or.N = "N")
-##'   plot_phase_2d(NY_lags_example$X_t, X.or.N = "X")
+##'   plot_phase_2d(NY_lags_example$Y_t, X.or.N = "X")
 ##' }
 plot_phase_2d <- function(values,
                           X.or.N = "X",
@@ -396,7 +396,7 @@ plot_phase_2d <- function(values,
 
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
-                    max(values, na.rm = TRUE))   # for N_t or X_t
+                    max(values, na.rm = TRUE))   # for N_t or Y_t
   }
   if(is.null(last.time.to.plot)) {
     last.time.to.plot = length(values)
@@ -433,12 +433,12 @@ plot_phase_2d <- function(values,
     values.to.plot <- values[start:last.time.to.plot]
   } else {
     plot(0, 0,
-         xlab = expression("X"[t-1]),
-         ylab = expression("X"[t]),
+         xlab = expression("Y"[t-1]),
+         ylab = expression("Y"[t]),
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
-    values.to.plot <- values[start:(last.time.to.plot-1)] # Not use X[last..]
+    values.to.plot <- values[start:(last.time.to.plot-1)] # Not use Y[last..]
   }
 
   if(cobwebbing) abline(0, 1, col="darkgrey")
@@ -469,7 +469,7 @@ plot_phase_2d <- function(values,
         # dplyr::pull(Nx.lags.use[(start+1):iii, "N_tmin1"]),
         # dplyr::pull(Nx.lags.use[(start+1):iii, "N_t"]),
         # not fully tested:
-        pbsLag(values.to.plot)[-length(values.to.plot)],   # N(t-1)
+        pbsLag(values.to.plot)[-length(values.to.plot)],   # N_{t-1}
         values.to.plot[-length(values.to.plot)],
         pbsLag(values.to.plot)[-1],
         values.to.plot[-1],
@@ -493,7 +493,7 @@ plot_phase_2d <- function(values,
 #        {
 #          if(cobwebbing)
 #            {
-#               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "X_t"]), each = 2)
+#               xvals = rep( dplyr::pull(Nx.lags.use[start:iii, "Y_t"]), each = 2)
 #               xvals = xvals[-1]
 #               xvals = xvals[-length(xvals)]
 #               lenx = length(xvals)
@@ -504,17 +504,17 @@ plot_phase_2d <- function(values,
 #                        col = col.cobweb.lines)
 #           } else
 #           {  # Just join consecutive points with lines
-#               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "X_tmin1"]),
-#                        dplyr::pull(Nx.lags.use[start:(iii-1), "X_t"]),
-#                        dplyr::pull(Nx.lags.use[(start+1):iii, "X_tmin1"]),
-#                        dplyr::pull(Nx.lags.use[(start+1):iii, "X_t"]),
+#               segments(dplyr::pull(Nx.lags.use[start:(iii-1), "Y_tmin1"]),
+#                        dplyr::pull(Nx.lags.use[start:(iii-1), "Y_t"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Y_tmin1"]),
+#                        dplyr::pull(Nx.lags.use[(start+1):iii, "Y_t"]),
 #                        col = col.plot.lines)
 #            }
 #        }
 #      if(iii > 1.5)
 #        {
-#          points(dplyr::pull(Nx.lags.use[start:iii, "X_tmin1"]),
-#                 dplyr::pull(Nx.lags.use[start:iii, "X_t"]),
+#          points(dplyr::pull(Nx.lags.use[start:iii, "Y_tmin1"]),
+#                 dplyr::pull(Nx.lags.use[start:iii, "Y_t"]),
 #                 type = pt.type, pch = pch.plot,
 #                 col = col.plot)           # start row has NA's, get ignored
 #        }
@@ -522,7 +522,7 @@ plot_phase_2d <- function(values,
   invisible()
 }
 
-##' Plot 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`
+##' Plot 3d phase plot of `Y_t` vs `Y_{t-1}` vs `Y_{t-2}`
 ##'
 ##' Shows the first-differenced values in three-dimensional phase space, as
 ##'   points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
@@ -536,11 +536,11 @@ plot_phase_2d <- function(values,
 ##' @param y.lab y axis label
 ##' @param z.lab z axis label
 ##' @param last.time.to.plot last time value of N[t] to use when plotting, so
-##'   final X[t] used will be X[t-1] (since X[t] uses N[t+1])
+##'   final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])
 ##' @param axis.range range of axes, if NA then calculated from values; all
 ##'   three axes have the same range
-##' @param late.num final number of `N(t)` time steps to plot in a different
-##'   colour; not showing `N(t)` here but keeping consistency with other plots
+##' @param late.num final number of `N_t` time steps to plot in a different
+##'   colour; not showing `N_t` here but keeping consistency with other plots
 ##' @param pt.type `type` value for `points()`
 ##' @param late.col colour in which to plot final `late.num` time steps
 ##' @param early.col colour in which to plot earlier time step points
@@ -563,9 +563,9 @@ plot_phase_3d <- function(obj,
                           par.mgp.3d = c(3, 10, 0),
                           par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
                           par.mar.3d = c(3, 0, 0, 0),
-                          x.lab = expression("X"[t-2]),
-                          y.lab = expression("X"[t-1]),
-                          z.lab = expression("X"[t]),
+                          x.lab = expression("Y"[t-2]),
+                          y.lab = expression("Y"[t-1]),
+                          z.lab = expression("Y"[t]),
                           last.time.to.plot = NULL,
                           axis.range = NA,
                           late.num = 3,
@@ -632,22 +632,22 @@ plot_phase_3d <- function(obj,
                     col = axes.col)
       # Obtain x-y co-ords of points for segments:
 #**      proj.pts = scat$xyz.convert(dplyr::pull(Nx.lags.use[start:iii,
-#                                                            "X_tmin2"]),
+#                                                            "Y_tmin2"]),
 #                                    dplyr::pull(Nx.lags.use[start:iii,
-#                                                            "X_tmin1"]),
-  #                                    dplyr::pull(Nx.lags.use[start:iii, "X_t"]) )
+#                                                            "Y_tmin1"]),
+  #                                    dplyr::pull(Nx.lags.use[start:iii, "Y_t"]) )
   # maybe this is okay with NA's:
 #  proj.pts = scat$xyz.convert(pbsLag(obj$X_observed,
-#                                     2)[start:iii],  # "X_tmin2", index wrong?
+#                                     2)[start:iii],  # "Y_tmin2", index wrong?
 #                              pbsLag(obj$X_observed,
-#                                     1)[start:iii],  # "X_tmin1"
-  #                              pbsLag(obj$X_observed)[start:iii])  # "X_t"
+#                                     1)[start:iii],  # "Y_tmin1"
+  #                              pbsLag(obj$X_observed)[start:iii])  # "Y_t"
   if(all(!is.na(values.to.plot))){
     proj.pts = scat$xyz.convert(pbsLag(values.to.plot,
-                                       2),  # "X_tmin2"
+                                       2),  # "Y_tmin2"
                                 pbsLag(values.to.plot,
-                                       1),  # "X_tmin1"
-                                values.to.plot)  # "X_t"
+                                       1),  # "Y_tmin1"
+                                values.to.plot)  # "Y_t"
     if(last.time.to.plot > 3.5){
       segments(proj.pts$x[1:(last.time.to.plot - start)],
                proj.pts$y[1:(last.time.to.plot - start)],
@@ -659,10 +659,10 @@ plot_phase_3d <- function(obj,
     # The points
     if(last.time.to.plot > 2.5){
       scat$points3d(pbsLag(values.to.plot,
-                           2),  # "X_tmin2"
+                           2),  # "Y_tmin2"
                     pbsLag(values.to.plot,
-                           1),  # "X_tmin1"
-                    values.to.plot,  # "X_t"
+                           1),  # "Y_tmin1"
+                    values.to.plot,  # "Y_t"
                     type = pt.type,
                     pch = pch.plot,
                     col = col.plot)
@@ -674,7 +674,7 @@ plot_phase_3d <- function(obj,
   invisible()                   # else returns the above line
 }
 
-##' 2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM
+##' 2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM
 ##'
 ##' Highlights a point to be projected, its nearest `E+1` neighbours, and then
 ##' draw arrows to show where they go and so where the projection goes. Very
@@ -719,8 +719,8 @@ plot_phase_3d <- function(obj,
 ##' }
 plot_explain_edm <- function(obj,
                              tstar,
-                             x.lab = expression("X"[t-1]),
-                             y.lab = expression("X"[t]),
+                             x.lab = expression("Y"[t-1]),
+                             y.lab = expression("Y"[t]),
                              main = "All the points in lagged space",
                              tstar.col = "blue",
                              tstar.pch = 1,
@@ -740,7 +740,8 @@ plot_explain_edm <- function(obj,
   par(pty="s")
                              # TODO maybe. Andy NOT CHANGED THESE (yet) in notation update
   Xt <- obj$X[, "N_t_0"]      # Should change Nt in pbsEDM() as confusing. Luke
-                              # was still tweaking that.
+                              # was still tweaking that. Think here want Xt ->
+                              # Y_t, and Xtmin1 -> X_tmin1
   Xtmin1 <- obj$X[, "N_t_1"]
 
   Xt.max.abs = max(abs( range( c(Xt,
@@ -939,7 +940,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "and take weighted average of X(t) to be predicted value"),
+                     "and take weighted average of Y_t to be predicted value"),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
