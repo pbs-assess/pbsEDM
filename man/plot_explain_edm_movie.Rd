@@ -21,8 +21,8 @@ Use with gifski in .Rmd - see `analyse_simple_time_series` vignette.
 }
 \examples{
 \donttest{
-  aa <- pbsEDM(Nx_lags_orig,
-              lags = list(Nt = 0:1),
+  aa <- pbsEDM(NY_lags_example,
+              lags = list(N_t = 0:1),
               first_difference = TRUE)
   plot_explain_edm_movie(aa, tstar = 15) # will only show last panel; see
                                          # `analyse_simple_time_series`

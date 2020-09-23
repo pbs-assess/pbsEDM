@@ -22,18 +22,18 @@ steps in a different colour}
 Five panels in 2x3 or 3x2 format, in current plot environment
 }
 \description{
-Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
-and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`.
+Plots time series of `N_t` and `Y_t`, 2d phase plots of `N_t` vs `N_{t-1}`
+and `Y_t` vs `Y_{t-1}`, and 3d phase plot of `Y_t` vs `Y_{t-1}` vs `Y_{t-2}`.
 See vignette "Analyse a simple time series".
-Only working if `N$Nt` values are in there (needs another switch if
+Only working if `N$N_t` values are in there (needs another switch if
 not). And very likely only works for univariate time series for now, not
-pred-prey for example. TODO, update if necessary. Works on `Nx_lags_orig`
+pred-prey for example. TODO, update if necessary. Works on `NY_lags_example`
 but likely need to generalise.
 }
 \examples{
 \donttest{
- aa <- pbsEDM(Nx_lags_orig,
-              lags = list(Nt = 0:1),
+ aa <- pbsEDM(NY_lags_example,
+              lags = list(N_t = 0:1),
               first_difference = TRUE)
  plot(aa)
 }

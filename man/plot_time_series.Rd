@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_time_series}
 \alias{plot_time_series}
-\title{Plot the observed time series as either `N(t)` or `X(t)`}
+\title{Plot the observed time series as either `N_t` or `Y_t`}
 \usage{
 plot_time_series(
   values,
@@ -32,7 +32,7 @@ plot_time_series(
 \item{t.axis.range}{range of time axis}
 
 \item{last.time.to.plot}{last time value of N[t] to use when plotting, so
-final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 
 \item{late.num}{final number of `N[t]` time steps to plot in a different colour}
 
@@ -52,15 +52,15 @@ final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
 
 }
 \description{
-First value must be `t=1`. For non-differenced values `N(t)`, shows the time
+First value must be `t=1`. For non-differenced values `N_t`, shows the time
 series with the final values in a different colour, and a title showing the
-final time step. For first-differenced values `X(t)`, shows the time series
+final time step. For first-differenced values `Y_t`, shows the time series
 of those, plus a one-dimensional phase plot.
 }
 \examples{
 \donttest{
-  plot_time_series(Nx_lags_orig$Nt, X.or.N = "N")
-  plot_time_series(Nx_lags_orig$Xt, X.or.N = "X")
+  plot_time_series(NY_lags_example$N_t, X.or.N = "N")
+  plot_time_series(NY_lags_example$Y_t, X.or.N = "X")
 }
 }
 \author{

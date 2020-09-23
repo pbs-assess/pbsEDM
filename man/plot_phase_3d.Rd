@@ -2,16 +2,16 @@
 % Please edit documentation in R/plotting.R
 \name{plot_phase_3d}
 \alias{plot_phase_3d}
-\title{Plot 3d phase plot of `X(t)` vs `X(t-1)` vs `X(t-2)`}
+\title{Plot 3d phase plot of `Y_t` vs `Y_{t-1}` vs `Y_{t-2}`}
 \usage{
 plot_phase_3d(
   obj,
   par.mgp.3d = c(3, 10, 0),
   par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
   par.mar.3d = c(3, 0, 0, 0),
-  x.lab = expression("X"[t - 2]),
-  y.lab = expression("X"[t - 1]),
-  z.lab = expression("X"[t]),
+  x.lab = expression("Y"[t - 2]),
+  y.lab = expression("Y"[t - 1]),
+  z.lab = expression("Y"[t]),
   last.time.to.plot = NULL,
   axis.range = NA,
   late.num = 3,
@@ -40,13 +40,13 @@ plot_phase_3d(
 \item{z.lab}{z axis label}
 
 \item{last.time.to.plot}{last time value of N[t] to use when plotting, so
-final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 
 \item{axis.range}{range of axes, if NA then calculated from values; all
 three axes have the same range}
 
-\item{late.num}{final number of `N(t)` time steps to plot in a different
-colour; not showing `N(t)` here but keeping consistency with other plots}
+\item{late.num}{final number of `N_t` time steps to plot in a different
+colour; not showing `N_t` here but keeping consistency with other plots}
 
 \item{pt.type}{`type` value for `points()`}
 
@@ -72,8 +72,8 @@ Shows the first-differenced values in three-dimensional phase space, as
 }
 \examples{
 \donttest{
- aa <- pbsEDM(Nx_lags_orig,
-              lags = list(Nt = 0:1),
+ aa <- pbsEDM(NY_lags_example,
+              lags = list(N_t = 0:1),
               first_difference = TRUE)
   plot_phase_3d(aa)
 }

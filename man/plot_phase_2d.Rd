@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_phase_2d}
 \alias{plot_phase_2d}
-\title{Plot 2d phase plot of `N(t)` vs `N(t-1)` or `X(t)` vs `X(t-1)`}
+\title{Plot 2d phase plot of `N_t` vs `N_{t-1}` or `Y_t` vs `Y_{t-1}`}
 \usage{
 plot_phase_2d(
   values,
@@ -20,7 +20,7 @@ plot_phase_2d(
 )
 }
 \arguments{
-\item{values}{vector of `N(t)` or `X(t)` values}
+\item{values}{vector of `N_t` or `Y_t` values}
 
 \item{X.or.N}{"N" if raw non-differenced data, "X" for differenced data}
 
@@ -31,7 +31,7 @@ plot_phase_2d(
 \item{start}{first time step to plot (currently must be 1)}
 
 \item{last.time.to.plot}{last time value of N[t] to use when plotting, so
-final X[t] used will be X[t-1] (since X[t] uses N[t+1])}
+final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 
 \item{pt.type}{`type` value for `points()`}
 
@@ -55,8 +55,8 @@ Shows the values in two-dimensional phase space (first differenced or not)
 }
 \examples{
 \donttest{
-  plot_phase_2d(Nx_lags_orig$Nt, X.or.N = "N")
-  plot_phase_2d(Nx_lags_orig$Xt, X.or.N = "X")
+  plot_phase_2d(NY_lags_example$N_t, X.or.N = "N")
+  plot_phase_2d(NY_lags_example$Y_t, X.or.N = "X")
 }
 }
 \author{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_pred_obs}
 \alias{plot_pred_obs}
-\title{Plot predictions versus observed values of `X(t)` for list of `pbsEDM`
+\title{Plot predictions versus observed values of `Y_t` for list of `pbsEDM`
 objects, for various values of `E`}
 \usage{
 plot_pred_obs(
@@ -19,18 +19,18 @@ plot_pred_obs(
 
 \item{E_cols}{Vector of colours, one for each value of E}
 
-\item{last.time.to.plot}{Last time value of `N[t]` to use when plotting.}
+\item{last.time.to.plot}{Last time value of `N_t` to use when plotting.}
 }
 \value{
 Figure in the current plot enivironment
 }
 \description{
-Plot the predicted versus observed values of `X(t)` for various values
+Plot the predicted versus observed values of `Y_t` for various values
 of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
 }
 \examples{
 \donttest{
-  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+  aa <- pbsEDM_Evec(NY_lags_example$N_t)
   plot_pred_obs(aa)
 }
 }

@@ -17,14 +17,14 @@ plot_pbsEDM_Evec(E_res, ...)
 Six-panel figure in current plot environment
 }
 \description{
-Plots time series of `N(t)` and `X(t)`, 2d phase plots of `N(t)` vs `N(t-1)`
-and `X(t)` vs `X(t-1)`, and 3d phase plot of `X(t)` vs `X(t-1)` vs
-`X(t-2)`. Sixth panel shows predictions vs observations for different values
+Plots time series of `N_t` and `Y_t`, 2d phase plots of `N_t` vs `N_{t-1}`
+and `Y_t` vs `Y_{t-1}`, and 3d phase plot of `Y_t` vs `Y_{t-1}` vs
+`Y_{t-2}`. Sixth panel shows predictions vs observations for different values
 of `E`. See vignette "Analyse a simple time series" for full details.
 }
 \examples{
 \donttest{
-  aa_Evec <- pbsEDM_Evec(Nx_lags_orig$Nt)
+  aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
   plot_pbsEDM_Evec(aa_Evec)
 }
 }

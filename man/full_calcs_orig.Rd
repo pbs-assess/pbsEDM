@@ -4,7 +4,7 @@
 \name{full_calcs_orig}
 \alias{full_calcs_orig}
 \title{Full results from a simple simulation model analysed using Andy's
-original independent code}
+original independent code (still has `Xt` notation not `Y_t`)}
 \format{
 List of 100 tibbles, each component `[[tstar]]` for each
   `tstar`. Each tibble is 100x5, and contains the original `Xt` and

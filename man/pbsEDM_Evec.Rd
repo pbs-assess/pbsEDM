@@ -4,11 +4,11 @@
 \alias{pbsEDM_Evec}
 \title{Do the `pbsEDM()` calculation for vector of `E` values}
 \usage{
-pbsEDM_Evec(Nt, E_vec = 1:10, ...)
+pbsEDM_Evec(N_t, E_vec = 1:10, ...)
 }
 \arguments{
-\item{Nt}{[vector] Vector of non-differenced values N(t), with time assumed
-to be `1:length(Nt)`.}
+\item{N_t}{[vector] Vector of non-differenced values $N_t$, with time assumed
+to be `1:length(N_t)`.}
 
 \item{E_vec}{The vector of embedding dimensions to try.}
 
@@ -19,12 +19,12 @@ List of `pbsEDM` lists, each main component corresponds to a value
   of `E`, given by `results$E`
 }
 \description{
-Only works for one variable, non-differenced N(t), for now, as I haven't thought how to incorporate
+Only works for one variable, non-differenced $N_t$, for now, as I haven't thought how to incorporate
 the lags variable properly yet.
 }
 \examples{
 \donttest{
-  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+  aa <- pbsEDM_Evec(NY_lags_example$N_t)
 }
 }
 \author{

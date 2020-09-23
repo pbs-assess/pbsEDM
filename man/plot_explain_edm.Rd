@@ -2,13 +2,13 @@
 % Please edit documentation in R/plotting.R
 \name{plot_explain_edm}
 \alias{plot_explain_edm}
-\title{2-d phase plot of x(t) v x(t-1) with coloured points to explain EDM}
+\title{2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM}
 \usage{
 plot_explain_edm(
   obj,
   tstar,
-  x.lab = expression("X"[t - 1]),
-  y.lab = expression("X"[t]),
+  x.lab = expression("Y"[t - 1]),
+  y.lab = expression("Y"[t]),
   main = "All the points in lagged space",
   tstar.col = "blue",
   tstar.pch = 1,
@@ -46,7 +46,7 @@ projection from}
 \item{pred.plot}{if TRUE then highlight forecasted value `x(t*+1)`}
 
 \item{pred.rEDM}{if TRUE then show predictions from `rEDM` for
-`Nx_lags_orig` saved values; obj must be `Nx_lags_orig` TODO do a test as
+`NY_lags_example` saved values; obj must be `NY_lags_example` TODO do a test as
 may not work}
 
 \item{true.val}{if TRUE then plot the true value of `x(t*+1)`}
@@ -65,8 +65,8 @@ times using TODO to make a movie. Type `plot_explain_edm_movie` for example call
 }
 \examples{
 \donttest{
-  aa <- pbsEDM(Nx_lags_orig,
-              lags = list(Nt = 0:1),
+  aa <- pbsEDM(NY_lags_example,
+              lags = list(N_t = 0:1),
               first_difference = TRUE)
   plot_explain_edm(aa,
                    tstar = 15,

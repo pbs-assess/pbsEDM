@@ -19,7 +19,7 @@ Plot correlation coefficient against `E`.
 }
 \examples{
 \donttest{
-  aa <- pbsEDM_Evec(Nx_lags_orig$Nt)
+  aa <- pbsEDM_Evec(NY_lags_example$N_t)
   plot_rho_Evec(aa)
 }
 }
