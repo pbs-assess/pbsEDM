@@ -87,11 +87,15 @@ abundance from its first two lags, and from the unlagged and first lags of
 N <- matrix(rep(1:30, 5), ncol = 5)
 colnames(N) <- c("A", "B", "C", "D", "E")
 lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
-m1 <- pbsEDM(N, lags)
+m1 <- pbsSmap(N, lags)
 
 N <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
-m2 <- pbsSMAP(N, lags)
+m2 <- pbsSmap(N, lags)
+
+N <- data.frame(x = simple_ts)
+lags <- list(x = 0:1)
+m3 <- pbsSmap(N, lags, first_difference = TRUE)
 
 }
 \author{
