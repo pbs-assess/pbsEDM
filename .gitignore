@@ -9,6 +9,7 @@
 .Rapp.history
 *.txt
 *.html
+vignettes/*.R
 
 # Mac OSX
 .DS_Store
