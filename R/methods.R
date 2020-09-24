@@ -1,62 +1,65 @@
 #' Forecast via Empirical Dynamic Modelling
 #'
-#' @param N [data.frame()] A data frame with named columns for the response
-#' variable and covariate time series
-#' @param lags [list()] A named list of integer vectors specifying the lags to
-#' use for each time series in \code{N}
-#' @param p [integer()] The forecast distance
-#' @param first_difference [logical()] First difference each time series?
-#' @param centre_and_scale [logical()] Centre and scale each time series?
+#' @description Perform short-term nonlinear forecasting via Empirical Dynamic
+#'   Modelling.
 #'
+#' @param N A data frame with named columns for the response variable and
+#'   covariate time series.
+#' @param lags A list of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param p The integer forecast distance.
+#' @param first_difference Logical. First-difference each time series?
+#' @param centre_and_scale Logical. Centre and scale each time series?
+#' @param verbose Logical. Print progress?
+#' 
 #' @details The name of the first element in \code{lags} must match the name of
-#' the response variable in \code{N}. Unlagged time series, including the
-#' response variable, must be specified by a zero in the corresponding named
-#' vector in \code{lags}. For example, given a \code{data.frame} with named
-#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator}
-#' can be specified as the unlagged response variable by
+#'   the response variable in \code{N}. Unlagged time series, including the
+#'   response variable, must be specified by a zero in the corresponding named
+#'   vector in \code{lags}. For example, given a \code{data.frame} with named
+#'   columns \code{Predator}, \code{Prey} and \code{Temperature},
+#'   \code{Predator} can be specified as the unlagged response variable by
 #'
-#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'   \code{lags = list(Predator = c(0, ...), ...)}.
 #'
-#' This places the unlagged time series of \code{Predator} abundance along the
-#' first axis of the reconstructed state space. To predict \code{Predator}
-#' abundance from its first two lags, and from the unlagged and first lags of
-#' \code{Prey} and \code{Temperature}, \code{lags} can be specified as
+#'   This places the unlagged time series of \code{Predator} abundance (or its
+#'   optionally first-differenced and/or centred and scaled counterpart) along
+#'   the first axis of the reconstructed state space. To predict \code{Predator}
+#'   abundance from its first two lags, and from the unlagged and first lags of
+#'   \code{Prey} and \code{Temperature}, \code{lags} can be specified as
 #'
-#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
+#'   \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
 #'
+#'   This example generalizes to arbitrary (possibly non-consecutive) lags of
+#'   arbitrarily many covariates (up to limitations of time series length).
 #'
 #' @return A list of class \code{pbsEDM} containing:
 #'
-#' \itemize{
-#'   \item \code{N} [matrix()] Response variable and unlagged covariates as columns
-#'   \item \code{N_observed} [vector()] Response variable time series
-#'   \item \code{N_forecast} [vector()] Forecast of response variable time series
-#'   \item \code{X} [matrix()] Unlagged and lagged state variables as columns
-#'   \item \code{X_observed} [vector()] Transformed response variable time series
-#'   \item \code{X_forecast} [vector()] Forecast of transformed response variable
-#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of
-#'   points in state space (pairs of rows in \code{X})
-#'   \item \code{neighbour_distance} [matrix()] Distance by focal time (row) and rank
-#'   (column)
-#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{lags} [list()] A named list of integer vectors specifying the lags to
-#'   use for each time series in \code{N}
-#'   \item \code{p} [integer()] The forecast distance
-#'   \item \code{first_difference} [logical()] First difference each time series?
-#'   \item \code{centre_and_scale} [logical()] Centre and scale each time series?
-#'   \item \code{results} [data.frame()] A summary of forecast accuracy
-#' }
+#'   \itemize{ \item \code{N} [matrix()] Response variable and unlagged
+#'   covariates as columns \item \code{N_observed} [vector()] Response variable
+#'   time series \item \code{N_forecast} [vector()] Forecast of response
+#'   variable time series \item \code{X} [matrix()] Unlagged and lagged state
+#'   variables as columns \item \code{X_observed} [vector()] Transformed
+#'   response variable time series \item \code{X_forecast} [vector()] Forecast
+#'   of transformed response variable \item \code{X_distance} [matrix()] Square
+#'   distance \code{matrix} between pairs of points in state space (pairs of
+#'   rows in \code{X}) \item \code{neighbour_distance} [matrix()] Distance by
+#'   focal time (row) and rank (column) \item \code{neighbour_index} [matrix()]
+#'   Neighbour index by focal time (row) and distance rank (column) \item
+#'   \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
+#'   distance rank (column) \item \code{neighbour_weight} [matrix()] Neighbour
+#'   weight by focal time (row) and distance rank (column) \item
+#'   \code{projected_index} [matrix()] Projected neighbour index by projected
+#'   time (row) and neighbour distance rank (column) \item
+#'   \code{projected_value} [matrix()] Projected neighbour value by projected
+#'   time (row) and neighbour distance rank (column) \item
+#'   \code{projected_weight} [matrix()] Projected neighbour weight by projected
+#'   time (row) and neighbour distance rank (column) \item \code{lags} [list()]
+#'   A named list of integer vectors specifying the lags to use for each time
+#'   series in \code{N} \item \code{p} [integer()] The forecast distance \item
+#'   \code{first_difference} [logical()] First difference each time series?
+#'   \item \code{centre_and_scale} [logical()] Centre and scale each time
+#'   series? \item \code{results} [data.frame()] A summary of forecast accuracy
+#'   }
 #'
 #' @author Luke A. Rogers
 #' @export
@@ -65,27 +68,30 @@
 #' N <- matrix(rep(1:30, 5), ncol = 5)
 #' colnames(N) <- c("A", "B", "C", "D", "E")
 #' lags <- list(A = c(0, 1, 2), B = c(0, 1), C = c(0, 1, 2))
-#' m1 <- pbsEDM(N, lags)
+#' m1 <- pbsEDM(N, lags, verbose = TRUE)
 #'
 #' N <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
-#' m2 <- pbsEDM(N, lags)
+#' m2 <- pbsEDM(N, lags, verbose = TRUE)
 #'
 #' N <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
-#' m3 <- pbsEDM(N, lags, first_difference = TRUE)
-#'
+#' m3 <- pbsEDM(N, lags, first_difference = TRUE, verbose = TRUE)
+#' 
 pbsEDM <- function (N,
                     lags,
                     p = 1L,
                     first_difference = FALSE,
-                    centre_and_scale = FALSE) {
+                    centre_and_scale = FALSE,
+                    verbose = FALSE) {
 
   #----------------- Check arguments ------------------------------------------#
-  # TODO: Update
+  
   stopifnot(
-    is.numeric(N) || is.matrix(N) || is.data.frame(N),
+    is.matrix(N) || is.data.frame(N),
     is.list(lags),
+    all(is.element(names(lags), colnames(N))),
+    lags[[1]][1] == 0L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L
@@ -97,35 +103,37 @@ pbsEDM <- function (N,
   N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
   colnames(N) <- names(lags) # TODO: Fails test without this - why?
   
-  #----------------- Define D -------------------------------------------------#
+  #----------------- Define Z -------------------------------------------------#
   
   if (first_difference) {
-    # D <- rbind(apply(N, 2, diff), NA_real_)
-    D <- diff(N)
+    # Z <- rbind(apply(N, 2, diff), NA_real_)
+    Z <- diff(N)
   } else {
-    D <- N
+    Z <- N
   }
-  D_means <- apply(D, 2, mean, na.rm = TRUE)
-  D_sds <- apply(D, 2, sd, na.rm = TRUE)
+  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
   
   #----------------- Define Y -------------------------------------------------#
   
   if (centre_and_scale) {
-    Y <- t((t(D) - D_means) / D_sds) # TODO: Print warning if divides by zero
+    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
   } else {
-    Y <- D
+    Y <- Z
   }
   
   #----------------- Define X -------------------------------------------------#
   
+  if (verbose) cat("\ndefining state space X\n")
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
   X <- pbsLag(Y[, lags_name], lags_size)
   colnames(X) <- paste0(lags_name, "_", lags_size)
 
   #----------------- Create distance matrix -----------------------------------#
-  # TODO: Update notation from here onward
   
+  if (verbose) cat("defining neighbour distances\n")
+  # TODO: Update notation from here onward
   # xt_dist[i, j] is the distance between row vectors i and j in X
   xt_lags_na <- X
   xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
@@ -133,6 +141,7 @@ pbsEDM <- function (N,
 
   #----------------- Exclude elements from the distance matrix ----------------#
 
+  if (verbose) cat("excluding disallowed neighbours\n")
   # Exclude the X focal row vector
   diag(xt_dist) <- NA
 
@@ -161,6 +170,7 @@ pbsEDM <- function (N,
 
   #----------------- Create neighbour index matrix ----------------------------#
 
+  if (verbose) cat("defining nearest neighbours\n")
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
   num_nbrs <- length(lags_size) + 1
   seq_nbrs <- seq_len(num_nbrs)
@@ -176,6 +186,7 @@ pbsEDM <- function (N,
 
   #----------------- Project neighbour matrices -------------------------------#
 
+  if (verbose) cat("projecting nearest neighbours forward by p\n")
   prj_inds <- pbsLag(nbr_inds, p) + p
   prj_vals <- t(apply(prj_inds,
                       1,
@@ -190,23 +201,25 @@ pbsEDM <- function (N,
   
   #----------------- Compute X_forecast ---------------------------------------#
 
+  if (verbose) cat("computing forecasts of X\n")
   X_forecast <- as.vector(rowSums(prj_vals * prj_wgts) / rowSums(prj_wgts))
   
-  #----------------- Compute D_forecast ---------------------------------------#
+  #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
-    D_forecast <- D_means[1] + X_forecast * D_sds[1] # X_forecast == Y_forecast
+    Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
-    D_forecast <- X_forecast
+    Z_forecast <- X_forecast
   }
   
   #----------------- Compute N_forecast ---------------------------------------#
   
+  if (verbose) cat("computing forecasts of N\n")
   if (first_difference) {
-    # N_fore_{t} = N_obs_{t-1} + D_fore_{t-1}
-    N_forecast <- pbsLag(N_observed) + pbsLag(c(D_forecast, NA_real_))
+    # N_fore_{t} = N_obs_{t-1} + Z_fore_{t-1}
+    N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
   } else {
-    N_forecast <- D_forecast
+    N_forecast <- Z_forecast
   }
   
   #----------------- Prepare return values ------------------------------------#
@@ -225,11 +238,18 @@ pbsEDM <- function (N,
   
   #----------------- Return a list of class pbsEDM ----------------------------#
 
+  if (verbose) cat("returning list of class pbsEDM\n")
   structure(
     list(
       N = N,
       N_observed = N_observed,
       N_forecast = N_forecast,
+      Z = Z,
+      Z_observed = Z[, 1],
+      Z_forecast = Z_forecast,
+      Y = Y,
+      Y_observed = Y[, 1],
+      Y_forecast = X_forecast,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
@@ -284,64 +304,67 @@ pbsEDM_Evec <- function(N_t,
 
 #' Forecast via S-Mapping
 #'
-#' @param N [data.frame()] A data frame with named columns for the response
-#' variable and covariate time series
-#' @param lags [list()] A named list of integer vectors specifying the lags to
-#' use for each time series in \code{N}
-#' @param theta [numeric()] Local weighting parameter
-#' @param p [integer()] The forecast distance
-#' @param first_difference [logical()] First difference each time series?
-#' @param centre_and_scale [logical()] Centre and scale each time series?
+#' @description Perform short-term nonlinear forecasting via S-mapping..
+#'
+#' @param N A data frame with named columns for the response variable and
+#'   covariate time series.
+#' @param lags A list of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param theta The numeric local weighting parameter.
+#' @param p The integer forecast distance.
+#' @param first_difference Logical. First-difference each time series?
+#' @param centre_and_scale Logical. Centre and scale each time series?
+#' @param verbose Logical. Print progress?
 #'
 #' @details The name of the first element in \code{lags} must match the name of
-#' the response variable in \code{N}. Unlagged time series, including the
-#' response variable, must be specified by a zero in the corresponding named
-#' vector in \code{lags}. For example, given a \code{data.frame} with named
-#' columns \code{Predator}, \code{Prey} and \code{Temperature}, \code{Predator}
-#' can be specified as the unlagged response variable by
+#'   the response variable in \code{N}. Unlagged time series, including the
+#'   response variable, must be specified by a zero in the corresponding named
+#'   vector in \code{lags}. For example, given a \code{data.frame} with named
+#'   columns \code{Predator}, \code{Prey} and \code{Temperature},
+#'   \code{Predator} can be specified as the unlagged response variable by
 #'
-#' \code{lags = list(Predator = c(0, ...), ...)}.
+#'   \code{lags = list(Predator = c(0, ...), ...)}.
 #'
-#' This places the unlagged time series of \code{Predator} abundance along the
-#' first axis of the reconstructed state space. To predict \code{Predator}
-#' abundance from its first two lags, and from the unlagged and first lags of
-#' \code{Prey} and \code{Temperature}, \code{lags} can be specified as
+#'   This places the unlagged time series of \code{Predator} abundance (or its
+#'   optionally first-differenced and/or centred and scaled counterpart) along
+#'   the first axis of the reconstructed state space. To predict \code{Predator}
+#'   abundance from its first two lags, and from the unlagged and first lags of
+#'   \code{Prey} and \code{Temperature}, \code{lags} can be specified as
 #'
-#' \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
+#'   \code{lags = list(Predator = c(0:2), Prey = c(0:1), Temperature = c(0:1))}.
+#'
+#'   This example generalizes to arbitrary (possibly non-consecutive) lags of
+#'   arbitrarily many covariates (up to limitations of time series length).
 #'
 #' @return A list of class \code{pbsEDM} containing:
 #'
-#' \itemize{
-#'   \item \code{N} [matrix()] Response variable and unlagged covariates as columns
-#'   \item \code{N_observed} [vector()] Response variable time series
-#'   \item \code{N_forecast} [vector()] Forecast of response variable time series
-#'   \item \code{X} [matrix()] Unlagged and lagged state variables as columns
-#'   \item \code{X_observed} [vector()] Transformed response variable time series
-#'   \item \code{X_forecast} [vector()] Forecast of transformed response variable
-#'   \item \code{X_distance} [matrix()] Square distance \code{matrix} between pairs of
-#'   points in state space (pairs of rows in \code{X})
-#'   \item \code{neighbour_distance} [matrix()] Distance by focal time (row) and rank
-#'   (column)
-#'   \item \code{neighbour_index} [matrix()] Neighbour index by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row) and
-#'   distance rank (column)
-#'   \item \code{projected_index} [matrix()] Projected neighbour index by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_value} [matrix()] Projected neighbour value by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{projected_weight} [matrix()] Projected neighbour weight by projected
-#'   time (row) and neighbour distance rank (column)
-#'   \item \code{lags} [list()] A named list of integer vectors specifying the lags to
-#'   use for each time series in \code{N}
-#'   \item \code{theta} [numeric()] Local weighting parameter
-#'   \item \code{p} [integer()] The forecast distance
-#'   \item \code{first_difference} [logical()] First difference each time series?
-#'   \item \code{centre_and_scale} [logical()] Centre and scale each time series?
-#'   \item \code{results} [data.frame()] A summary of forecast accuracy
-#' }
+#'   \itemize{ \item \code{N} [matrix()] Response variable and unlagged
+#'   covariates as columns \item \code{N_observed} [vector()] Response variable
+#'   time series \item \code{N_forecast} [vector()] Forecast of response
+#'   variable time series \item \code{X} [matrix()] Unlagged and lagged state
+#'   variables as columns \item \code{X_observed} [vector()] Transformed
+#'   response variable time series \item \code{X_forecast} [vector()] Forecast
+#'   of transformed response variable \item \code{X_distance} [matrix()] Square
+#'   distance \code{matrix} between pairs of points in state space (pairs of
+#'   rows in \code{X}) \item \code{neighbour_distance} [matrix()] Distance by
+#'   focal time (row) and rank (column) \item \code{neighbour_index} [matrix()]
+#'   Neighbour index by focal time (row) and distance rank (column) \item
+#'   \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
+#'   distance rank (column) \item \code{neighbour_weight} [matrix()] Neighbour
+#'   weight by focal time (row) and distance rank (column) \item
+#'   \code{projected_index} [matrix()] Projected neighbour index by projected
+#'   time (row) and neighbour distance rank (column) \item
+#'   \code{projected_value} [matrix()] Projected neighbour value by projected
+#'   time (row) and neighbour distance rank (column) \item
+#'   \code{projected_weight} [matrix()] Projected neighbour weight by projected
+#'   time (row) and neighbour distance rank (column) \item \code{lags} [list()]
+#'   A named list of integer vectors specifying the lags to use for each time
+#'   series in \code{N} \item \code{theta} [numeric()] Local weighting parameter
+#'   \item \code{p} [integer()] The forecast distance \item
+#'   \code{first_difference} [logical()] First difference each time series?
+#'   \item \code{centre_and_scale} [logical()] Centre and scale each time
+#'   series? \item \code{results} [data.frame()] A summary of forecast accuracy
+#'   }
 #'
 #'
 #' @author Luke A. Rogers
@@ -356,28 +379,31 @@ pbsEDM_Evec <- function(N_t,
 #' N <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
 #' m2 <- pbsSmap(N, lags)
-#' 
+#'
 #' N <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
 #' m3 <- pbsSmap(N, lags, first_difference = TRUE)
-#'
+#' 
 pbsSmap <- function (N,
                      lags,
                      theta = 0,
                      p = 1L,
                      first_difference = FALSE,
-                     centre_and_scale = FALSE) {
+                     centre_and_scale = FALSE,
+                     verbose = FALSE) {
 
   #----------------- Check arguments ------------------------------------------#
 
   stopifnot(
-    is.numeric(N) || is.matrix(N) || is.data.frame(N),
+    is.matrix(N) || is.data.frame(N),
     is.list(lags),
+    all(is.element(names(lags), colnames(N))),
+    lags[[1]][1] == 0L,
     is.numeric(theta) && length(theta) == 1L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L
-  )
+  )  
 
   #----------------- Redefine N -----------------------------------------------#
   
@@ -385,33 +411,36 @@ pbsSmap <- function (N,
   N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
   colnames(N) <- names(lags) # TODO: Fails test without this - why?
   
-  #----------------- Define D -------------------------------------------------#
+  #----------------- Define Z -------------------------------------------------#
   
   if (first_difference) {
-    # D <- rbind(apply(N, 2, diff), NA_real_)
-    D <- diff(N)
+    # Z <- rbind(apply(N, 2, diff), NA_real_)
+    Z <- diff(N)
   } else {
-    D <- N
+    Z <- N
   }
-  D_means <- apply(D, 2, mean, na.rm = TRUE)
-  D_sds <- apply(D, 2, sd, na.rm = TRUE)
+  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
   
   #----------------- Define Y -------------------------------------------------#
   
   if (centre_and_scale) {
-    Y <- t((t(D) - D_means) / D_sds) # TODO: Print warning if divides by zero
+    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
   } else {
-    Y <- D
+    Y <- Z
   }
   
   #----------------- Define X -------------------------------------------------#
   
+  if (verbose) cat("\ndefining state space X\n")
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
   X <- pbsLag(Y[, lags_name], lags_size)
   colnames(X) <- paste0(lags_name, "_", lags_size)
   
   #----------------- Create distance matrix -----------------------------------#
+  
+  if (verbose) cat("defining neighbour distances\n")
   # TODO: Update notation from here onward
   
   # xt_dist[i, j] is the distance between row vectors i and j in X
@@ -421,6 +450,7 @@ pbsSmap <- function (N,
 
   #----------------- Exclude elements from the distance matrix ----------------#
 
+  if (verbose) cat("excluding disallowed neighbours\n")
   # Exclude the X focal row vector
   diag(xt_dist) <- NA
 
@@ -449,6 +479,7 @@ pbsSmap <- function (N,
 
   #----------------- Create neighbour index matrix ----------------------------#
 
+  if (verbose) cat("defining neighbours\n")
   nbr_dist <- t(apply(xt_dist, 1, sort, na.last = TRUE))
   nbr_inds <- t(apply(xt_dist, 1, order))
   nbr_inds[which(is.na(nbr_dist))] <- NA
@@ -465,6 +496,7 @@ pbsSmap <- function (N,
 
   #----------------- Project neighbour matrices -------------------------------#
 
+  if (verbose) cat("projecting nearest neighbours forward by p\n")
   prj_inds <- pbsLag(nbr_inds, p) + p
   prj_vals <- t(apply(prj_inds,
                       1,
@@ -538,27 +570,29 @@ pbsSmap <- function (N,
   
   #----------------- Compute X_forecast ---------------------------------------#
   
+  if (verbose) cat("computing forecasts of X\n")
   X_forecast <- sapply(X = seq_rows,
                        FUN = function(X, l, m) sum(m[, X] * l[X, ]),
                        m = c_matrix,
                        l = prj_lags)
   X_forecast[is.nan(X_forecast)] <- NA_real_
     
-  #----------------- Compute D_forecast ---------------------------------------#
+  #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
-    D_forecast <- D_means[1] + X_forecast * D_sds[1] # X_forecast == Y_forecast
+    Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
-    D_forecast <- X_forecast
+    Z_forecast <- X_forecast
   }
   
   #----------------- Compute N_forecast ---------------------------------------#
   
+  if (verbose) cat("computing forecasts of N\n")
   if (first_difference) {
-    # N_fore_{t} = N_obs_{t-1} + D_fore_{t-1}
-    N_forecast <- pbsLag(N_observed) + pbsLag(c(D_forecast, NA_real_))
+    # N_fore_{t} = N_obs_{t-1} + Z_fore_{t-1}
+    N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
   } else {
-    N_forecast <- D_forecast
+    N_forecast <- Z_forecast
   }
   
   #----------------- Prepare return values ------------------------------------#
@@ -578,11 +612,18 @@ pbsSmap <- function (N,
   
   #----------------- Return a list --------------------------------------------#
 
+  if (verbose) cat("returning list of class pbsEDM\n")
   structure(
     list(
       N = N,
       N_observed = N_observed,
       N_forecast = N_forecast,
+      Z = Z,
+      Z_observed = Z[, 1],
+      Z_forecast = Z_forecast,
+      Y = Y,
+      Y_observed = Y[, 1],
+      Y_forecast = X_forecast,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
