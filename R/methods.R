@@ -101,12 +101,11 @@ pbsEDM <- function (N,
     
   N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
   N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags) # TODO: Fails test without this - why?
+  colnames(N) <- names(lags)
   
   #----------------- Define Z -------------------------------------------------#
   
   if (first_difference) {
-    # Z <- rbind(apply(N, 2, diff), NA_real_)
     Z <- diff(N)
   } else {
     Z <- N
@@ -127,46 +126,42 @@ pbsEDM <- function (N,
   if (verbose) cat("\ndefining state space X\n")
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
+  # Rows in X are points in the reconstructed state space
   X <- pbsLag(Y[, lags_name], lags_size)
   colnames(X) <- paste0(lags_name, "_", lags_size)
 
   #----------------- Create distance matrix -----------------------------------#
   
   if (verbose) cat("defining neighbour distances\n")
-  # TODO: Update notation from here onward
-  # xt_dist[i, j] is the distance between row vectors i and j in X
-  xt_lags_na <- X
-  xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
-  xt_dist <- as.matrix(dist(xt_lags_na))
+  # X_distance[i, j] is the distance between row vectors i and j in X
+  X_distance <- as.matrix(dist(X)) # Distance for NA rows in X corrected below
 
-  #----------------- Exclude elements from the distance matrix ----------------#
+  #----------------- Exclude disallowed neighbours ----------------------------#
 
   if (verbose) cat("excluding disallowed neighbours\n")
-  # Exclude the X focal row vector
-  diag(xt_dist) <- NA
-
-  # Exclude X row vectors that contain NAs
+  # Exclude the focal point from each row of neighbours
+  diag(X_distance) <- NA
+  # Index points in X that contain NAs
   na_rows <- which(is.na(rowSums(X)))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project beyond X
+  # Exclude all neighbours of focal points that contain NAs
+  X_distance[na_rows, ] <- NA
+  # Exclude all neighbours that contain NAs
+  X_distance[, na_rows] <- NA
+  # Index points that project to points that contain NAs
+  na_rows <- (which(is.na(rowSums(X))) - p)
+  na_rows <- subset(na_rows, na_rows > 0)
+  # Exclude neighbours that project to points that contain NAs
+  X_distance[, na_rows] <- NA
+  # Index points whose elements include a projection of the focal value
   seq_rows <- seq_len(nrow(X))
-  na_rows <- which((seq_rows + p) > max(seq_rows))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
+  fcl_rows <- rep(seq_rows, each = length(lags[[1]]))
+  prj_rows <- fcl_rows + p + lags[[1]]
+  na_mat <- matrix(c(fcl_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
+  # Exclude neighbours whose elements include a projection of the focal value
+  X_distance[na_mat] <- NA # Specify [row, col] pairs
 
-  # Exclude X rows that project to rows that contain NAs
-  prj_rows <- (which(is.na(rowSums(X))) - p)
-  na_rows <- prj_rows[which(prj_rows > 0)]
-  # xt_dist[na_rows, ] <- NA # Commented to allow forecast from here
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that contain a projection of the focal value
-  rep_rows <- rep(seq_rows, each = length(lags[[1]]))
-  prj_rows <- rep_rows + p + lags[[1]]
-  na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
-  xt_dist[na_mat] <- NA # Specify [row, col] pairs
+  # Exclude neighbours whose projection is linked to focal via differencing
+  # TODO: Continue from here (notation and algorithm)
 
   #----------------- Create neighbour index matrix ----------------------------#
 
@@ -174,14 +169,14 @@ pbsEDM <- function (N,
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
   num_nbrs <- length(lags_size) + 1
   seq_nbrs <- seq_len(num_nbrs)
-  nbr_inds <- t(apply(xt_dist, 1, order))[, seq_nbrs]
-  nbr_inds[which(rowSums(!is.na(xt_dist)) < num_nbrs), ] <- NA
+  nbr_inds <- t(apply(X_distance, 1, order))[, seq_nbrs]
+  nbr_inds[which(rowSums(!is.na(X_distance)) < num_nbrs), ] <- NA
 
   #----------------- Create neighbour matrices --------------------------------#
 
   # nbr_vals is a matrix of values from X[, 1] corresponding to nbr_inds
   nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
-  nbr_dist <- t(apply(xt_dist, 1, sort, na.last = T))[, seq_nbrs]
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = T))[, seq_nbrs]
   nbr_wgts <- t(apply(nbr_dist, 1, function(x) exp(-x / x[1])))
 
   #----------------- Project neighbour matrices -------------------------------#
@@ -253,7 +248,7 @@ pbsEDM <- function (N,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
-      X_distance = xt_dist,
+      X_distance = X_distance,
       neighbour_distance = nbr_dist,
       neighbour_index = nbr_inds,
       neighbour_value = nbr_vals,
@@ -409,12 +404,11 @@ pbsSmap <- function (N,
   
   N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
   N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags) # TODO: Fails test without this - why?
+  colnames(N) <- names(lags)
   
   #----------------- Define Z -------------------------------------------------#
   
   if (first_difference) {
-    # Z <- rbind(apply(N, 2, diff), NA_real_)
     Z <- diff(N)
   } else {
     Z <- N
@@ -435,53 +429,48 @@ pbsSmap <- function (N,
   if (verbose) cat("\ndefining state space X\n")
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
+  # Rows in X are points in the reconstructed state space
   X <- pbsLag(Y[, lags_name], lags_size)
   colnames(X) <- paste0(lags_name, "_", lags_size)
   
   #----------------- Create distance matrix -----------------------------------#
   
   if (verbose) cat("defining neighbour distances\n")
-  # TODO: Update notation from here onward
+  # X_distance[i, j] is the distance between row vectors i and j in X
+  X_distance <- as.matrix(dist(X)) # Distance for NA rows in X corrected below
   
-  # xt_dist[i, j] is the distance between row vectors i and j in X
-  xt_lags_na <- X
-  xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
-  xt_dist <- as.matrix(dist(xt_lags_na))
-
-  #----------------- Exclude elements from the distance matrix ----------------#
-
+  #----------------- Exclude disallowed neighbours ----------------------------#
+  
   if (verbose) cat("excluding disallowed neighbours\n")
-  # Exclude the X focal row vector
-  diag(xt_dist) <- NA
-
-  # Exclude X row vectors that contain NAs
+  # Exclude the focal point from each row of neighbours
+  diag(X_distance) <- NA
+  # Index points in X that contain NAs
   na_rows <- which(is.na(rowSums(X)))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project beyond X
+  # Exclude all neighbours of focal points that contain NAs
+  X_distance[na_rows, ] <- NA
+  # Exclude all neighbours that contain NAs
+  X_distance[, na_rows] <- NA
+  # Index points that project to points that contain NAs
+  na_rows <- (which(is.na(rowSums(X))) - p)
+  na_rows <- subset(na_rows, na_rows > 0)
+  # Exclude neighbours that project to points that contain NAs
+  X_distance[, na_rows] <- NA
+  # Index points whose elements include a projection of the focal value
   seq_rows <- seq_len(nrow(X))
-  na_rows <- which((seq_rows + p) > max(seq_rows))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project to rows that contain NAs
-  prj_rows <- (which(is.na(rowSums(X))) - p)
-  na_rows <- prj_rows[which(prj_rows > 0)]
-  # xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that contain a projection of the focal value
-  rep_rows <- rep(seq_rows, each = length(lags[[1]]))
-  prj_rows <- rep_rows + p + lags[[1]]
-  na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
-  xt_dist[na_mat] <- NA # Specify [row, col] pairs
-
+  fcl_rows <- rep(seq_rows, each = length(lags[[1]]))
+  prj_rows <- fcl_rows + p + lags[[1]]
+  na_mat <- matrix(c(fcl_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
+  # Exclude neighbours whose elements include a projection of the focal value
+  X_distance[na_mat] <- NA # Specify [row, col] pairs
+  
+  # Exclude neighbours whose projection is linked to focal via differencing
+  # TODO: Continue from here (notation and algorithm)
+  
   #----------------- Create neighbour index matrix ----------------------------#
 
   if (verbose) cat("defining neighbours\n")
-  nbr_dist <- t(apply(xt_dist, 1, sort, na.last = TRUE))
-  nbr_inds <- t(apply(xt_dist, 1, order))
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = TRUE))
+  nbr_inds <- t(apply(X_distance, 1, order))
   nbr_inds[which(is.na(nbr_dist))] <- NA
   # nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
   nbr_wgts <- t(apply(nbr_dist,
@@ -627,7 +616,7 @@ pbsSmap <- function (N,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
-      X_distance = xt_dist,
+      X_distance = X_distance,
       neighbour_distance = nbr_dist,
       neighbour_index = nbr_inds,
       neighbour_value = NULL,
