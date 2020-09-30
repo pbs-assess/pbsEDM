@@ -143,7 +143,7 @@ pbsEDM <- function (N,
   diag(X_distance) <- NA
   # Index points in X that contain NAs
   na_rows <- which(is.na(rowSums(X)))
-  # Exclude all neighbours of focal points that contain NAs
+  # Exclude all neighbours of focal points that themselves contain NAs
   X_distance[na_rows, ] <- NA
   # Exclude all neighbours that contain NAs
   X_distance[, na_rows] <- NA
