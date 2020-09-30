@@ -159,12 +159,17 @@ pbsEDM <- function (N,
   na_mat <- matrix(c(fcl_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
   # Exclude neighbours whose elements include a projection of the focal value
   X_distance[na_mat] <- NA # Specify [row, col] pairs
-
-  # Exclude neighbours whose projection is linked to focal via differencing
-  # TODO: Continue from here (notation and algorithm)
-
+  if (first_difference) {
+    # Index points whose elements include a first difference of the focal value
+    dif_rows <- fcl_rows - 1 + lags[[1]]
+    na_mat <- matrix(c(fcl_rows, dif_rows), ncol = 2)[which(dif_rows <= nrow(X)),]
+    # Exclude neighbours whose elements include a first difference of the focal value
+    X_distance[na_mat] <- NA # Specify [row, col] pairs
+  }
+  
   #----------------- Create neighbour index matrix ----------------------------#
-
+  # TODO: Continue from here (notation and algorithm)
+  
   if (verbose) cat("defining nearest neighbours\n")
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
   num_nbrs <- length(lags_size) + 1
@@ -462,11 +467,16 @@ pbsSmap <- function (N,
   na_mat <- matrix(c(fcl_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
   # Exclude neighbours whose elements include a projection of the focal value
   X_distance[na_mat] <- NA # Specify [row, col] pairs
-  
-  # Exclude neighbours whose projection is linked to focal via differencing
-  # TODO: Continue from here (notation and algorithm)
+  if (first_difference) {
+    # Index points whose elements include a first difference of the focal value
+    dif_rows <- fcl_rows - 1 + lags[[1]]
+    na_mat <- matrix(c(fcl_rows, dif_rows), ncol = 2)[which(dif_rows <= nrow(X)),]
+    # Exclude neighbours whose elements include a first difference of the focal value
+    X_distance[na_mat] <- NA # Specify [row, col] pairs
+  }
   
   #----------------- Create neighbour index matrix ----------------------------#
+  # TODO: Continue from here (notation and algorithm)
 
   if (verbose) cat("defining neighbours\n")
   nbr_dist <- t(apply(X_distance, 1, sort, na.last = TRUE))
