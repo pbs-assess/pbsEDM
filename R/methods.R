@@ -92,8 +92,8 @@ pbsEDM <- function (N,
     is.list(lags),
     all(is.element(names(lags), colnames(N))),
     length(unique(names(lags))) == length(names(lags)),
-    length(unique(colnames(Y))) == length(colnames(Y)),
-    is.numeric(as.vector(unlist(Y[, names(lags)]))),
+    length(unique(colnames(N))) == length(colnames(N)),
+    is.numeric(as.vector(unlist(N[, names(lags)]))),
     is.numeric(as.vector(unlist(lags))),
     lags[[1]][1] == 0L,
     is.integer(p) && length(p) == 1L,
@@ -151,6 +151,8 @@ pbsEDM <- function (N,
   
   if (verbose) cat("defining nearest neighbours\n")
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
+  lags_size <- unlist(lags, use.names = FALSE)
+  lags_name <- rep(names(lags), lengths(lags))
   num_nbrs <- length(lags_size) + 1
   seq_nbrs <- seq_len(num_nbrs)
   nbr_inds <- t(apply(X_distance, 1, order))[, seq_nbrs]
@@ -186,6 +188,8 @@ pbsEDM <- function (N,
   #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
+    Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
@@ -473,6 +477,7 @@ pbsSmap <- function (N,
   # The row (first dimension) gives the nearest neighbours relative to focal
   # The (second dimension) gives the X row vector index
   # The col (third dimension) gives the focal index
+  lags_size <- unlist(lags, use.names = FALSE)
   w_array <- sapply(X = seq_rows,
                     FUN = function(X, w, y) w[X, ] %*% t(rep(1, y)),
                     w = prj_wgts,
@@ -533,6 +538,8 @@ pbsSmap <- function (N,
   #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
+    Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
