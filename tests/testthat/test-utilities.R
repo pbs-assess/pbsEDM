@@ -1,4 +1,37 @@
 context("test-utilities.R")
+# pbsN()
+test_that("pbsN() errors when N is a <0 x 0 matrix>", {
+	
+})
+test_that("pbsN() errors when N is a data frame with 0 columns and 0 rows", {
+	
+})
+test_that("pbsN() errors when the columns of N are not numeric", {
+	
+})
+test_that("pbsN() errors when the elements of lags are not numeric", {
+	
+})
+test_that("pbsN() errors when the elements of lags are not vectors", {
+	
+})
+test_that("pbsN() errors when names(lags) are not in colnames(N)", {
+	
+})
+test_that("pbsN() errors when there are duplicates in names(lags)", {
+	
+})
+test_that("pbsN() errors when there are duplicates in colnames(N)", {
+	
+})
+test_that("pbsN() errors when lags[[1]][1] is not equal to 0L", {
+	
+})
+test_that("pbsN() errors when p is not a scalar integer", {
+	
+})
+# pbsZ()
+
 
 test_that("pbsLag() returns a vector or matrix depending on the input", {
 	x1 <- c(1:10)

@@ -91,44 +91,23 @@ pbsEDM <- function (N,
     is.matrix(N) || is.data.frame(N),
     is.list(lags),
     all(is.element(names(lags), colnames(N))),
+    length(unique(names(lags))) == length(names(lags)),
+    length(unique(colnames(Y))) == length(colnames(Y)),
+    is.numeric(as.vector(unlist(Y[, names(lags)]))),
+    is.numeric(as.vector(unlist(lags))),
     lags[[1]][1] == 0L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L
   )
-
-  #----------------- Redefine N -----------------------------------------------#
-    
-  N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
-  N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags)
-  
-  #----------------- Define Z -------------------------------------------------#
-  
-  if (first_difference) {
-    Z <- diff(N)
-  } else {
-    Z <- N
-  }
-  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
-  
-  #----------------- Define Y -------------------------------------------------#
-  
-  if (centre_and_scale) {
-    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
-  } else {
-    Y <- Z
-  }
   
   #----------------- Define X -------------------------------------------------#
   
   if (verbose) cat("\ndefining state space X\n")
-  lags_size <- unlist(lags, use.names = FALSE)
-  lags_name <- rep(names(lags), lengths(lags))
-  # Rows in X are points in the reconstructed state space
-  X <- pbsLag(Y[, lags_name], lags_size)
-  colnames(X) <- paste0(lags_name, "_", lags_size)
+  N <- pbsN(N = N, lags = lags, p = p)
+  Z <- pbsZ(N = N, first_difference = first_difference)
+  Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+  X <- pbsX(Y = Y, lags = lags)
 
   #----------------- Create distance matrix -----------------------------------#
   
@@ -405,38 +384,13 @@ pbsSmap <- function (N,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L
   )  
 
-  #----------------- Redefine N -----------------------------------------------#
-  
-  N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
-  N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags)
-  
-  #----------------- Define Z -------------------------------------------------#
-  
-  if (first_difference) {
-    Z <- diff(N)
-  } else {
-    Z <- N
-  }
-  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
-  
-  #----------------- Define Y -------------------------------------------------#
-  
-  if (centre_and_scale) {
-    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
-  } else {
-    Y <- Z
-  }
-  
   #----------------- Define X -------------------------------------------------#
   
   if (verbose) cat("\ndefining state space X\n")
-  lags_size <- unlist(lags, use.names = FALSE)
-  lags_name <- rep(names(lags), lengths(lags))
-  # Rows in X are points in the reconstructed state space
-  X <- pbsLag(Y[, lags_name], lags_size)
-  colnames(X) <- paste0(lags_name, "_", lags_size)
+  N <- pbsN(N = N, lags = lags, p = p)
+  Z <- pbsZ(N = N, first_difference = first_difference)
+  Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+  X <- pbsX(Y = Y, lags = lags)
   
   #----------------- Create distance matrix -----------------------------------#
   

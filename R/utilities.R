@@ -1,3 +1,98 @@
+
+
+pbsN <- function (N, lags, p = 1L) {
+	# Check arguments
+	stopifnot(
+		is.matrix(N) || is.data.frame(N),
+		is.list(lags),
+		all(is.element(names(lags), colnames(N))),
+		length(unique(names(lags))) == length(names(lags)),
+		length(unique(colnames(N))) == length(colnames(N)),
+		is.numeric(as.vector(unlist(N[, names(lags)]))),
+		is.numeric(as.vector(unlist(lags))),
+		lags[[1]][1] == 0L,
+		is.integer(p) && length(p) == 1L
+	)
+	# Compute N
+	N <- as.matrix(N[, names(lags)]) # Retain only columns named in lags
+	N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Augment by rows
+	colnames(N) <- names(lags) # Assign column names to new N
+	return(N)	# Return new N
+}
+
+pbsZ <- function (N, first_difference) {
+	# Check arguments
+	stopifnot(
+		is.matrix(N),
+		is.logical(first_difference) && length(first_difference) == 1L
+	)
+	# Compute Z
+	if (first_difference) {
+		diff(N)
+	} else {
+		N
+	}
+}
+
+pbsY <- function (Z, centre_and_scale) {
+	# Check arguments
+	stopifnot(
+		is.matrix(Z),
+		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+	)
+	# Compute Y
+	if (centre_and_scale) {
+		Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+		Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
+		t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
+	} else {
+		Z
+	}
+}
+
+pbsX <- function (Y, lags) {
+	# Check arguments
+	stopifnot(
+		is.matrix(Y),
+		is.list(lags),
+		all(is.element(names(lags), colnames(Y))),
+		length(unique(names(lags))) == length(names(lags)),
+		length(unique(colnames(Y))) == length(colnames(Y)),
+		is.numeric(as.vector(unlist(Y[, names(lags)]))),
+		is.numeric(as.vector(unlist(lags))),
+		lags[[1]][1] == 0L
+	)
+	# Compute X
+	lags_size <- unlist(lags, use.names = FALSE)
+	lags_name <- rep(names(lags), lengths(lags))
+	X <- pbsLag(Y[, lags_name], lags_size) # Rows in X are points in state space
+	colnames(X) <- paste0(lags_name, "_", lags_size)
+	return(X)
+}
+
+pbsSSR <- function (N,
+										lags,
+										p = 1L,
+										first_difference = FALSE,
+										centre_and_scale = FALSE) {
+	# Compute X the state space reconstruction (SSR)
+	N <- pbsN(N = N, lags = lags, p = p)
+	Z <- pbsZ(N = N, first_difference = first_difference)
+	Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+	X <- pbsX(Y = Y, lags = lags)
+	return(X)
+}
+ 
+# pbsDist <- function () {
+# 	
+# }
+
+
+
+
+
+
+
 #' Return a Lagged Matrix
 #'
 #' @param x [matrix()] A vector or column matrix
