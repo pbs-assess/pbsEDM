@@ -67,6 +67,7 @@ pbsX <- function (Y, lags) {
 	lags_name <- rep(names(lags), lengths(lags))
 	X <- pbsLag(Y[, lags_name], lags_size) # Rows in X are points in state space
 	colnames(X) <- paste0(lags_name, "_", lags_size)
+	class(X) <- unique(c(class(X), "pbsSSR"))
 	return(X)
 }
 
@@ -83,9 +84,56 @@ pbsSSR <- function (N,
 	return(X)
 }
  
-# pbsDist <- function () {
-# 	
-# }
+pbsDist <- function (X,
+										 lags,
+										 p = 1L,
+										 first_difference = FALSE) {
+	# Check arguments
+	stopifnot(
+		is.matrix(X) & is.numeric(X),
+		is.element("pbsSSR", class(X)),
+		is.list(lags),
+		length(unique(names(lags))) == length(names(lags)),
+		is.numeric(as.vector(unlist(lags))),
+		lags[[1]][1] == 0L,
+		is.integer(p) && length(p) == 1L,
+		is.logical(first_difference) && length(first_difference) == 1L
+	)
+	# Avoid partial-component distances
+	X[is.na(rowSums(X)), ] <- NA 
+	# Compute distance matrix
+	X_distance <- as.matrix(dist(X))
+	# Exclude the focal point from each row of neighbours
+	diag(X_distance) <- NA
+	# Index points in X that contain NAs
+	na_rows <- which(is.na(rowSums(X)))
+	# Exclude all neighbours of focal points that themselves contain NAs
+	X_distance[na_rows, ] <- NA
+	# Exclude all neighbours that contain NAs
+	X_distance[, na_rows] <- NA
+	# Index points that project to points that contain NAs
+	na_rows <- (which(is.na(rowSums(X))) - p)
+	na_rows <- subset(na_rows, na_rows > 0)
+	# Exclude neighbours that project to points that contain NAs
+	X_distance[, na_rows] <- NA
+	# Index points whose elements include a projection of the focal value
+	seq_rows <- seq_len(nrow(X))
+	fcl_rows <- rep(seq_rows, each = length(lags[[1]]))
+	prj_rows <- fcl_rows + p + lags[[1]]
+	na_mat <- matrix(c(fcl_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
+	# Exclude neighbours whose elements include a projection of the focal value
+	X_distance[na_mat] <- NA # Specify [row, col] pairs
+	if (first_difference) {
+		# Index points whose elements include a first difference of the focal value
+		dif_rows <- fcl_rows - 1 + lags[[1]]
+		na_mat <- matrix(c(fcl_rows, dif_rows), ncol = 2)[which(dif_rows <= nrow(X)),]
+		# Exclude neighbours whose elements include a first difference of the focal value
+		X_distance[na_mat] <- NA # Specify [row, col] pairs
+	}
+	# Set class
+	class(X_distance) <- unique(c(class(X_distance), "pbsDist"))
+	return(X_distance)
+}
 
 
 
