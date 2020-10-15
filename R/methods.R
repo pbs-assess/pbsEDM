@@ -98,7 +98,8 @@ pbsEDM <- function (N,
     lags[[1]][1] == 0L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
-    is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
   )
   
   #----------------- Define X -------------------------------------------------#
@@ -358,7 +359,8 @@ pbsSmap <- function (N,
     is.numeric(theta) && length(theta) == 1L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
-    is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
   )  
 
   #----------------- Define X -------------------------------------------------#
@@ -546,5 +548,44 @@ pbsSmap <- function (N,
       results = results
     ),
     class = c("pbsEDM", "pbsSmap")
+  )
+}
+
+
+
+pbsSimplex <- function (N,
+                        E = 2L,
+                        p = 1L,
+                        first_difference = FALSE,
+                        centre_and_scale = FALSE,
+                        verbose = FALSE) {
+  
+  #----------------- Check arguments ------------------------------------------#
+  
+  stopifnot(
+    is.vector(N),
+    is.numeric(N),
+    is.numeric(E) && length(E) == 1L && floor(E) == E && E > 0L,
+    is.integer(p) && length(p) == 1L,
+    is.logical(first_difference) && length(first_difference) == 1L,
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
+  )
+  
+  #----------------- Define N -------------------------------------------------#
+  
+  N <- data.frame(Obs = N)
+  
+  #----------------- Define lags ----------------------------------------------#
+  
+  lags <- list(Obs = seq(0L, E - 1))
+  
+  #----------------- Return value ---------------------------------------------#
+  
+  return(
+    structure(
+      pbsEDM(N, lags, p, first_difference, centre_and_scale, verbose),
+      class = c("pbsEDM", "pbsSimplex")
+    )
   )
 }
