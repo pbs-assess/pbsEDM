@@ -1,7 +1,7 @@
 Package: pbsEDM
 Type: Package
 Title: Perform Empirical Dynamic Modeling in R
-Version: 0.1.1
+Version: 0.2.0
 Authors@R:
     c(person(given = c("Luke", "A."),
              family = "Rogers",
@@ -23,7 +23,8 @@ RoxygenNote: 7.1.0
 Imports:
     dplyr,
     scatterplot3d,
-    igraph
+    igraph,
+    parallel
 Suggests:
     knitr,
     rmarkdown,
