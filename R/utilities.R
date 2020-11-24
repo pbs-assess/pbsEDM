@@ -1,5 +1,18 @@
-
-
+#' Create N Matrix
+#'
+#' @param N [matrix()] or [data.frame()] with [numeric()] columns.
+#' @param lags [list()] of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param p The integer forecast distance.
+#'
+#' @return [matrix()] N
+#' @export
+#'
+#' @examples
+#' N <- data.frame(x = 1:10, y = 11:20)
+#' lags <- list(x = c(0, 1, 2), y = c(0, 1))
+#' pbsN(N, lags)
+#' 
 pbsN <- function (N, lags, p = 1L) {
 	# Check arguments
 	stopifnot(
@@ -20,6 +33,20 @@ pbsN <- function (N, lags, p = 1L) {
 	return(N)	# Return new N
 }
 
+#' Create Z Matrix
+#'
+#' @param N [matrix()] with [numeric()] columns.
+#' @param first_difference [logical()] First difference columns of N?
+#'
+#' @return [matrix()] Z
+#' @export
+#'
+#' @examples
+#' N <- data.frame(x = 1:10, y = 11:20)
+#' lags <- list(x = c(0, 1, 2), y = c(0, 1))
+#' N <- pbsN(N, lags)
+#' Z <- pbsZ(N, first_difference = FALSE)
+#' 
 pbsZ <- function (N, first_difference) {
 	# Check arguments
 	stopifnot(
@@ -34,6 +61,14 @@ pbsZ <- function (N, first_difference) {
 	}
 }
 
+#' Create Y Matrix
+#'
+#' @param Z [matrix()] with [numeric()] columns.
+#' @param centre_and_scale [logical()] Centre and scale columns of Z?
+#'
+#' @return [matrix()] Y
+#' @export
+#'
 pbsY <- function (Z, centre_and_scale) {
 	# Check arguments
 	stopifnot(
@@ -50,6 +85,15 @@ pbsY <- function (Z, centre_and_scale) {
 	}
 }
 
+#' Create X Matrix
+#'
+#' @param Y [matrix()] with [numeric()] columns.
+#' @param lags [list()] of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#'
+#' @return [matrix()] X
+#' @export
+#'
 pbsX <- function (Y, lags) {
 	# Check arguments
 	stopifnot(
@@ -65,12 +109,26 @@ pbsX <- function (Y, lags) {
 	# Compute X
 	lags_size <- unlist(lags, use.names = FALSE)
 	lags_name <- rep(names(lags), lengths(lags))
-	X <- pbsLag(Y[, lags_name], lags_size) # Rows in X are points in state space
+	# Rows in X are points in state space
+	X <- pbsLag(Y[, lags_name, drop = FALSE], lags_size)
 	colnames(X) <- paste0(lags_name, "_", lags_size)
 	class(X) <- unique(c(class(X), "pbsSSR"))
 	return(X)
 }
 
+#' Create State Space Reconstruction Matrix
+#'
+#' @param N [matrix()] or [data.frame()] with named [numeric()] columns 
+#'   for the response variable and covariate time series.
+#' @param lags [list()] of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param p [integer()] The forecast distance.
+#' @param first_difference [logical()] First-difference each time series?
+#' @param centre_and_scale [logical()] Centre and scale each time series?
+#'
+#' @return [matrix()] State space reconstruction.
+#' @export
+#'
 pbsSSR <- function (N,
 										lags,
 										p = 1L,
@@ -83,7 +141,18 @@ pbsSSR <- function (N,
 	X <- pbsX(Y = Y, lags = lags)
 	return(X)
 }
- 
+
+#' Compute Distances Between Points in the State Space Reconstruction
+#'
+#' @param X [matrix()] with named [numeric()] columns.
+#' @param lags [list()] of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param p [integer()] The forecast distance.
+#' @param first_difference [logical()] First-difference each time series?
+#'
+#' @return
+#' @export
+#'
 pbsDist <- function (X,
 										 lags,
 										 p = 1L,
@@ -135,12 +204,6 @@ pbsDist <- function (X,
 	return(X_distance)
 }
 
-
-
-
-
-
-
 #' Return a Lagged Matrix
 #'
 #' @param x [matrix()] A vector or column matrix
@@ -149,8 +212,7 @@ pbsDist <- function (X,
 #' @return A matrix or vector. If `x` is a vector then returns a vector `length(x)`
 #'   with `NA` for the first `n` values then the first `length(x) - n` values of
 #'   `x`.
-#' If `x` is a matrix then TODO [Andy thinks it does the
-#'   obvious thing].
+#'   
 #' @export
 #'
 #' @examples
@@ -172,7 +234,11 @@ pbsLag <- function (x,
 	for (i in seq_along(n)) {
 		m[, i] <- c(rep(NA_real_, floor(n[i])), m[, i])[seq_along(m[, i])]
 	}
-	if (is.vector(x)) {m <- as.vector(m)}
+	if (is.vector(x)) {
+		m <- as.vector(m)
+	} else if (is.matrix(x)) {
+		m <- as.matrix(m)
+	}
 	m
 }
 
