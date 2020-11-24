@@ -15,8 +15,6 @@ pbsLag(x, n = 1)
 A matrix or vector. If `x` is a vector then returns a vector `length(x)`
   with `NA` for the first `n` values then the first `length(x) - n` values of
   `x`.
-If `x` is a matrix then TODO [Andy thinks it does the
-  obvious thing].
 }
 \description{
 Return a Lagged Matrix
