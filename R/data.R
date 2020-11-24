@@ -111,3 +111,13 @@
 ##'
 ##' @source Generated from Andy running `data-raw/Nx_lags.R`.
 "psi_orig"
+
+##' Predicted and Observed Values from rEDM output
+##'
+##' @format Dataframe of size 100x4 with one row for each `time`, and columns:
+##'   * `time`
+##'   * `obs`
+##'   * `pred`
+##'   * `pred_var`
+##'
+"rEDM_points"

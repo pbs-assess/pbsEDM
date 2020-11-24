@@ -1,30 +1,32 @@
 context("test-methods.R")
 
-test_that("pbsEDM() returns a list", {
-	N <- data.frame(x = simple_ts)
-	lags <- list(x = 0:1)
-	out_list <- pbsEDM(N, lags)
-	expect_true(is.list(out_list))
-
-        out_list2 <- pbsEDM(N,
-                            lags,
-                            centre_and_scale = TRUE)
-	expect_true(is.list(out_list2))
+# pbsEDM
+test_that("pbsEDM() returns a list of class 'pbsEDM'", {
+	N <- data.frame(N1 = 1:10)
+	lags <- list(N1 = 0:1)
+	m1 <- pbsEDM(N, lags)
+	expect_true(is.list(m1))
+	expect_s3_class(m1, "pbsEDM")
 })
 
-test_that("pbsSmap() returns a list", {
-	N <- data.frame(x = simple_ts)
-	lags <- list(x = 0:1)
-	out_list <- pbsSmap(N, lags)
-	expect_true(is.list(out_list))
+test_that("pbsEDM() throws an error if lags[[1]][1] != 0L", {
+	N <- data.frame(N1 = 1:10)
+	lags <- list(N1 = 1:2)
+	expect_error(pbsEDM(N, lags))
+})
 
-      	out_list2 <- pbsSmap(N,
-                             lags,
-                             centre_and_scale = TRUE)
-	expect_true(is.list(out_list2))
+# pbsSmap
+test_that("pbsSmap() returns a list of class 'pbsEDM' and 'pbsSmap'", {
+	N <- data.frame(N1 = 1:10)
+	lags <- list(N1 = 0:1)
+	m1 <- pbsSmap(N, lags)
+	expect_true(is.list(m1))
+	expect_s3_class(m1, "pbsEDM")
+	expect_s3_class(m1, "pbsSmap")
+})
 
-      	out_list3 <- pbsSmap(N,
-                             lags,
-                             first_difference = TRUE)
-	expect_true(is.list(out_list3))
+test_that("pbsSmap() throws an error if lags[[1]][1] != 0L", {
+	N <- data.frame(N1 = 1:10)
+	lags <- list(N1 = 1:2)
+	expect_error(pbsSmap(N, lags))
 })

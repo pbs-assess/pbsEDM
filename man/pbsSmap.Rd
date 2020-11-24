@@ -6,7 +6,7 @@
 \usage{
 pbsSmap(
   N,
-  lags,
+  lags = NULL,
   theta = 0,
   p = 1L,
   first_difference = FALSE,

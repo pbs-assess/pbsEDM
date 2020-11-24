@@ -36,7 +36,7 @@ gets3dusr = function(s3dobject)
 ##' pred-prey for example. TODO, update if necessary. Works on `NY_lags_example`
 ##' but likely need to generalise.
 ##'
-##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param x list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
 ##'   landscape (2x3, filled columnwise) for presentations.
 ##' @param ... additional arguments to be passed onto other plotting functions,
@@ -53,37 +53,37 @@ gets3dusr = function(s3dobject)
 ##'               first_difference = TRUE)
 ##'  plot(aa)
 ##' }
-plot.pbsEDM = function(obj,
+plot.pbsEDM = function(x,
                        portrait = TRUE,
                        ...){
-  stopifnot(attr(obj, "class") == "pbsEDM")
+  stopifnot(attr(x, "class") == "pbsEDM")
 
   ifelse(portrait,
          par(mfrow = c(3,2)),
          par(mfcol = c(2,3)))
 
-  if(!exists("last.time.to.plot")) last.time.to.plot <- length(obj$X_observed)
+  if(!exists("last.time.to.plot")) last.time.to.plot <- length(x$X_observed)
                                             # though last will have NA # not
                                             # incorporated fully yet
 
-  plot_time_series(values = obj$N,  # $N_t,
+  plot_time_series(values = x$N,  # $N_t,
                                         # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
                    ...)
 
-  plot_time_series(values = obj$X_observed,
+  plot_time_series(values = x$X_observed,
                    X.or.N = "X",
                    ...)
 
-  plot_phase_2d(values = obj$N,    # $N_t,
+  plot_phase_2d(values = x$N,    # $N_t,
                 X.or.N = "N",
                 ...)
 
-  plot_phase_2d(values = obj$X_observed,
+  plot_phase_2d(values = x$X_observed,
                 X.or.N = "X",
                 ...)
 
-  plot_phase_3d(obj,
+  plot_phase_3d(x,
                 ...)
   invisible()
 }

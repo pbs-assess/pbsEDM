@@ -91,97 +91,48 @@ pbsEDM <- function (N,
     is.matrix(N) || is.data.frame(N),
     is.list(lags),
     all(is.element(names(lags), colnames(N))),
+    length(unique(names(lags))) == length(names(lags)),
+    length(unique(colnames(N))) == length(colnames(N)),
+    is.numeric(as.vector(unlist(N[, names(lags)]))),
+    is.numeric(as.vector(unlist(lags))),
     lags[[1]][1] == 0L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
-    is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
   )
-
-  #----------------- Redefine N -----------------------------------------------#
-    
-  N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
-  N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags) # TODO: Fails test without this - why?
-  
-  #----------------- Define Z -------------------------------------------------#
-  
-  if (first_difference) {
-    # Z <- rbind(apply(N, 2, diff), NA_real_)
-    Z <- diff(N)
-  } else {
-    Z <- N
-  }
-  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
-  
-  #----------------- Define Y -------------------------------------------------#
-  
-  if (centre_and_scale) {
-    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
-  } else {
-    Y <- Z
-  }
   
   #----------------- Define X -------------------------------------------------#
   
   if (verbose) cat("\ndefining state space X\n")
-  lags_size <- unlist(lags, use.names = FALSE)
-  lags_name <- rep(names(lags), lengths(lags))
-  X <- pbsLag(Y[, lags_name], lags_size)
-  colnames(X) <- paste0(lags_name, "_", lags_size)
+  N <- pbsN(N = N, lags = lags, p = p)
+  Z <- pbsZ(N = N, first_difference = first_difference)
+  Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+  X <- pbsX(Y = Y, lags = lags)
 
-  #----------------- Create distance matrix -----------------------------------#
+  #----------------- Exclude disallowed neighbours ----------------------------#
   
   if (verbose) cat("defining neighbour distances\n")
-  # TODO: Update notation from here onward
-  # xt_dist[i, j] is the distance between row vectors i and j in X
-  xt_lags_na <- X
-  xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
-  xt_dist <- as.matrix(dist(xt_lags_na))
-
-  #----------------- Exclude elements from the distance matrix ----------------#
-
-  if (verbose) cat("excluding disallowed neighbours\n")
-  # Exclude the X focal row vector
-  diag(xt_dist) <- NA
-
-  # Exclude X row vectors that contain NAs
-  na_rows <- which(is.na(rowSums(X)))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project beyond X
-  seq_rows <- seq_len(nrow(X))
-  na_rows <- which((seq_rows + p) > max(seq_rows))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project to rows that contain NAs
-  prj_rows <- (which(is.na(rowSums(X))) - p)
-  na_rows <- prj_rows[which(prj_rows > 0)]
-  # xt_dist[na_rows, ] <- NA # Commented to allow forecast from here
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that contain a projection of the focal value
-  rep_rows <- rep(seq_rows, each = length(lags[[1]]))
-  prj_rows <- rep_rows + p + lags[[1]]
-  na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
-  xt_dist[na_mat] <- NA # Specify [row, col] pairs
-
+  # Distances between points in state space (row vectors in X)
+  X_distance <- pbsDist(X, lags, p, first_difference)
+  
   #----------------- Create neighbour index matrix ----------------------------#
-
+  # TODO: Continue from here (notation and algorithm)
+  
   if (verbose) cat("defining nearest neighbours\n")
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
+  lags_size <- unlist(lags, use.names = FALSE)
+  lags_name <- rep(names(lags), lengths(lags))
   num_nbrs <- length(lags_size) + 1
   seq_nbrs <- seq_len(num_nbrs)
-  nbr_inds <- t(apply(xt_dist, 1, order))[, seq_nbrs]
-  nbr_inds[which(rowSums(!is.na(xt_dist)) < num_nbrs), ] <- NA
+  nbr_inds <- t(apply(X_distance, 1, order))[, seq_nbrs]
+  nbr_inds[which(rowSums(!is.na(X_distance)) < num_nbrs), ] <- NA
 
   #----------------- Create neighbour matrices --------------------------------#
 
   # nbr_vals is a matrix of values from X[, 1] corresponding to nbr_inds
   nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
-  nbr_dist <- t(apply(xt_dist, 1, sort, na.last = T))[, seq_nbrs]
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = T))[, seq_nbrs]
   nbr_wgts <- t(apply(nbr_dist, 1, function(x) exp(-x / x[1])))
 
   #----------------- Project neighbour matrices -------------------------------#
@@ -207,6 +158,8 @@ pbsEDM <- function (N,
   #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
+    Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
@@ -216,7 +169,7 @@ pbsEDM <- function (N,
   
   if (verbose) cat("computing forecasts of N\n")
   if (first_difference) {
-    # N_fore_{t} = N_obs_{t-1} + Z_fore_{t-1}
+    # N_forecast_{t} = N_observed_{t-1} + Z_forecast_{t-1}
     N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
   } else {
     N_forecast <- Z_forecast
@@ -253,7 +206,7 @@ pbsEDM <- function (N,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
-      X_distance = xt_dist,
+      X_distance = X_distance,
       neighbour_distance = nbr_dist,
       neighbour_index = nbr_inds,
       neighbour_value = nbr_vals,
@@ -385,7 +338,7 @@ pbsEDM_Evec <- function(N_t,
 #' m3 <- pbsSmap(N, lags, first_difference = TRUE)
 #' 
 pbsSmap <- function (N,
-                     lags,
+                     lags = NULL,
                      theta = 0,
                      p = 1L,
                      first_difference = FALSE,
@@ -398,90 +351,38 @@ pbsSmap <- function (N,
     is.matrix(N) || is.data.frame(N),
     is.list(lags),
     all(is.element(names(lags), colnames(N))),
+    length(unique(names(lags))) == length(names(lags)),
+    length(unique(colnames(N))) == length(colnames(N)),
+    is.numeric(as.vector(unlist(N[, names(lags)]))),
+    is.numeric(as.vector(unlist(lags))),
     lags[[1]][1] == 0L,
     is.numeric(theta) && length(theta) == 1L,
     is.integer(p) && length(p) == 1L,
     is.logical(first_difference) && length(first_difference) == 1L,
-    is.logical(centre_and_scale) && length(centre_and_scale) == 1L
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
   )  
 
-  #----------------- Redefine N -----------------------------------------------#
-  
-  N <- as.matrix(N[, names(lags)]) # Retains only columns named in lags
-  N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Space for forecasts
-  colnames(N) <- names(lags) # TODO: Fails test without this - why?
-  
-  #----------------- Define Z -------------------------------------------------#
-  
-  if (first_difference) {
-    # Z <- rbind(apply(N, 2, diff), NA_real_)
-    Z <- diff(N)
-  } else {
-    Z <- N
-  }
-  Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-  Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
-  
-  #----------------- Define Y -------------------------------------------------#
-  
-  if (centre_and_scale) {
-    Y <- t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
-  } else {
-    Y <- Z
-  }
-  
   #----------------- Define X -------------------------------------------------#
   
   if (verbose) cat("\ndefining state space X\n")
-  lags_size <- unlist(lags, use.names = FALSE)
-  lags_name <- rep(names(lags), lengths(lags))
-  X <- pbsLag(Y[, lags_name], lags_size)
-  colnames(X) <- paste0(lags_name, "_", lags_size)
+  N <- pbsN(N = N, lags = lags, p = p)
+  Z <- pbsZ(N = N, first_difference = first_difference)
+  Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+  X <- pbsX(Y = Y, lags = lags)
   
-  #----------------- Create distance matrix -----------------------------------#
+  #----------------- Exclude disallowed neighbours ----------------------------#
   
   if (verbose) cat("defining neighbour distances\n")
-  # TODO: Update notation from here onward
+  # Distances between points in state space (row vectors in X)
+  X_distance <- pbsDist(X, lags, p, first_difference)
   
-  # xt_dist[i, j] is the distance between row vectors i and j in X
-  xt_lags_na <- X
-  xt_lags_na[which(is.na(rowSums(xt_lags_na))), ] <- NA # For distance
-  xt_dist <- as.matrix(dist(xt_lags_na))
-
-  #----------------- Exclude elements from the distance matrix ----------------#
-
-  if (verbose) cat("excluding disallowed neighbours\n")
-  # Exclude the X focal row vector
-  diag(xt_dist) <- NA
-
-  # Exclude X row vectors that contain NAs
-  na_rows <- which(is.na(rowSums(X)))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project beyond X
-  seq_rows <- seq_len(nrow(X))
-  na_rows <- which((seq_rows + p) > max(seq_rows))
-  xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that project to rows that contain NAs
-  prj_rows <- (which(is.na(rowSums(X))) - p)
-  na_rows <- prj_rows[which(prj_rows > 0)]
-  # xt_dist[na_rows, ] <- NA
-  xt_dist[, na_rows] <- NA
-
-  # Exclude X rows that contain a projection of the focal value
-  rep_rows <- rep(seq_rows, each = length(lags[[1]]))
-  prj_rows <- rep_rows + p + lags[[1]]
-  na_mat <- matrix(c(rep_rows, prj_rows), ncol = 2)[which(prj_rows <= nrow(X)),]
-  xt_dist[na_mat] <- NA # Specify [row, col] pairs
-
   #----------------- Create neighbour index matrix ----------------------------#
+  # TODO: Continue from here (notation and algorithm)
 
   if (verbose) cat("defining neighbours\n")
-  nbr_dist <- t(apply(xt_dist, 1, sort, na.last = TRUE))
-  nbr_inds <- t(apply(xt_dist, 1, order))
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = TRUE))
+  nbr_inds <- t(apply(X_distance, 1, order))
   nbr_inds[which(is.na(nbr_dist))] <- NA
   # nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
   nbr_wgts <- t(apply(nbr_dist,
@@ -520,6 +421,8 @@ pbsSmap <- function (N,
   # The row (first dimension) gives the nearest neighbours relative to focal
   # The (second dimension) gives the X row vector index
   # The col (third dimension) gives the focal index
+  seq_rows <- seq_len(nrow(X))
+  lags_size <- unlist(lags, use.names = FALSE)
   w_array <- sapply(X = seq_rows,
                     FUN = function(X, w, y) w[X, ] %*% t(rep(1, y)),
                     w = prj_wgts,
@@ -580,6 +483,8 @@ pbsSmap <- function (N,
   #----------------- Compute Z_forecast ---------------------------------------#
   
   if (centre_and_scale) {
+    Z_means <- apply(Z, 2, mean, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
@@ -589,7 +494,7 @@ pbsSmap <- function (N,
   
   if (verbose) cat("computing forecasts of N\n")
   if (first_difference) {
-    # N_fore_{t} = N_obs_{t-1} + Z_fore_{t-1}
+    # N_forecast_{t} = N_observed_{t-1} + Z_forecast_{t-1}
     N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
   } else {
     N_forecast <- Z_forecast
@@ -627,7 +532,7 @@ pbsSmap <- function (N,
       X = X,
       X_observed = X_observed,
       X_forecast = X_forecast,
-      X_distance = xt_dist,
+      X_distance = X_distance,
       neighbour_distance = nbr_dist,
       neighbour_index = nbr_inds,
       neighbour_value = NULL,
@@ -644,4 +549,78 @@ pbsSmap <- function (N,
     ),
     class = c("pbsEDM", "pbsSmap")
   )
+}
+
+#' Forecast via Simplex Projection
+#'
+#' @param N [data.frame()] or [numeric()] Response variable time series as
+#'   first column or as a vector.
+#' @param E [integer()] Vector of embedding dimensions.
+#' @param p [integer()] Scalar forecast distance.
+#' @param first_difference [logical()] First-difference the time series
+#' @param centre_and_scale [logical()] Centre and scale the time series?
+#' @param verbose [logical()] Print progress?
+#'
+#' @return A list of class \code{pbsSimplex}
+#' @author Luke A. Rogers
+#' @export
+#'
+#' @examples
+#' N <- data.frame(x = 1:30)
+#' s1 <- pbsSimplex(N)
+#' 
+#' N <- data.frame(x = simple_ts)
+#' s2 <- pbsSimplex(N)   
+#' 
+pbsSimplex <- function (N,
+                        E = 1:10,
+                        p = 1L,
+                        first_difference = FALSE,
+                        centre_and_scale = FALSE,
+                        verbose = FALSE) {
+  
+  # Check arguments ------------------------------------------------------------
+  
+  stopifnot(
+    is.data.frame(N) | (is.vector(N) & is.numeric(N)),
+    is.numeric(E) & floor(E) == E & E > 0L,
+    is.integer(p) && length(p) == 1L,
+    is.logical(first_difference) && length(first_difference) == 1L,
+    is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
+    is.logical(verbose) && length(verbose) == 1L
+  )
+  
+  # Define N -------------------------------------------------------------------
+  
+  if (is.numeric(N)) {
+    N <- data.frame(Obs = N)
+  } else {
+    colnames(N)[1] <- "Obs"
+  }
+  
+  # Compute --------------------------------------------------------------------
+  
+  results_list <- list()
+  results <- data.frame()
+  
+  # TODO: Parallelize this using sockets for compatibility with Windows
+  for (i in seq_along(E)) {
+    # Define lags
+    lags <- list(Obs = seq(0L, E[i] - 1))
+    # Store value
+    results_list[[i]] <- pbsEDM(N, 
+                                lags, 
+                                p, 
+                                first_difference, 
+                                centre_and_scale, 
+                                verbose = FALSE)
+    results <- rbind(results, results_list[[i]]$results)
+  }
+
+  # Return value ---------------------------------------------------------------
+  
+  return(structure(list(
+    results_list = results_list,
+    results = results),
+    class = c("pbsSimplex")))
 }

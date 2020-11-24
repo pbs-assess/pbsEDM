@@ -5,10 +5,10 @@
 \title{Plot data and results of an object of class `pbsEDM` as time series and
 phase plots}
 \usage{
-\method{plot}{pbsEDM}(obj, portrait = TRUE, ...)
+\method{plot}{pbsEDM}(x, portrait = TRUE, ...)
 }
 \arguments{
-\item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
+\item{x}{list object of class `pbsEDM`, an output from `pbsEDM()`}
 
 \item{portrait}{if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
 landscape (2x3, filled columnwise) for presentations.}
