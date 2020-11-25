@@ -4,10 +4,12 @@
 \alias{plot.pbsSim}
 \title{Plot Method for `pbsSim`}
 \usage{
-\method{plot}{pbsSim}(x)
+\method{plot}{pbsSim}(x, ...)
 }
 \arguments{
 \item{x}{[pbsSim()]}
+
+\item{...}{Other arguments.}
 }
 \value{
 Panel plot.
