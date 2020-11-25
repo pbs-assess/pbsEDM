@@ -971,3 +971,25 @@ plot_explain_edm_movie <- function(obj,
                    true.val = TRUE,
                    ...)
 }
+
+#' Plot Method for `pbsSim`
+#'
+#' @param x [pbsSim()]
+#' @param ... Other arguments.
+#'
+#' @return Panel plot.
+#' @export
+#'
+plot.pbsSim <- function (x, ...) {
+  par(mfrow = c(3, 1), mar = c(4, 4, 1, 0), oma = c(2, 1, 1, 1))
+  plot(x[, "producers"], type = "l", ylab = "Producers")
+  plot(x[, "prey"], type = "l", ylab = "Prey")
+  plot(
+    x[, "predators"], 
+    type = "l",
+    xlab = "Time step",
+    ylab = "Predators")
+  par(mfrow = c(1, 1))
+  
+}
+

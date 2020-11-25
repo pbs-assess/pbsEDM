@@ -23,8 +23,7 @@ RoxygenNote: 7.1.0
 Imports:
     dplyr,
     scatterplot3d,
-    igraph,
-    parallel
+    igraph
 Suggests:
     knitr,
     rmarkdown,
