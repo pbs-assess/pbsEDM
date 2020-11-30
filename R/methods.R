@@ -335,7 +335,11 @@ pbsEDM_Evec <- function(N_t,
 #'
 #' N <- data.frame(x = simple_ts)
 #' lags <- list(x = 0:1)
-#' m3 <- pbsSmap(N, lags, first_difference = TRUE)
+#' m3 <- pbsSmap(N, lags, theta = 2)
+#' 
+#' N <- data.frame(x = simple_ts)
+#' lags <- list(x = 0:1)
+#' m4 <- pbsSmap(N, lags, first_difference = TRUE)
 #' 
 pbsSmap <- function (N,
                      lags = NULL,
@@ -344,6 +348,8 @@ pbsSmap <- function (N,
                      first_difference = FALSE,
                      centre_and_scale = FALSE,
                      verbose = FALSE) {
+  
+  tictoc::tic("pbsEDM")
 
   #----------------- Check arguments ------------------------------------------#
 
@@ -362,7 +368,7 @@ pbsSmap <- function (N,
     is.logical(centre_and_scale) && length(centre_and_scale) == 1L,
     is.logical(verbose) && length(verbose) == 1L
   )  
-
+  
   #----------------- Define X -------------------------------------------------#
   
   if (verbose) cat("\ndefining state space X\n")
@@ -500,6 +506,15 @@ pbsSmap <- function (N,
     N_forecast <- Z_forecast
   }
   
+  # Prepare p-value ------------------------------------------------------------
+  
+  X_pval <- smap_surrogates(N,
+                            lags,
+                            theta,
+                            p,
+                            first_difference,
+                            centre_and_scale)
+  
   #----------------- Prepare return values ------------------------------------#
     
   N_rho <- cor(N_observed, N_forecast, use = "pairwise.complete.obs")
@@ -513,10 +528,13 @@ pbsSmap <- function (N,
                         N_rmse = N_rmse,
                         X_rho = X_rho,
                         X_rmse = X_rmse,
+                        X_pval = X_pval,
                         stringsAsFactors = FALSE)
   
   #----------------- Return a list --------------------------------------------#
 
+  tictoc::toc()
+  
   if (verbose) cat("returning list of class pbsEDM\n")
   structure(
     list(
@@ -549,6 +567,229 @@ pbsSmap <- function (N,
     ),
     class = c("pbsEDM", "pbsSmap")
   )
+}
+
+#' SMap That Returns Only The Forecast Accuracy
+#'
+#' @param N A data frame with named columns for the response variable and
+#'   covariate time series.
+#' @param lags A list of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param theta The numeric local weighting parameter.
+#' @param p The integer forecast distance.
+#' @param first_difference Logical. First-difference each time series?
+#' @param centre_and_scale Logical. Centre and scale each time series?
+#'
+#' @return [numeric()] The forecast accuracy rho
+#' @export
+#' 
+smap_efficient <- function (N, 
+                            lags, 
+                            theta, 
+                            p, 
+                            first_difference,
+                            centre_and_scale) {
+  
+  #----------------- Define X -------------------------------------------------#
+  
+  # N <- pbsN(N = N, lags = lags, p = p)
+  Z <- pbsZ(N = N, first_difference = first_difference)
+  Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
+  X <- pbsX(Y = Y, lags = lags)
+
+  #----------------- Exclude disallowed neighbours ----------------------------#
+  
+  # Distances between points in state space (row vectors in X)
+  X_distance <- pbsDist(X, lags, p, first_difference)
+  
+  #----------------- Create neighbour index matrix ----------------------------#
+  # TODO: Continue from here (notation and algorithm)
+  
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = TRUE))
+  nbr_inds <- t(apply(X_distance, 1, order))
+  nbr_inds[which(is.na(nbr_dist))] <- NA
+  # nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
+  nbr_wgts <- t(apply(nbr_dist,
+                      1,
+                      function(x, y) exp(-y * x / mean(x, na.rm = TRUE)),
+                      y = theta))
+  
+  #----------------- Compute lag of neighbour index matrix --------------------#
+  
+  # TODO: Needed?
+  lag_inds <- pbsLag(nbr_inds, p)
+  
+  #----------------- Project neighbour matrices -------------------------------#
+  
+  prj_inds <- pbsLag(nbr_inds, p) + p
+  prj_vals <- t(apply(prj_inds,
+                      1,
+                      function(x, y) y[x, 1],
+                      y = X))
+  prj_wgts <- pbsLag(nbr_wgts, p)
+  
+  #----------------- Project xt_lag matrix ------------------------------------#
+  
+  prj_lags <- pbsLag(X, p)
+  
+  #----------------- Compute B matrix for SVD ---------------------------------#
+  
+  # The row gives the focal index
+  # The col gives the nearest neighbours ordered relative to focal index
+  b_matrix <- prj_wgts * prj_vals
+  b_matrix[which(is.na(b_matrix))] <- 0
+  
+  #----------------- Compute W array of matrices for SVD ----------------------#
+  
+  # The row (first dimension) gives the nearest neighbours relative to focal
+  # The (second dimension) gives the X row vector index
+  # The col (third dimension) gives the focal index
+  seq_rows <- seq_len(nrow(X))
+  lags_size <- unlist(lags, use.names = FALSE)
+  w_array <- sapply(X = seq_rows,
+                    FUN = function(X, w, y) w[X, ] %*% t(rep(1, y)),
+                    w = prj_wgts,
+                    y = length(lags_size),
+                    simplify = "array")
+  
+  #----------------- Compute L array of lagged row vectors for SVD ------------#
+  
+  # The row (first dimension) gives the nearest neighbours relative to focal
+  # The (second dimension) gives the X row vector index
+  # The col (third dimension) gives the focal index
+  l_array <- sapply(X = seq_rows,
+                    FUN = function(X, l, m) l[m[X, ], ],
+                    l = X,
+                    m = lag_inds, # Double check
+                    simplify = "array")
+  
+  #----------------- Compute A array of matrices for SVD ----------------------#
+  
+  # The row (first dimension) gives the nearest neighbours relative to focal
+  # The (second dimension) gives the X row vector index
+  # The col (third dimension) gives the focal index
+  a_array <- w_array * l_array
+  a_array[which(is.na(a_array))] <- 0
+  
+  #----------------- Solve for C matrix via SVD -------------------------------#
+  
+  # Decompose A matrices by SVD
+  svd_list <- apply(a_array, 3, svd)
+  
+  # Simplify
+  vdu_array <- sapply(X = seq_rows,
+                      FUN = function(X, s) s[[X]]$v %*% diag(1/s[[X]]$d) %*%
+                        t(s[[X]]$u),
+                      s = svd_list,
+                      simplify = "array")
+  
+  # Solve for C matrix
+  c_matrix <- sapply(X = seq_rows,
+                     FUN = function(X, a, b) a[,, X] %*% b[X, ],
+                     a = vdu_array,
+                     b = b_matrix)
+  
+  #----------------- Store observed as vectors --------------------------------#
+  
+  X_observed <- X[, 1]
+  N_observed <- N[, 1]  # Check that response var. is in first column
+  
+  #----------------- Compute X_forecast ---------------------------------------#
+  
+  X_forecast <- sapply(X = seq_rows,
+                       FUN = function(X, l, m) sum(m[, X] * l[X, ]),
+                       m = c_matrix,
+                       l = prj_lags)
+  X_forecast[is.nan(X_forecast)] <- NA_real_
+  
+  #----------------- Prepare return values ------------------------------------#
+  
+  X_rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
+
+  # Return rho -----------------------------------------------------------------
+  
+  return(X_rho)
+}
+
+#' Perform Surrogate Test For Nonlinearity
+#'
+#' @param N A data frame with named columns for the response variable and
+#'   covariate time series.
+#' @param lags A list of named integer vectors specifying the lags to use for
+#'   each time series in \code{N}.
+#' @param theta The numeric local weighting parameter.
+#' @param p The integer forecast distance.
+#' @param first_difference Logical. First-difference each time series?
+#' @param centre_and_scale Logical. Centre and scale each time series?
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' 
+smap_surrogates <- function (N, 
+                             lags, 
+                             theta, 
+                             p, 
+                             first_difference,
+                             centre_and_scale) {
+  
+  # Compute the empirical delta rho --------------------------------------------
+  
+  # Rho at theta
+  rho_at_theta <- smap_efficient(N, 
+                                 lags, 
+                                 theta, 
+                                 p, 
+                                 first_difference,
+                                 centre_and_scale)
+  # Rho at zero
+  rho_at_zero <- smap_efficient(N, 
+                                lags, 
+                                0L, 
+                                p, 
+                                first_difference,
+                                centre_and_scale)
+  # Delta rho
+  empirical_delta_rho <- rho_at_theta - rho_at_zero
+  
+  # Compute the surrogate delta rho --------------------------------------------
+  
+  # Number of iterations
+  n_surrogates <- 100L
+  # Initialize
+  surrogate_delta_rho <- numeric(n_surrogates)
+  # Iterate
+  for (i in seq_len(n_surrogates)) {
+    # Permute N
+    row_permute <- c(sample(seq_len(nrow(N) - 1L)), nrow(N))
+    P <- N[row_permute, , drop = FALSE]
+    # Rho at theta
+    rho_at_theta <- smap_efficient(P, 
+                                   lags, 
+                                   theta, 
+                                   p, 
+                                   first_difference,
+                                   centre_and_scale)
+    # Rho at zero
+    rho_at_zero <- smap_efficient(P, 
+                                  lags, 
+                                  0L, 
+                                  p, 
+                                  first_difference,
+                                  centre_and_scale)
+    # Delta rho
+    surrogate_delta_rho[i] <- rho_at_theta - rho_at_zero
+  }
+  
+  # Compute the quantile -------------------------------------------------------
+  
+  p_val <- 1 - stats::ecdf(surrogate_delta_rho)(empirical_delta_rho)
+  if (p_val == 0) p_val <- NA_real_
+  
+  # Return the p-value ---------------------------------------------------------
+  
+  return(p_val)
 }
 
 #' Forecast via Simplex Projection
