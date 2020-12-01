@@ -13,7 +13,7 @@ pbsX(Y, lags)
 each time series in \code{N}.}
 }
 \value{
-[matrix()] X
+[matrix()] X of class [pbsSSR()]
 }
 \description{
 Create X Matrix

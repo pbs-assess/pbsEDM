@@ -21,6 +21,19 @@ each time series in \code{N}.}
 Create N Matrix
 }
 \examples{
+
+# Numeric vector
+N <- 1:10
+lags <- list(x = c(0, 1, 2))
+pbsN(N, lags)
+
+# Numeric matrix
+N <- matrix(1:20, ncol = 2)
+colnames(N) <- c("x", "y")
+lags <- list(x = c(0, 1, 2), y = c(0, 1))
+pbsN(N, lags)
+
+# Data frame
 N <- data.frame(x = 1:10, y = 11:20)
 lags <- list(x = c(0, 1, 2), y = c(0, 1))
 pbsN(N, lags)
