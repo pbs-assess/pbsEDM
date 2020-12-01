@@ -98,7 +98,11 @@ m2 <- pbsSmap(N, lags)
 
 N <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
-m3 <- pbsSmap(N, lags, first_difference = TRUE)
+m3 <- pbsSmap(N, lags, theta = 2)
+
+N <- data.frame(x = simple_ts)
+lags <- list(x = 0:1)
+m4 <- pbsSmap(N, lags, first_difference = TRUE)
 
 }
 \author{
