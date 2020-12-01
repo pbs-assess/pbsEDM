@@ -1,5 +1,61 @@
 context("test-utilities.R")
 
+# Test pbsN --------------------------------------------------------------------
+
+test_that("pbsN() returns a matrix", {
+	# Vector
+	N <- 1:10
+	lags <- list(x = c(0, 1, 2))
+	expect_true(class(pbsN(N, lags))[1] == "matrix")	
+	# Matrix
+	N <- as.matrix(1:10)
+	colnames(N) <- "x"
+	lags <- list(x = c(0, 1, 2))
+	expect_true(class(pbsN(N, lags))[1] == "matrix")	
+	# Data frame
+	N <- data.frame(x = 1:10)
+	lags <- list(x = c(0, 1, 2))
+	expect_true(class(pbsN(N, lags))[1] == "matrix")	
+})
+
+# Test pbsZ --------------------------------------------------------------------
+
+test_that("pbsZ() returns a matrix", {
+	lags <- list(x = c(0, 1, 2))
+	N <- pbsN(1:10, lags)
+	expect_true(class(pbsZ(N, FALSE))[1] == "matrix")	
+	expect_true(class(pbsZ(N, TRUE))[1] == "matrix")	
+})
+
+# Test pbsY --------------------------------------------------------------------
+
+test_that("pbsY() returns a matrix", {
+	lags <- list(x = c(0, 1, 2))
+	N <- pbsN(sample(1:10), lags)
+	Z <- pbsZ(N, TRUE)
+	expect_true(class(pbsY(Z, FALSE))[1] == "matrix")	
+	expect_true(class(pbsY(Z, TRUE))[1] == "matrix")	
+})
+
+# Test pbsX --------------------------------------------------------------------
+
+test_that("pbsX() returns a matrix", {
+	lags <- list(x = c(0, 1, 2))
+	N <- pbsN(sample(1:10), lags)
+	Z <- pbsZ(N, TRUE)
+	Y <- pbsY(Z, TRUE)
+	expect_true(class(pbsX(Y, lags))[1] == "matrix")	
+})
+
+# Test pbsSSR ------------------------------------------------------------------
+
+test_that("pbsSSR() returns a matrix of class 'pbsSSR'", {
+	lags <- list(x = c(0, 1, 2))
+	N <- pbsN(sample(1:10), lags)
+	expect_true(class(pbsSSR(N, lags))[1] == "matrix")	
+	expect_true(class(pbsSSR(N, lags))[2] == "pbsSSR")	
+})
+
 # Test pbsLag ------------------------------------------------------------------
 
 test_that("pbsLag() returns a vector for vector input", {
