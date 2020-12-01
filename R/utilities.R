@@ -9,28 +9,51 @@
 #' @export
 #'
 #' @examples
+#' 
+#' # Numeric vector
+#' N <- 1:10
+#' lags <- list(x = c(0, 1, 2))
+#' pbsN(N, lags)
+#' 
+#' # Numeric matrix
+#' N <- matrix(1:20, ncol = 2)
+#' colnames(N) <- c("x", "y")
+#' lags <- list(x = c(0, 1, 2), y = c(0, 1))
+#' pbsN(N, lags)
+#' 
+#' # Data frame
 #' N <- data.frame(x = 1:10, y = 11:20)
 #' lags <- list(x = c(0, 1, 2), y = c(0, 1))
 #' pbsN(N, lags)
 #' 
 pbsN <- function (N, lags, p = 1L) {
+	
 	# Check arguments
-	stopifnot(
-		is.matrix(N) || is.data.frame(N),
-		is.list(lags),
-		all(is.element(names(lags), colnames(N))),
-		length(unique(names(lags))) == length(names(lags)),
-		length(unique(colnames(N))) == length(colnames(N)),
-		is.numeric(as.vector(unlist(N[, names(lags)]))),
-		is.numeric(as.vector(unlist(lags))),
-		lags[[1]][1] == 0L,
-		is.integer(p) && length(p) == 1L
-	)
-	# Compute N
-	N <- as.matrix(N[, names(lags)]) # Retain only columns named in lags
-	N <- rbind(N, array(NA_real_, dim = c(p, ncol(N)))) # Augment by rows
-	colnames(N) <- names(lags) # Assign column names to new N
-	return(N)	# Return new N
+	checkmate::assert_list(lags, types = "integerish", any.missing = FALSE)
+	checkmate::assert_list(lags, min.len = 1)
+	checkmate::assert_integerish(p, lower = 1, any.missing = FALSE, len = 1)
+	# Check that N is a numeric vector, numeric matrix, or data frame
+	stopifnot((is.numeric(N) & (is.vector(N) | is.matrix(N))) | is.data.frame(N))
+	# Convert vector N to data frame
+	if (is.vector(N)) {
+		N <- as.matrix(N, ncol = 1)
+		colnames(N) <- names(lags)[1]
+	}
+	# Check remaining arguments
+	checkmate::assert_true(all(is.element(names(lags), colnames(N))))
+	checkmate::assert_true(length(unique(names(lags))) == length(names(lags)))
+	checkmate::assert_true(length(unique(colnames(N))) == length(colnames(N)))
+	checkmate::assert_true(is.numeric(as.vector(unlist(N[, names(lags)]))))
+	checkmate::assert_true(is.numeric(as.vector(unlist(lags))))
+	checkmate::assert_true(lags[[1]][1] == 0L)
+	# Convert data.frame N to matrix
+	N <- as.matrix(N[, names(lags), drop = FALSE]) # Retain columns named in lags
+	# Augment by rows
+	N <- rbind(N, array(NA_real_, dim = c(p, ncol(N))))
+	# Assign column names to new N
+	colnames(N) <- names(lags)
+	# Return new N
+	return(N)
 }
 
 #' Create Z Matrix
@@ -49,16 +72,10 @@ pbsN <- function (N, lags, p = 1L) {
 #' 
 pbsZ <- function (N, first_difference) {
 	# Check arguments
-	stopifnot(
-		is.matrix(N),
-		is.logical(first_difference) && length(first_difference) == 1L
-	)
+	checkmate::assert_matrix(N, mode = "double", min.cols = 1L)
+	checkmate::assert_logical(first_difference, any.missing = FALSE, len = 1L)
 	# Compute Z
-	if (first_difference) {
-		diff(N)
-	} else {
-		N
-	}
+	if (first_difference) diff(N) else N
 }
 
 #' Create Y Matrix
@@ -71,15 +88,14 @@ pbsZ <- function (N, first_difference) {
 #'
 pbsY <- function (Z, centre_and_scale) {
 	# Check arguments
-	stopifnot(
-		is.matrix(Z),
-		is.logical(centre_and_scale) && length(centre_and_scale) == 1L
-	)
+	checkmate::assert_matrix(Z, mode = "double", min.cols = 1)
+	checkmate::assert_logical(centre_and_scale, any.missing = FALSE, len = 1L)
 	# Compute Y
 	if (centre_and_scale) {
 		Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-		Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
-		t((t(Z) - Z_means) / Z_sds) # TODO: Print warning if divides by zero
+		Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
+		if (Z_sds <= 0) stop("the standard deviation of columns in Z must be > 0")
+		t((t(Z) - Z_means) / Z_sds)
 	} else {
 		Z
 	}
@@ -91,21 +107,20 @@ pbsY <- function (Z, centre_and_scale) {
 #' @param lags [list()] of named integer vectors specifying the lags to use for
 #'   each time series in \code{N}.
 #'
-#' @return [matrix()] X
+#' @return [matrix()] X of class [pbsSSR()]
 #' @export
 #'
 pbsX <- function (Y, lags) {
 	# Check arguments
-	stopifnot(
-		is.matrix(Y),
-		is.list(lags),
-		all(is.element(names(lags), colnames(Y))),
-		length(unique(names(lags))) == length(names(lags)),
-		length(unique(colnames(Y))) == length(colnames(Y)),
-		is.numeric(as.vector(unlist(Y[, names(lags)]))),
-		is.numeric(as.vector(unlist(lags))),
-		lags[[1]][1] == 0L
-	)
+	checkmate::assert_matrix(Y, mode = "double", min.cols = 1)
+	checkmate::assert_list(lags, types = "integerish", any.missing = FALSE)
+	checkmate::assert_list(lags, min.len = 1L)
+	checkmate::assert_true(all(is.element(names(lags), colnames(Y))))
+	checkmate::assert_true(length(unique(names(lags))) == length(names(lags)))
+	checkmate::assert_true(length(unique(colnames(Y))) == length(colnames(Y)))
+	checkmate::assert_numeric(as.vector(unlist(Y[, names(lags)])))
+	checkmate::assert_numeric(as.vector(unlist(lags)))
+	checkmate::assert_true(lags[[1]][1] == 0L)
 	# Compute X
 	lags_size <- unlist(lags, use.names = FALSE)
 	lags_name <- rep(names(lags), lengths(lags))
@@ -118,8 +133,10 @@ pbsX <- function (Y, lags) {
 
 #' Create State Space Reconstruction Matrix
 #'
-#' @param N [matrix()] or [data.frame()] with named [numeric()] columns 
-#'   for the response variable and covariate time series.
+#' @param N [vector()], [matrix()] or [data.frame()] of time series
+#'   for the response variable and covariate time series. Elements must be
+#'   [numeric()]. If present, columns must have [colnames()] matching 
+#'   \code{names(lags)}.
 #' @param lags [list()] of named integer vectors specifying the lags to use for
 #'   each time series in \code{N}.
 #' @param p [integer()] The forecast distance.
