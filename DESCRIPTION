@@ -23,7 +23,8 @@ RoxygenNote: 7.1.0
 Imports:
     dplyr,
     scatterplot3d,
-    igraph
+    igraph,
+    tictoc
 Suggests:
     knitr,
     rmarkdown,
