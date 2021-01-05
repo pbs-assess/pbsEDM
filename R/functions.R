@@ -159,7 +159,7 @@ pbsEDM <- function (N,
   
   if (centre_and_scale) {
     Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
@@ -177,9 +177,9 @@ pbsEDM <- function (N,
   
   #----------------- Prepare return values ------------------------------------#
   
-  N_rho <- cor(N_observed, N_forecast, use = "pairwise.complete.obs")
+  N_rho <- stats::cor(N_observed, N_forecast, use = "pairwise.complete.obs")
   N_rmse <- sqrt(mean((N_observed - N_forecast)^2, na.rm = TRUE))
-  X_rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
+  X_rho <- stats::cor(X_observed, X_forecast, use = "pairwise.complete.obs")
   X_rmse <- sqrt(mean((X_observed - X_forecast)^2, na.rm = TRUE))
   E <- length(lags_size)
   results <- data.frame(E = E,
@@ -490,7 +490,7 @@ pbsSmap <- function (N,
   
   if (centre_and_scale) {
     Z_means <- apply(Z, 2, mean, na.rm = TRUE)
-    Z_sds <- apply(Z, 2, sd, na.rm = TRUE)
+    Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
     Z_forecast <- Z_means[1] + X_forecast * Z_sds[1] # X_forecast == Y_forecast
   } else {
     Z_forecast <- X_forecast
@@ -517,9 +517,9 @@ pbsSmap <- function (N,
   
   #----------------- Prepare return values ------------------------------------#
     
-  N_rho <- cor(N_observed, N_forecast, use = "pairwise.complete.obs")
+  N_rho <- stats::cor(N_observed, N_forecast, use = "pairwise.complete.obs")
   N_rmse <- sqrt(mean((N_observed - N_forecast)^2, na.rm = TRUE))
-  X_rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
+  X_rho <- stats::cor(X_observed, X_forecast, use = "pairwise.complete.obs")
   X_rmse <- sqrt(mean((X_observed - X_forecast)^2, na.rm = TRUE))
   E <- length(lags_size)
   results <- data.frame(E = E,
@@ -704,7 +704,7 @@ smap_efficient <- function (N,
   
   #----------------- Prepare return values ------------------------------------#
   
-  X_rho <- cor(X_observed, X_forecast, use = "pairwise.complete.obs")
+  X_rho <- stats::cor(X_observed, X_forecast, use = "pairwise.complete.obs")
 
   # Return rho -----------------------------------------------------------------
   
@@ -722,10 +722,9 @@ smap_efficient <- function (N,
 #' @param first_difference Logical. First-difference each time series?
 #' @param centre_and_scale Logical. Centre and scale each time series?
 #'
-#' @return
+#' @return [numeric()] Quantile for empirical delta rho among surrogates
 #' @export
 #'
-#' @examples
 #' 
 smap_surrogates <- function (N, 
                              lags, 

@@ -251,7 +251,6 @@ plot_pred_obs <- function(E_res,
 ##' @param start first time step (must be 1)
 ##' @param pt.type `type` value for `points()`
 ##' @param par.mgp `par("mgp")` values
-##' @return
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples

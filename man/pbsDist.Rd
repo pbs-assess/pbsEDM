@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{pbsDist}
 \alias{pbsDist}
-\title{Compute Distances Between Points in the State Space Reconstruction}
+\title{Compute Distances Between Allowed Points in the State Space Reconstruction}
 \usage{
 pbsDist(X, lags, p = 1L, first_difference = FALSE)
 }
@@ -17,8 +17,8 @@ each time series in \code{N}.}
 \item{first_difference}{[logical()] First-difference each time series?}
 }
 \value{
-
+[pbsDist()] [matrix()] of allowed distances
 }
 \description{
-Compute Distances Between Points in the State Space Reconstruction
+Compute Distances Between Allowed Points in the State Space Reconstruction
 }

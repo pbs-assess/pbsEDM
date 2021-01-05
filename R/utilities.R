@@ -159,7 +159,7 @@ pbsSSR <- function (N,
 	return(X)
 }
 
-#' Compute Distances Between Points in the State Space Reconstruction
+#' Compute Distances Between Allowed Points in the State Space Reconstruction
 #'
 #' @param X [matrix()] with named [numeric()] columns.
 #' @param lags [list()] of named integer vectors specifying the lags to use for
@@ -167,7 +167,8 @@ pbsSSR <- function (N,
 #' @param p [integer()] The forecast distance.
 #' @param first_difference [logical()] First-difference each time series?
 #'
-#' @return
+#' @return [pbsDist()] [matrix()] of allowed distances
+#' 
 #' @export
 #'
 pbsDist <- function (X,
@@ -188,7 +189,7 @@ pbsDist <- function (X,
 	# Avoid partial-component distances
 	X[is.na(rowSums(X)), ] <- NA 
 	# Compute distance matrix
-	X_distance <- as.matrix(dist(X))
+	X_distance <- as.matrix(stats::dist(X))
 	# Exclude the focal point from each row of neighbours
 	diag(X_distance) <- NA
 	# Index points in X that contain NAs

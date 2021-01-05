@@ -48,9 +48,6 @@ final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 
 \item{par.mgp}{`par("mgp")` values}
 }
-\value{
-
-}
 \description{
 First value must be `t=1`. For non-differenced values `N_t`, shows the time
 series with the final values in a different colour, and a title showing the
