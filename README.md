@@ -3,13 +3,16 @@
 
 # pbsEDM
 
+<!-- badges: start -->
+
 [![Travis build
-status](https://travis-ci.org/luke-a-rogers/pbsEDM.svg?branch=master)](https://travis-ci.org/luke-a-rogers/pbsEDM)
+status](https://travis-ci.com/luke-a-rogers/pbsEDM.svg?branch=master)](https://travis-ci.com/luke-a-rogers/pbsEDM)
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Coverage
 status](https://codecov.io/gh/luke-a-rogers/pbsEDM/branch/master/graph/badge.svg)](https://codecov.io/github/luke-a-rogers/pbsEDM?branch=master)
+<!-- badges: end -->
 
 An R package to implement the delay embedding methods of Empirical
 Dynamic Modeling
@@ -19,13 +22,6 @@ Dynamic Modeling
 ``` r
 devtools::install_github("luke-a-rogers/pbsEDM")
 ```
-
-## Notation
-
-Where possible we have followed the useful notation in Deyle et al. (2013), namely:
-
-(unable to render math in GitHub readme, so let's just keep it in a write up and refer to it there)
-
 
 ## Functionality
 
