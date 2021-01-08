@@ -121,6 +121,35 @@ usethis::use_data(psi_orig_2, overwrite = TRUE)
 
 
 # This is run after, for the new notation.
-NY_lags_example_2 <- Nx_lags_orig
+NY_lags_example_2 <- Nx_lags_orig_2
 names(NY_lags_example_2)[2:6] <- c("N_t", "N_tmin1", "Y_t", "Y_tmin1", "Y_tmin2")
 usethis::use_data(NY_lags_example_2, overwrite = TRUE)
+
+# To compare with original:
+expect_equal(full_calcs_orig, full_calcs_orig_2)
+expect_equal(Nx_lags_orig, Nx_lags_orig_2)
+expect_equal(NY_lags_example, NY_lags_example_2)
+# Error: `NY_lags_example` not equal to `NY_lags_example_2`.
+# Component "rEDM.pred": 'is.NA' value mismatch: 2 in current 3 in target
+# Component "rEDM.var": 'is.NA' value mismatch: 2 in current 3 in target
+# Component "pred.diff": 'is.NA' value mismatch: 2 in current 3 in target
+# Component "var.diff": 'is.NA' value mismatch: 2 in current 3 in target
+# Component "pred.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+# Component "var.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_2$rEDM.pred)
+#Error: NY_lags_example$rEDM.pred not equal to NY_lags_example_2$rEDM.pred.
+#6/100 mismatches (average diff: 0.414)
+#[16]  -2.84 - -2.564 == -0.280
+#[28]  -2.82 - -2.707 == -0.112
+#[40]  -3.82 - -4.389 ==  0.569
+#[44]  -2.77 - -2.613 == -0.156
+#[82]  -2.55 - -1.591 == -0.954
+#[100]   NaN - -0.136 ==    NaN
+
+expect_equal(psi_orig  , psi_orig_2)
+
+# So my calcs haven't changed, but some of the rEDM ones have. Now look at
+# vignette inclusion_issue_2.Rmd
+NY_lags_example_2[c(16, 28, 40, 44, 82, 100),]
+# Gives the values that have changed, but they don't match mine, though value
+# 100 looks to be there now.
