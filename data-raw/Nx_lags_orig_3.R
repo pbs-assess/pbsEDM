@@ -65,10 +65,10 @@ simp.Efix = rEDM::Simplex(dataFrame = input,
                           pred = "1 99",
                           E = Efix,
                           verbose = TRUE) #stats_only = FALSE)
-stats = ComputeError(simp.Efix$Observations,
-                     simp.Efix$Predictions) # computes all three stats
-rEDM.rho.2 = stats$rho
-rEDM.rho.2
+stats = rEDM::ComputeError(simp.Efix$Observations,
+                           simp.Efix$Predictions) # computes all three stats
+rEDM.rho.3 = stats$rho
+rEDM.rho.3
 
 
 # rEDM.points = simp.Efix[,"model_output"][[1]]
@@ -145,10 +145,12 @@ names(NY_lags_example_3)[2:6] <- c("N_t", "N_tmin1", "Y_t", "Y_tmin1", "Y_tmin2"
 usethis::use_data(NY_lags_example_3, overwrite = TRUE)
 
 # To compare with original:
-expect_equal(full_calcs_orig, full_calcs_orig_3)
+expect_equal(full_calcs_orig, full_calcs_orig_3)   # my results haven't changed,
+                                        # as expected
 expect_equal(Nx_lags_orig_2, Nx_lags_orig_3)   # simplex() and Simplex() give
   # different results!
-expect_equal(Nx_lags_orig, Nx_lags_orig_2)   # original and new simplex() match
+# expect_equal(Nx_lags_orig, Nx_lags_orig_2)   # original and new simplex() match
+  # NOT NOW?!?! Do in Nx_lags_orig_2.R, else confusing.
 # simplex and Simplex differ:
 expect_equal(Nx_lags_orig, Nx_lags_orig_3)
 #Error: `Nx_lags_orig` not equal to `Nx_lags_orig_3`.
@@ -157,7 +159,7 @@ expect_equal(Nx_lags_orig, Nx_lags_orig_3)
 #Component "pred.diff": Mean relative difference: 1
 #Component "var.diff": Mean relative difference: 1
 #Component "pred.ratio": Mean relative difference: 0.1569088
-#omponent "var.ratio": Mean relative difference: 0.6525705
+#Component "var.ratio": Mean relative difference: 0.6525705
 
 expect_equal(NY_lags_example, NY_lags_example_3)
 #Error: `NY_lags_example` not equal to `NY_lags_example_3`.

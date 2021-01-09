@@ -1,6 +1,6 @@
 # Nx_lags_orig_2.R - rerunning with latest version of rEDM. Currently had 0.7.4
 # saved, now getting 1.7.3 from CRAN, dated 17 Dec 2020 and using its simplex()
-# function (which is deprecated, and gives different results to _3). Saving data as _2 .
+# function (which is deprecated, and gives different results to _3 that uses Simplex()). Saving data as _2 .
 
 # Generate the example N time series from Carrie's original function (that
 #  demonstrates the concerns with rEDM), differences and lagged values, and
@@ -129,6 +129,14 @@ usethis::use_data(NY_lags_example_2, overwrite = TRUE)
 # To compare with original:
 expect_equal(full_calcs_orig, full_calcs_orig_2)
 expect_equal(Nx_lags_orig, Nx_lags_orig_2)
+#Error: `Nx_lags_orig` not equal to `Nx_lags_orig_2`.
+#Component "rEDM.pred": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "rEDM.var": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "pred.diff": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "var.diff": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "pred.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "var.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+
 expect_equal(NY_lags_example, NY_lags_example_2)
 # Error: `NY_lags_example` not equal to `NY_lags_example_2`.
 # Component "rEDM.pred": 'is.NA' value mismatch: 2 in current 3 in target
@@ -138,6 +146,7 @@ expect_equal(NY_lags_example, NY_lags_example_2)
 # Component "pred.ratio": 'is.NA' value mismatch: 2 in current 3 in target
 # Component "var.ratio": 'is.NA' value mismatch: 2 in current 3 in target
 expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_2$rEDM.pred)
+# These are the new additional differences with older rEDM
 #Error: NY_lags_example$rEDM.pred not equal to NY_lags_example_2$rEDM.pred.
 #6/100 mismatches (average diff: 0.414)
 #[16]  -2.84 - -2.564 == -0.280

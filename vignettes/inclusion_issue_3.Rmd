@@ -1,8 +1,8 @@
 ---
-title: "Inclusion Issue Version 2 (new rEDM to compare)"
+title: "Inclusion Issue Version 3 (new rEDM Simplex() to compare)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{inclusion_issue_2}
+  %\VignetteIndexEntry{inclusion_issue_3}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,12 @@ library(pbsEDM)
 
 ## Introduction
 
-Only saved data object that changed in `Nx_lags_orig2.R` is `NY_lags_example_2`
-so here replace `NY_lags_example` with `NY_lags_example_2` but can leave the
+Using data saved in `Nx_lags_orig_3.R`, which used `rEDM::Simplex()`, whereas
+vignette `inclusion_issue_2.Rmd` used `rEDM::simplex()` which is deprecated but
+threw up a few more different answers. At some point simplify these all down.
+
+Only saved data object that changed in `Nx_lags_orig_3.R` is `NY_lags_example_3`
+(others are my results) so here replace `NY_lags_example` with `NY_lags_example_3` but can leave the
 rest the same. NOW refers to text annotations here for differences with earlier version.
 
 This vignette shows the code used to reproduce the issue we found with
@@ -33,14 +37,14 @@ that are used in the projection calculations. We verified this using manual code
 then using functionalised code (in this `pbsEDM` package) written independently by
 Luke Rogers. <!-- See our manuscript for a full explanation. -->
 
-The tibble `NY_lags_example_2` is saved in the package and contains a simple
+The tibble `NY_lags_example_3` is saved in the package and contains a simple
 simulated population time
 series $N_t$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
 lagged values $N_{t-1}$ as `Ntmin1`, and first differences $Y_t = N_{t+1} - N_t$
 as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`. Also
 included are EDM results for embedding dimension 2, using `rEDM` (`rEDM.pred`
 for the predicted value and `rEDM.var` for its variance) and Andy's original
-function `EDM_pred_E_2()` (saved as `my.pred` and `my.var`). See `?NY_lags_example_2` for full details.
+function `EDM_pred_E_2()` (saved as `my.pred` and `my.var`). See `?NY_lags_example_3` for full details.
 
 <!-- Change what's below based on
 edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie
@@ -54,13 +58,13 @@ edm-work/code/simulated/egDeyle/tstarLoop/mwe-2019.r
 
 Here are example results (for helping explain some of the later text):
 ```{r fullresults}
-as.data.frame(head(NY_lags_example_2))
-as.data.frame(tail(NY_lags_example_2))
+as.data.frame(head(NY_lags_example_3))
+as.data.frame(tail(NY_lags_example_3))
 ```
 
 Note that (TODO: check this):
 ```{r}
-NY_lags_example_2[100, c("rEDM.pred", "my.pred")]
+NY_lags_example_3[100, c("rEDM.pred", "my.pred")]
 ```
 such that `rEDM` does not predict $Y_{100} = Y_{101} - Y_{100}$, but that is the
 value we want so that we can predict $N_{101}$.
@@ -81,10 +85,10 @@ plotPanelMovie.df2(only.final.plot=TRUE,
 # Cannot change fig.width and fig.height hooks unless re-order par() in function
 # fig.width is 0.67 * fig.height
 #```{r, eval=FALSE}
- for(i in 1:nrow(NY_lags_example_2))
+ for(i in 1:nrow(NY_lags_example_3))
   {
     plotPanelMovie.df2(end = i,
-                       max_time = max(NY_lags_example_2$t),
+                       max_time = max(NY_lags_example_3$t),
                        only.final.plot=TRUE,
                        open.pdf=FALSE)
   }
@@ -96,15 +100,15 @@ Plot Andy's manual predictions against rEDM predictions, with the differing ones
 in red:
 ```{r}
 eps = 0.00001      # How different the predictions can be
-plot(NY_lags_example_2$rEDM.pred,
-     NY_lags_example_2$my.pred,
+plot(NY_lags_example_3$rEDM.pred,
+     NY_lags_example_3$my.pred,
      xlab = "rEDM predictions",
      ylab = "Andy predictions")
 abline(a=0,
        b=1,
        col="grey")
 # Colour in red the ones more than eps away
-different <- dplyr::filter(NY_lags_example_2,
+different <- dplyr::filter(NY_lags_example_3,
                            abs(pred.diff) > eps)
 points(different$rEDM.pred,
        different$my.pred,
@@ -113,11 +117,9 @@ points(different$rEDM.pred,
 
 ```
 
-This shows that eight points disagree between Andy's calculations and
+This shows that three points disagree between Andy's calculations and
 rEDM's by more than $`r eps`$. (Originally there were a few more for other
-reasons, but these have been corrected in rEDM). This is more than the original
-`rEDM` calculations, and than those in vignette `..._3.Rmd` that uses
-`rEDM::Simplex()` not `rEDM::simplex()`. The points are:
+reasons, but these have been corrected in rEDM). The three points are:
 ```{r}
 as.data.frame(different)
 ```
@@ -128,16 +130,16 @@ Now use the new `pbsEDM` code that Luke wrote independently; see the
 [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette for details on
 using it. Then compare `pbsEDM` results with those from `rEDM` and from Andy's manual code:
 ```{r pbsEDMcalc}
-pbs_calc <- pbsEDM(NY_lags_example_2,
+pbs_calc <- pbsEDM(NY_lags_example_3,
                    lags = list(Y_t = c(0:1))) # A tibble (contains lists)
 
-testthat::expect_equal(NY_lags_example_2$Y_t,
+testthat::expect_equal(NY_lags_example_3$Y_t,
                        pbs_calc$X_observed[-length(pbs_calc$X_observed)]) # check the indexing is the same, X_observed now has extra value though
                        # TODO: check why that's needed, maybe not now?
 
 pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
 
-plot(NY_lags_example_2$rEDM.pred,
+plot(NY_lags_example_3$rEDM.pred,
      pbs_pred,
      xlab = "rEDM predictions",
      ylab = "pbsEDM predictions")
@@ -149,7 +151,7 @@ abline(a=0,
 Looks similar to above figure (have not coloured in red points). Then compare
 `pbsEDM` results with Andy's:
 ```{r}
-plot(NY_lags_example_2$my.pred,
+plot(NY_lags_example_3$my.pred,
      pbs_pred,
      xlab = "Andy predictions",
      ylab = "pbsEDM predictions")
@@ -157,8 +159,8 @@ abline(a=0,
        b=1,
        col="grey")
 
-# max(abs(NY_lags_example_2$my.pred - pbs_pred), na.rm = TRUE)
-testthat::expect_equal(NY_lags_example_2$my.pred,
+# max(abs(NY_lags_example_3$my.pred - pbs_pred), na.rm = TRUE)
+testthat::expect_equal(NY_lags_example_3$my.pred,
                        pbs_pred)
 ```
 
