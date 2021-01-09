@@ -1,5 +1,7 @@
 # Nx_lags_orig2.R - rerunning with latest version of rEDM. Currently had 0.7.4
-# saved, now getting 1.7.3 from CRAN, dated 17 Dec 2020.
+# saved, now getting 1.7.3 from CRAN, dated 17 Dec 2020. Now redoing with
+# Simplex() since simplex() seems deprecated, and saving these as _3 (simplex
+# was _2, older ones have no number).
 
 # Generate the example N time series from Carrie's original function (that
 #  demonstrates the concerns with rEDM), differences and lagged values, and
@@ -43,11 +45,7 @@ Nx.lags = dplyr::mutate(Nx.lags,
                         "Xtmin2" = c(NA, NA, Xt[-c(T-1, T)])
                         )
 Efix = 2
-simp.Efix = rEDM::simplex(X,
-                          E = Efix,
-                          stats_only = FALSE)
-rEDM.rho = simp.Efix$stats$rho
-simp.Efix     # New format for 2019 (and then in Dec 2020 version)
+
 # From tStarLoop19.rnw in Sept 2019:
 # Those results (except full prediction values as hard to compare by eye), are
 #  the same as for old rEDM, except that rho is now higher, mae is lower, rmse
@@ -55,8 +53,26 @@ simp.Efix     # New format for 2019 (and then in Dec 2020 version)
 #  are the same as to be expected. In my 2017 summary I said I calculated rho to
 #  be 0.70, so looks like rEDM value now agrees. But see later for exact points...
 
+# Try with new Simplex(), not simplex(), function, need to make a dataframe
+#  first:
+input = dplyr::select(Nx.lags, t, Xt) %>%
+  dplyr::rename(Time = t)
+
+simp.Efix = rEDM::Simplex(dataFrame = input,
+                          columns = "Xt",
+                          target = "Xt",
+                          lib = "1 99",
+                          pred = "1 99",
+                          E = Efix,
+                          verbose = TRUE) #stats_only = FALSE)
+stats = ComputeError(simp.Efix$Observations,
+                     simp.Efix$Predictions) # computes all three stats
+rEDM.rho.2 = stats$rho
+rEDM.rho.2
+
+
 # rEDM.points = simp.Efix[,"model_output"][[1]]
-rEDM.points = simp.Efix$model_output$E2
+rEDM.points = simp.Efix
 rEDM.points = tibble::as_tibble(rEDM.points) %>%
   dplyr::rename(obs = Observations,
                 pred = Predictions,
@@ -73,7 +89,7 @@ rEDM.points = dplyr::mutate(rEDM.points,
 num.in = sum(rEDM.points$in_int, na.rm=TRUE)       # within interval
 num.poss = sum(!is.na(rEDM.points$obs * rEDM.points$pred))  # have obs and pred
 percent.in = num.in/num.poss * 100
-
+percent.in
 # manually calc absolute error
 rEDM.points = dplyr::mutate(rEDM.points,
                             diff = obs - pred)
@@ -81,14 +97,14 @@ mae.manual = mean(abs(rEDM.points$diff),
                   na.rm=TRUE)
 mae.manual
 testthat::expect_equal(mae.manual,
-                       simp.Efix$stats$mae[[1]])
+                       stats$MAE)
 # That agrees with the rEDM calculated value (as it did for 2017 version).
 
 Nx.lags = dplyr::mutate(Nx.lags,
                         rEDM.pred = c(NA, rEDM.points$pred),
                         rEDM.var = c(NA, rEDM.points$pred_var))
                         # rEDM.pred was XtPredEeq2, but use this to specify it's rEDM
-res = EDM_pred_E_2(Nx.lags)
+res = EDM_pred_E_2(Nx.lags)   # Andy manual function
 Nx.lags = res$Nx.lags
 my.full.calcs =  res$my.full.calcs
 psi.values = res$psi.values
@@ -107,35 +123,52 @@ tstarPlus1.big.var.diff = which(abs(Nx.lags$var.diff) > eps)
 tstarPlus1.big.var.diff
 
 # Rename to save them in PBSedm package
-# Append with _2 for now to not overwrite original ones.
-Nx_lags_orig_2 <- Nx.lags
-full_calcs_orig_2 =  res$my.full.calcs
-psi_orig_2 = res$psi.values
+# Append with _2 for now to not overwrite original ones - that's using new rEDM
+# (Dec 2020) simplex()
+# Appending with _3 is using same package but Simplex() function, since that's
+# now recommended.
+Nx_lags_orig_3 <- Nx.lags
+full_calcs_orig_3 =  res$my.full.calcs
+psi_orig_3 = res$psi.values
 
-usethis::use_data(Nx_lags_orig_2, overwrite = TRUE)
-usethis::use_data(full_calcs_orig_2, overwrite = TRUE)
-usethis::use_data(psi_orig_2, overwrite = TRUE)
+usethis::use_data(Nx_lags_orig_3, overwrite = TRUE)
+usethis::use_data(full_calcs_orig_3, overwrite = TRUE)
+usethis::use_data(psi_orig_3, overwrite = TRUE)
 
 # These are the ones that are different:
 # dplyr::filter(Nx_lags_orig, abs(pred.diff) > 0.0000001)
 
 
 # This is run after, for the new notation.
-NY_lags_example_2 <- Nx_lags_orig_2
-names(NY_lags_example_2)[2:6] <- c("N_t", "N_tmin1", "Y_t", "Y_tmin1", "Y_tmin2")
-usethis::use_data(NY_lags_example_2, overwrite = TRUE)
+NY_lags_example_3 <- Nx_lags_orig_3
+names(NY_lags_example_3)[2:6] <- c("N_t", "N_tmin1", "Y_t", "Y_tmin1", "Y_tmin2")
+usethis::use_data(NY_lags_example_3, overwrite = TRUE)
 
 # To compare with original:
-expect_equal(full_calcs_orig, full_calcs_orig_2)
-expect_equal(Nx_lags_orig, Nx_lags_orig_2)
-expect_equal(NY_lags_example, NY_lags_example_2)
-# Error: `NY_lags_example` not equal to `NY_lags_example_2`.
-# Component "rEDM.pred": 'is.NA' value mismatch: 2 in current 3 in target
-# Component "rEDM.var": 'is.NA' value mismatch: 2 in current 3 in target
-# Component "pred.diff": 'is.NA' value mismatch: 2 in current 3 in target
-# Component "var.diff": 'is.NA' value mismatch: 2 in current 3 in target
-# Component "pred.ratio": 'is.NA' value mismatch: 2 in current 3 in target
-# Component "var.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+expect_equal(full_calcs_orig, full_calcs_orig_3)
+expect_equal(Nx_lags_orig_2, Nx_lags_orig_3)   # simplex() and Simplex() give
+  # different results!
+expect_equal(Nx_lags_orig, Nx_lags_orig_2)   # original and new simplex() match
+# simplex and Simplex differ:
+expect_equal(Nx_lags_orig, Nx_lags_orig_3)
+#Error: `Nx_lags_orig` not equal to `Nx_lags_orig_3`.
+#Component "rEDM.pred": Mean relative difference: 0.1494412
+#Component "rEDM.var": Mean relative difference: 0.4327178
+#Component "pred.diff": Mean relative difference: 1
+#Component "var.diff": Mean relative difference: 1
+#Component "pred.ratio": Mean relative difference: 0.1569088
+#omponent "var.ratio": Mean relative difference: 0.6525705
+
+expect_equal(NY_lags_example, NY_lags_example_3)
+#Error: `NY_lags_example` not equal to `NY_lags_example_3`.
+#Component "rEDM.pred": 'is.NA' value mismatch: 2 in current 3 in target
+#omponent "rEDM.var": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "pred.diff": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "var.diff": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "pred.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+#Component "var.ratio": 'is.NA' value mismatch: 2 in current 3 in target
+
+# For orig versus 2 (I think older rEDM versus new rEDM simplex()) I had
 expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_2$rEDM.pred)
 #Error: NY_lags_example$rEDM.pred not equal to NY_lags_example_2$rEDM.pred.
 #6/100 mismatches (average diff: 0.414)
@@ -146,8 +179,13 @@ expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_2$rEDM.pred)
 #[82]  -2.55 - -1.591 == -0.954
 #[100]   NaN - -0.136 ==    NaN
 
-expect_equal(psi_orig  , psi_orig_2)
+# But now just get:
+expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_3$rEDM.pred)
+# [100] NaN - -0.136 == NaN
 
+expect_equal(psi_orig  , psi_orig_3)
+
+TODO (may not be needed now?):
 # So my calcs haven't changed, but some of the rEDM ones have. Now look at
 # vignette inclusion_issue_2.Rmd
 NY_lags_example_2[c(16, 28, 40, 44, 82, 100),]
