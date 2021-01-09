@@ -182,12 +182,29 @@ expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_2$rEDM.pred)
 # But now just get:
 expect_equal(NY_lags_example$rEDM.pred, NY_lags_example_3$rEDM.pred)
 # [100] NaN - -0.136 == NaN
+# and as expected the others will similarly change:
+expect_equal(NY_lags_example$rEDM.var, NY_lags_example_3$rEDM.var)
+# Error: NY_lags_example$rEDM.var not equal to NY_lags_example_3$rEDM.var.
+# 1/100 mismatches
+# [100] NaN - 0.00289 == NaN
+expect_equal(NY_lags_example$pred.diff, NY_lags_example_3$pred.diff)
+# [100] NaN - -2.78e-17 == NaN    # rEDM.pred and my.pred [100] agree (but
+# previously the former was NaN), so get these expected results, just confirming.
+expect_equal(NY_lags_example$var.diff, NY_lags_example_3$var.diff)
+# [100] NaN - 0 == NaN
+expect_equal(NY_lags_example$pred.ratio, NY_lags_example_3$pred.ratio)
+# [100] NaN - 1 == NaN
+expect_equal(NY_lags_example$var.ratio, NY_lags_example_3$var.ratio)
+# [23]  3.8e+21 - 3.8e+21 == -524288
+# [100]     NaN - 1.0e+00 ==     NaN
+# That first one is a numerical thing, don't worry.
 
 expect_equal(psi_orig  , psi_orig_3)
 
-TODO (may not be needed now?):
-# So my calcs haven't changed, but some of the rEDM ones have. Now look at
-# vignette inclusion_issue_2.Rmd
-NY_lags_example_2[c(16, 28, 40, 44, 82, 100),]
+# So my calcs haven't changed, but some of the rEDM ones have for simplex(), but
+# not Simplex(), so this not needed now.
+# NY_lags_example_2[c(16, 28, 40, 44, 82, 100),]
 # Gives the values that have changed, but they don't match mine, though value
 # 100 looks to be there now.
+
+#  Now look at  vignette inclusion_issue_3.Rmd
