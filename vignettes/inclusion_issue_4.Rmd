@@ -102,8 +102,6 @@ value we want so that we can predict $N_{101}$.
 We should be able to predict it because we have all the relevent
 information. THIS IS FIXED NOW IN rEDM.
 
-## Visualise data and some results
-
 <!-- Plot of data (before making movie):
 Commenting out since not really needed (and have better function now
 demonstrated in the vignette analyse_simple_time_series, though the code here
@@ -126,27 +124,6 @@ plotPanelMovie.df2(only.final.plot=TRUE,
 # ```
 ```
 -->
-
-Plot Andy's manual predictions against rEDM predictions, with the differing ones
-in red:
-```{r}
-eps = 0.00001      # How different the predictions can be
-plot(NY_lags_example_3$rEDM.pred,
-     NY_lags_example_3$my.pred,
-     xlab = "rEDM predictions",
-     ylab = "Andy predictions")
-abline(a=0,
-       b=1,
-       col="grey")
-
-```
-
-This shows that three points disagree between Andy's calculations and
-rEDM's by more than $`r eps`$. (Originally there were a few more for other
-reasons, but these have been corrected in rEDM). The three points are:
-```{r}
-as.data.frame(different)
-```
 
 ## Predictions using pbsEDM code
 
