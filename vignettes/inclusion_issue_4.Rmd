@@ -177,25 +177,6 @@ as.data.frame(different)
 dplyr::select(different, t, Y_t, rEDM.pred, my.pred, pbsEDM.pred)
 ```
 
-HERE
-
-Looks similar to above figure (have not coloured in red points). Then compare
-`pbsEDM` results with Andy's:
-```{r}
-plot(NY_lags_example_3$my.pred,
-     pbs_pred,
-     xlab = "Andy predictions",
-     ylab = "pbsEDM predictions")
-abline(a=0,
-       b=1,
-       col="grey")
-
-# max(abs(NY_lags_example_3$my.pred - pbs_pred), na.rm = TRUE)
-```
-
-The above figure shows they look identical, as confirmed by the above line of code not
-returning an error.
-
 **Conclusion**: Andy's original manual calculations and Luke's new function in
 `pbsEDM` give the same results for this simulated data set, which differs for
 three time values MORE NOW from
@@ -238,12 +219,14 @@ testthat::expect_equal(weights94, pbs_calc$neighbour_weight[94, ], tolerance = 0
 testthat::expect_equal(Y95est, pbs_calc$X_forecast[95])
 ```
 However, `rEDM` gives
+
 ```{r rEDMninetyfive}
-Y95est_rEDM = rEDM_points[95, "pred"]
+Y95est_rEDM = NY_lags_example_3$rEDM.pred[95]
 Y95est_rEDM
 ```
+as already noted above.
 
-TODO: redoing that and check if it's changed.
+TODO: show rEDM full results. Can't find them now though.
 
 ## Manually reproduce `rEDM` result
 
@@ -260,27 +243,24 @@ Y95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
 Y95est_allow
 ```
 
-However, the problem is that we should not be allowed to use $\bf{x}_{96}$.
-By definition,
-$$\bf{x}_{96} = [Y_{96}, Y_{95}],$$
-which contains $Y_{95}$. But $Y_{95}$ is the first component of
-$$\bf{x}_{95} = [Y_{95}, Y_{94}]$$
-and is exactly what we are trying to predict.
-$Y_{95}$ is presumably the 'one' that we are leaving out in 'leave-one-out', but
-it occurs in $\bf{x}_{95}$ and $\bf{x}_{96}$, by definition.
+However, the problem is that we should not be allowed to use $\bf{x}_{96}$. For
+our focal time $t^* = 94$ we are trying to predict $Y_{t^*+1} = Y_{95}$. But, by
+definition, $Y_{95}$ is included in $\bf{x}_{96}$ since
+$$\bf{x}_{96} = [Y_{96}, Y_{95}].$$
 
 So $\bf{x}_{96}$ should not be used to forecast $\bf{x}_{95}$, because it
-explicitly contains one of the two components of $\bf{x}_{95}$.
+explicitly contains one of the two components of $\bf{x}_{95}$ (namely the
+$Y_{95}$ value that we are trying to predict).
 
 The same issue occurs (with Andy's manual code) for $t^*=75$, for which Luke's code
 gives the same answer as shown above (because all values give the same answer).
 
-To summarise -- the issue is that rEDM does not fully take into account that
+So the implementation of `rEDM` is not taking into account the fact that
 $\bf{x}_t$ is a vector of lagged values.
-<!-- Not sure what I meant by this: It's not simply an implementation issue
-(that `rEDM` is unaware that the $X_t$ are differences of the $N_t$). -->
 
-## Another attempt with `rEDM`
+## Try alternative settings for `rEDM`
+
+## Another (old) attempt with `rEDM` - can probably delete
 
 Andy tried the following in `rEDM`, to not allow $Y_{96}$ to be a nearest neighbour
 predicting $Y_{95}$ from $Y_{94}$ -- but think this isn't possible, since it still
