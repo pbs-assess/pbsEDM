@@ -268,7 +268,10 @@ ahead should be excluded anyway so maybe it is (I just haven't worked
 through it until now). First try setting it to 1
 ```{r exclusion1}
 # TODO do here then do in data-raw and save
-check_rEDM_excl_1 <- rEDM::Simplex(dataFrame = input,
+input_obs <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
+  dplyr::rename(Time = t)
+
+check_rEDM_excl_1 <- rEDM::Simplex(dataFrame = input_obs,
                                    columns = "Y_t",
                                    target = "Y_t",
                                    lib = "1 99",
@@ -289,7 +292,7 @@ testthat::expect_equal(pbs_pred,
 Then try setting it to 2:
 ```{r exclusion2}
 # TODO do here then do in data-raw and save
-check_rEDM_excl_2 <- rEDM::Simplex(dataFrame = input,
+check_rEDM_excl_2 <- rEDM::Simplex(dataFrame = input_obs,
                                    columns = "Y_t",
                                    target = "Y_t",
                                    lib = "1 99",
