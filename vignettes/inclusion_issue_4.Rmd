@@ -260,6 +260,55 @@ $\bf{x}_t$ is a vector of lagged values.
 
 ## Try alternative settings for `rEDM`
 
+Try changing `exclusionRadius` input in `rEDM::Simplex`, which "excludes vectors
+from the search space of nearest neighbors if their relative time
+index is within  exclusionRadius." I originally thought that this
+isn't quite what we want since goes both ways, but the time steps
+ahead should be excluded anyway so maybe it is (I just haven't worked
+through it until now). First try setting it to 1
+```{r exclusion1}
+# TODO do here then do in data-raw and save
+check_rEDM_excl_1 <- rEDM::Simplex(dataFrame = input,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE,
+                                   exclusionRadius = 1)$Predictions
+check_rEDM_excl_1 <- c(NA,
+                       check_rEDM_excl_1)   # Needs extra NA to get indexing correct
+
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       check_rEDM_excl_1)
+
+testthat::expect_equal(pbs_pred,
+                       check_rEDM_excl_1)
+```
+
+Then try setting it to 2:
+```{r exclusion2}
+# TODO do here then do in data-raw and save
+check_rEDM_excl_2 <- rEDM::Simplex(dataFrame = input,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE,
+                                   exclusionRadius = 2)$Predictions
+check_rEDM_excl_2 <- c(NA,
+                       check_rEDM_excl_2)   # Needs extra NA to get indexing correct
+
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       check_rEDM_excl_2)
+
+testthat::expect_equal(pbs_pred,
+                       check_rEDM_excl_2)
+```
+
+
+
 ## Another (old) attempt with `rEDM` - can probably delete
 
 Andy tried the following in `rEDM`, to not allow $Y_{96}$ to be a nearest neighbour
