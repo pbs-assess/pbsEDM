@@ -148,7 +148,7 @@ reasons, but these have been corrected in rEDM). The three points are:
 as.data.frame(different)
 ```
 
-## Use new pbsEDM code
+## Predictions using pbsEDM code
 
 Now use the new `pbsEDM` code that Luke wrote independently; see the
 [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette for details on
@@ -164,6 +164,14 @@ testthat::expect_equal(NY_lags_example_3$Y_t,
 
 pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
 
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbs_pred)
+```
+That last line will cause an error if the `pbsEDM` results do not match the
+`my.pred` values from Andy's manual code.
+
+Now to plot the `pbsEDM` predictions again those from `rEDM`:
+```{r pbsredm}
 plot(NY_lags_example_3$rEDM.pred,
      pbs_pred,
      xlab = "rEDM predictions",
@@ -173,15 +181,26 @@ abline(a=0,
        col="grey")
 
 # Colour in red the ones more than eps away
-HERE
-different <- dplyr::filter(NY_lags_example_3,
-                           abs(pred.diff) > eps)
+eps = 0.00001      # How different the predictions can be
+
+# Want to compare new pbsEDM results with saved rEDM
+NY_lags_extended <- dplyr::mutate(NY_lags_example_3,
+                                  pbsEDM.pred = pbs_pred)
+
+different <- dplyr::filter(NY_lags_extended,
+                           abs(rEDM.pred - pbsEDM.pred) > eps)
 points(different$rEDM.pred,
        different$my.pred,
        col = "red",
        pch = 20)
 
+as.data.frame(different)
+# Just time, observations Y_5, and predictions (my.pred is Andy's manual
+# calculations):
+dplyr::select(different, t, Y_t, rEDM.pred, my.pred, pbsEDM.pred)
 ```
+
+HERE
 
 Looks similar to above figure (have not coloured in red points). Then compare
 `pbsEDM` results with Andy's:
@@ -195,8 +214,6 @@ abline(a=0,
        col="grey")
 
 # max(abs(NY_lags_example_3$my.pred - pbs_pred), na.rm = TRUE)
-testthat::expect_equal(NY_lags_example_3$my.pred,
-                       pbs_pred)
 ```
 
 The above figure shows they look identical, as confirmed by the above line of code not
