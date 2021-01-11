@@ -70,7 +70,30 @@ as.data.frame(head(NY_lags_example_3))
 as.data.frame(tail(NY_lags_example_3))
 ```
 
-Note that (TODO: mention if it's part of the GitHub Issue):
+This is the code to check that `rEDM::Simplex()` gives the stated results, but
+it is not run (is just shown) in this vignette to avoid `pbsEDM` being dependent
+on `rEDM` (and its dependencies). Can be used to simply check future versions of
+both packages.
+```{r compareredm, eval=FALSE}
+input <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
+  dplyr::rename(Time = t)
+
+check_rEDM <- rEDM::Simplex(dataFrame = input,
+                            columns = "Y_t",
+                            target = "Y_t",
+                            lib = "1 99",
+                            pred = "1 99",
+                            E = 2,
+                            verbose = TRUE)$Predictions
+check_rEDM <- c(NA,
+                check_rEDM)   # Needs extra NA to get indexing correct
+
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       check_rEDM)
+```
+
+
+Note that (TODO: mention this if it's part of the GitHub Issue):
 ```{r}
 NY_lags_example_3[100, c("rEDM.pred", "my.pred")]
 ```
@@ -115,13 +138,6 @@ plot(NY_lags_example_3$rEDM.pred,
 abline(a=0,
        b=1,
        col="grey")
-# Colour in red the ones more than eps away
-different <- dplyr::filter(NY_lags_example_3,
-                           abs(pred.diff) > eps)
-points(different$rEDM.pred,
-       different$my.pred,
-       col = "red",
-       pch = 20)
 
 ```
 
@@ -155,6 +171,16 @@ plot(NY_lags_example_3$rEDM.pred,
 abline(a=0,
        b=1,
        col="grey")
+
+# Colour in red the ones more than eps away
+HERE
+different <- dplyr::filter(NY_lags_example_3,
+                           abs(pred.diff) > eps)
+points(different$rEDM.pred,
+       different$my.pred,
+       col = "red",
+       pch = 20)
+
 ```
 
 Looks similar to above figure (have not coloured in red points). Then compare
