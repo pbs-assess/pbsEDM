@@ -36,6 +36,7 @@ X = N[-1] - N[-length(N)]    # X = first-difference vector of
 
 # Create Nx.lags with extra columns to represent lagged variables (manually,
 # TODO put a test comparing with Luke's function).
+# TODO Change Xt to Y_t, etc., check with what gets saved
 Nx.lags = data.frame("t" = tvec, "Nt" = N)   # now adding t
 Nx.lags = dplyr::tbl_df(Nx.lags)   # TODO change to tibble
 Nx.lags = dplyr::mutate(Nx.lags,
