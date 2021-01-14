@@ -224,10 +224,10 @@ However, `rEDM` gives
 Y95est_rEDM = NY_lags_example_3$rEDM.pred[95]
 Y95est_rEDM
 ```
-as already noted above. Unlike earlier versions of `rEDM::simplex()`, the full
-results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`.
-
-TODO: show rEDM full results. Can't find them now though.
+as already noted above. Unlike (I think) earlier versions of `rEDM::simplex()`, the full
+results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`
+or `rEDM::simplex()`; have tried changing options `verbose, stats_only, silent`,
+but none give the full results.
 
 ## Manually reproduce `rEDM` result
 
@@ -241,8 +241,12 @@ weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
 #  very close to x[94].
 Y95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
                    sum(weights94_allow)
+testthat::expect_equal(Y95est_allow,
+                       Y95est_rEDM)
 Y95est_allow
+
 ```
+which agrees with the `Y95est_rEDM` value shown above
 
 However, the problem is that we should not be allowed to use $\bf{x}_{96}$. For
 our focal time $t^* = 94$ we are trying to predict $Y_{t^*+1} = Y_{95}$. But, by
@@ -270,7 +274,7 @@ input_obs <- dplyr::select(NY_lags_example_3, t, Y_t) %>%
   dplyr::rename(Time = t)
 input_obs[95,]
 input_obs_change <- input_obs
-input_obs_change[95,"Y_t"] = 7
+input_obs_change[95,"Y_t"] = 7    # Move it out of the way
 
 rEDM_change <- rEDM::Simplex(dataFrame = input_obs_change,
                                    columns = "Y_t",
@@ -281,12 +285,14 @@ rEDM_change <- rEDM::Simplex(dataFrame = input_obs_change,
                                    verbose = TRUE)$Predictions
 rEDM_change <- c(NA,
                  rEDM_change)   # Needs extra NA to get indexing correct
-
 testthat::expect_equal(pbs_pred[95],
                        rEDM_change[95])
 
+pbs_pred[95]
+rEDM_change[95]
+
 ```
-That does not cause an error, so this shows that changing $Y_{95}$ gives the
+Those are the same, so showing that changing $Y_{95}$ gives the
 expected answer from using `rEDM::Simplex()`.
 
 ## Try alternative `exclusionRadius` settings for `rEDM`
