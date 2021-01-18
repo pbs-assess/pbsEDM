@@ -94,7 +94,7 @@ pbsY <- function (Z, centre_and_scale) {
 	if (centre_and_scale) {
 		Z_means <- apply(Z, 2, mean, na.rm = TRUE)
 		Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
-		if (Z_sds <= 0) stop("the standard deviation of columns in Z must be > 0")
+		if (!all(Z_sds > 0)) stop("standard deviations of columns in Z must be > 0")
 		t((t(Z) - Z_means) / Z_sds)
 	} else {
 		Z
