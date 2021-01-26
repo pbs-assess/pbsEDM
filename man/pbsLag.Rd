@@ -24,4 +24,8 @@ pbsLag(1:10, 3)
 pbsLag(matrix(rep(1:10, 2), nrow = 10), 3)
 pbsLag(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
 
+pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 1))
+pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 0))
+pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, -1))
+
 }

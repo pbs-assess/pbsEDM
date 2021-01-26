@@ -237,6 +237,10 @@ pbsDist <- function (X,
 #' pbsLag(1:10, 3)
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), 3)
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
+#' 
+#' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 1))
+#' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 0))
+#' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, -1))
 #'
 pbsLag <- function (x,
                     n = 1) {
@@ -250,7 +254,11 @@ pbsLag <- function (x,
 	m <- as.matrix(x)
 	if (length(n) == 1) {n <- rep(n, ncol(m))}
 	for (i in seq_along(n)) {
-		m[, i] <- c(rep(NA_real_, floor(n[i])), m[, i])[seq_along(m[, i])]
+		if (n[i] >= 0) {
+			m[, i] <- c(rep(NA_real_, floor(n[i])), m[, i])[seq_along(m[, i])]
+		} else {
+			m[, i] <- c(m[, i], rep(NA_real_, floor(-n[i])))[seq_along(m[, i]) - n[i]]
+		}
 	}
 	if (is.vector(x)) {
 		m <- as.vector(m)
