@@ -49,12 +49,12 @@ test_that("pbsX() returns a matrix", {
 
 # Test pbsSSR ------------------------------------------------------------------
 
-test_that("pbsSSR() returns a matrix of class 'pbsSSR'", {
-	lags <- list(x = c(0, 1, 2))
-	N <- pbsN(sample(1:10), lags)
-	expect_true(class(pbsSSR(N, lags))[1] == "matrix")	
-	expect_true(class(pbsSSR(N, lags))[2] == "pbsSSR")	
-})
+# test_that("pbsSSR() returns a matrix of class 'pbsSSR'", {
+# 	lags <- list(x = c(0, 1, 2))
+# 	N <- pbsN(sample(1:10), lags)
+# 	expect_true(class(pbsSSR(N, lags))[1] == "matrix")	
+# 	expect_true(class(pbsSSR(N, lags))[2] == "pbsSSR")	
+# })
 
 # Test pbsLag ------------------------------------------------------------------
 
