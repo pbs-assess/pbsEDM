@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = "",
   fig.width = 5,
   fig.height = 5
 )
@@ -27,32 +27,13 @@ This vignette demonstrates the issue we found with
 calculations in the `rEDM` package, namely to do with the nearest neighbours
 that are used in the projection calculations. The calculations here use our
 `pbsEDM` package led by Luke Rogers, and are verified using manual code written
-independently by Andrew Edwards. <!-- See our manuscript for a full explanation. -->
+independently by Andy Edwards. <!-- See our manuscript for a full explanation. -->
 
 The tibble `NY_lags_example_3` is saved in the package and contains a simple
 simulated population time
 series $N_t$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
 lagged values $N_{t-1}$ as `Ntmin1`, and first differences $Y_t = N_{t+1} - N_t$
-as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`. Also
-included are EDM results for embedding dimension 2, using `rEDM::Simplex()` (`rEDM.pred`
-for the predicted value and `rEDM.var` for its variance) and results from Andrew's original
-function `EDM_pred_E_2()` (saved as `my.pred` and `my.var`). The code used to
-run `rEDM::Simplex()` is repeated here, but not run (to avoid our `pbsEDM`
-package being dependent on the `rEDM` package, to keep dependencies to a minimum.
-See `?NY_lags_example_3` for full details. THE HELP WILL NEED UPDATING.
-
-
-Can delete:
-Using data saved in `Nx_lags_orig_3.R`, which used `rEDM::Simplex()`, whereas
-vignette `inclusion_issue_2.Rmd` used `rEDM::simplex()` which is deprecated but
-threw up a few more different answers. At some point simplify these all down.
-
-Can delete:
-Only saved data object that changed in `Nx_lags_orig_3.R` is `NY_lags_example_3`
-(others are my results) so here replace `NY_lags_example` with `NY_lags_example_3` but can leave the
-rest the same. NOW refers to text annotations here for differences with earlier version.
-
-
+as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`:
 
 <!-- Change what's below based on
 edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie
@@ -63,15 +44,18 @@ edm-work/code/simulated/egDeyle/tstarLoop/tstarLoop2019.rnw
 and
 edm-work/code/simulated/egDeyle/tstarLoop/mwe-2019.r
 -->
-
-Here are example results (for helping explain some of the later text):
 ```{r fullresults}
 as.data.frame(head(NY_lags_example_3))
 as.data.frame(tail(NY_lags_example_3))
 ```
+Also included are results from using the `rEDM`
+package with embedding dimension 2 (see below) as `rEDM.pred` for the predicted value and `rEDM.var`
+for its variance, and results from Andy's original
+function `EDM_pred_E_2()`, saved as `my.pred` and `my.var`.
+See `?NY_lags_example_3` for full details. THE HELP WILL NEED UPDATING.
 
 This is the code to check that `rEDM::Simplex()` gives the stated results, but
-it is not run (is just shown) in this vignette to avoid `pbsEDM` being dependent
+it is not run in this vignette to avoid `pbsEDM` being dependent
 on `rEDM` (and its dependencies). Can be used to simply check future versions of
 both packages.
 ```{r compareredm, eval=FALSE}
@@ -145,7 +129,16 @@ testthat::expect_equal(NY_lags_example_3$my.pred,
                        pbs_pred)
 ```
 That last line will cause an error if the `pbsEDM` results do not match the
-`my.pred` values from Andy's manual code.
+`my.pred` values from Andy's manual code (there is no error because they do match).
+
+**Conclusion**: Andy's original manual calculations and Luke's new function in
+`pbsEDM` give the same results for this simulated data set. Andy's and Luke's
+code was written independently (although Andy had explained why his results
+differed to those from `rEDM`). This is a reassuring test of Luke's new code,
+which is more general and functionalised than Andy's, and can do more than just $E=2$.
+Thus, we will continue using the `pbsEDM` results.
+
+## Compare `pbsEDM` results with those from `rEDM`
 
 Now to plot the `pbsEDM` predictions again those from `rEDM`:
 ```{r pbsredm}
@@ -167,23 +160,16 @@ NY_lags_extended <- dplyr::mutate(NY_lags_example_3,
 different <- dplyr::filter(NY_lags_extended,
                            abs(rEDM.pred - pbsEDM.pred) > eps)
 points(different$rEDM.pred,
-       different$my.pred,
+       different$pbsEDM.pred,
        col = "red",
        pch = 20)
 
-# Just time, observations Y_t, and predictions (my.pred is Andy's manual
-# calculations):
-dplyr::select(different, t, Y_t, rEDM.pred, my.pred, pbsEDM.pred)
+# Just time, observations Y_t, and predictions
+dplyr::select(different, t, Y_t, rEDM.pred, pbsEDM.pred)
 ```
 Those time indices represent $t^*+1$ values.
 
-**Conclusion**: Andy's original manual calculations and Luke's new function in
-`pbsEDM` give the same results for this simulated data set, which differs for
-three time values from
-results from `rEDM::Simplex()`. Andy's and Luke's code was written independently (although
-Andy had explained why his results differed to those from `rEDM`).
-This is a reassuring test of Luke's new code, which is more
-general and functionalised than Andy's, and can do more than just $E=2$.
+So there are three time values for which results differ between `pbsEDM` and `rEDM`.
 
 ## Explaining the issue
 
@@ -226,8 +212,8 @@ Y95est_rEDM
 ```
 as already noted above. Unlike (I think) earlier versions of `rEDM::simplex()`, the full
 results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`
-or `rEDM::simplex()`; have tried changing options `verbose, stats_only, silent`,
-but none give the full results.
+or `rEDM::simplex()` [have tried changing options `verbose, stats_only, silent`,
+but none give the full results].
 
 ## Manually reproduce `rEDM` result
 
@@ -255,10 +241,9 @@ $$\bf{x}_{96} = [Y_{96}, Y_{95}].$$
 
 So $\bf{x}_{96}$ should not be used to forecast $\bf{x}_{95}$, because it
 explicitly contains one of the two components of $\bf{x}_{95}$ (namely the
-$Y_{95}$ value that we are trying to predict).
+$Y_{95}$ value that we are trying to predict). See our manuscript for full details.
 
-The same issue occurs (with Andy's manual code) for $t^*=75$, for which Luke's code
-gives the same answer as shown above (because all values give the same answer).
+The same issue occurs for $t^*=75$.
 
 So the implementation of `rEDM` is not taking into account the fact that
 $\bf{x}_t$ is a vector of lagged values.
