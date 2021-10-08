@@ -1,4 +1,4 @@
-# Nx_lags_orig2.R - rerunning with latest version of rEDM. Currently had 0.7.4
+# Nx_lags_orig3.R - rerunning with latest version of rEDM. Currently had 0.7.4
 # saved, now getting 1.7.3 from CRAN, dated 17 Dec 2020. Now redoing with
 # Simplex() since simplex() seems deprecated, and saving these as _3 (simplex
 # was _2, older ones have no number).
