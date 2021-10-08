@@ -365,7 +365,7 @@ have those three agreeing, but 77 and 97 being quite different:
 ```
 
 Try exclusion radius of 3 (also saved in `pbsEDM`):
-```{r exclusion3}
+```{r exclusion3, eval=FALSE}
 check_rEDM_excl_3 <- rEDM::Simplex(dataFrame = input_obs,
                                    columns = "Y_t",
                                    target = "Y_t",
@@ -404,30 +404,7 @@ check_rEDM_excl_3 <- c(NA,
 # [97] -0.7977 - 0.7547 == -1.55e+00
 # [98]  0.0799 - 0.0799 ==  3.28e-06
 ```
-The three highlighed ones are new differences this for `exclusionRadius=3`,
+The three highlighted ones are new differences for `exclusionRadius=3`,
 which, as expected, does not fix the problem.
 
 So, conclusion is that setting `exclusionRadius` in `rEDM` does not fix the problem.
-
-
-## Another (old) attempt with `rEDM` - can probably delete
-
-Andy tried the following in `rEDM`, to not allow $Y_{96}$ to be a nearest neighbour
-predicting $Y_{95}$ from $Y_{94}$ -- but think this isn't possible, since it still
-kind of wants cross-validation. Had played with `lib` and `pred` but couldn't get answer
-to agree with Andy's original one. Not running
-this in vignette, keeping for reference if needed:
-```{r rEDMagain, eval=FALSE}
-simp_Efix2 = simplex(simple_ts,
-                     E = 2,
-                     stats_only = FALSE,
-                     # lib = matrix(c(1, 94, 97, 99), nrow = 2, byrow = TRUE),
-                     lib = c(1, 94),
-                     pred = c(95, 97)
-                     # pred = matrix(c(95, 95, 96, 96), nrow = 2, byrow = TRUE)
-                     )
-rEDM_points2 = simp_Efix2[,"model_output"][[1]]       # time, obs, pred and pred_var
-# Make each row correspond to t:
-# rEDM_points2 = rbind(c(1, simple_ts[1], NA, NA), rEDM_points2) - only if doing all times
-head(rEDM_points2)
-```
