@@ -1041,3 +1041,64 @@ plot_library_size <- function(T = 100,
   }
   return(lib_size)
 }
+
+# Attempts at a decent colour figure:
+
+
+# USEME
+# This is best I think, though no colourbar, but I can add numbers in manually
+#  given the shape of the output, which isn't go to change.
+image(E_vec, tstar_vec, C, xlim = range(E_vec) + c(-0.5, 0.5),
+      ylim = range(tstar_vec) + c(-0.5, 0.5),
+      xaxs = "i",
+      yaxs = "i")   # sets axis range
+rect(0, 0, max(E_vec) + 2, max(tstar_vec) + 2, col = "darkgrey")
+image(E_vec, tstar_vec, C, add = TRUE,
+      col = hcl.colors(max(C, na.rm=TRUE) - min(C, na.rm=TRUE) + 1, "Spectral"))
+
+# Or image.plot does color bar, but I'll just add the numbers on the plot
+# given the nature of the plot.
+
+
+# Without lines, fixing the x-axis, but has too many colours (four between 2 and 4)
+filled.contour(E_vec, tstar_vec, C, xlim = range(E_vec) + c(-0.5, 0.5))
+
+# With lines added. But slightly confusing as the lines are in the middle of the
+# colours. I'd thought that lines were delineating colours, but they're not, and
+# the colours are in fact in the middle of each integer E as required.
+filled.contour(E_vec, tstar_vec, C, plot.axes = {
+  axis(1)
+  axis(2)
+  contour(E_vec, tstar_vec, C, add = TRUE, lwd = 2)
+  })
+
+
+# Trying to add grey background. Doesn't work.
+filled.contour(E_vec, tstar_vec, C, plot.axes = {
+  filled.contour(E_vec, tstar_vec, C)
+  axis(1)
+  axis(2)
+  rect(1, min(tstar_vec), max(E_vec), max(tstar_vec), col = "darkgrey", add=TRUE)
+  contour(E_vec, tstar_vec, C, add = TRUE, lwd = 2)
+  })
+
+
+
+# This does grey background and contour lines, just need to get filled.contour
+# working, but I think can't have add=TRUE:
+filled.contour(E_vec, tstar_vec, C,plot.axes = {rect(1, min(tstar_vec), max(E_vec), max(tstar_vec), col = "darkgrey")
+  axis(1)
+  axis(2)
+  contour(E_vec, tstar_vec, C, add = TRUE, lwd = 2)
+  })
+#    rect(1, min(tstar_vec), max(E_vec), max(tstar_vec), col = "darkgrey")
+
+# From R Graphics Cookbook, but need to make df with named columns and haven't
+# tried since then (see next comment)
+p  <- ggplot(df, aes(x = E_vec, y = tstar_vec, fill = C))
+
+# But heatmap in base R is recommended here:
+https://r-graph-gallery.com/heatmap.html
+heatmap(t(C), Rowv = NA, Colv = NA, scale = "column",
+              main = "heatmap(*, NA, NA) ~= image(t(x))")
+# but doesn't automatically give colorbar
