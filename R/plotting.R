@@ -1015,8 +1015,8 @@ plot_library_size <- function(T = 100,
                               tstar_vec = 1:100){
   stopifnot(length(T) == 1,
             length(E_vec) > 1,
-            min(E_vec) < 2,
-            length(tstar_vec > 1))
+            min(E_vec) > 1,
+            length(tstar_vec) > 1)
 
   lib_size <- matrix(NA,
                      nrow = length(E_vec),
@@ -1034,4 +1034,5 @@ plot_library_size <- function(T = 100,
     }
     # And tstar <= E-1 and tstar >= T-1 remain as NA
   }
+  return(lib_size)
 }
