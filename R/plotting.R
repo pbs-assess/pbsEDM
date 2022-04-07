@@ -984,11 +984,54 @@ plot.pbsSim <- function (x, ...) {
   plot(x[, "producers"], type = "l", ylab = "Producers")
   plot(x[, "prey"], type = "l", ylab = "Prey")
   plot(
-    x[, "predators"], 
+    x[, "predators"],
     type = "l",
     xlab = "Time step",
     ylab = "Predators")
   par(mfrow = c(1, 1))
-  
+
 }
 
+##' Plot the size of the library for a given `T` as a function of `E` and `tstar`
+##'
+##' Show a coloured contour plot of how the library size changes for a
+##' univariate time series with sample size `T` as chosen embedding dimension
+##' `E` and target index `tstar` vary.
+##'
+##' @param T integer of the sample size of a univariate time series (time series
+##'   itself not needed)
+##' @param E vector of integers to show for the embedding dimension
+##' @param tstar vector of integers to show for the focal point time index
+##'   `tstar`, `t*`, from which projections are made from
+##' @return plots the contour plot and returns the matrix of calculated library sizes
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \dontrun{
+##'
+##' }
+plot_library_size <- function(T = 100,
+                              E_vec = 2:10,
+                              tstar_vec = 1:100){
+  stopifnot(length(T) == 1,
+            length(E_vec) > 1,
+            min(E_vec) < 2,
+            length(tstar_vec > 1))
+
+  lib_size <- matrix(NA,
+                     nrow = length(E_vec),
+                     ncol = length(tstar_vec))
+
+  for(i in 1:length(E_vec)){
+    E <- E_vec[i]
+    for(tstar in E:(T - E - 2)){    # and deal with exceptions
+      j <- which(tstar_vec == tstar)
+      lib_size[i, j] <- T - 2 * (E + 1)
+    }
+    for(tstar in (T - E - 1):(T - 2)){    # and deal with exceptions
+      j <- which(tstar_vec == tstar)
+      lib_size[i, j] <- tstar - E
+    }
+    # And tstar <= E-1 and tstar >= T-1 remain as NA
+  }
+}
