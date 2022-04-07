@@ -1018,17 +1018,22 @@ plot_library_size <- function(T = 100,
             min(E_vec) > 1,
             length(tstar_vec) > 1)
 
+  stopifnot("T is too small relative to max(E_vec); change code if you want to try exceptions" =
+              T - 2 * (max(E_vec) + 1) >= 0)
+
   lib_size <- matrix(NA,
                      nrow = length(E_vec),
                      ncol = length(tstar_vec))
 
   for(i in 1:length(E_vec)){
     E <- E_vec[i]
-    for(tstar in E:(T - E - 2)){    # and deal with exceptions
-      j <- which(tstar_vec == tstar)
-      lib_size[i, j] <- T - 2 * (E + 1)
+    if(T - E - 2 >= E){
+      for(tstar in E:(T - E - 2)){
+        j <- which(tstar_vec == tstar)
+        lib_size[i, j] <- T - 2 * (E + 1)
+      }
     }
-    for(tstar in (T - E - 1):(T - 2)){    # and deal with exceptions
+    for(tstar in (T - E - 1):(T - 2)){    # E > 1 so always valid
       j <- which(tstar_vec == tstar)
       lib_size[i, j] <- tstar - E
     }
