@@ -1011,6 +1011,9 @@ plot.pbsSim <- function (x, ...) {
 ##'   NULL then is `max(tstar_vec)/2`.
 ##' @param annotate_extra_cex text size for extra smaller numbers in boxes at
 ##'   the top
+##' @param words_pos vector of positioning for words in grey areas, given by `E`
+##'   and `tstar` position for `Early values' text (text is placed to the right
+##'   of these), then for `Late values' text (text is centred around these.
 ##' @return plots the contour plot and returns the matrix (`C` in manuscript) of calculated library sizes
 ##' @export
 ##' @author Andrew Edwards
@@ -1024,7 +1027,8 @@ plot_library_size <- function(T = 50,
                               annotate = TRUE,
                               annotate_cex = 1,
                               annotate_tstar = 28,
-                              annotate_extra_cex = 0.7){
+                              annotate_extra_cex = 0.7,
+                              words_pos = c(6.5, 3.5, 6, 49.6)){
   stopifnot(length(T) == 1,
             length(E_vec) > 1,
             min(E_vec) > 1,
@@ -1063,8 +1067,9 @@ plot_library_size <- function(T = 50,
         ylim = range(tstar_vec) + c(-0.5, 0.5),
         xaxs = "i",
         yaxs = "i",         # sets exact axis range
-        xlab = expression("Embedding dimension, TODO", expression(italic("E"))),
-        ylab = expression("Focal time, TODO", expression(italic("E"))))
+        xlab = expression(paste("Embedding dimension, ", italic(E))),
+        ylab = expression(paste("Focal time, ", italic(t), "*")))
+
   rect(0,
        0,
        max(E_vec) + 2,
@@ -1096,6 +1101,18 @@ plot_library_size <- function(T = 50,
              annotate_extra[k, "col"]],
            cex = annotate_extra_cex)
     }
+
+    text(words_pos[1],
+         words_pos[2],
+         expression(paste("Early values of ",
+                          italic(t),
+                          "* not possible")),
+         pos = 4)
+    text(words_pos[3],
+         words_pos[4],
+         expression(paste("Late values of ",
+                          italic(t),
+                          "* not possible")))
   }
 
   return(C)
