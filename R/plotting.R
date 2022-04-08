@@ -1026,7 +1026,7 @@ plot_library_size <- function(T = 50,
                               tstar_vec = 1:50,
                               annotate = TRUE,
                               annotate_cex = 1,
-                              annotate_tstar = 28,
+                              annotate_tstar = 23,
                               annotate_extra_cex = 0.7,
                               words_pos = c(6.5, 3.5, 6, 49.6)){
   stopifnot(length(T) == 1,
@@ -1064,7 +1064,7 @@ plot_library_size <- function(T = 50,
         tstar_vec,
         C,
         xlim = range(E_vec) + c(-0.5, 0.5),   # colours are correctly around integers
-        ylim = range(tstar_vec) + c(-0.5, 0.5),
+        ylim = rev(range(tstar_vec) + c(-0.5, 0.5)),
         xaxs = "i",
         yaxs = "i",         # sets exact axis range
         xlab = expression(paste("Embedding dimension, ", italic(E))),
