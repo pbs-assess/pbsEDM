@@ -1000,10 +1000,18 @@ plot.pbsSim <- function (x, ...) {
 ##'
 ##' @param T integer of the sample size of a univariate time series (time series
 ##'   itself not needed)
-##' @param E vector of integers to show for the embedding dimension
-##' @param tstar vector of integers to show for the focal point time index
-##'   `tstar`, `t*`, from which projections are made from
-##' @return plots the contour plot and returns the matrix of calculated library sizes
+##' @param E_vec vector of integers to show for the embedding dimension
+##' @param tstar_vec vector of integers to show for the focal point time index
+##'   `tstar`, `t*` in the manuscript, from which projections are made from
+##' @param annotate logical whether to add numbers along the middle of the plot
+##'   (avoids the need for a colorbar, which was fiddly to do (see attempts
+##'   deleted in 8f567ff) plus get a grey background).
+##' @param annotate_cex text size for main annotation
+##' @param annotate_tstar tstar value at which to add the annotated numbers; if
+##'   NULL then is `max(tstar_vec)/2`.
+##' @param annotate_extra_cex text size for extra smaller numbers in boxes at
+##'   the top
+##' @return plots the contour plot and returns the matrix (`C` in manuscript) of calculated library sizes
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
@@ -1012,7 +1020,11 @@ plot.pbsSim <- function (x, ...) {
 ##' }
 plot_library_size <- function(T = 50,
                               E_vec = 2:10,
-                              tstar_vec = 1:50){
+                              tstar_vec = 1:50,
+                              annotate = TRUE,
+                              annotate_cex = 1,
+                              annotate_tstar = 28,
+                              annotate_extra_cex = 0.7){
   stopifnot(length(T) == 1,
             length(E_vec) > 1,
             min(E_vec) > 1,
@@ -1021,28 +1033,32 @@ plot_library_size <- function(T = 50,
   stopifnot("T is too small relative to max(E_vec); change code if you want to try exceptions" =
               T - 2 * (max(E_vec) + 1) >= 0)
 
-  lib_size <- matrix(NA,
-                     nrow = length(E_vec),
-                     ncol = length(tstar_vec))
+  if(is.null(annotate_tstar)){
+    annotate_tstar <- max(tstar_vec)/2
+  }
+
+  C <- matrix(NA,
+              nrow = length(E_vec),
+              ncol = length(tstar_vec))
 
   for(i in 1:length(E_vec)){
     E <- E_vec[i]
     if(T - E - 2 >= E){
       for(tstar in E:(T - E - 2)){
         j <- which(tstar_vec == tstar)
-        lib_size[i, j] <- T - 2 * (E + 1)
+        C[i, j] <- T - 2 * (E + 1)
       }
     }
     for(tstar in (T - E - 1):(T - 2)){    # E > 1 so always valid
       j <- which(tstar_vec == tstar)
-      lib_size[i, j] <- tstar - E
+      C[i, j] <- tstar - E
     }
     # And tstar <= E-1 and tstar >= T-1 remain as NA
   }
 
   image(E_vec,
         tstar_vec,
-        lib_size,
+        C,
         xlim = range(E_vec) + c(-0.5, 0.5),   # colours are correctly around integers
         ylim = range(tstar_vec) + c(-0.5, 0.5),
         xaxs = "i",
@@ -1057,10 +1073,30 @@ plot_library_size <- function(T = 50,
 
   image(E_vec,
         tstar_vec,
-        lib_size,
+        C,
         add = TRUE,
-        col = rev(hcl.colors(max(lib_size, na.rm=TRUE) - min(lib_size, na.rm=TRUE) + 1,
+        col = rev(hcl.colors(max(C, na.rm=TRUE) - min(C, na.rm=TRUE) + 1,
                          "Spectral")))
 
-  return(lib_size)
+  if(annotate){
+    annotate_main <- C[1:length(E_vec),
+                       which(tstar_vec == annotate_tstar)]  # main annotation
+    text(E_vec,
+         annotate_tstar,
+         annotate_main,
+         cex = annotate_cex)
+
+    annotate_extra <- which(C > max(annotate_main),
+                            arr.ind = TRUE)          # extra small annotations
+
+    for(k in 1:nrow(annotate_extra)){
+      text(E_vec[annotate_extra[k, "row"]],
+           tstar_vec[annotate_extra[k, "col"]],
+           C[annotate_extra[k, "row"],
+             annotate_extra[k, "col"]],
+           cex = annotate_extra_cex)
+    }
+  }
+
+  return(C)
 }
