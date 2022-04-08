@@ -121,3 +121,30 @@
 ##'   * `pred_var`
 ##'
 "rEDM_points"
+
+##' Prediction results from setting `exclusionRadius` to 1 in `rEDM:Simplex()`
+##'
+##' See inclusion issue vignette.
+##'
+##' @format Vector of predicted values from setting `exclusionRadius` to 1.
+##'
+##' @source Generated from Andy running `data-raw/exclusion_radius_test.R`.
+"check_rEDM_excl_1"
+
+##' Prediction results from setting `exclusionRadius` to 2 in `rEDM:Simplex()`
+##'
+##' See inclusion issue vignette.
+##'
+##' @format Vector of predicted values from setting `exclusionRadius` to 2.
+##'
+##' @source Generated from Andy running `data-raw/exclusion_radius_test.R`.
+"check_rEDM_excl_2"
+
+##' Prediction results from setting `exclusionRadius` to 3 in `rEDM:Simplex()`
+##'
+##' See inclusion issue vignette.
+##'
+##' @format Vector of predicted values from setting `exclusionRadius` to 3.
+##'
+##' @source Generated from Andy running `data-raw/exclusion_radius_test.R`.
+"check_rEDM_excl_3"

@@ -984,11 +984,158 @@ plot.pbsSim <- function (x, ...) {
   plot(x[, "producers"], type = "l", ylab = "Producers")
   plot(x[, "prey"], type = "l", ylab = "Prey")
   plot(
-    x[, "predators"], 
+    x[, "predators"],
     type = "l",
     xlab = "Time step",
     ylab = "Predators")
   par(mfrow = c(1, 1))
-  
+
 }
 
+##' Plot the size of the library for a given `T` as a function of `E` and `tstar`
+##'
+##' Show a coloured contour plot of how the library size changes for a
+##' univariate time series with sample size `T` as chosen embedding dimension
+##' `E` and target index `tstar` vary.
+##'
+##' @param T integer of the sample size of a univariate time series (time series
+##'   itself not needed)
+##' @param E_vec vector of integers to show for the embedding dimension
+##' @param tstar_vec vector of integers to show for the focal point time index
+##'   `tstar`, `t*` in the manuscript, from which projections are made from
+##' @param annotate logical whether to add numbers along the middle of the plot
+##'   (avoids the need for a colorbar, which was fiddly to do, see attempts
+##'   deleted in 8f567ff, while also having a grey background), and add text to
+##'   explain the grey areas.
+##' @param annotate_cex text size for main annotation
+##' @param annotate_tstar tstar value at which to add the annotated numbers; if
+##'   NULL then is `max(tstar_vec)/2`.
+##' @param annotate_extra_cex text size for extra smaller numbers in boxes at
+##'   the top
+##' @param words_pos vector of positioning for words in grey areas, given by `E`
+##'   and `tstar` position for `Early values' text (text is placed to the right
+##'   of these), then for `Late values' text (text is centred around these.
+##' @param words_cex text size for above words
+##' @param mgp_vals mgp values to use, as in `plot(..., mgp = mgp_vals)`.
+##' @return plots the contour plot and returns the matrix (`C` in manuscript) of calculated library sizes
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \dontrun{
+##' # For manusript doing:
+##' postscript("library_size.eps",
+##'             height = 6,
+##'             width = 6,
+##'             horizontal=FALSE,
+##'             paper="special")
+##' plot_library_size()
+##' dev.off()
+##' }
+plot_library_size <- function(T = 50,
+                              E_vec = 2:10,
+                              tstar_vec = 1:50,
+                              annotate = TRUE,
+                              annotate_cex = 1,
+                              annotate_tstar = 23,
+                              annotate_extra_cex = 0.7,
+                              words_pos = c(6, 3.5, 6, 49.6),
+                              words_cex = 0.9,
+                              mgp_vals = c(2, 0.5, 0)){
+  stopifnot(length(T) == 1,
+            length(E_vec) > 1,
+            min(E_vec) > 1,
+            length(tstar_vec) > 1)
+
+  stopifnot("T is too small relative to max(E_vec); change code if you want to try exceptions" =
+              T - 2 * (max(E_vec) + 1) >= 0)
+
+  if(is.null(annotate_tstar)){
+    annotate_tstar <- max(tstar_vec)/2
+  }
+
+  C <- matrix(NA,
+              nrow = length(E_vec),
+              ncol = length(tstar_vec))
+
+  for(i in 1:length(E_vec)){
+    E <- E_vec[i]
+    if(T - E - 2 >= E){
+      for(tstar in E:(T - E - 2)){
+        j <- which(tstar_vec == tstar)
+        C[i, j] <- T - 2 * (E + 1)
+      }
+    }
+    for(tstar in (T - E - 1):(T - 2)){    # E > 1 so always valid
+      j <- which(tstar_vec == tstar)
+      C[i, j] <- tstar - E
+    }
+    # And tstar <= E-1 and tstar >= T-1 remain as NA
+  }
+
+  image(E_vec,
+        tstar_vec,
+        C,
+        xlim = range(E_vec) + c(-0.5, 0.5),   # colours are correctly around integers
+        ylim = rev(range(tstar_vec) + c(-0.5, 0.5)),
+        xaxs = "i",
+        yaxs = "i",         # sets exact axis range
+        xlab = expression(paste("Embedding dimension, ", italic(E))),
+        ylab = expression(paste("Focal time, ", italic(t), "*")),
+        mgp = mgp_vals)
+
+  rect(0,
+       0,
+       max(E_vec) + 2,
+       max(tstar_vec) + 2,
+       col = "darkgrey")    # So NA's come out grey
+
+  image(E_vec,
+        tstar_vec,
+        C,
+        add = TRUE,
+        col = rev(hcl.colors(max(C, na.rm=TRUE) - min(C, na.rm=TRUE) + 1,
+                         "Spectral")))
+
+  # Add extra unlaballed tickmarks
+  box()
+  axis(1, E_vec, tcl = -0.4, labels = rep("", length(E_vec)))
+  axis(2, tstar_vec, tcl = -0.2, labels = rep("", length(tstar_vec)))
+  every_five <- tstar_vec[which(tstar_vec %% 5 == 0)]
+  axis(2, every_five, tcl = -0.4, labels = rep("", length(every_five)))
+
+  if(annotate){
+    annotate_main <- C[1:length(E_vec),
+                       which(tstar_vec == annotate_tstar)]  # main annotation
+    text(E_vec,
+         annotate_tstar,
+         annotate_main,
+         cex = annotate_cex)
+
+    annotate_extra <- which(C > max(annotate_main),
+                            arr.ind = TRUE)          # extra small annotations
+
+    for(k in 1:nrow(annotate_extra)){
+      text(E_vec[annotate_extra[k, "row"]],
+           tstar_vec[annotate_extra[k, "col"]],
+           C[annotate_extra[k, "row"],
+             annotate_extra[k, "col"]],
+           cex = annotate_extra_cex)
+    }
+
+    text(words_pos[1],
+         words_pos[2],
+         expression(paste("Early values of ",
+                          italic(t),
+                          "* not possible")),
+         pos = 4,
+         cex = words_cex)
+    text(words_pos[3],
+         words_pos[4],
+         expression(paste("Late values of ",
+                          italic(t),
+                          "* not possible")),
+         cex = words_cex)
+  }
+
+  return(C)
+}
