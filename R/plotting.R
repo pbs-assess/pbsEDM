@@ -106,6 +106,19 @@ plot.pbsEDM = function(x,
 ##' \donttest{
 ##'   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
 ##'   plot_pbsEDM_Evec(aa_Evec)
+##'
+##' # For manuscript figure, after running `analyse_simple_time_series.Rmd` vignette run:
+##' postscript("six_panels.eps",
+##'             height = 5.36,
+##'             width = 9,
+##'             horizontal=FALSE,
+##'             paper="special")
+##' for(iiii in 1:length(NY_lags_example$N_t)){
+##'     plot_pbsEDM_Evec(E_results,
+##'     last.time.to.plot = iiii,
+##'     portrait = FALSE)
+##'   }
+##' dev.off()
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
                              ...){
