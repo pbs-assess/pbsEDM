@@ -62,9 +62,10 @@ plot.pbsEDM = function(x,
          par(mfrow = c(3,2)),
          par(mfcol = c(2,3)))
 
-  if(!exists("last.time.to.plot")) last.time.to.plot <- length(x$X_observed)
-                                            # though last will have NA # not
-                                            # incorporated fully yet
+  # Commenting as isn't passed on anyway
+  #if(!exists("last.time.to.plot")) last.time.to.plot <- length(x$X_observed)
+  #                                          # though last will have NA # not
+  #                                          # incorporated fully yet
 
   plot_time_series(values = x$N,  # $N_t,
                                         # TODO: why might as.vector() be needed , xt is okay
@@ -286,9 +287,10 @@ plot_time_series <- function(values,
                              par.mgp = c(1.5, 0.5, 0)
                              ){
   stopifnot(start == 1)
-  if(is.null(max_time)) max_time <- length(values)
-  if(is.null(last.time.to.plot)) last.time.to.plot <- max_time
 
+  if(is.null(max_time)) max_time <- length(values)
+  if(is.null(last.time.to.plot)) last.time.to.plot <-
+                                   max(which(!is.na(values)))
   if(is.null(t.axis.range)) {
       t.axis.range <- c(start, max_time)
   }
@@ -410,9 +412,8 @@ plot_phase_2d <- function(values,
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
                     max(values, na.rm = TRUE))   # for N_t or Y_t
   }
-  if(is.null(last.time.to.plot)) {
-    last.time.to.plot = length(values)
-  }
+  if(is.null(last.time.to.plot)) last.time.to.plot <-
+                                   max(which(!is.na(values)))
 
   stopifnot(start == 1)
   # Now copying from plot_observed:
