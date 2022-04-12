@@ -109,7 +109,7 @@ uncomment the commented line and save the movie produced here direcly from the h
 [this page](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html)
 if you want more details of this.
 ```{r, eval=FALSE, echo=TRUE}
-# ```{r movietime, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
+# ```{r movietime, animation.hook = 'gifski', interval = 3, fig.width = 9, fig.height = 5.36}
 for(iiii in 1:length(NY_lags_example$N_t)){
   plot_pbsEDM_Evec(E_results,
        last.time.to.plot = iiii,

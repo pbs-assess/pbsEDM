@@ -127,7 +127,8 @@ plot_pbsEDM_Evec <- function(E_res,
   plot.pbsEDM(E_res[[1]],
               ...)
 
-  plot_pred_obs(E_res)
+  plot_pred_obs(E_res,
+                ...)
   invisible()
 }
 
@@ -176,6 +177,8 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
 ##' @param last.time.to.plot Last time value of `N_t` to use when plotting.
+##' @param portrait dummy argument that allows `...` to be passed from
+##'   `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.
 ##' @return Figure in the current plot enivironment
 ##' @export
 ##' @author Andrew Edwards
@@ -191,14 +194,15 @@ plot_pred_obs <- function(E_res,
                                      "green",
                                      "red",
                                      "black"),
-                          last.time.to.plot = NULL
+                          last.time.to.plot = NULL,
+                          portrait = NULL
                           ){
 
   stopifnot("Need more distinct colours in E_cols"=
               length(E_cols) <= E_components)
 
   if(is.null(last.time.to.plot)) last.time.to.plot <- length(E_res[[1]]$X_observed)
-
+  if(is.null(portrait)){portrait = NULL} # to use the dummy argument portrait
   # Determine range for axes
   obs.max.abs = max( abs( range(E_res[[1]]$X_observed,
                                 na.rm=TRUE) ) ) # max abs observed value
