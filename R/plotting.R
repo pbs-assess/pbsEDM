@@ -114,11 +114,10 @@ plot.pbsEDM = function(x,
 ##'             width = 9,
 ##'             horizontal=FALSE,
 ##'             paper="special")
-##' for(iiii in 1:length(NY_lags_example$N_t)){
-##'     plot_pbsEDM_Evec(E_results,
-##'     last.time.to.plot = iiii,
+##' plot_pbsEDM_Evec(E_results,
+##'     last.time.to.plot = 13, # then NULL for all
 ##'     portrait = FALSE)
-##'   }
+##'
 ##' dev.off()
 ##' }
 plot_pbsEDM_Evec <- function(E_res,
@@ -195,11 +194,15 @@ plot_pred_obs <- function(E_res,
                                      "red",
                                      "black"),
                           last.time.to.plot = NULL,
+                          E_cex = seq(1.7, 0.6, length = 5),
                           portrait = NULL
                           ){
 
   stopifnot("Need more distinct colours in E_cols"=
               length(E_cols) <= E_components)
+
+  stopifnot("Need more values in E_cex"=
+              length(E_cex) <= E_components)
 
   if(is.null(last.time.to.plot)) last.time.to.plot <- length(E_res[[1]]$X_observed)
   if(is.null(portrait)){portrait = NULL} # to use the dummy argument portrait
@@ -231,20 +234,22 @@ plot_pred_obs <- function(E_res,
            E_res[[j]]$X_forecast[1:(last.time.to.plot-1)],
            pch = 16, # could note the final one differently (but not a star,
                      # since that's last N[t] not Y[t])
-           col = E_cols[j])
+           col = E_cols[j],
+           cex = E_cex[j])
     leg = c(leg,
             paste0("E=",
                    E_res[[j]]$results$E,
                    ", rho=",
-                   round(E_res[[j]]$results$X_rho,
-                         2)))
+                   format(round(E_res[[j]]$results$X_rho,
+                                2),
+                          nsmall = 2)))
   }
 
   legend("topleft",
-         pch=c(20, 20, 20),
+         pch = 16,
          leg,
-         col=E_cols,
-         cex=0.7)
+         col = E_cols,
+         pt.cex = E_cex)
   invisible()
 }
 
