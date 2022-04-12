@@ -9,7 +9,9 @@ plot_pred_obs(
   E_res,
   E_components = 5,
   E_cols = c("orange", "blue", "green", "red", "black"),
-  last.time.to.plot = NULL
+  last.time.to.plot = NULL,
+  E_cex = seq(1.7, 0.6, length = 5),
+  portrait = NULL
 )
 }
 \arguments{
@@ -20,6 +22,9 @@ plot_pred_obs(
 \item{E_cols}{Vector of colours, one for each value of E}
 
 \item{last.time.to.plot}{Last time value of `N_t` to use when plotting.}
+
+\item{portrait}{dummy argument that allows `...` to be passed from
+`plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.}
 }
 \value{
 Figure in the current plot enivironment
