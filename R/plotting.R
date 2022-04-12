@@ -108,8 +108,9 @@ plot.pbsEDM = function(x,
 ##'   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
 ##'   plot_pbsEDM_Evec(aa_Evec)
 ##'
-##' # For manuscript figures, after running `analyse_simple_time_series.Rmd` vignette run:
-##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
+##' # For manuscript figures:
+##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##' ##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
 ##'             height = 5.36,
 ##'             width = 9,
 ##'             horizontal=FALSE,
@@ -454,8 +455,9 @@ plot_phase_2d <- function(values,
                           ){
 
   if(is.na(axis.range)) {
+    expand <- ifelse(X.or.N == "N", 1.04, 1)   # expand N axis as in plot_time_series()
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
-                    max(values, na.rm = TRUE))   # for N_t or Y_t
+                    max(values, na.rm = TRUE) * expand)   # for N_t or Y_t
   }
   if(is.null(last.time.to.plot)){
     if(X.or.N == "N"){
