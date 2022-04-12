@@ -487,13 +487,15 @@ plot_phase_2d <- function(values,
       vals = vals[-1]
       vals = vals[-length(vals)]
       len = length(vals)
+
       col.cobweb.lines = rep(early.col.lines, len)
-      col.cobweb.lines[(max(len - 2*late.num + 1 + 2*(X.or.N == "X"),
+      col.cobweb.lines[(max(len - 2*late.num + 1,
                             1)):len] = late.col
-      segments(vals[1:(len-2)],
-               vals[2:(len-1)],
-               vals[2:(len-1)],
-               vals[3:len],
+      # Take off two more for "X"
+      segments(vals[1:(len - 2 - 2*(X.or.N == "X"))],
+               vals[2:(len - 1 - 2*(X.or.N == "X"))],
+               vals[2:(len - 1 - 2*(X.or.N == "X"))],
+               vals[3:(len - 2*(X.or.N == "X"))],
                col = col.cobweb.lines)
     } else {
       # Join each point to the next   (N(5), N(6)) to (N(6), N(7))
@@ -512,7 +514,6 @@ plot_phase_2d <- function(values,
     }
   }
   if(last.time.to.plot > 1.5){
-browser()
     points(pbsLag(values.to.plot),
            values.to.plot,
            type = pt.type,
