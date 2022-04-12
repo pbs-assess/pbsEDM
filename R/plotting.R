@@ -265,6 +265,7 @@ plot_pred_obs <- function(E_res,
 ##' @param start first time step (must be 1)
 ##' @param pt.type `type` value for `points()`
 ##' @param par.mgp `par("mgp")` values
+##' @param add.legend logical, whether to add legend to the `N[t]` time series
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
@@ -284,7 +285,8 @@ plot_time_series <- function(values,
                              early.col.lines = "lightgrey",
                              start = 1, # may not work for others
                              pt.type = "p",
-                             par.mgp = c(1.5, 0.5, 0)
+                             par.mgp = c(1.5, 0.5, 0),
+                             add.legend = TRUE
                              ){
   stopifnot(start == 1)
 
@@ -336,6 +338,18 @@ plot_time_series <- function(values,
          ylim = Nt.axes.range,
          type = "n",                           # empty plot
          main = paste0("Time t=", last.time.to.plot))
+
+    if(add.legend){
+      # for the red late.num points
+      late.num.ind = (length(pch.plot) - late.num + 1):length(pch.plot)
+      legend("topright",
+             pch = pch.plot[late.num.ind],
+             col = col.plot[late.num.ind],
+             leg = paste0("t=",
+                          late.num.ind),
+             cex = 1,
+             bty = "n")
+    }
   } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
     Xt.max.abs = max(abs( range(values[start:max_time],
