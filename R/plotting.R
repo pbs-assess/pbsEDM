@@ -321,6 +321,7 @@ plot_time_series <- function(values,
   pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
                                         # filled circles for latest
   pch.plot[length(pch.plot)] = 8     # latest one a star
+  pch.plot[length(pch.plot) - late.num + 1] = 1 # late.num'th from end an open circle
 
 
   if(X.or.N == "N"){
@@ -437,6 +438,7 @@ plot_phase_2d <- function(values,
   pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
                                         # filled circles for latest
   pch.plot[length(pch.plot)] = 8     # latest one a star
+  pch.plot[length(pch.plot) - late.num + 1] = 1 # late.num'th from end an open circle
 
   # Copying from plotPanelMovie.df2
 
@@ -626,6 +628,7 @@ plot_phase_3d <- function(obj,
   pch.plot = (col.plot == early.col) * 1 + (col.plot == late.col) * 16
                                         # filled circles for latest
   pch.plot[length(pch.plot)] = 8     # latest one a star
+  pch.plot[length(pch.plot) - late.num + 1] = 1 # late.num'th from end an open circle
 
   # Empty plot to get started
   par(mgp = par.mgp.3d)
