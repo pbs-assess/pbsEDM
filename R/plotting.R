@@ -425,14 +425,16 @@ plot_phase_2d <- function(values,
                     max(values, na.rm = TRUE))   # for N_t or Y_t
   }
   if(is.null(last.time.to.plot)){
-    last.time.to.plot <- max(which(!is.na(values)))} else {
-                                                      last.time.to.plot <-
+    if(X.or.N == "N"){
+      last.time.to.plot <- max(which(!is.na(values)))} else {
+                                                       last.time.to.plot <-
                                                         length(values)
-                                                      # Want the NA included for
-                                                      #  X, but N has an extra
-                                                      #  time step
-                                                      #  added. i.e. want 100 for both
-                                                      }
+                                                       # Want the NA included for
+                                                       #  X, but N has an extra
+                                                       #  time step
+                                                       #  added. i.e. want 100 for both
+                                                     }
+  }
 
   stopifnot(start == 1)
   # Now copying from plot_observed:
@@ -510,6 +512,7 @@ plot_phase_2d <- function(values,
     }
   }
   if(last.time.to.plot > 1.5){
+browser()
     points(pbsLag(values.to.plot),
            values.to.plot,
            type = pt.type,
