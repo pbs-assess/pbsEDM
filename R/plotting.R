@@ -289,8 +289,19 @@ plot_time_series <- function(values,
   stopifnot(start == 1)
 
   if(is.null(max_time)) max_time <- length(values)
-  if(is.null(last.time.to.plot)) last.time.to.plot <-
-                                   max(which(!is.na(values)))
+
+  if(is.null(last.time.to.plot)){
+    if(X.or.N == "N"){
+       last.time.to.plot <- max(which(!is.na(values)))} else {
+                                                      last.time.to.plot <-
+                                                        length(values)
+                                                      # Want the NA included for
+                                                      #  X, but N has an extra
+                                                      #  time step added
+                                                      }
+  }
+
+
   if(is.null(t.axis.range)) {
       t.axis.range <- c(start, max_time)
   }
