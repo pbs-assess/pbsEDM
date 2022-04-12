@@ -639,7 +639,7 @@ plot_phase_3d <- function(obj,
   start = 1     # currently only works for 1
 
   if(last.time.to.plot > 2){
-    values.to.plot <- obj$X_observed[start:(last.time.to.plot-1)]   # can't use N[last...])
+    values.to.plot <- obj$X_observed[start:last.time.to.plot]
   } else {
     values.to.plot <- NA          # nothing to plot
   }
@@ -695,7 +695,8 @@ plot_phase_3d <- function(obj,
 #                              pbsLag(obj$X_observed,
 #                                     1)[start:iii],  # "Y_tmin1"
   #                              pbsLag(obj$X_observed)[start:iii])  # "Y_t"
-  if(all(!is.na(values.to.plot))){
+
+  if(!all(is.na(values.to.plot))){
     proj.pts = scat$xyz.convert(pbsLag(values.to.plot,
                                        2),  # "Y_tmin2"
                                 pbsLag(values.to.plot,
