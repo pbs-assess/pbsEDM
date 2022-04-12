@@ -424,8 +424,15 @@ plot_phase_2d <- function(values,
     axis.range <- c(min(0, min(values, na.rm = TRUE)),
                     max(values, na.rm = TRUE))   # for N_t or Y_t
   }
-  if(is.null(last.time.to.plot)) last.time.to.plot <-
-                                   max(which(!is.na(values)))
+  if(is.null(last.time.to.plot)){
+    last.time.to.plot <- max(which(!is.na(values)))} else {
+                                                      last.time.to.plot <-
+                                                        length(values)
+                                                      # Want the NA included for
+                                                      #  X, but N has an extra
+                                                      #  time step
+                                                      #  added. i.e. want 100 for both
+                                                      }
 
   stopifnot(start == 1)
   # Now copying from plot_observed:
@@ -464,7 +471,7 @@ plot_phase_2d <- function(values,
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
-    values.to.plot <- values[start:(last.time.to.plot-1)] # Not use Y[last..]
+    values.to.plot <- values[start:last.time.to.plot]
   }
 
   if(cobwebbing) abline(0, 1, col="darkgrey")
