@@ -342,6 +342,7 @@ plot_time_series <- function(values,
     if(add.legend){
       # for the red late.num points
       late.num.ind = (length(pch.plot) - late.num + 1):length(pch.plot)
+      late.num.ind = late.num.ind[late.num.ind > 0]   # else t=0 shown for t=2 plot
       legend("topright",
              pch = pch.plot[late.num.ind],
              col = col.plot[late.num.ind],
