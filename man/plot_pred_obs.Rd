@@ -15,7 +15,7 @@ plot_pred_obs(
 )
 }
 \arguments{
-\item{E_res}{A list of `pbsEDM` objects}
+\item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
 
 \item{E_components}{How many of the first E_res components to show}
 

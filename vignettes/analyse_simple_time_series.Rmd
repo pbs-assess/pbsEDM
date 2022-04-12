@@ -24,6 +24,9 @@ library(pbsEDM)
 TODO: Axes in code are updated to be $Y_t$ not $X_t$ etc., but have to manually
 save the movies to GitHub, so not doing that now in case they change again.
 
+TODO: Could simplify some of this, just save a vector also as `Nt_example`
+instead of using the tibble.
+
 The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
 $N_t$, which has column name `N_t`. See `?NY_lags_example` for full details, and

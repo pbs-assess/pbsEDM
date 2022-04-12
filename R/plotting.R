@@ -181,7 +181,7 @@ plot_rho_Evec <- function(E_res,
 ##' Plot the predicted versus observed values of `Y_t` for various values
 ##' of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
 ##'
-##' @param E_res A list of `pbsEDM` objects
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
 ##' @param last.time.to.plot Last time value of `N_t` to use when plotting.
@@ -1043,6 +1043,42 @@ plot_explain_edm_movie <- function(obj,
                    true.val = TRUE,
                    ...)
 }
+
+##' Make pdf movie of six-panel figure to go into Supp pdf.
+##'
+##' Creates a single .pdf with one frame for each time step, which can be
+##'  included as a pausable movie of Supp pdf for primer manuscript.
+##'  See `analyse_simple_time_series.Rmd` vignette for creating the similar .gif
+##'  that is shown in the vignette.
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param pdf.filename filename to save to
+##' @param ... extra arguments to pass to `plot.pbsEDM()`
+##' @return saved pdf file with one page for each time step, that can become
+##'  movie in Supp of primer manuscript.
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##'   plot_pbsEDM_Evec_movie(E_results)
+##' }
+plot_pbsEDM_Evec_movie <- function(E_res,
+                                   pdf.filename = "six_panel_movie.pdf",
+                                   ...){
+  pdf(pdf.filename,
+      height = 5.36,
+      width = 9)
+
+  num.frames <- length(E_res[[1]]$X_observed)
+
+  for(i in 1:num.frames){
+    plot_pbsEDM_Evec(E_res = E_res,
+                     last.time.to.plot = i,
+                     portrait = FALSE)
+  }
+  dev.off()
+}
+
 
 #' Plot Method for `pbsSim`
 #'

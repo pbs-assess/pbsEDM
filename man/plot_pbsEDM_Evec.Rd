@@ -27,16 +27,25 @@ of `E`. See vignette "Analyse a simple time series" for full details.
   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
   plot_pbsEDM_Evec(aa_Evec)
 
-# For manuscript figure, after running `analyse_simple_time_series.Rmd` vignette run:
-postscript("six_panels.eps",
+# For manuscript figures, after running `analyse_simple_time_series.Rmd` vignette run:
+postscript("six_panels_13.eps",   # 13 is last.time.to.plot
             height = 5.36,
             width = 9,
             horizontal=FALSE,
             paper="special")
 plot_pbsEDM_Evec(E_results,
-    last.time.to.plot = 13, # then NULL for all
+    last.time.to.plot = 13,
     portrait = FALSE)
+dev.off()
 
+postscript("six_panels_all.eps",
+           height = 5.36,
+           width = 9,
+           horizontal=FALSE,
+           paper="special")
+plot_pbsEDM_Evec(E_results,
+    last.time.to.plot = NULL, # to automatically plot all
+    portrait = FALSE)
 dev.off()
 }
 }
