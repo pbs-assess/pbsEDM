@@ -943,11 +943,12 @@ plot_explain_edm <- function(obj,
     if(legend.inc.rEDM){
       legend("bottomleft",
              pch=c(tstar.pch, 19, 8, 1, 1),
-             leg=c("x(t*)",
-                   "neighbours",
-                   "x(t*+1) pred (wt avge)",
-                   "rEDM pred",
-                   "true x(t*+1)"),
+             leg=c(as.expression(bquote(bold(x)* "(" * italic(t) * "*)")),
+                         "neighbours",
+                         as.expression(bquote(bold(x)* "(" * italic(t) *
+                                              "*+1) pred (wt avge)")),
+                         "rEDM pred",
+                         as.expression(bquote("true " * bold(x)* "(" * italic(t) * "*+1)"))),
              col=c(tstar.col,
                    "red",
                    tstar.col,
@@ -956,10 +957,12 @@ plot_explain_edm <- function(obj,
              cex=0.85)} else {
                         legend("bottomleft",
                                pch=c(tstar.pch, 19, 8, 1),
-                               leg=c("x(t*)",
+                               leg=c(as.expression(bquote(bold(x)* "(" * italic(t) * "*)")),
                                      "neighbours",
-                                     "x(t*+1) pred (wt avge)",
-                                     "true x(t*+1)"),
+                                     as.expression(bquote(bold(x)* "(" *
+                                                          italic(t) *
+                                                          "*+1) pred (wt avge)")),
+                                     as.expression(bquote("true " * bold(x)* "(" * italic(t) * "*+1)"))),
                                col=c(tstar.col,
                                      "red",
                                      tstar.col,
@@ -968,7 +971,7 @@ plot_explain_edm <- function(obj,
                       }
 
     legend("topleft",
-           leg = paste0("t*=", tstar),
+           leg = as.expression(bquote(italic(t)* "*=" *.(tstar))),
            col = "white",
            bty = "n")
   }
