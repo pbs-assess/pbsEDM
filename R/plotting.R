@@ -772,6 +772,8 @@ plot_phase_3d <- function(obj,
 ##'   may not work
 ##' @param true.val if TRUE then plot the true value of `x(t*+1)`
 ##' @param legend.plot if TRUE then do a legend and print value of `t*`
+##' @param legend.inc.rEDM if TRUE then include `rEDM` in the legend (not wanted
+##'   for first manuscript Figure).
 ##' @return single plot that explains one part of EDM, link together in a movie
 ##'   using `pbs_explain_edm_movie()`
 ##' @export
@@ -790,6 +792,26 @@ plot_phase_3d <- function(obj,
 ##'                    neigh.plot = TRUE,
 ##'                    neigh.proj = TRUE)
 ##' # Type plot_explain_edm_movie to see other examples
+##' # For manuscript:
+##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##' postscript("explain_EDM.eps",
+##'            height = 5.36,
+##'            width = 5.36,
+##'            horizontal=FALSE,
+##'            paper="special")
+##'
+##' plot_explain_edm(E_results[[1]], tstar = 39,
+##'                  main = "",
+##'                  tstar.pch = 19,
+##'                  tstar.cex = 1.2,
+##'                  neigh.plot = TRUE,
+##'                  neigh.proj = TRUE,
+##'                  pred.plot = TRUE,
+##'                  pred.rEDM = FALSE,
+##'                  true.val = TRUE,
+##'                  legend.inc.rEDM = FALSE)
+##' dev.off()
+##' expect_equal(aa, E_results[[1]])  # is TRUE
 ##' }
 plot_explain_edm <- function(obj,
                              tstar,
@@ -804,7 +826,8 @@ plot_explain_edm <- function(obj,
                              pred.plot = FALSE,
                              pred.rEDM = FALSE,
                              true.val = FALSE,
-                             legend.plot = TRUE){
+                             legend.plot = TRUE,
+                             legend.inc.rEDM = TRUE){
   if(pred.rEDM){
     testthat::expect_equal(obj$X_observed, NY_lags_example$Y_t)
     #  ideally want this message:
@@ -917,19 +940,32 @@ plot_explain_edm <- function(obj,
   }
 
   if(legend.plot){
-    legend("bottomleft",
-           pch=c(tstar.pch, 19, 8, 1, 1),
-           leg=c("x(t*)",
-                 "neighbours",
-                 "x(t*+1) pred (wt avge)",
-                 "rEDM pred",
-                 "true x(t*+1)"),
-           col=c(tstar.col,
-                 "red",
-                 tstar.col,
-                 "red",
-                 "darkgreen"),
-           cex=0.85)
+    if(legend.inc.rEDM){
+      legend("bottomleft",
+             pch=c(tstar.pch, 19, 8, 1, 1),
+             leg=c("x(t*)",
+                   "neighbours",
+                   "x(t*+1) pred (wt avge)",
+                   "rEDM pred",
+                   "true x(t*+1)"),
+             col=c(tstar.col,
+                   "red",
+                   tstar.col,
+                   "red",
+                   "darkgreen"),
+             cex=0.85)} else {
+                        legend("bottomleft",
+                               pch=c(tstar.pch, 19, 8, 1),
+                               leg=c("x(t*)",
+                                     "neighbours",
+                                     "x(t*+1) pred (wt avge)",
+                                     "true x(t*+1)"),
+                               col=c(tstar.col,
+                                     "red",
+                                     tstar.col,
+                                     "darkgreen"),
+                               cex=0.85)
+                      }
 
     legend("topleft",
            leg = paste0("t*=", tstar),
