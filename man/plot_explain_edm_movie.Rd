@@ -4,10 +4,12 @@
 \alias{plot_explain_edm_movie}
 \title{Create movie to explain EDM}
 \usage{
-plot_explain_edm_movie(obj, ...)
+plot_explain_edm_movie(obj, inc.rEDM = FALSE, ...)
 }
 \arguments{
 \item{obj}{list object of class `pbsEDM`, an output from `pbsEDM()`}
+
+\item{inc.rEDM}{logical whether to include rEDM calculation figure and in legend.}
 
 \item{...}{extra values to use in calls to `plot_explain_edm()`; needs to include tstar}
 }
@@ -17,7 +19,9 @@ movie (if used with gifski) to explain EDM; if combined with
   borders etc have not been set up properly for this and will need adjusting
 }
 \description{
-Use with gifski in .Rmd - see `analyse_simple_time_series` vignette.
+Use with gifski in .Rmd - see `analyse_simple_time_series` vignette. Also
+ called from `plot_explain_edm_movie_save` to save a pdf that can be
+ incremented through in the Appendix.
 }
 \examples{
 \donttest{

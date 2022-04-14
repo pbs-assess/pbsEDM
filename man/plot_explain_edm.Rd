@@ -2,23 +2,26 @@
 % Please edit documentation in R/plotting.R
 \name{plot_explain_edm}
 \alias{plot_explain_edm}
-\title{2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM}
+\title{2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM for E=2}
 \usage{
 plot_explain_edm(
   obj,
   tstar,
-  x.lab = expression("Y"[t - 1]),
-  y.lab = expression("Y"[t]),
-  main = "All the points in lagged space",
+  x.lab = expression(italic(Y)[t - 1]),
+  y.lab = expression(italic(Y)[t]),
+  main = "Plot all the points in lagged space.",
   tstar.col = "blue",
   tstar.pch = 1,
   tstar.cex = 1,
+  lib.remove = FALSE,
   neigh.plot = FALSE,
   neigh.proj = FALSE,
   pred.plot = FALSE,
   pred.rEDM = FALSE,
   true.val = FALSE,
-  legend.plot = TRUE
+  legend.plot = TRUE,
+  legend.inc.rEDM = TRUE,
+  font.main = 1
 )
 }
 \arguments{
@@ -39,6 +42,8 @@ projection from}
 
 \item{tstar.cex}{cex value (size) for `x(t*)`}
 
+\item{lib.remove}{if TRUE then shows which values to exclude from library}
+
 \item{neigh.plot}{if TRUE then highlight neighbours to `x(t*)`}
 
 \item{neigh.proj}{if TRUE then highlight projections of neighbours to `x(t*)`}
@@ -52,10 +57,16 @@ may not work}
 \item{true.val}{if TRUE then plot the true value of `x(t*+1)`}
 
 \item{legend.plot}{if TRUE then do a legend and print value of `t*`}
+
+\item{legend.inc.rEDM}{if TRUE then include `rEDM` in the legend (not wanted
+for first manuscript Figure).}
+
+\item{font.main}{font for title, can't have bold with subscripts it seems,
+so set this for all plots.}
 }
 \value{
 single plot that explains one part of EDM, link together in a movie
-  using `pbs_explain_edm_movie()`
+  using `pbs_explain_edm_movie()` and `pbs_explain_edm_movie_save()`
 }
 \description{
 Highlights a point to be projected, its nearest `E+1` neighbours, and then
@@ -77,6 +88,26 @@ times using TODO to make a movie. Type `plot_explain_edm_movie` for example call
                    neigh.plot = TRUE,
                    neigh.proj = TRUE)
 # Type plot_explain_edm_movie to see other examples
+# For manuscript:
+E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+postscript("explain_EDM.eps",
+           height = 6.5,
+           width = 6.5,
+           horizontal=FALSE,
+           paper="special")
+
+plot_explain_edm(E_results[[1]], tstar = 39,
+                 main = "",
+                 tstar.pch = 19,
+                 tstar.cex = 1.2,
+                 neigh.plot = TRUE,
+                 neigh.proj = TRUE,
+                 pred.plot = TRUE,
+                 pred.rEDM = FALSE,
+                 true.val = TRUE,
+                 legend.inc.rEDM = FALSE)
+dev.off()
+expect_equal(aa, E_results[[1]])  # is TRUE
 }
 }
 \author{

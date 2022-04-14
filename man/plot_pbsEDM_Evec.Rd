@@ -27,8 +27,9 @@ of `E`. See vignette "Analyse a simple time series" for full details.
   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
   plot_pbsEDM_Evec(aa_Evec)
 
-# For manuscript figures, after running `analyse_simple_time_series.Rmd` vignette run:
-postscript("six_panels_13.eps",   # 13 is last.time.to.plot
+# For manuscript figures:
+E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
             height = 5.36,
             width = 9,
             horizontal=FALSE,
