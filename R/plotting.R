@@ -793,8 +793,8 @@ plot_phase_3d <- function(obj,
 ##' # For manuscript:
 ##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
 ##' postscript("explain_EDM.eps",
-##'            height = 5.36,
-##'            width = 5.36,
+##'            height = 6.5,
+##'            width = 6.5,
 ##'            horizontal=FALSE,
 ##'            paper="special")
 ##'
