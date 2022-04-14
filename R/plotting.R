@@ -167,8 +167,8 @@ plot_rho_Evec <- function(E_res,
   plot(E,
        rho,
        ylim = c(0,1),
-       xlab = "Embedding Dimension (E)",
-       ylab = "Forecast Skill (rho)",
+       xlab = expression("Embedding Dimension ," * italic(E)),
+       ylab = expression("Forecast Skill, " * rho),
        ...
        )
   # TODO see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
@@ -230,8 +230,8 @@ plot_pred_obs <- function(E_res,
   axes.range = c(- max.abs, max.abs)
 
   plot(0, 0,
-       xlab = expression("Observation of Y"[t]),
-       ylab = expression("Prediction of Y"[t]),
+       xlab = expression("Observation of " * italic(Y) [t]),
+       ylab = expression("Prediction of " * italic(Y) [t]),
        xlim = axes.range,
        ylim = axes.range,
        asp = 1,
@@ -246,13 +246,11 @@ plot_pred_obs <- function(E_res,
                      # since that's last N[t] not Y[t])
            col = E_cols[j],
            cex = E_cex[j])
-    leg = c(leg,
-            paste0("E=",
-                   E_res[[j]]$results$E,
-                   ", rho=",
-                   format(round(E_res[[j]]$results$X_rho,
+    leg = c(leg,         # Could try and make E italic but likely fiddly
+            as.expression(bquote(italic(E) * "=" *.(E_res[[j]]$results$E) *
+    ", " * rho * "=" *.(format(round(E_res[[j]]$results$X_rho,
                                 2),
-                          nsmall = 2)))
+                          nsmall = 2)))))
   }
 
   legend("topleft",
@@ -351,12 +349,12 @@ plot_time_series <- function(values,
     Nt.axes.range = c(0, Nt.max.abs*1.04)    # Expand else points can hit edge
 
     plot(0, 0,
-         xlab = expression("Time, t"),
-         ylab = expression("N"[t]),
+         xlab = expression("Time, " * italic(t)),
+         ylab = expression(italic(N) [t]),
          xlim = c(0, max(t.axis.range)),
          ylim = Nt.axes.range,
          type = "n",                           # empty plot
-         main = paste0("Time t=", last.time.to.plot))
+         main = as.expression(bquote("Time " * italic(t) * "=" *.(last.time.to.plot))))
 
     if(add.legend){
       # for the red late.num points
@@ -379,8 +377,8 @@ plot_time_series <- function(values,
     Xt.axes.range = c(-Xt.max.abs, Xt.max.abs)
 
     plot(0, 0,
-         xlab = expression("Time, t"),
-         ylab = expression("Y"[t]),
+         xlab = expression("Time, " * italic(t)),
+         ylab = expression(italic(Y) [t]),
          xlim = c(XtLoc, max(t.axis.range)),
          ylim = Xt.axes.range,
          type = "n")                           # empty plot
@@ -495,16 +493,16 @@ plot_phase_2d <- function(values,
   # Empty plot to get started
   if(X.or.N == "N"){
     plot(0, 0,
-         xlab = expression("N"[t-1]),
-         ylab = expression("N"[t]),
+         xlab = expression(italic(N) [t-1]),
+         ylab = expression(italic(N) [t]),
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
     values.to.plot <- values[start:last.time.to.plot]
   } else {
     plot(0, 0,
-         xlab = expression("Y"[t-1]),
-         ylab = expression("Y"[t]),
+         xlab = expression(italic(Y) [t-1]),
+         ylab = expression(italic(Y) [t]),
          xlim = axis.range,
          ylim = axis.range,
          type = "n")
@@ -635,9 +633,9 @@ plot_phase_3d <- function(obj,
                           par.mgp.3d = c(3, 10, 0),
                           par.mai.3d = c(0.1, 0.1, 0.1, 0.1),
                           par.mar.3d = c(3, 0, 0, 0),
-                          x.lab = expression("Y"[t-2]),
-                          y.lab = expression("Y"[t-1]),
-                          z.lab = expression("Y"[t]),
+                          x.lab = expression(italic(Y) [t-2]),
+                          y.lab = expression(italic(Y) [t-1]),
+                          z.lab = expression(italic(Y) [t]),
                           last.time.to.plot = NULL,
                           axis.range = NA,
                           late.num = 3,
