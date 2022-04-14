@@ -772,8 +772,10 @@ plot_phase_3d <- function(obj,
 ##' @param legend.plot if TRUE then do a legend and print value of `t*`
 ##' @param legend.inc.rEDM if TRUE then include `rEDM` in the legend (not wanted
 ##'   for first manuscript Figure).
+##' @param font.main font for title, can't have bold with subscripts it seems,
+##'   so set this for all plots.
 ##' @return single plot that explains one part of EDM, link together in a movie
-##'   using `pbs_explain_edm_movie()`
+##'   using `pbs_explain_edm_movie()` and `pbs_explain_edm_movie_save()`
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
@@ -815,7 +817,7 @@ plot_explain_edm <- function(obj,
                              tstar,
                              x.lab = expression(italic(Y) [t-1]),
                              y.lab = expression(italic(Y) [t]),
-                             main = "All the points in lagged space",
+                             main = "Plot all the points in lagged space.",
                              tstar.col = "blue",
                              tstar.pch = 1,
                              tstar.cex = 1,
@@ -825,7 +827,8 @@ plot_explain_edm <- function(obj,
                              pred.rEDM = FALSE,
                              true.val = FALSE,
                              legend.plot = TRUE,
-                             legend.inc.rEDM = TRUE){
+                             legend.inc.rEDM = TRUE,
+                             font.main = 1){
   if(pred.rEDM){
     testthat::expect_equal(obj$X_observed, NY_lags_example$Y_t)
     #  ideally want this message:
@@ -852,7 +855,8 @@ plot_explain_edm <- function(obj,
        ylab = y.lab,
        xlim = Xt.axes.range,
        ylim = Xt.axes.range,
-       main = main)
+       main = main,
+       font.main = font.main)
 
   # Highlight x[tstar]
   points(Xtmin1[tstar],
@@ -1004,6 +1008,12 @@ plot_explain_edm_movie <- function(obj,
   #   stop("Need to specify tstar")
   # }
 
+  # https://stackoverflow.com/questions/64851094/extract-value-of-argument-from-ellipsis-without-evaluating-other-arguments
+  if(hasArg(tstar)) {
+    tstar <- eval.parent(match.call()[["tstar"]])
+  }
+
+
   plot_explain_edm(obj,
                    tstar.col = "black",
                    ...)    # tstar should get carried through
@@ -1028,15 +1038,24 @@ plot_explain_edm_movie <- function(obj,
   #                 ...)
 
   plot_explain_edm(obj,
-                   main = paste0(
-                     "Want to predict where vector x(tstar) will go ..."),
+                   main = as.expression(bquote("Want to predict" * italic(Y) [ .(tstar+1)] *
+                                        " by locating (" *
+                                        italic(Y) [ .(tstar -1)] * ", " *
+                                        italic(Y) [ .(tstar)] * ") ...")),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    ...)
 
+# and taking a weighted average to give x(40) = (Y_39, Y_40), to give an
+#  estimate of Y_40
+
+#  Maybe omit the agree with rEDM for now, then pick the examples that
+#  don't agree.
+
+
   plot_explain_edm(obj,
                    main = paste0(
-                     "... based on three (E+1) nearest neighbours"),
+                     "... determining its three nearest neighbours ..."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1044,7 +1063,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "See where neighbours go"),
+                     "... seeing where they go in their next time step ..."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1052,8 +1071,10 @@ plot_explain_edm_movie <- function(obj,
                    ...)
 
   plot_explain_edm(obj,
-                   main = paste0(
-                     "and take weighted average of Y_t to be predicted value"),
+                   main =
+                   as.expression(bquote("... and taking a weighted average of the " *
+                                        italic(Y) [t] * " values to give " *
+                                        italic(Y) [ .(tstar+1)] * " ...")),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1063,7 +1084,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "which should agree with prediction from rEDM"),
+                     "... which should agree with prediction from rEDM ..."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1074,7 +1095,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "and is hopefully close to the true value"),
+                     "... and is hopefully close to the true value."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
