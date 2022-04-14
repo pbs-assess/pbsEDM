@@ -986,6 +986,7 @@ plot_explain_edm <- function(obj,
 ##'  incremented through in the Appendix.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
+##' @param inc.rEDM logical whether to include rEDM calculation figure and in legend.
 ##' @param ... extra values to use in calls to `plot_explain_edm()`; needs to include tstar
 ##' @return movie (if used with gifski) to explain EDM; if combined with
 ##'   `par(mfrow=c(4,2))` (and not gifski) then will give multiple panels, but
@@ -1002,21 +1003,20 @@ plot_explain_edm <- function(obj,
 ##'                                          #  vignette.
 ##' }
 plot_explain_edm_movie <- function(obj,
+                                   inc.rEDM = FALSE,
                                    ...){
-  # Need to specify tstar, but plot_explain_edm() will give automatic error anyway
-  # if(!exists("tstar")){
-  #   stop("Need to specify tstar")
-  # }
 
+  # Need tstar here
   # https://stackoverflow.com/questions/64851094/extract-value-of-argument-from-ellipsis-without-evaluating-other-arguments
   if(hasArg(tstar)) {
     tstar <- eval.parent(match.call()[["tstar"]])
   }
 
-
   plot_explain_edm(obj,
                    tstar.col = "black",
-                   ...)    # tstar should get carried through
+                   legend.inc.rEDM = inc.rEDM,
+                   legend.plot = FALSE,
+                   ...)    # includes tstar that  gets carried through
 
   #plot_explain_edm(obj,
   #                 tstar.col = "blue",,
@@ -1030,13 +1030,6 @@ plot_explain_edm_movie <- function(obj,
   # DON'T we want to remove tstar+1 also - whole point of my error finding!
 # TODO ADD THAT IN HERE
 
-  #plot_explain_edm(obj,
-  #                 tstar.col = "white",   # to hide it
-  #                 main = paste0(
-  #                   "Want to predict where it goes, i.e. predict vec x(tstar+1)"),
-  #                 tstar.cex = 2.5,
-  #                 ...)
-
   plot_explain_edm(obj,
                    main = as.expression(bquote("Want to predict" * italic(Y) [ .(tstar+1)] *
                                         " by locating (" *
@@ -1044,6 +1037,7 @@ plot_explain_edm_movie <- function(obj,
                                         italic(Y) [ .(tstar)] * ") ...")),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
+                   legend.inc.rEDM = inc.rEDM,
                    ...)
 
 # and taking a weighted average to give x(40) = (Y_39, Y_40), to give an
@@ -1059,6 +1053,7 @@ plot_explain_edm_movie <- function(obj,
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
+                   legend.inc.rEDM = inc.rEDM,
                    ...)
 
   plot_explain_edm(obj,
@@ -1068,34 +1063,38 @@ plot_explain_edm_movie <- function(obj,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
                    neigh.proj = TRUE,
+                   legend.inc.rEDM = inc.rEDM,
                    ...)
 
   plot_explain_edm(obj,
                    main =
                    as.expression(bquote("... and taking a weighted average of the " *
                                         italic(Y) [t] * " values to give " *
-                                        italic(Y) [ .(tstar+1)] * " ...")),
+                                        italic(Y) [ .(tstar+1)] * " which ...")),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
                    neigh.proj = TRUE,
                    pred.plot = TRUE,
+                   legend.inc.rEDM = inc.rEDM,
                    ...)
+
+  if(inc.rEDM){
+    plot_explain_edm(obj,
+                     main = paste0("... should agree with prediction from rEDM and ..."),
+                     tstar.pch = 19,
+                     tstar.cex = 1.2,
+                     neigh.plot = TRUE,
+                     neigh.proj = TRUE,
+                     pred.plot = TRUE,
+                     pred.rEDM = TRUE,
+                     legend.inc.rEDM = inc.rEDM,
+                     ...)
+  }
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "... which should agree with prediction from rEDM ..."),
-                   tstar.pch = 19,
-                   tstar.cex = 1.2,
-                   neigh.plot = TRUE,
-                   neigh.proj = TRUE,
-                   pred.plot = TRUE,
-                   pred.rEDM = TRUE,
-                   ...)
-
-  plot_explain_edm(obj,
-                   main = paste0(
-                     "... and is hopefully close to the true value."),
+                     "... is hopefully close to the true known value."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1103,6 +1102,7 @@ plot_explain_edm_movie <- function(obj,
                    pred.plot = TRUE,
                    pred.rEDM = TRUE,
                    true.val = TRUE,
+                   legend.inc.rEDM = inc.rEDM,
                    ...)
 }
 
