@@ -977,7 +977,9 @@ plot_explain_edm <- function(obj,
 
 ##' Create movie to explain EDM
 ##'
-##' Use with gifski in .Rmd - see `analyse_simple_time_series` vignette.
+##' Use with gifski in .Rmd - see `analyse_simple_time_series` vignette. Also
+##'  called from `plot_explain_edm_movie_save` to save a pdf that can be
+##'  incremented through in the Appendix.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param ... extra values to use in calls to `plot_explain_edm()`; needs to include tstar
@@ -1082,6 +1084,43 @@ plot_explain_edm_movie <- function(obj,
                    true.val = TRUE,
                    ...)
 }
+
+
+
+
+##' Make pdf movie of explain EDM figures to go into Supp pdf.
+##'
+##' Creates a single .pdf with one frame for each figure,
+##'  included as a pausable movie of Supp pdf for primer manuscript.
+##'  See `analyse_simple_time_series.Rmd` vignette for creating the similar .gif
+##'  that is shown in the vignette.
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param pdf.filename filename to save to
+##' @param tstar focal point to make projection from
+##' @param ... extra arguments to pass to `plot_explain_edm_movie()`
+##' @return saved pdf file with one page for each figure, that can become
+##'  movie in Supp of primer manuscript.
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##'   plot_explain_edm_movie_save(E_results[[1]])
+##' }
+plot_explain_edm_movie_save <- function(E_res,
+                                        pdf.filename = "explain_EDM_movie.pdf",
+                                        tstar = 39,
+                                        ...){
+  pdf(pdf.filename,
+      height = 5.36,
+      width = 9)
+
+  plot_explain_edm_movie(E_results[[1]],
+                         tstar = tstar)
+
+  dev.off()
+}
+
 
 ##' Make pdf movie of six-panel figure to go into Supp pdf.
 ##'
