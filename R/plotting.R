@@ -378,7 +378,7 @@ plot_time_series <- function(values,
 
     plot(0, 0,
          xlab = expression("Time, " * italic(t)),
-         ylab = expression(italic(Y) [t]),
+         ylab = expression(italic(Y) [t] ~ "=" ~ italic(N) [t+1] ~ "-" ~ italic(N) [t]),
          xlim = c(XtLoc, max(t.axis.range)),
          ylim = Xt.axes.range,
          type = "n")                           # empty plot
