@@ -1063,7 +1063,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "... and determine the three nearest neighbours."),
+                     "... and determine the three nearest valid neighbours."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
