@@ -746,7 +746,7 @@ plot_phase_3d <- function(obj,
   invisible()                   # else returns the above line
 }
 
-##' 2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM
+##' 2-d phase plot of x_t v x_{t-1} with coloured points to explain EDM for E=2
 ##'
 ##' Highlights a point to be projected, its nearest `E+1` neighbours, and then
 ##' draw arrows to show where they go and so where the projection goes. Very
@@ -762,6 +762,7 @@ plot_phase_3d <- function(obj,
 ##' @param tstar.col colour for `x(t*)`
 ##' @param tstar.pch pch value (point style) for `x(t*)`
 ##' @param tstar.cex cex value (size) for `x(t*)`
+##' @param lib.remove if TRUE then shows which values to exclude from library
 ##' @param neigh.plot if TRUE then highlight neighbours to `x(t*)`
 ##' @param neigh.proj if TRUE then highlight projections of neighbours to `x(t*)`
 ##' @param pred.plot if TRUE then highlight forecasted value `x(t*+1)`
@@ -821,6 +822,7 @@ plot_explain_edm <- function(obj,
                              tstar.col = "blue",
                              tstar.pch = 1,
                              tstar.cex = 1,
+                             lib.remove = FALSE,
                              neigh.plot = FALSE,
                              neigh.proj = FALSE,
                              pred.plot = FALSE,
@@ -864,6 +866,20 @@ plot_explain_edm <- function(obj,
          col = tstar.col,
          pch = tstar.pch,
          cex = tstar.cex)
+
+  if(lib.remove){
+    lib.remove.ind <- c(1,       # points 1 and T aren't plotted anyway since
+                                 # not defined
+                        tstar + 1,
+                        min(tstar + 2, nrow(obj$X)),
+                        nrow(obj$X) - 1,
+                        nrow(obj$X))
+    points(Xtmin1[lib.remove.ind],
+           Xt[lib.remove.ind],
+           pch = 4,
+           cex = 2,
+           col = "blue")
+    }
 
   psi_vec <- obj$neighbour_index[tstar,]     #  vector of indices of points closest
                                         #  to x[tstar]
@@ -1018,23 +1034,11 @@ plot_explain_edm_movie <- function(obj,
                    legend.plot = FALSE,
                    ...)    # includes tstar that  gets carried through
 
-  #plot_explain_edm(obj,
-  #                 tstar.col = "blue",,
-  #                 main = paste0(
-  #                   "Remove vector x(tstar) from library"),
-  #                   # where tstar=", tstar,
-  #                 tstar.pch = 4,
-  #                 tstar.cex = 2.5,
-  #                 ...)
-
-  # DON'T we want to remove tstar+1 also - whole point of my error finding!
-# TODO ADD THAT IN HERE
-
   plot_explain_edm(obj,
                    main = as.expression(bquote("Want to predict" * italic(Y) [ .(tstar+1)] *
                                         " by locating (" *
                                         italic(Y) [ .(tstar -1)] * ", " *
-                                        italic(Y) [ .(tstar)] * ") ...")),
+                                        italic(Y) [ .(tstar)] * ").")),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    legend.inc.rEDM = inc.rEDM,
@@ -1046,19 +1050,30 @@ plot_explain_edm_movie <- function(obj,
 #  Maybe omit the agree with rEDM for now, then pick the examples that
 #  don't agree.
 
-
+  # Remove all unusable potential neighbours
   plot_explain_edm(obj,
+                   tstar.col = "blue",,
                    main = paste0(
-                     "... determining its three nearest neighbours ..."),
+                     "Exclude invalid potential neighbours ..."),
+                   legend.inc.rEDM = inc.rEDM,
                    tstar.pch = 19,
                    tstar.cex = 1.2,
-                   neigh.plot = TRUE,
-                   legend.inc.rEDM = inc.rEDM,
+                   lib.remove = TRUE,
                    ...)
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "... seeing where they go in their next time step ..."),
+                     "... and determine the three nearest neighbours."),
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   legend.inc.rEDM = inc.rEDM,
+                   lib.remove = TRUE,
+                   ...)
+
+  plot_explain_edm(obj,
+                   main = paste0(
+                     "See where they get projected to in their next time step ..."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1068,7 +1083,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main =
-                   as.expression(bquote("... and taking a weighted average of the " *
+                   as.expression(bquote("... and take a weighted average of the " *
                                         italic(Y) [t] * " values to give " *
                                         italic(Y) [ .(tstar+1)] * " which ...")),
                    tstar.pch = 19,
