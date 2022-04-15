@@ -1175,7 +1175,7 @@ plot_explain_edm_all_tstar_movie_save <- function(E_res,
       height = 5.36,
       width = 9)
 
-  for(tstar_val in 2:(nrow(E_res$X) - 2)){    # For E=2
+  for(tstar_val in 2:(nrow(E_res$X) - 1)){    # For E=2
     plot_explain_edm(E_res,
                      tstar = tstar_val,
                      main = "",
