@@ -1044,12 +1044,6 @@ plot_explain_edm_movie <- function(obj,
                    legend.inc.rEDM = inc.rEDM,
                    ...)
 
-# and taking a weighted average to give x(40) = (Y_39, Y_40), to give an
-#  estimate of Y_40
-
-#  Maybe omit the agree with rEDM for now, then pick the examples that
-#  don't agree.
-
   # Remove all unusable potential neighbours
   plot_explain_edm(obj,
                    tstar.col = "blue",,
@@ -1151,9 +1145,49 @@ plot_explain_edm_movie_save <- function(E_res,
       height = 5.36,
       width = 9)
 
-  plot_explain_edm_movie(E_results[[1]],
+  plot_explain_edm_movie(E_res,
                          tstar = tstar)
 
+  dev.off()
+}
+
+##' Make pdf movie of explain EDM figure for each tstar to go into Supp pdf.
+##'
+##' Creates a single .pdf with one frame for each figure (value of tstar),
+##'  included as a pausable movie of Supp pdf for primer manuscript.
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param pdf.filename filename to save to
+##' @param ... extra arguments to pass to `plot_explain_edm_movie()`
+##' @return saved pdf file with one page for each figure, that can become
+##'  movie in Supp of primer manuscript.
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##'   E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##'   plot_explain_edm_all_tstar_movie_save(E_results[[1]])
+##' }
+plot_explain_edm_all_tstar_movie_save <- function(E_res,
+                                                  pdf.filename =
+                                                    "explain_EDM_all_tstar_movie.pdf",
+                                                  ...){
+  pdf(pdf.filename,
+      height = 5.36,
+      width = 9)
+
+  for(tstar_val in 2:(nrow(E_res$X) - 2)){    # For E=2
+    plot_explain_edm(E_res,
+                     tstar = tstar_val,
+                     main = "",
+                     tstar.pch = 19,
+                     tstar.cex = 1.2,
+                     neigh.plot = TRUE,
+                     neigh.proj = TRUE,
+                     pred.plot = TRUE,
+                     pred.rEDM = TRUE,
+                     true.val = TRUE,
+                     legend.inc.rEDM = TRUE)
+  }
   dev.off()
 }
 
