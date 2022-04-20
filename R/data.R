@@ -148,3 +148,35 @@
 ##'
 ##' @source Generated from Andy running `data-raw/exclusion_radius_test.R`.
 "check_rEDM_excl_3"
+
+#' Simulated Larkin Sockeye Salmon Population Dynamics
+#'
+#' A dataset containing sockeye salmon population dynamics simulated
+#' from a Larkin spawner-recruitment model using the \code{larkin} package.
+#'
+#' @format [data.frame()] with 500 rows (brood years) and four variables:
+#' \describe{
+#'   \item{R_3}{Recruitment abundance at age three}
+#'   \item{R_4}{Recruitment abundance at age four}
+#'   \item{R_5}{Recruitment abundance at age five}
+#'   \item{S}{Spawning abundance}
+#' }
+#'
+#' @source Generated from data-raw/larkin.R
+"larkin"
+
+#' Simulated Ricker Sockeye Salmon Population Dynamics
+#'
+#' A dataset containing sockeye salmon population dynamics simulated
+#' from a Ricker spawner-recruitment model using the \code{larkin} package.
+#'
+#' @format [data.frame()] with 500 rows (brood years) and four variables:
+#' \describe{
+#'   \item{R_3}{Recruitment abundance at age three}
+#'   \item{R_4}{Recruitment abundance at age four}
+#'   \item{R_5}{Recruitment abundance at age five}
+#'   \item{S}{Spawning abundance}
+#' }
+#'
+#' @source Generated from data-raw/ricker.R
+"ricker"
