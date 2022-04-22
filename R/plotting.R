@@ -110,7 +110,7 @@ plot.pbsEDM = function(x,
 ##'
 ##' # For manuscript figures:
 ##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##' ##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
+##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
 ##'             height = 5.36,
 ##'             width = 9,
 ##'             horizontal=FALSE,
