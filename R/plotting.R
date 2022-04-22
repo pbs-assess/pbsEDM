@@ -1367,8 +1367,25 @@ plot_library_size <- function(T = 50,
          annotate_main,
          cex = annotate_cex)
 
-    annotate_extra <- which(C > max(annotate_main),
-                            arr.ind = TRUE)          # extra small annotations
+    annotate_extra_three <- which(C > max(annotate_main),
+                                  arr.ind = TRUE)          # extra small annotations
+                                                           # (just three for default)
+
+
+    tstar_max <- max(annotate_extra_three[ , 2]) # max valid tstar, same for all
+                                               #  E, namely (T-2 = 48 for default)
+    # Want value at t^*=48 and values along diagonal
+    annotate_extra_row <- 1:length(E_vec)
+
+    annotate_extra_max_tstar_col <- rep(tstar_max, length(E_vec))  # values at t^* = 48
+    annotate_extra_diag_col <- tstar_max - 1:length(E_vec)         # values along diagonal
+
+    annotate_extra <- rbind(annotate_extra_three,                  # duplicates some
+                                                                   #  values but keeps the
+                            cbind(annotate_extra_row,              #  col headings
+                                  annotate_extra_max_tstar_col),
+                            cbind(annotate_extra_row,
+                                  annotate_extra_diag_col))
 
     for(k in 1:nrow(annotate_extra)){
       text(E_vec[annotate_extra[k, "row"]],
