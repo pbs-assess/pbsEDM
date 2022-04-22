@@ -962,12 +962,11 @@ plot_explain_edm <- function(obj,
     if(legend.inc.rEDM){
       legend("bottomleft",
              pch=c(tstar.pch, 19, 8, 1, 1),
-             leg=c(expression(bold(x)* "(" * italic(t) * "*)"),
-                         "neighbours",
-                         expression(bold(x)* "(" * italic(t) *
-                                              "*+1) pred (wt avge)"),
-                         "rEDM pred",
-                         expression("true " * bold(x)* "(" * italic(t) * "*+1)")),
+             leg=c(expression(italic(t) * "*"),
+                   "neighbours",
+                   expression(italic(t) * "*+1 prediction"),
+                   "rEDM pred",
+                   expression("true " * italic(t) * "*+1")),
              col=c(tstar.col,
                    "red",
                    tstar.col,
@@ -976,12 +975,17 @@ plot_explain_edm <- function(obj,
              cex=0.85)} else {
                         legend("bottomleft",
                                pch=c(tstar.pch, 19, 8, 1),
-                               leg=c(expression(bold(x)* "(" * italic(t) * "*)"),
+                               leg=c(expression(italic(t) * "*"),
                                      "neighbours",
-                                     expression(bold(x)* "(" *
-                                                          italic(t) *
-                                                          "*+1) pred (wt avge)"),
-                                     expression("true " * bold(x)* "(" * italic(t) * "*+1)")),
+                                     expression(italic(t) * "*+1 prediction"),
+                                     expression("true " * italic(t) * "*+1")),
+                               # This was original with bold x:
+                               # leg=c(expression(bold(x)* "(" * italic(t) * "*)"),
+                               #       "neighbours",
+                               #       expression(bold(x)* "(" *
+                               #                            italic(t) *
+                               #                            "*+1) pred (wt avge)"),
+                               #       expression("true " * bold(x)* "(" * italic(t) * "*+1)")),
                                col=c(tstar.col,
                                      "red",
                                      tstar.col,
