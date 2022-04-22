@@ -1191,7 +1191,6 @@ plot_explain_edm_all_tstar_movie_save <- function(E_res,
   dev.off()
 }
 
-
 ##' Make pdf movie of six-panel figure to go into Supp pdf.
 ##'
 ##' Creates a single .pdf with one frame for each time step, which can be
