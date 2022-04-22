@@ -23,6 +23,8 @@ plot_pred_obs(
 
 \item{last.time.to.plot}{Last time value of `N_t` to use when plotting.}
 
+\item{E_cex}{Vector of sizes, one for each value of E}
+
 \item{portrait}{dummy argument that allows `...` to be passed from
 `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.}
 }

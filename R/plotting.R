@@ -186,6 +186,7 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
 ##' @param last.time.to.plot Last time value of `N_t` to use when plotting.
+##' @param E_cex Vector of sizes, one for each value of E
 ##' @param portrait dummy argument that allows `...` to be passed from
 ##'   `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.
 ##' @return Figure in the current plot enivironment
