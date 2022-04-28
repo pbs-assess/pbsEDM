@@ -152,8 +152,15 @@ plot_pbsEDM_Evec <- function(E_res,
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
-##'   aa <- pbsEDM_Evec(NY_lags_example$N_t)
-##'   plot_rho_Evec(aa)
+##' E_results_17 <- pbsEDM_Evec(NY_lags_example$N_t,
+##'                             E_vec = 1:16)  # go up to E=17
+##'   postscript("rho_Evec.eps",
+##'             height = 4.5,
+##'             width = 4.5,
+##'             horizontal=FALSE,
+##'             paper="special")
+##'   plot_rho_Evec(E_results_17)
+##'   dev.off()
 ##' }
 plot_rho_Evec <- function(E_res,
                           ...){
@@ -166,11 +173,21 @@ plot_rho_Evec <- function(E_res,
 
   plot(E,
        rho,
+       xlim = c(0, max(E)),
        ylim = c(0,1),
-       xlab = expression("Embedding Dimension ," * italic(E)),
-       ylab = expression("Forecast Skill, " * rho),
+       xlab = expression("Embedding dimension," * italic(E)),
+       ylab = expression("Forecast skill, " * rho),
        ...
        )
+  box()
+  axis(1, 1:max(E),
+       tcl = -0.2,
+       labels = rep("", max(E)))
+  axis(2,
+       seq(0, 1, 0.1),
+       tcl = -0.2,
+       labels = rep("", 11))
+
   # TODO see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
   invisible()
 }
