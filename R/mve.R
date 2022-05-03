@@ -33,7 +33,7 @@ mve <- function (data,
 	
 	# Check arguments ------------------------------------------------------------
 	
-	checkmate::assert_integerish(index, lower = 40, upper = nrow(data), len = 1)
+	checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
 	checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
 	
 	# Create subset lags ---------------------------------------------------------
@@ -143,7 +143,7 @@ single_view_embedding <- function (data,
 	
 	# Check arguments ------------------------------------------------------------
 	
-	checkmate::assert_integerish(index, lower = 40, upper = nrow(data), len = 1)
+	checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
 	checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
 	
 	# Define the state space reconstruction --------------------------------------
