@@ -80,29 +80,6 @@ testthat::expect_equal(NY_lags_example_3$rEDM.pred,
                        check_rEDM)    # If no error then they match
 ```
 
-<!-- Plot of data (before making movie):
-Commenting out since not really needed (and have better function now
-demonstrated in the vignette analyse_simple_time_series, though the code here
-compares results in the final panel.
-```{r, eval=FALSE}
-plotPanelMovie.df2(only.final.plot=TRUE,
-                   open.pdf=FALSE)
-
-# ```{r, animation.hook = 'gifski', interval = 1.5}
-# Cannot change fig.width and fig.height hooks unless re-order par() in function
-# fig.width is 0.67 * fig.height
-#```{r, eval=FALSE}
- for(i in 1:nrow(NY_lags_example_3))
-  {
-    plotPanelMovie.df2(end = i,
-                       max_time = max(NY_lags_example_3$t),
-                       only.final.plot=TRUE,
-                       open.pdf=FALSE)
-  }
-# ```
-```
--->
-
 ## Predictions using pbsEDM code
 
 Now use the new `pbsEDM` code that Luke wrote independently; see the
