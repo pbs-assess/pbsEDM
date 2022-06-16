@@ -140,6 +140,26 @@ differed to those from `rEDM`). This is a reassuring test of Luke's new code,
 which is more general and functionalised than Andy's, and can do more than just $E=2$.
 Thus, we will continue using the `pbsEDM` results.
 
+## Redoing inputting the N value, else the output has N for Y which is confusing
+
+```{r pbsEDMcalc2}
+pbs_calc2 <- pbsEDM(NY_lags_example_3,
+                    lags = list(N_t = c(0:1)),
+                    first_difference = TRUE) # A tibble (contains lists)
+
+Need to re-render documentation, as I have old one.
+testthat::expect_equal(NY_lags_example_3$Y_t,
+                       pbs_calc2$X_observed[-length(pbs_calc2$X_observed)])
+                       # verifying the indexing is the same because X_observed has an extra NA value
+                       # to match pbs_calc$X_forecast (to allow for forecasts of unlagged data)
+
+pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
+
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbs_pred)
+```
+
+
 ## Compare `pbsEDM` results with those from `rEDM`
 
 Now to plot the `pbsEDM` predictions again those from `rEDM`:
@@ -412,3 +432,29 @@ which, as expected, does not fix the problem.
 So, conclusion is that setting `exclusionRadius` in `rEDM` does not fix the problem.
 
 ## That's all for predictions of $Y$, what about $N$?
+
+So `pbs_pred` is a vector of predictions of the $Y_t$ values.
+But we are really interested in the $N_t$ values. So get those by
+un-first-differencing:
+
+$\hat{N}_{t+1} = N_{t} + \hat{Y}_{t}$,
+
+and in particular for the projected value
+
+$\hat{N}_{101} = N_{100} + \hat{Y}_{100}$.
+
+Note that we are using the known values of $N_t$ rather than estimated. Then
+calculate a correlation coefficient, $\rho_N$, based on $N$ rather than $Y$
+(which is what we really care about).
+
+```{r predN}
+pbs_pred_N <- c(NA,
+                NY_lags_example_3$N_t + pbs_pred)
+
+# Luke has done this already:
+pbs_calc[["N_forecast"]]
+# But disagrees with mine. He used:
+N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
+
+rho_N <-
+```
