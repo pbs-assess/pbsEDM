@@ -147,16 +147,51 @@ pbs_calc2 <- pbsEDM(NY_lags_example_3,
                     lags = list(N_t = c(0:1)),
                     first_difference = TRUE) # A tibble (contains lists)
 
-Need to re-render documentation, as I have old one.
-testthat::expect_equal(NY_lags_example_3$Y_t,
-                       pbs_calc2$X_observed[-length(pbs_calc2$X_observed)])
+testthat::expect_equal(NY_lags_example_3$N_t,
+                       pbs_calc2$N_observed[-length(pbs_calc2$N_observed)])
                        # verifying the indexing is the same because X_observed has an extra NA value
                        # to match pbs_calc$X_forecast (to allow for forecasts of unlagged data)
 
-pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
+testthat::expect_equal(NY_lags_example_3$Y_t,
+                       pbs_calc2$Y_observed)
 
+pbs_calc2$results
+#  E     N_rho  N_rmse    X_rho  X_rmse
+#  2 0.2973217 1.12366 0.703475 1.12366
+# N_rho is way smaller than X_rho! Check manually:
+
+# \hat{N_{t+1}} = N_t + \hat{Y_t}
+my_pred_N <- c(NA,
+               NY_lags_example_3$N_t + NY_lags_example_3$my.pred)
+
+testthat::expect_equal(my_pred_N,
+                       pbs_calc2$N_forecast)
+# What?! How come only one weird one:
+#Error: `my_pred_N` not equal to pbs_calc2$N_forecast.
+#1/101 mismatches
+#[78] -0.202 - 1.21 == -1.41
+
+# See Issue #29 - I'm not sure if rest of pbsEDM function is updated.
+
+# But these work:
 testthat::expect_equal(NY_lags_example_3$my.pred,
                        pbs_pred)
+
+testthat::expect_equal(pbs_calc$X_forecast,
+                       pbs_calc$Y_forecast)
+
+testthat::expect_equal(pbs_calc$X_forecast[-101],
+                       NY_lags_example_3$my.pred)
+
+# Okay, so just stick with my N calculation
+#  since pbs X or Y forecast is same as my.pred
+
+
+
+#pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
+
+#testthat::expect_equal(NY_lags_example_3$my.pred,
+#                       pbs_pred)
 ```
 
 
