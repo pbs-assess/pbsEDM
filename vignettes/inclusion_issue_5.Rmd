@@ -1,0 +1,414 @@
+---
+title: "Inclusion Issue Version 5 (update rEDM Simplex() again, report version number)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{inclusion_issue_4}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "",
+  fig.width = 5,
+  fig.height = 5
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+## Introduction
+
+This vignette demonstrates the issue we found with
+calculations in the `rEDM` package, namely to do with the nearest neighbours
+that are used in the projection calculations. The calculations here use our
+`pbsEDM` package led by Luke Rogers, and are verified using manual code written
+independently by Andy Edwards. <!-- See our manuscript for a full explanation. -->
+
+The tibble `NY_lags_example_3` is saved in the package and contains a simple
+simulated population time
+series $N_t$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
+lagged values $N_{t-1}$ as `Ntmin1`, and first differences $Y_t = N_{t+1} - N_t$
+as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`:
+
+<!-- Change what's below based on
+edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie
+edm-work/code/simulated/egDeyle/egDeyle.rnw (that I used for different tstar,
+for EAFMWG Jan 2020 I used egDeyleT95tstar15.rnw - can generalise once get
+going here.
+edm-work/code/simulated/egDeyle/tstarLoop/tstarLoop2019.rnw
+and
+edm-work/code/simulated/egDeyle/tstarLoop/mwe-2019.r
+-->
+```{r fullresults}
+as.data.frame(head(NY_lags_example_3))
+as.data.frame(tail(NY_lags_example_3))
+```
+Also included are results from using the `rEDM`
+package with embedding dimension 2 (see below) as `rEDM.pred` for the predicted
+value of `Y_t` with `rEDM.var`
+for its variance, and results from Andy's original
+function `EDM_pred_E_2()`, saved as `my.pred` and `my.var`.
+See `?NY_lags_example_3` for full details. THE HELP WILL NEED UPDATING.
+
+This is the code to check that `rEDM::Simplex()` gives the stated results, but
+it is not run in this vignette to avoid `pbsEDM` being dependent
+on `rEDM` (and its dependencies). Can be used to simply check future versions of
+both packages.
+```{r compareredm, eval=FALSE}
+library(rEDM)
+packageVersion("rEDM")
+# '1.12.2', published 2022-06-01
+input <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
+  dplyr::rename(Time = t)
+
+check_rEDM <- rEDM::Simplex(dataFrame = input,
+                            columns = "Y_t",
+                            target = "Y_t",
+                            lib = "1 99",
+                            pred = "1 99",
+                            E = 2,
+                            verbose = TRUE)$Predictions
+check_rEDM <- c(NA,
+                check_rEDM)   # Needs extra NA to get indexing correct
+
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       check_rEDM)    # If no error then they match
+```
+
+Note that (TODO: mention this if it's part of the GitHub Issue):
+```{r}
+NY_lags_example_3[100, c("rEDM.pred", "my.pred")]
+```
+which are the predicted values of $Y_{100}$. such that `rEDM` does not predict $Y_{100} = N_{101} - N_{100}$, but that is the
+value we want so that we can predict $N_{101}$.
+
+
+<!-- Plot of data (before making movie):
+Commenting out since not really needed (and have better function now
+demonstrated in the vignette analyse_simple_time_series, though the code here
+compares results in the final panel.
+```{r, eval=FALSE}
+plotPanelMovie.df2(only.final.plot=TRUE,
+                   open.pdf=FALSE)
+
+# ```{r, animation.hook = 'gifski', interval = 1.5}
+# Cannot change fig.width and fig.height hooks unless re-order par() in function
+# fig.width is 0.67 * fig.height
+#```{r, eval=FALSE}
+ for(i in 1:nrow(NY_lags_example_3))
+  {
+    plotPanelMovie.df2(end = i,
+                       max_time = max(NY_lags_example_3$t),
+                       only.final.plot=TRUE,
+                       open.pdf=FALSE)
+  }
+# ```
+```
+-->
+
+## Predictions using pbsEDM code
+
+Now use the new `pbsEDM` code that Luke wrote independently; see the
+[`analyse_simple_time_series`](analyse_simple_time_series.html) vignette for details on
+using it. Then compare `pbsEDM` results with those from `rEDM` and from Andy's manual code:
+```{r pbsEDMcalc}
+pbs_calc <- pbsEDM(NY_lags_example_3,
+                   lags = list(Y_t = c(0:1))) # A tibble (contains lists)
+
+testthat::expect_equal(NY_lags_example_3$Y_t,
+                       pbs_calc$X_observed[-length(pbs_calc$X_observed)])
+                       # verifying the indexing is the same because X_observed has an extra NA value
+                       # to match pbs_calc$X_forecast (to allow for forecasts of unlagged data)
+
+pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
+
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbs_pred)
+```
+That last line will cause an error if the `pbsEDM` results do not match the
+`my.pred` values from Andy's manual code (there is no error because they do match).
+
+**Conclusion**: Andy's original manual calculations and Luke's new function in
+`pbsEDM` give the same results for this simulated data set. Andy's and Luke's
+code was written independently (although Andy had explained why his results
+differed to those from `rEDM`). This is a reassuring test of Luke's new code,
+which is more general and functionalised than Andy's, and can do more than just $E=2$.
+Thus, we will continue using the `pbsEDM` results.
+
+## Compare `pbsEDM` results with those from `rEDM`
+
+Now to plot the `pbsEDM` predictions again those from `rEDM`:
+```{r pbsredm}
+plot(NY_lags_example_3$rEDM.pred,
+     pbs_pred,
+     xlab = "rEDM predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+
+# Colour in red the ones more than eps away
+eps = 0.00001      # How different the predictions can be
+
+# Want to compare new pbsEDM results with saved rEDM
+NY_lags_extended <- dplyr::mutate(NY_lags_example_3,
+                                  pbsEDM.pred = pbs_pred)
+
+different <- dplyr::filter(NY_lags_extended,
+                           abs(rEDM.pred - pbsEDM.pred) > eps)
+points(different$rEDM.pred,
+       different$pbsEDM.pred,
+       col = "red",
+       pch = 20)
+
+# Just time, observations Y_t, and predictions
+dplyr::select(different, t, Y_t, rEDM.pred, pbsEDM.pred)
+```
+Those time indices represent $t^*+1$ values.
+
+So there are three time values for which results differ between `pbsEDM` and `rEDM`.
+
+## Explaining the issue
+
+Vector $\bf{x}_t$ is the vector of lagged values of the
+scalars $Y_t$:
+$$\bf{x}_t = [Y_t, ~Y_{t-1}].$$
+For focal time $t^*$, we know $\bf{x}_{t^*}$ and are trying to predict
+$\bf{x}_{t^*+1}$. The issue is that `rEDM` seems to use $\bf{x}_{t^*+2}$ as a
+nearest neighbour, but this should not be permissible.
+
+For example, for $t^*=94$, Andy's R code calculates nearest neighbours with indices $\psi$
+(saved as `psivec94`) and corresponding weights `weights94`:
+```{r psi}
+psivec94 = c(6, 57, 88)
+weights94 = c(0.3678794, 0.3205861, 0.2895013)
+```
+giving the estimate of $Y_{95}$, from [S1] of Deyle et al. (2013), as
+```{r Yninetyfive}
+Y95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
+Y95est
+```
+
+The `pbsEDM` code gives the same results:
+```{r}
+pbs_calc$neighbour_index[94, ]
+pbs_calc$neighbour_weight[94, ]
+pbs_calc$X_forecast[95]
+```
+The following will give errors if those results don't agree:
+```{r test}
+testthat::expect_equal(psivec94, pbs_calc$neighbour_index[94, ])
+testthat::expect_equal(weights94, pbs_calc$neighbour_weight[94, ], tolerance = 0.000001)
+testthat::expect_equal(Y95est, pbs_calc$X_forecast[95])
+```
+However, `rEDM` gives
+
+```{r rEDMninetyfive}
+Y95est_rEDM = NY_lags_example_3$rEDM.pred[95]
+Y95est_rEDM
+```
+as already noted above. Unlike (I think) earlier versions of `rEDM::simplex()`, the full
+results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`
+or `rEDM::simplex()` [have tried changing options `verbose, stats_only, silent`,
+but none give the full results].
+
+## Manually reproduce `rEDM` result
+
+We can reproduce the `rEDM` result by adapting Andy's manual code to allow
+$\bf{x}_{96}$ to be a nearest neighbour of $\bf{x}_{94}$,  giving
+```{r psi94allow}
+psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
+weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
+# Note that the first weight is the same as above (by definition it's always
+#  exp(-1)), but the second and third are very small because x[96] is
+#  very close to x[94].
+Y95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
+                   sum(weights94_allow)
+testthat::expect_equal(Y95est_allow,
+                       Y95est_rEDM)
+Y95est_allow
+
+```
+which agrees with the `Y95est_rEDM` value shown above
+
+However, the problem is that we should not be allowed to use $\bf{x}_{96}$. For
+our focal time $t^* = 94$ we are trying to predict $Y_{t^*+1} = Y_{95}$. But, by
+definition, $Y_{95}$ is included in $\bf{x}_{96}$ since
+$$\bf{x}_{96} = [Y_{96}, Y_{95}].$$
+
+So $\bf{x}_{96}$ should not be used to forecast $\bf{x}_{95}$, because it
+explicitly contains one of the two components of $\bf{x}_{95}$ (namely the
+$Y_{95}$ value that we are trying to predict). See our manuscript for full details.
+
+The same issue occurs for $t^*=75$.
+
+So the implementation of `rEDM` is not taking into account the fact that
+$\bf{x}_t$ is a vector of lagged values.
+
+## Similarly, tweak the data and use `rEDM`
+
+Try changing the value of $Y_{95}$ so that `rEDM::Simplex()` does not pick
+$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if get the same result as
+for `pbsEDM`.
+
+```{r changedata}
+input_obs <- dplyr::select(NY_lags_example_3, t, Y_t) %>%
+  dplyr::rename(Time = t)
+input_obs[95,]
+input_obs_change <- input_obs
+input_obs_change[95,"Y_t"] = 7    # Move it out of the way
+
+rEDM_change <- rEDM::Simplex(dataFrame = input_obs_change,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE)$Predictions
+rEDM_change <- c(NA,
+                 rEDM_change)   # Needs extra NA to get indexing correct
+testthat::expect_equal(pbs_pred[95],
+                       rEDM_change[95])
+
+pbs_pred[95]
+rEDM_change[95]
+
+```
+Those are the same, so showing that changing $Y_{95}$ gives the
+expected answer from using `rEDM::Simplex()`.
+
+## Try alternative `exclusionRadius` settings for `rEDM`
+
+Try changing `exclusionRadius` input in `rEDM::Simplex`, which "excludes vectors
+from the search space of nearest neighbors if their relative time
+index is within  exclusionRadius." as suggested in `rEDM` Issue 24.
+
+Commenting out `expect_equal()` in these, because it creates error -- writing the
+results manually as comments.
+
+First try setting `exclusionRadius = 1` (`check_rEDM_excl_1` result is saved in
+`pbsEDM` using `data-raw/exclusion_radius_test.R` and not run here):
+```{r exclusion1, eval=FALSE}
+check_rEDM_excl_1 <- rEDM::Simplex(dataFrame = input_obs,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE,
+                                   exclusionRadius = 1)$Predictions
+check_rEDM_excl_1 <- c(NA,
+                       check_rEDM_excl_1)   # Needs extra NA to get indexing correct
+
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       check_rEDM_excl_1)
+# Fails:
+# 2/100 mismatches (average diff: 0.969)
+# [76]  1.368 - 0.838 ==  0.53
+# [77] -0.381 - 1.027 == -1.41
+# So two differences using Simplex() with exclusionRadius=0 (default) and 1.
+
+testthat::expect_equal(pbs_pred,
+                       check_rEDM_excl_1)
+# Fails:
+# 6/100 mismatches (average diff: 0.274)
+# [19]  1.0614 - 1.0614 ==  5.82e-06 #small
+# [23]  1.4783 - 1.4783 ==  8.08e-06 #small
+# [77] -0.3812 - 1.0266 == -1.41e+00
+# [90]  2.1994 - 2.1994 ==  1.43e-05 #small
+# [95]  0.4123 - 0.1774 ==  2.35e-01
+# [98]  0.0799 - 0.0799 ==  3.28e-06 #small
+# So [76] now matches pbs_pred, [77] for some reason has changed, [90] is
+# probably close enough, but [95] still not the same as pbs_pred.
+```
+
+Then try setting it to 2, again not run here but saved in `pbsEDM`:
+```{r exclusion2, eval=FALSE}
+check_rEDM_excl_2 <- rEDM::Simplex(dataFrame = input_obs,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE,
+                                   exclusionRadius = 2)$Predictions
+check_rEDM_excl_2 <- c(NA,
+                       check_rEDM_excl_2)   # Needs extra NA to get indexing correct
+
+# testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+#                        check_rEDM_excl_2)
+# 4/100 mismatches (average diff: 0.931)
+# [76]  1.368 - 0.838 ==  0.530  # same as exclR=1
+# [77] -0.381 - 1.027 == -1.408  # same as exclR=1
+# [95]  0.177 - 0.412 == -0.235
+# [97] -0.798 - 0.755 == -1.552
+# So this has two new differences from exclR=0
+
+# testthat::expect_equal(pbs_pred,
+#                       check_rEDM_excl_2)
+# [19]  1.0614 - 1.0614 ==  5.82e-06 # small
+# [23]  1.4783 - 1.4783 ==  8.08e-06 # small
+# [77] -0.3812 - 1.0266 == -1.41e+00
+# [90]  2.1994 - 2.1994 ==  1.43e-05 # small
+# [97] -0.7977 - 0.7547 == -1.55e+00
+# [98]  0.0799 - 0.0799 ==  3.28e-06 # small
+```
+So with exclusion radius of 2, assuming the e-06 and e-05 values are equal, instead of
+$t^*+1 = 76, 90$ and 95 results disagreeing between `pbsEDM` and `rEDM` results, we now
+have those three agreeing, but 77 and 97 being quite different:
+```{r newdiff}
+# [77] -0.3812 - 1.0266 == -1.41e+00
+# [97] -0.7977 - 0.7547 == -1.55e+00
+```
+
+Try exclusion radius of 3 (also saved in `pbsEDM`):
+```{r exclusion3, eval=FALSE}
+check_rEDM_excl_3 <- rEDM::Simplex(dataFrame = input_obs,
+                                   columns = "Y_t",
+                                   target = "Y_t",
+                                   lib = "1 99",
+                                   pred = "1 99",
+                                   E = 2,
+                                   verbose = TRUE,
+                                   exclusionRadius = 3)$Predictions
+check_rEDM_excl_3 <- c(NA,
+                       check_rEDM_excl_3)   # Needs extra NA to get indexing correct
+
+# testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+#                       check_rEDM_excl_3)
+# 7/100 mismatches (average diff: 0.64)
+# [61]  0.797 - 0.891 == -0.0943
+# [64]  0.171 - 0.150 ==  0.0209
+# [65]  2.883 - 3.521 == -0.6378
+# [76]  1.368 - 0.838 ==  0.5299
+# [77] -0.381 - 1.027 == -1.4078
+# [95]  0.177 - 0.412 == -0.2350
+# [97] -0.798 - 0.755 == -1.5523
+# So first three values are different (but weren't for exclR = 2), last four
+# have the same differences as for exclR = 2
+# (expect to get more differences with larger radius).
+
+# testthat::expect_equal(pbs_pred,
+#                       check_rEDM_excl_3)
+# 9/100 mismatches (average diff: 0.413)
+# [19]  1.0614 - 1.0614 ==  5.82e-06
+# [23]  1.4783 - 1.4783 ==  8.08e-06
+# [61]  0.7967 - 0.8910 == -9.43e-02 # new
+# [64]  0.1709 - 0.1500 ==  2.09e-02 # new
+# [65]  2.8828 - 3.5206 == -6.38e-01 # new
+# [77] -0.3812 - 1.0266 == -1.41e+00
+# [90]  2.1994 - 2.1994 ==  1.43e-05
+# [97] -0.7977 - 0.7547 == -1.55e+00
+# [98]  0.0799 - 0.0799 ==  3.28e-06
+```
+The three highlighted ones are new differences for `exclusionRadius=3`,
+which, as expected, does not fix the problem.
+
+So, conclusion is that setting `exclusionRadius` in `rEDM` does not fix the problem.
+
+## That's all for predictions of $Y$, what about $N$?
