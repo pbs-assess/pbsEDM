@@ -111,12 +111,20 @@ Thus, we will continue using the `pbsEDM` results.
 
 ## Redoing inputting the N value, else the output has N for Y which is confusing
 
+Using
+
+$\hat{N_{t+1}} = N_t + \hat{Y_t}$
+
+
 ```{r pbsEDMcalc2}
+N_t <- NY_lags_example_3$N_t
+Y_t <- NY_lags_example_3$Y_t
+
 pbs_calc2 <- pbsEDM(NY_lags_example_3,
                     lags = list(N_t = c(0:1)),
                     first_difference = TRUE) # A tibble (contains lists)
 
-testthat::expect_equal(NY_lags_example_3$N_t,
+testthat::expect_equal(N_t,
                        pbs_calc2$N_observed[-length(pbs_calc2$N_observed)])
                        # verifying the indexing is the same because X_observed has an extra NA value
                        # to match pbs_calc$X_forecast (to allow for forecasts of unlagged data)
@@ -129,9 +137,12 @@ pbs_calc2$results
 #  2 0.2973217 1.12366 0.703475 1.12366
 # N_rho is way smaller than X_rho! Check manually:
 
+my_pred_Y <- NY_lags_example_3$my.pred
+
 # \hat{N_{t+1}} = N_t + \hat{Y_t}
 my_pred_N <- c(NA,
-               NY_lags_example_3$N_t + NY_lags_example_3$my.pred)
+               N_t + my_pred_Y)
+# Can't predict N[3] since can't predict know Y_2 since can't use t^*=1 as focal point
 
 # Commenting out to build vignette, but needs figuring out.
 #testthat::expect_equal(my_pred_N,
@@ -140,8 +151,12 @@ my_pred_N <- c(NA,
 #Error: `my_pred_N` not equal to pbs_calc2$N_forecast.
 #1/101 mismatches
 #[78] -0.202 - 1.21 == -1.41
-
 # See Issue #29 - I'm not sure if rest of pbsEDM function is updated.
+# How about:
+testthat::expect_equal(NY_lags_example_3$N_t,
+                       pbs_calc2$N_observed[-101])
+# So using the same N values.
+
 
 # But these work:
 testthat::expect_equal(NY_lags_example_3$my.pred,
@@ -154,20 +169,93 @@ testthat::expect_equal(pbs_calc$X_forecast[-101],
                        NY_lags_example_3$my.pred)
 
 # Okay, so just stick with my N calculation
-#  since pbs X or Y forecast is same as my.pred
+#  since pbs X or Y forecast is same as my.pred, until fix #29.
+plot(c(N_t, NA),
+     my_pred_N,
+     xlab = "Observation of Nt",
+     ylab = "Estimate of Nt")
+abline(0, 1, col="grey")
 
+plot(Y_t,
+     my_pred_Y,
+     xlab = "Observation of Yt",
+     ylab = "Estimate of Yt")
+abline(0, 1, col="grey")
 
-
-#pbs_pred <- pbs_calc$X_forecast[-length(pbs_calc$X_forecast)]
-
-#testthat::expect_equal(NY_lags_example_3$my.pred,
-#                       pbs_pred)
+my_rho_N <- cor(c(N_t, NA),
+                my_pred_N,
+                use = "pairwise.complete.obs")
+my_rho_N
+pbs_calc2$results
+# N_rho slightly different presumably due to that one different value.
 ```
 
+Doesn't look great. Thought about alternative definition:
+
+$\hat{N_{t+1}} = \hat{N_t} + \hat{Y_t}$
+
+but first $\hat{Y_t}$ is $\hat{Y_3}$ so we have
+
+$\hat{N_4} = \hat{N_3} + \hat{Y_3}$
+
+but we don't know $\hat{N_3}$ (because don't know $\hat{Y_2}$. So this wouldn't
+work anyway (and it seems like it would just compound errors anyway).
+
+So that's a super low correlation coefficient, compared to that based on the
+$Y_t$. So EDM has given a misleadingly impression of prediction accuracy based
+on estimating $Y_t$,
+because what we're interested in is predicting $N_t$ not $Y_t$
+
+### How about working in the log scale
+
+Joe suggested trying on the log scale. So use $\log N_t$ values. Then
+define $Y'_t$ as
+
+$Y'_t = \log N_{t+1} - \log N_t = \log \dfrac{N_{t+1}}{N_t}$
+
+and the reverse transformation becomes
+
+$\hat{N}_{t+1} = N_t \textrm{e}^{\hat{Y'}_t}$
+
+```{r logcalcs}
+Nt_log <- dplyr::mutate(NY_lags_example_3,
+                        "logN_t" = log(N_t)) %>%
+  dplyr::select(logN_t)
+pbs_log <- pbsEDM(Nt_log,
+                  lags = list(logN_t = c(0:1)),
+                  first_difference = TRUE)
+
+pbs_log$results
+# Work out explicitly here given above issue with one value being different to
+#  my calcs:
+pbs_logN_fore <- c(NA,
+                   Nt_log$logN_t + pbs_log$X_forecast)
+pbs_rho_logN_manual <- cor(c(Nt_log$logN_t, NA),
+                           pbs_logN_fore,
+                           use = "pairwise.complete.obs")
+testthat::expect_equal(pbs_rho_logN_manual,
+                       pbs_log$results$N_rho)
+# Now un-log:
+pbs_N_fore <- exp(pbs_logN_fore)
+pbs_rho_N_manual <- cor(c(N_t, NA),
+                        pbs_N_fore,
+                        use = "pairwise.complete.obs")
+
+plot(N_t,
+     pbs_N_fore[-101],
+     xlab = "Observation of Nt",
+     ylab = "Estimate of Nt having worked in log space")
+abline(0, 1, col="grey")
+pbs_rho_N_manual
+```
+
+Wow, so 7% correlation. Not good. So stick with not logging. Seems really poor -
+maybe should double check that code. TODO Once `pbsEDM()` output clarified then
+do that last bit again.
 
 ## Compare `pbsEDM` results with those from `rEDM`
 
-Now to plot the `pbsEDM` predictions again those from `rEDM`:
+Now to plot the earlier `pbsEDM` predictions again those from `rEDM`:
 ```{r pbsredm}
 plot(NY_lags_example_3$rEDM.pred,
      pbs_pred,
