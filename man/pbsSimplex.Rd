@@ -38,7 +38,7 @@ N <- data.frame(x = 1:30)
 s1 <- pbsSimplex(N)
 
 N <- data.frame(x = simple_ts)
-s2 <- pbsSimplex(N)   
+s2 <- pbsSimplex(N)
 
 }
 \author{

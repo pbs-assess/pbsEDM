@@ -10,7 +10,8 @@ pbsEDM_Evec(N_t, E_vec = 1:10, ...)
 \item{N_t}{[vector] Vector of non-differenced values $N_t$, with time assumed
 to be `1:length(N_t)`.}
 
-\item{E_vec}{The vector of embedding dimensions to try.}
+\item{E_vec}{The vector of embedding dimensions to try. ACTUALLY lags, see
+Issue 28.}
 
 \item{...}{Further options to pass to `pbsEDM()`.}
 }
