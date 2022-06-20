@@ -34,33 +34,62 @@ each time series in \code{N}.}
 \value{
 A list of class \code{pbsEDM} containing:
 
-  \itemize{ \item \code{N} [matrix()] Response variable and unlagged
-  covariates as columns \item \code{N_observed} [vector()] Response variable
-  time series \item \code{N_forecast} [vector()] Forecast of response
-  variable time series \item \code{X} [matrix()] Unlagged and lagged state
-  variables as columns \item \code{X_observed} [vector()] Transformed
-  response variable time series \item \code{X_forecast} [vector()] Forecast
-  of transformed response variable \item \code{X_distance} [matrix()] Square
-  distance \code{matrix} between pairs of points in state space (pairs of
-  rows in \code{X}) \item \code{neighbour_distance} [matrix()] Distance by
-  focal time (row) and rank (column) \item \code{neighbour_index} [matrix()]
-  Neighbour index by focal time (row) and distance rank (column) \item
+  \itemize{
+\item \code{N} [matrix()] Response variable and unlagged covariates as
+  columns
+
+\item \code{N_observed} [vector()] Response variable time series
+
+\item \code{N_forecast} [vector()] Forecast of response variable time series
+
+\item \code{X} [matrix()] Unlagged and lagged state variables as columns
+
+\item \code{X_observed} [vector()] Transformed response variable time series
+
+\item \code{X_forecast} [vector()] Forecast of transformed response variable
+
+\item \code{X_distance} [matrix()] Square distance \code{matrix} between
+  pairs of points in state space (pairs of rows in \code{X})
+
+\item \code{neighbour_distance} [matrix()] Distance by focal time (row) and
+  rank (column)
+
+\item \code{neighbour_index} [matrix()]
+  Neighbour index by focal time (row) and distance rank (column)
+
+\item
   \code{neighbour_value} [matrix()] Neighbour value by focal time (row) and
-  distance rank (column) \item \code{neighbour_weight} [matrix()] Neighbour
-  weight by focal time (row) and distance rank (column) \item
+  distance rank (column)
+
+\item \code{neighbour_weight} [matrix()] Neighbour weight by focal time (row)
+  and distance rank (column)
+
+\item
   \code{projected_index} [matrix()] Projected neighbour index by projected
-  time (row) and neighbour distance rank (column) \item
+  time (row) and neighbour distance rank (column)
+
+\item
   \code{projected_value} [matrix()] Projected neighbour value by projected
-  time (row) and neighbour distance rank (column) \item
+  time (row) and neighbour distance rank (column)
+
+\item
   \code{projected_weight} [matrix()] Projected neighbour weight by projected
-  time (row) and neighbour distance rank (column) \item \code{lags} [list()]
+  time (row) and neighbour distance rank (column)
+
+\item \code{lags} [list()]
   A named list of integer vectors specifying the lags to use for each time
-  series in \code{N} \item \code{theta} [numeric()] Local weighting parameter
-  \item \code{p} [integer()] The forecast distance \item
-  \code{first_difference} [logical()] First difference each time series?
-  \item \code{centre_and_scale} [logical()] Centre and scale each time
-  series? \item \code{results} [data.frame()] A summary of forecast accuracy
-  }
+  series in \code{N}
+
+\item \code{theta} [numeric()] Local weighting parameter
+
+\item \code{p} [integer()] The forecast distance
+
+\item \code{first_difference} [logical()] First difference each time series?
+
+\item \code{centre_and_scale} [logical()] Centre and scale each time series?
+
+\item \code{results} [data.frame()] A summary of forecast accuracy
+}
 }
 \description{
 Perform short-term nonlinear forecasting via S-mapping..

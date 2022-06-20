@@ -137,14 +137,15 @@ pbs_calc2$results
 #  2 0.2973217 1.12366 0.703475 1.12366
 # N_rho is way smaller than X_rho! Check manually:
 
+# Now use Andy's original calculations:
 my_pred_Y <- NY_lags_example_3$my.pred
 
 # \hat{N_{t+1}} = N_t + \hat{Y_t}
 my_pred_N <- c(NA,
                N_t + my_pred_Y)
-# Can't predict N[3] since can't predict know Y_2 since can't use t^*=1 as focal point
+# Can't predict N[3] since can't predict Y_2 since can't use t^*=1 as focal point
 
-# Commenting out to build vignette, but needs figuring out.
+# Check mine and pbsEDM (commenting out to build vignette, but needs figuring out):
 #testthat::expect_equal(my_pred_N,
 #                       pbs_calc2$N_forecast)
 # What?! How come only one weird one:
@@ -155,7 +156,7 @@ my_pred_N <- c(NA,
 # How about:
 testthat::expect_equal(NY_lags_example_3$N_t,
                        pbs_calc2$N_observed[-101])
-# So using the same N values.
+# So definitely using the same N values.
 
 
 # But these work:
@@ -204,7 +205,11 @@ work anyway (and it seems like it would just compound errors anyway).
 So that's a super low correlation coefficient, compared to that based on the
 $Y_t$. So EDM has given a misleadingly impression of prediction accuracy based
 on estimating $Y_t$,
-because what we're interested in is predicting $N_t$ not $Y_t$
+because what we're interested in is predicting $N_t$ not $Y_t$.
+
+Note this is all with setting $E=2$, and the analysis on $Y_t$ suggested
+$E=3$. TODO: do the full analysis (other vignette) using $N_t$ to see what value
+of $E$ is suggested and what the resulting $\rho$ is. Needs pbsEDM issue 29 fixed.
 
 ### How about working in the log scale
 
