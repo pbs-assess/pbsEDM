@@ -9,25 +9,25 @@
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' # Numeric vector
 #' N <- 1:10
 #' lags <- list(x = c(0, 1, 2))
 #' pbsN(N, lags)
-#' 
+#'
 #' # Numeric matrix
 #' N <- matrix(1:20, ncol = 2)
 #' colnames(N) <- c("x", "y")
 #' lags <- list(x = c(0, 1, 2), y = c(0, 1))
 #' pbsN(N, lags)
-#' 
+#'
 #' # Data frame
 #' N <- data.frame(x = 1:10, y = 11:20)
 #' lags <- list(x = c(0, 1, 2), y = c(0, 1))
 #' pbsN(N, lags)
-#' 
+#'
 pbsN <- function (N, lags, p = 1L) {
-	
+
 	# Check arguments
 	checkmate::assert_list(lags, types = "integerish", any.missing = FALSE)
 	checkmate::assert_list(lags, min.len = 1)
@@ -69,7 +69,7 @@ pbsN <- function (N, lags, p = 1L) {
 #' lags <- list(x = c(0, 1, 2), y = c(0, 1))
 #' N <- pbsN(N, lags)
 #' Z <- pbsZ(N, first_difference = FALSE)
-#' 
+#'
 pbsZ <- function (N, first_difference) {
 	# Check arguments
 	checkmate::assert_matrix(N, mode = "double", min.cols = 1L)
@@ -135,7 +135,7 @@ pbsX <- function (Y, lags) {
 #'
 #' @param N [vector()], [matrix()] or [data.frame()] of time series
 #'   for the response variable and covariate time series. Elements must be
-#'   [numeric()]. If present, columns must have [colnames()] matching 
+#'   [numeric()]. If present, columns must have [colnames()] matching
 #'   \code{names(lags)}.
 #' @param lags [list()] of named integer vectors specifying the lags to use for
 #'   each time series in \code{N}.
@@ -147,11 +147,11 @@ pbsX <- function (Y, lags) {
 #' @export
 #'
 pbsSSR <- function (N,
-										lags,
-										p = 1L,
-										first_difference = FALSE,
-										centre_and_scale = FALSE) {
-	# Compute X the state space reconstruction (SSR)
+                    lags,
+                    p = 1L,
+                    first_difference = FALSE,
+                    centre_and_scale = FALSE) {
+  	# Compute X the state space reconstruction (SSR)
 	N <- pbsN(N = N, lags = lags, p = p)
 	Z <- pbsZ(N = N, first_difference = first_difference)
 	Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
@@ -168,13 +168,13 @@ pbsSSR <- function (N,
 #' @param first_difference [logical()] First-difference each time series?
 #'
 #' @return [pbsDist()] [matrix()] of allowed distances
-#' 
+#'
 #' @export
 #'
 pbsDist <- function (X,
-										 lags,
-										 p = 1L,
-										 first_difference = FALSE) {
+                     lags,
+                     p = 1L,
+                     first_difference = FALSE) {
 	# Check arguments
 	stopifnot(
 		is.matrix(X) & is.numeric(X),
@@ -187,7 +187,7 @@ pbsDist <- function (X,
 		is.logical(first_difference) && length(first_difference) == 1L
 	)
 	# Avoid partial-component distances
-	X[is.na(rowSums(X)), ] <- NA 
+	X[is.na(rowSums(X)), ] <- NA
 	# Compute distance matrix
 	X_distance <- as.matrix(stats::dist(X))
 	# Exclude the focal point from each row of neighbours
@@ -230,14 +230,14 @@ pbsDist <- function (X,
 #' @return A matrix or vector. If `x` is a vector then returns a vector `length(x)`
 #'   with `NA` for the first `n` values then the first `length(x) - n` values of
 #'   `x`.
-#'   
+#'
 #' @export
 #'
 #' @examples
 #' pbsLag(1:10, 3)
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), 3)
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(3, 5))
-#' 
+#'
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 1))
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, 0))
 #' pbsLag(matrix(rep(1:10, 2), nrow = 10), c(0, -1))
@@ -274,12 +274,12 @@ pbsLag <- function (x,
 # maybe add some more at the end).
 if (getRversion() >= "2.15.1") utils::globalVariables(c("."))
 if (getRversion() >= "2.15.1") {
-	utils::globalVariables(c(
-		"Nx_lags_orig",
-		"Xt",
-		"Xtmin1",
-		"d",
-		"my.pred",
-		"rEDM.pred"
+  utils::globalVariables(c(
+           "Nx_lags_orig",
+           "Xt",
+           "Xtmin1",
+           "d",
+           "my.pred",
+           "rEDM.pred"
 	))
 }

@@ -211,6 +211,35 @@ Note this is all with setting $E=2$, and the analysis on $Y_t$ suggested
 $E=3$. TODO: do the full analysis (other vignette) using $N_t$ to see what value
 of $E$ is suggested and what the resulting $\rho$ is. Needs pbsEDM issue 29 fixed.
 
+Okay, trying to debug the problem above, that one (but only one) forecast $N_t$
+comes out different between mine and Luke's, but the $Y_t$'s don't (implying
+nearest neighbours etc are the same).
+```{r debug}
+# First check from scratch:
+pbs_calc3 <- pbsEDM(NY_lags_example_3,
+                    lags = list(N_t = c(0:1)),
+                    first_difference = TRUE) # A tibble (contains lists)
+pbs_calc3$Y_forecast - my_pred_Y
+# So this doesn't hold, it's to do with doing the
+#  first_difference within pbsEDM:
+
+# This is done above, using the Y_t values we already have (and so then not first-differencing)
+#pbs_calc <- pbsEDM(NY_lags_example_3,
+#                   lags = list(Y_t = c(0:1))) # A tibble (contains lists)
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbs_pred)    # Is fine.
+
+#testthat::expect_equal(pbs_calc$Y_forecast[-101],
+#                       pbs_calc3$Y_forecast)
+# 1/100 mismatches
+# [77] -0.381 - 1.03 == -1.41
+
+#HERE
+
+# Put a browser into pbsEDM()
+
+```
+
 ### How about working in the log scale
 
 Joe suggested trying on the log scale. So use $\log N_t$ values. Then
