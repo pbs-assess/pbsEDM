@@ -28,7 +28,7 @@ mve <- function (data,
 								 metric = "rmse",
 								 beyond = FALSE,
 								 weight = NULL,
-								 n_weight = ceiling(sqrt(length(unlist(lags)))),
+								 n_weight = ceiling(sqrt(2^length(unlist(lags)))),
 								 cores = NULL) {
 	
 	# Check arguments ------------------------------------------------------------
