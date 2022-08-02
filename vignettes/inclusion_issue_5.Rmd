@@ -62,7 +62,7 @@ both packages.
 ```{r compareredm, eval=FALSE}
 library(rEDM)
 packageVersion("rEDM")
-# '1.12.2', published 2022-06-01
+# '1.13.0', published 2022-06-17
 input <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
   dplyr::rename(Time = t)
 
@@ -72,12 +72,18 @@ check_rEDM <- rEDM::Simplex(dataFrame = input,
                             lib = "1 99",
                             pred = "1 99",
                             E = 2,
-                            verbose = TRUE)$Predictions
-check_rEDM <- c(NA,
-                check_rEDM)   # Needs extra NA to get indexing correct
+                            verbose = TRUE)
+check_rEDM_pred <- c(NA,
+                     check_rEDM$Predictions)   # Needs extra NA to get indexing correct
+
+check_rEDM_pred_var <- c(NA,
+                         check_rEDM$Pred_Variance)
 
 testthat::expect_equal(NY_lags_example_3$rEDM.pred,
-                       check_rEDM)    # If no error then they match
+                       check_rEDM_pred)       # If no error then they match
+testthat::expect_equal(NY_lags_example_3$rEDM.var,
+                       check_rEDM_pred_var)   # If no error then they match
+
 ```
 
 ## Predictions using pbsEDM code
@@ -234,7 +240,7 @@ testthat::expect_equal(NY_lags_example_3$my.pred,
 # 1/100 mismatches
 # [77] -0.381 - 1.03 == -1.41
 
-#HERE
+HERE
 
 # Put a browser into pbsEDM()
 
