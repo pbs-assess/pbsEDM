@@ -23,6 +23,10 @@ library(pbsEDM)
 
 ## Introduction
 
+This vignette was more for working things out. Now defining Aspects 1, 2 and 3
+in the manuscript, so creating aspect_2.Rmd (and maybe aspect_1.Rmd and
+aspect_3.Rmd if needed) based on this one.
+
 This vignette demonstrates the issue we found with
 calculations in the `rEDM` package, namely to do with the nearest neighbours
 that are used in the projection calculations. The calculations here use our
@@ -240,7 +244,7 @@ testthat::expect_equal(NY_lags_example_3$my.pred,
 # 1/100 mismatches
 # [77] -0.381 - 1.03 == -1.41
 
-HERE
+# TODO: HERE
 
 # Put a browser into pbsEDM()
 
