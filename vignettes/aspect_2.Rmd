@@ -106,7 +106,7 @@ abline(a=0,
        col="grey")
 
 # Work out the ones more than epsilon away
-epsilon = 0.00001      # Small value for how different the predictions can be
+epsilon = 0.0001      # Small value for how different the predictions can be
 
 different <- dplyr::tibble(t = input$Time,
                            rEDM_pred,
@@ -125,8 +125,8 @@ values, where $t^*$ is the focal time from which we make predictions:
 different
 ```
 
-So there are three time values for which results differ between `pbsEDM` and
-`rEDM`, corresponding to $t^* =$ `r different$t-1`.
+So there are two time indices for which results differ between `pbsEDM` and
+`rEDM`, corresponding to $t^* =$ `r different$t[1] - 1` and `r different$t[2] - 1`.
 
 ## Explaining the issue -- Aspect 2
 
@@ -190,7 +190,7 @@ rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
                                  verbose = TRUE)
 rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
                          rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
-rEDM_change_pred <- rEDM_change_res$Predictions       # Just the predicted values
+rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
 rEDM_change_pred[t_star+1]
 ```
 
@@ -237,10 +237,9 @@ rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
                                  verbose = TRUE)
 rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
                          rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
-rEDM_change_pred <- rEDM_change_res$Predictions       # Just the predicted values
+rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
 rEDM_change_pred[t_star+1]
 ```
-
 Again, we get the same result as obtained earlier using `pbsEDM`.
 
 HERE
@@ -290,7 +289,7 @@ results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`
 or `rEDM::simplex()` [have tried changing options `verbose, stats_only, silent`,
 but none give the full results].
 
-## Manually reproduce `rEDM` result
+## Manually reproduce `rEDM` result -- TODO just do this with pbsEDM code, or results
 
 We can reproduce the `rEDM` result by adapting Andy's manual code to allow
 $\bf{x}_{96}$ to be a nearest neighbour of $\bf{x}_{94}$,  giving
@@ -323,7 +322,10 @@ The same issue occurs for $t^*=75$.
 So the implementation of `rEDM` is not taking into account the fact that
 $\bf{x}_t$ is a vector of lagged values.
 
-## Similarly, tweak the data and use `rEDM`
+
+
+TODO: Also mention that rho is actually better for pbsEDM than rEDM in this
+example. So not that rEDM is necessarily overstating accuracy.
 
 ## Try alternative `exclusionRadius` settings for `rEDM`
 
