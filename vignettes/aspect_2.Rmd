@@ -23,34 +23,36 @@ library(pbsEDM)
 
 ## Introduction
 
-In the manuscript, Aspect 2 concerns which points can be considered as being the
-library used to work out the nearest neighbours of the focal point. We show that
+In the manuscript, the library contains the points that can be used to work out
+the nearest neighbours of the focal point from which we are making a
+prediction. Aspect 2 in the manuscripts concerns which points can be considered
+as being in the library, and which should be excluded. Here we find that
 occasionally `rEDM` inadvertently includes some points that should be excluded.
 
 <!-- Simplifying down from inclusion_issue_5.Rmd, which was more for working -->
 <!-- things out. Now have text written up can keep the vignette simpler -->
 
-We use the simulated population time series from the manuscript, with values (already first
-differenced) $Y_t$ at $t = 1, 2, 3, ..., 99, 100$, which we extract from the
-saved tibble `NY_lags_example_3` (that also contains other results):
-```{t_and_Y}
+We use the simulated population time series from the manuscript, with
+first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
+extract them from the saved tibble `NY_lags_example_3`:
+
+```{r, t_and_Y}
 input <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
   dplyr::rename(Time = t)
 input
 ```
 
-Note that `NY_lags_example_3` already contains results. At the end we test
-whether results using `rEDM` or `pbsEDM` have changed from the saved ones.
+Note that `NY_lags_example_3` already contains results. At the end we verifty
+that results using `rEDM` or `pbsEDM` have not changed from the saved ones (for
+example due to package updates). TODO (maybe)
 
 We will do the simplex calculations for embedding dimension $E = 2$ using three
 independent sources of code.
 
-DEL: Also included are results from using the `rEDM`
-package with embedding dimension 2 (see below) as `rEDM.pred` for the predicted
-value of `Y_t` with `rEDM.var`
-for its variance, and results from Andy's original
-function `EDM_pred_E_2()`, saved as `my.pred` and `my.var`.
-See `?NY_lags_example_3` for full details. THE HELP WILL NEED UPDATING.
+TODO: maybe redo pbsEDM calcs using N as input (though could be confusing), then
+have more logical output. But see
+inclusion issue 5 vignette and issue 29 (deleting from here for now).
+
 
 ## Calculations with rEDM
 
@@ -68,234 +70,34 @@ rEDM_res <- rEDM::Simplex(dataFrame = input,
                           pred = "1 99",
                           E = 2,
                           verbose = TRUE)
+                          # lib and pred overlap, so leave-one-out
+                          #  cross-validation is used.
 
 rEDM_res <- rbind(c(1, input$Y_t[1], NA, NA),
-                  rEDM_res)                    # Add Time = 1 values.
+                  rEDM_res)             # Add Time = 1 values, to give t = 1:100
+
+rEDM_pred <- rEDM_res$Predictions       # Just the predicted values
 ```
 
 ## Calculations using pbsEDM
 
 See the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
-for general details on using the code. Here do same calculations as above.
-
+for general details on using the code. Here do the simplex calculation as just
+done using `rEDM`:
 ```{r pbsEDM}
 pbsEDM_res_full <- pbsEDM(input,
                           lags = list(Y_t = c(0:1)))   # Gives full calculations
 
 pbsEDM_pred <- pbsEDM_res_full$X_forecast[-length(pbsEDM_res_full$X_forecast)]
-                                           # Just the predictions, excluding t=101
-
+                                           # Just the predictions, excluding
+                                           #  t=101, so also for t = 1:100
 ```
-HERE - now move plots etc. up.
-
-## Test that rEDM and pbsEDM results have not changed
-
-Run some tests to check that calculations are the same as those previously
-saved. These give errors if they fail.
-
-```{r tests}
-# rEDM results are already saved in NY_lags_example_3; checkthatthis code checks that the
-#  calculations give matching results
-testthat::expect_equal(NY_lags_example_3$rEDM.pred,
-                       rEDM_res$Predictions)       # If no error then they match
-testthat::expect_equal(NY_lags_example_3$rEDM.var,
-                       rEDM_res$Pred_Variance)     # If no error then they match
-
-# pbsEDM results with original independent code
-testthat::expect_equal(NY_lags_example_3$my.pred,
-                       pbsEDM_pred)
-```
-**Conclusion**: Andy's original manual calculations and Luke's new function in
-`pbsEDM` give the same results for this simulated data set. Andy's and Luke's
-code was written independently (although Andy had explained why his results
-differed to those from `rEDM`). This is a reassuring test of Luke's new code,
-which is more general and functionalised than Andy's, and can do more than just $E=2$.
-Thus, we will continue using the `pbsEDM` results.
-
-HERE
-## Redoing inputting the N value, else the output has N for Y which is confusing
-
-Using
-
-$\hat{N_{t+1}} = N_t + \hat{Y_t}$
-
-
-```{r pbsEDMcalc2}
-N_t <- NY_lags_example_3$N_t
-Y_t <- NY_lags_example_3$Y_t
-
-pbs_calc2 <- pbsEDM(NY_lags_example_3,
-                    lags = list(N_t = c(0:1)),
-                    first_difference = TRUE) # A tibble (contains lists)
-
-testthat::expect_equal(N_t,
-                       pbs_calc2$N_observed[-length(pbs_calc2$N_observed)])
-                       # verifying the indexing is the same because X_observed has an extra NA value
-                       # to match pbs_calc$X_forecast (to allow for forecasts of unlagged data)
-
-testthat::expect_equal(NY_lags_example_3$Y_t,
-                       pbs_calc2$Y_observed)
-
-pbs_calc2$results
-#  E     N_rho  N_rmse    X_rho  X_rmse
-#  2 0.2973217 1.12366 0.703475 1.12366
-# N_rho is way smaller than X_rho! Check manually:
-
-# Now use Andy's original calculations:
-my_pred_Y <- NY_lags_example_3$my.pred
-
-# \hat{N_{t+1}} = N_t + \hat{Y_t}
-my_pred_N <- c(NA,
-               N_t + my_pred_Y)
-# Can't predict N[3] since can't predict Y_2 since can't use t^*=1 as focal point
-
-# Check mine and pbsEDM (commenting out to build vignette, but needs figuring out):
-#testthat::expect_equal(my_pred_N,
-#                       pbs_calc2$N_forecast)
-# What?! How come only one weird one:
-#Error: `my_pred_N` not equal to pbs_calc2$N_forecast.
-#1/101 mismatches
-#[78] -0.202 - 1.21 == -1.41
-# See Issue #29 - I'm not sure if rest of pbsEDM function is updated.
-# How about:
-testthat::expect_equal(NY_lags_example_3$N_t,
-                       pbs_calc2$N_observed[-101])
-# So definitely using the same N values.
-
-
-# But these work:
-testthat::expect_equal(NY_lags_example_3$my.pred,
-                       pbs_pred)
-
-testthat::expect_equal(pbs_calc$X_forecast,
-                       pbs_calc$Y_forecast)
-
-testthat::expect_equal(pbs_calc$X_forecast[-101],
-                       NY_lags_example_3$my.pred)
-
-# Okay, so just stick with my N calculation
-#  since pbs X or Y forecast is same as my.pred, until fix #29.
-plot(c(N_t, NA),
-     my_pred_N,
-     xlab = "Observation of Nt",
-     ylab = "Estimate of Nt")
-abline(0, 1, col="grey")
-
-plot(Y_t,
-     my_pred_Y,
-     xlab = "Observation of Yt",
-     ylab = "Estimate of Yt")
-abline(0, 1, col="grey")
-
-my_rho_N <- cor(c(N_t, NA),
-                my_pred_N,
-                use = "pairwise.complete.obs")
-my_rho_N
-pbs_calc2$results
-# N_rho slightly different presumably due to that one different value.
-```
-
-Doesn't look great. Thought about alternative definition:
-
-$\hat{N_{t+1}} = \hat{N_t} + \hat{Y_t}$
-
-but first $\hat{Y_t}$ is $\hat{Y_3}$ so we have
-
-$\hat{N_4} = \hat{N_3} + \hat{Y_3}$
-
-but we don't know $\hat{N_3}$ (because don't know $\hat{Y_2}$. So this wouldn't
-work anyway (and it seems like it would just compound errors anyway).
-
-So that's a super low correlation coefficient, compared to that based on the
-$Y_t$. So EDM has given a misleadingly impression of prediction accuracy based
-on estimating $Y_t$,
-because what we're interested in is predicting $N_t$ not $Y_t$.
-
-Note this is all with setting $E=2$, and the analysis on $Y_t$ suggested
-$E=3$. TODO: do the full analysis (other vignette) using $N_t$ to see what value
-of $E$ is suggested and what the resulting $\rho$ is. Needs pbsEDM issue 29 fixed.
-
-Okay, trying to debug the problem above, that one (but only one) forecast $N_t$
-comes out different between mine and Luke's, but the $Y_t$'s don't (implying
-nearest neighbours etc are the same).
-```{r debug}
-# First check from scratch:
-pbs_calc3 <- pbsEDM(NY_lags_example_3,
-                    lags = list(N_t = c(0:1)),
-                    first_difference = TRUE) # A tibble (contains lists)
-pbs_calc3$Y_forecast - my_pred_Y
-# So this doesn't hold, it's to do with doing the
-#  first_difference within pbsEDM:
-
-# This is done above, using the Y_t values we already have (and so then not first-differencing)
-#pbs_calc <- pbsEDM(NY_lags_example_3,
-#                   lags = list(Y_t = c(0:1))) # A tibble (contains lists)
-testthat::expect_equal(NY_lags_example_3$my.pred,
-                       pbs_pred)    # Is fine.
-
-#testthat::expect_equal(pbs_calc$Y_forecast[-101],
-#                       pbs_calc3$Y_forecast)
-# 1/100 mismatches
-# [77] -0.381 - 1.03 == -1.41
-
-# TODO: HERE
-
-# Put a browser into pbsEDM()
-
-```
-
-### How about working in the log scale
-
-Joe suggested trying on the log scale. So use $\log N_t$ values. Then
-define $Y'_t$ as
-
-$Y'_t = \log N_{t+1} - \log N_t = \log \dfrac{N_{t+1}}{N_t}$
-
-and the reverse transformation becomes
-
-$\hat{N}_{t+1} = N_t \textrm{e}^{\hat{Y'}_t}$
-
-```{r logcalcs}
-Nt_log <- dplyr::mutate(NY_lags_example_3,
-                        "logN_t" = log(N_t)) %>%
-  dplyr::select(logN_t)
-pbs_log <- pbsEDM(Nt_log,
-                  lags = list(logN_t = c(0:1)),
-                  first_difference = TRUE)
-
-pbs_log$results
-# Work out explicitly here given above issue with one value being different to
-#  my calcs:
-pbs_logN_fore <- c(NA,
-                   Nt_log$logN_t + pbs_log$X_forecast)
-pbs_rho_logN_manual <- cor(c(Nt_log$logN_t, NA),
-                           pbs_logN_fore,
-                           use = "pairwise.complete.obs")
-testthat::expect_equal(pbs_rho_logN_manual,
-                       pbs_log$results$N_rho)
-# Now un-log:
-pbs_N_fore <- exp(pbs_logN_fore)
-pbs_rho_N_manual <- cor(c(N_t, NA),
-                        pbs_N_fore,
-                        use = "pairwise.complete.obs")
-
-plot(N_t,
-     pbs_N_fore[-101],
-     xlab = "Observation of Nt",
-     ylab = "Estimate of Nt having worked in log space")
-abline(0, 1, col="grey")
-pbs_rho_N_manual
-```
-
-Wow, so 7% correlation. Not good. So stick with not logging. Seems really poor -
-maybe should double check that code. TODO Once `pbsEDM()` output clarified then
-do that last bit again.
 
 ## Compare `pbsEDM` results with those from `rEDM`
 
-Now to plot the earlier `pbsEDM` predictions again those from `rEDM`:
+Now to plot the `pbsEDM` predictions again those from `rEDM`:
 ```{r pbsredm}
-plot(NY_lags_example_3$rEDM.pred,
+plot(rEDM_pred,
      pbs_pred,
      xlab = "rEDM predictions",
      ylab = "pbsEDM predictions")
@@ -303,34 +105,154 @@ abline(a=0,
        b=1,
        col="grey")
 
-# Colour in red the ones more than eps away
-eps = 0.00001      # How different the predictions can be
+# Work out the ones more than epsilon away
+epsilon = 0.00001      # Small value for how different the predictions can be
 
-# Want to compare new pbsEDM results with saved rEDM
-NY_lags_extended <- dplyr::mutate(NY_lags_example_3,
-                                  pbsEDM.pred = pbs_pred)
+different <- dplyr::tibble(t = input$Time,
+                           rEDM_pred,
+                           pbsEDM_pred) %>%
+  dplyr::filter(abs(rEDM_pred - pbsEDM_pred) > epsilon)
 
-different <- dplyr::filter(NY_lags_extended,
-                           abs(rEDM.pred - pbsEDM.pred) > eps)
-points(different$rEDM.pred,
-       different$pbsEDM.pred,
+points(different$rEDM_pred,
+       different$pbsEDM_pred,
        col = "red",
        pch = 20)
-
-# Just time, observations Y_t, and predictions
-dplyr::select(different, t, Y_t, rEDM.pred, pbsEDM.pred)
 ```
-Those time indices represent $t^*+1$ values.
 
-So there are three time values for which results differ between `pbsEDM` and `rEDM`.
+The time indices correspond to the predicted times, so represent $t^*+1$
+values, where $t^*$ is the focal time from which we make predictions:
+```{r different}
+different
+```
 
-## Explaining the issue
+So there are three time values for which results differ between `pbsEDM` and
+`rEDM`, corresponding to $t^* =$ `r different$t-1`.
 
-Vector $\bf{x}_t$ is the vector of lagged values of the
-scalars $Y_t$:
+## Explaining the issue -- Aspect 2
+
+As defined in the manuscript, vector $\bf{x}_t$ has components consisting
+of the lagged values of scalars $Y_t$. For $E=2$ we have
 $$\bf{x}_t = [Y_t, ~Y_{t-1}].$$
-For focal time $t^*$, we know $\bf{x}_{t^*}$ and are trying to predict
-$\bf{x}_{t^*+1}$. The issue is that `rEDM` seems to use $\bf{x}_{t^*+2}$ as a
+For focal time $t^*$, we know $Y_{t^*}$ and are trying to predict
+$Y_{t^*+1}$.
+
+Aspect 2 in the manuscript is explicitly defined by exclusion condition (d),
+namely that the library of allowable nearest neighbours cannot include
+any $\bf{x}_t$ that includes $Y_{t^*+1}$, since we are trying to predict
+$Y_{t^*+1}$.
+
+Thus, the library cannot include
+$$\bf{x}_{t^*+1} = [Y_{t^*+1}, ~Y_{t^*}]$$
+or
+$$\bf{x}_{t^*+2} = [Y_{t^*+2}, ~Y_{t^*+1}]$$
+since these both contain $Y_{t^*+1}$.
+
+### Calculations for $t^*=94$
+
+For $t^*=94$, we have the aforementioned discrepancy between calculations:
+```{r tstar94}
+t_star = 94
+rEDM_pred[t_star + 1]
+pbsEDM_pred[t_star + 1]
+```
+
+For `pbsEDM`, the nearest neighbours are saved as output, and for $t^*=94$ have
+indices and weights:
+```{r neigh}
+pbsEDM_res_full$neighbour_index[t_star,]
+pbsEDM_res_full$neighbour_weight[t_star,]
+```
+giving the above prediction for $Y_{95}$ of
+```{r pred95}
+pbsEDM_pred[t_star+1]
+```
+
+For `rEDM` the full details of nearest neighbours does not appear to be an
+available output. However, here we show that $\bf{x}_{96}$ was used as a nearest
+neighbour of $\bf{x}_{94}$. We simply change the value of
+$Y_{95}$ so that `rEDM::Simplex()` will not pick
+$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if get the same result as
+for `pbsEDM`.
+
+```{r changedata}
+input[t_star+1, ]
+input_change <- input
+input_change[t_star+1, "Y_t"] = 7    # Move it far out of the way so it will not be a
+                               #  nearest neighbour
+
+# Do Simplex calculation with same options as earlier
+rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
+                                 columns = "Y_t",
+                                 target = "Y_t",
+                                 lib = "1 99",
+                                 pred = "1 99",
+                                 E = 2,
+                                 verbose = TRUE)
+rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
+                         rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
+rEDM_change_pred <- rEDM_change_res$Predictions       # Just the predicted values
+rEDM_change_pred[t_star+1]
+```
+
+That is the same value as obtained earlier using `pbsEDM`. Thus by moving
+$Y_{95}$ far away so that it definitely will not now be considered as a component of
+the nearest neighbour of $\bf{x}_{94}$, we have shown that `pbsEDM` was
+originally being considered by `pbsEDM` as a nearest neighbour. But as explained
+in condition (d), this should not occur.
+
+
+### Calculations for $t^*=75$
+
+We can repeat the above calculations for $t^*=75$. Skipping some of the
+explanatory steps, we have:
+```{r tstar75}
+t_star = 75
+rEDM_pred[t_star + 1]
+pbsEDM_pred[t_star + 1]
+```
+
+Using `pbsEDM` and $t^*=75$, the indices and weights of the nearest neighbours are:
+```{r neigh75}
+pbsEDM_res_full$neighbour_index[t_star,]
+pbsEDM_res_full$neighbour_weight[t_star,]
+```
+
+Change the value of $Y_{76}$ so that `rEDM::Simplex()` will not pick
+$\bf{x}_{77}$ as a nearest neighbour for $\bf{x}_{75}$, and see if get the same result as
+for `pbsEDM`.
+
+```{r changedata75}
+input[t_star+1, ]
+input_change <- input
+input_change[t_star+1, "Y_t"] = 7    # Move it far out of the way so it will not be a
+                                     #  nearest neighbour
+
+# Do Simplex calculation with same options as earlier
+rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
+                                 columns = "Y_t",
+                                 target = "Y_t",
+                                 lib = "1 99",
+                                 pred = "1 99",
+                                 E = 2,
+                                 verbose = TRUE)
+rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
+                         rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
+rEDM_change_pred <- rEDM_change_res$Predictions       # Just the predicted values
+rEDM_change_pred[t_star+1]
+```
+
+Again, we get the same result as obtained earlier using `pbsEDM`.
+
+HERE
+
+
+## Mention this briefly at the end
+
+Mention Andy's code is available on request, but is not functionalised or generalisable for higher
+$E$, and is superceded by `pbsEDM`. Note that writing of `pbsEDM` was led by
+Luke Rogers, and the code is independent of the original code.
+
+The issue is that `rEDM` seems to use $\bf{x}_{t^*+2}$ as a
 nearest neighbour, but this should not be permissible.
 
 For example, for $t^*=94$, Andy's R code calculates nearest neighbours with indices $\psi$
@@ -402,36 +324,6 @@ So the implementation of `rEDM` is not taking into account the fact that
 $\bf{x}_t$ is a vector of lagged values.
 
 ## Similarly, tweak the data and use `rEDM`
-
-Try changing the value of $Y_{95}$ so that `rEDM::Simplex()` does not pick
-$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if get the same result as
-for `pbsEDM`.
-
-```{r changedata}
-input_obs <- dplyr::select(NY_lags_example_3, t, Y_t) %>%
-  dplyr::rename(Time = t)
-input_obs[95,]
-input_obs_change <- input_obs
-input_obs_change[95,"Y_t"] = 7    # Move it out of the way
-
-rEDM_change <- rEDM::Simplex(dataFrame = input_obs_change,
-                                   columns = "Y_t",
-                                   target = "Y_t",
-                                   lib = "1 99",
-                                   pred = "1 99",
-                                   E = 2,
-                                   verbose = TRUE)$Predictions
-rEDM_change <- c(NA,
-                 rEDM_change)   # Needs extra NA to get indexing correct
-testthat::expect_equal(pbs_pred[95],
-                       rEDM_change[95])
-
-pbs_pred[95]
-rEDM_change[95]
-
-```
-Those are the same, so showing that changing $Y_{95}$ gives the
-expected answer from using `rEDM::Simplex()`.
 
 ## Try alternative `exclusionRadius` settings for `rEDM`
 
@@ -562,30 +454,33 @@ which, as expected, does not fix the problem.
 
 So, conclusion is that setting `exclusionRadius` in `rEDM` does not fix the problem.
 
-## That's all for predictions of $Y$, what about $N$?
-
-So `pbs_pred` is a vector of predictions of the $Y_t$ values.
-But we are really interested in the $N_t$ values. So get those by
-un-first-differencing:
-
-$\hat{N}_{t+1} = N_{t} + \hat{Y}_{t}$,
-
-and in particular for the projected value
-
-$\hat{N}_{101} = N_{100} + \hat{Y}_{100}$.
-
-Note that we are using the known values of $N_t$ rather than estimated. Then
-calculate a correlation coefficient, $\rho_N$, based on $N$ rather than $Y$
-(which is what we really care about).
-
-```{r predN}
-pbs_pred_N <- c(NA,
-                NY_lags_example_3$N_t + pbs_pred)
-
-# Luke has done this already:
-pbs_calc[["N_forecast"]]
-# But disagrees with mine. He used:
-# N_forecast <- pbsLag(N_observed) + pbsLag(c(Z_forecast, NA_real_))
 
 
+
+
+
+
+
+## Test that rEDM and pbsEDM results have not changed
+
+Run some tests to check that calculations are the same as those previously
+saved. These give errors if they fail.
+
+```{r tests}
+# rEDM results are already saved in NY_lags_example_3; this code checks that the
+#  calculations give matching results
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       rEDM_res$Predictions)       # If no error then they match
+testthat::expect_equal(NY_lags_example_3$rEDM.var,
+                       rEDM_res$Pred_Variance)     # If no error then they match
+
+# pbsEDM results with original independent code
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbsEDM_pred)
 ```
+**Conclusion**: Andy's original manual calculations and Luke's new function in
+`pbsEDM` give the same results for this simulated data set. Andy's and Luke's
+code was written independently (although Andy had explained why his results
+differed to those from `rEDM`). This is a reassuring test of Luke's new code,
+which is more general and functionalised than Andy's, and can do more than just $E=2$.
+Thus, we will continue using the `pbsEDM` results.
