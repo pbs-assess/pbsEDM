@@ -25,7 +25,7 @@ library(pbsEDM)
 
 In the manuscript, the library contains the points that can be used to work out
 the nearest neighbours of the focal point from which we are making a
-prediction. Aspect 2 in the manuscripts concerns which points can be considered
+prediction. Aspect 2 in the manuscript concerns which points can be considered
 as being in the library, and which should be excluded. Here we find that
 occasionally `rEDM` inadvertently includes some points that should be excluded.
 
@@ -46,13 +46,8 @@ Note that `NY_lags_example_3` already contains results. At the end of this
 vignette we verifty that results using `rEDM` or `pbsEDM` have not changed (for
 example due to package updates) from those saved in `NY_lags_example_3`.
 
-We will do the simplex calculations for embedding dimension $E = 2$ using three
-independent sources of code.
-
-TODO: maybe redo pbsEDM calcs using N as input (though could be confusing), then
-have more logical output. But see
-inclusion issue 5 vignette and issue 29 (deleting from here for now).
-
+We will do the simplex calculations for embedding dimension $E = 2$ using
+`rEDM` and `pbsEDM` (and also compare with some earlier independent code).
 
 ## Calculations with rEDM
 
@@ -85,17 +80,18 @@ See the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
 for general details on using the code. Here do the simplex calculation as just
 done using `rEDM`:
 ```{r pbsEDM}
-pbsEDM_res_full <- pbsEDM(input,
-                          lags = list(Y_t = c(0:1)))   # Gives full calculations
+pbsEDM_res_full <- pbsEDM::pbsEDM(input,
+                                  lags = list(Y_t = c(0:1)))   # Gives full calculations
 
 pbsEDM_pred <- pbsEDM_res_full$X_forecast[-length(pbsEDM_res_full$X_forecast)]
                                            # Just the predictions, excluding
-                                           #  t=101, so also for t = 1:100
+                                           #  t=101, so for t = 1:100
 ```
 
-## Compare `pbsEDM` results with those from `rEDM`
+## Compare `rEDM` results with those from `pbsEDM`
 
-Now to plot the `pbsEDM` predictions again those from `rEDM`:
+Now to plot the `pbsEDM` predictions again those from `rEDM`, and highlight
+in red those that differ:
 ```{r pbsredm}
 plot(rEDM_pred,
      pbs_pred,
@@ -156,7 +152,7 @@ rEDM_pred[t_star + 1]
 pbsEDM_pred[t_star + 1]
 ```
 
-For `pbsEDM`, the nearest neighbours are saved as output, and for $t^*=94$ have
+With `pbsEDM`, the nearest neighbours are saved as output, and for $t^*=94$ have
 indices and weights:
 ```{r neigh}
 pbsEDM_res_full$neighbour_index[t_star,]
@@ -168,10 +164,10 @@ pbsEDM_pred[t_star+1]
 ```
 
 For `rEDM` the full details of nearest neighbours does not appear to be an
-available output. However, here we show that $\bf{x}_{96}$ was used as a nearest
+available output. However, here we show that $\bf{x}_{96}$ was used by `rEDM` as a nearest
 neighbour of $\bf{x}_{94}$. We simply change the value of
 $Y_{95}$ so that `rEDM::Simplex()` will not pick
-$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if get the same result as
+$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if we get the same result as
 for `pbsEDM`.
 
 ```{r changedata}
@@ -245,12 +241,28 @@ Again, we get the same result as obtained earlier using `pbsEDM`.
 Thus, we have demonstrated two examples for which `rEDM` has used $Y_{t^* + 1}$
 as a nearest neighbours, which is described as Aspect 2 in the manuscript.
 
-TODO: Also mention that rho is actually better for pbsEDM than rEDM in this
-example. So not that rEDM is necessarily overstating accuracy.
+## Differences in $\rho$
+
+Since the results differ for `pbsEDM` and `rEDM`, we expect
+a slight difference in the overall Pearson correlation coefficient:
+
+```{r rEDMerror}
+rEDM_rho <- rEDM::ComputeError(rEDM_res$Observations,
+                               rEDM_res$Predictions)$rho
+rEDM_rho
+pbsEDM_rho <- pbsEDM_res_full$results$X_rho
+pbsEDM_rho
+```
+
+So the correlation coefficient is actually slight higher for the `pbsEDM`
+results compared to the `rEDM` results. Thus, for this example there is an
+improved fit from accommodating Aspect 2 (in `pbsEDM`). So accuracy of `rEDM`
+can be improved by accommodating Aspect 2 (this not guaranteed, but these
+results show that it will not necessarily give worse results).
 
 ## Try alternative `exclusionRadius` settings for `rEDM`
 
-We now try changing `exclusionRadius` input in `rEDM::Simplex`, which (from `?Simplex`)
+We now try changing the `exclusionRadius` input value in `rEDM::Simplex`, which (from `?rEDM::Simplex`)
 "excludes vectors
 from the search space of nearest neighbors if their relative time
 index is within  exclusionRadius."
@@ -283,7 +295,7 @@ dplyr::filter(different_excl,
 ```
 
 The $t$ values shown are for the predictions at $t = t^* + 1$. So the `rEDM`
-results have changed for $t^* = 75$ (which is good) and 76 (which is not
+results have changed for $t^* = 75$ (which is good) and for 76 (which was not
 expected), but not for the desired $t^* = 94$.
 
 Now check what is different to `pbsEDM` results:
@@ -343,60 +355,44 @@ results (results not shown).
 So, we conclude that change `exclusionRadius` in the call to `rEDM::Simplex()`
 does not fix Aspect 2.
 
-## Test that rEDM and pbsEDM results have not changed
+## Independent code
 
-TODO: Mention Andy's code is available on request, but is not functionalised or generalisable for higher
-$E$, and is superceded by `pbsEDM`. Note that writing of `pbsEDM` was led by
-Luke Rogers, and the code is independent of the original code.
-
-And:
-
-We can reproduce the `rEDM` result by adapting Andy's manual code to allow
-$\bf{x}_{96}$ to be a nearest neighbour of $\bf{x}_{94}$,  giving
-```{r psi94allow}
-psivec94_allow = c(96, 6, 57)   # so 6 and 57 are now 2nd and 3rd nearest neighbours
-weights94_allow = c(3.678794e-01, 1.405278e-04, 4.146457e-05)
-# Note that the first weight is the same as above (by definition it's always
-#  exp(-1)), but the second and third are very small because x[96] is
-#  very close to x[94].
-Y95est_allow = sum(weights94_allow * simple_ts[psivec94_allow+1]) /
-                   sum(weights94_allow)
-testthat::expect_equal(Y95est_allow,
-                       Y95est_rEDM)
-Y95est_allow
-
-```
-which agrees with the `Y95est_rEDM` value shown above
-
---
-
-Run some tests to check that calculations are the same as those previously
-saved. These give errors if they fail.
-
-```{r tests}
-# rEDM results are already saved in NY_lags_example_3; this code checks that the
-#  calculations give matching results
-testthat::expect_equal(NY_lags_example_3$rEDM.pred,
-                       rEDM_res$Predictions)       # If no error then they match
-testthat::expect_equal(NY_lags_example_3$rEDM.var,
-                       rEDM_res$Pred_Variance)     # If no error then they match
-
-# pbsEDM results with original independent code
+Aspect 2 was originally figured out using other code (written by Andrew
+Edwards) to help understand EDM. The results are saved as
+`NY_lags_example_3$my.pred`. The predictions agree with those calculated here
+using `pbsEDM`:
+```{r checkorig}
 testthat::expect_equal(NY_lags_example_3$my.pred,
                        pbsEDM_pred)
 ```
-**Conclusion**: Andy's original manual calculations and Luke's new function in
-`pbsEDM` give the same results for this simulated data set. Andy's and Luke's
-code was written independently (although Andy had explained why his results
-differed to those from `rEDM`). This is a reassuring test of Luke's new code,
-which is more general and functionalised than Andy's, and can do more than just $E=2$.
-Thus, we will continue using the `pbsEDM` results.
+The original code also allowed independent verification of the above results (for example
+by explicitly allowing $Y_{t^* + 1}$ to be used as a nearest neighbour). The
+original code is available on request, but is not functionalised or
+generalisable for $E>2$, and is now superceded by the functions in `pbsEDM`. Note
+that writing of the `pbsEDM` code was led by Luke Rogers, using functions that were
+independently written from the original code. Hence the original code also served as an
+independent check of some of the `pbsEDM` code.
 
-Also check that the `rEDM::Simplex()` calculations have not changed, by
-comparing a saved version in `pbsEDM` to those calculated above (if these give
-an error then `rEDM` has changed and the text above would need updating):
+## Test that rEDM and pbsEDM results have not changed
+
+Here we run some tests to check that if any of the above results from `pbsEDM`
+or `rEDM` have changed from when this vignette was written (some results are
+saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
+such failures should be investigated and this vignette updated).
+
+Check the default `rEDM` predictions have not changed.
+```{r testrEDM}
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       rEDM_res$Predictions)       # If no error then they match
+```
+
+Also check that the results with different values of `exclusionsRadius` have not changed:
 ```{r testExcl}
 testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
 testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
 testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
 ```
+
+The test in the Independent Code section has already verified that the `pbsEDM`
+results have not changed (since they match the `my.pred` results from the original
+independent code).
