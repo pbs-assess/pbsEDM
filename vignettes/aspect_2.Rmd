@@ -248,49 +248,6 @@ as a nearest neighbours, which is described as Aspect 2 in the manuscript.
 HERE
 
 
-## Mention this briefly at the end
-
-Mention Andy's code is available on request, but is not functionalised or generalisable for higher
-$E$, and is superceded by `pbsEDM`. Note that writing of `pbsEDM` was led by
-Luke Rogers, and the code is independent of the original code.
-
-The issue is that `rEDM` seems to use $\bf{x}_{t^*+2}$ as a
-nearest neighbour, but this should not be permissible.
-
-For example, for $t^*=94$, Andy's R code calculates nearest neighbours with indices $\psi$
-(saved as `psivec94`) and corresponding weights `weights94`:
-```{r psi}
-psivec94 = c(6, 57, 88)
-weights94 = c(0.3678794, 0.3205861, 0.2895013)
-```
-giving the estimate of $Y_{95}$, from [S1] of Deyle et al. (2013), as
-```{r Yninetyfive}
-Y95est = sum(weights94 * simple_ts[psivec94+1]) / sum(weights94)
-Y95est
-```
-
-The `pbsEDM` code gives the same results:
-```{r}
-pbs_calc$neighbour_index[94, ]
-pbs_calc$neighbour_weight[94, ]
-pbs_calc$X_forecast[95]
-```
-The following will give errors if those results don't agree:
-```{r test}
-testthat::expect_equal(psivec94, pbs_calc$neighbour_index[94, ])
-testthat::expect_equal(weights94, pbs_calc$neighbour_weight[94, ], tolerance = 0.000001)
-testthat::expect_equal(Y95est, pbs_calc$X_forecast[95])
-```
-However, `rEDM` gives
-
-```{r rEDMninetyfive}
-Y95est_rEDM = NY_lags_example_3$rEDM.pred[95]
-Y95est_rEDM
-```
-as already noted above. Unlike (I think) earlier versions of `rEDM::simplex()`, the full
-results (nearest neighbours etc.) do not seem returnable from `rEDM::Simplex()`
-or `rEDM::simplex()` [have tried changing options `verbose, stats_only, silent`,
-but none give the full results].
 
 ## Manually reproduce `rEDM` result -- TODO just do this with pbsEDM code, or results
 
@@ -467,6 +424,12 @@ So, conclusion is that setting `exclusionRadius` in `rEDM` does not fix the prob
 
 
 ## Test that rEDM and pbsEDM results have not changed
+
+TODO: Mention Andy's code is available on request, but is not functionalised or generalisable for higher
+$E$, and is superceded by `pbsEDM`. Note that writing of `pbsEDM` was led by
+Luke Rogers, and the code is independent of the original code.
+
+
 
 Run some tests to check that calculations are the same as those previously
 saved. These give errors if they fail.
