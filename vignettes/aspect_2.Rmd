@@ -42,9 +42,9 @@ input <-  dplyr::select(NY_lags_example_3, t, Y_t) %>%
 input
 ```
 
-Note that `NY_lags_example_3` already contains results. At the end we verifty
-that results using `rEDM` or `pbsEDM` have not changed from the saved ones (for
-example due to package updates). TODO (maybe)
+Note that `NY_lags_example_3` already contains results. At the end of this
+vignette we verifty that results using `rEDM` or `pbsEDM` have not changed (for
+example due to package updates) from those saved in `NY_lags_example_3`.
 
 We will do the simplex calculations for embedding dimension $E = 2$ using three
 independent sources of code.
@@ -130,9 +130,9 @@ So there are two time indices for which results differ between `pbsEDM` and
 
 ## Explaining the issue -- Aspect 2
 
-As defined in the manuscript, vector $\bf{x}_t$ has components consisting
-of the lagged values of scalars $Y_t$. For $E=2$ we have
-$$\bf{x}_t = [Y_t, ~Y_{t-1}].$$
+As defined in the manuscript, vector $\bf{\tilde{x}}_t$ has components defined by
+the lagged values of scalars $Y_t$. For $E=2$ we have
+$$\bf{\tilde{x}}_t = [Y_t, ~Y_{t-1}].$$
 For focal time $t^*$, we know $Y_{t^*}$ and are trying to predict
 $Y_{t^*+1}$.
 
@@ -178,7 +178,7 @@ for `pbsEDM`.
 input[t_star+1, ]
 input_change <- input
 input_change[t_star+1, "Y_t"] = 7    # Move it far out of the way so it will not be a
-                               #  nearest neighbour
+                                     #  nearest neighbour
 
 # Do Simplex calculation with same options as earlier
 rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
@@ -196,20 +196,20 @@ rEDM_change_pred[t_star+1]
 
 That is the same value as obtained earlier using `pbsEDM`. Thus by moving
 $Y_{95}$ far away so that it definitely will not now be considered as a component of
-the nearest neighbour of $\bf{x}_{94}$, we have shown that `pbsEDM` was
-originally being considered by `pbsEDM` as a nearest neighbour. But as explained
-in condition (d), this should not occur.
-
+the nearest neighbour of $\bf{x}_{94}$, we have shown that $Y_{95}$ was
+originally being considered by `rEDM` as a nearest neighbour. But as explained
+in condition (d), this should not be the case.
 
 ### Calculations for $t^*=75$
 
-We can repeat the above calculations for $t^*=75$. Skipping some of the
+We now repeat the above calculations for $t^*=75$. Skipping some of the
 explanatory steps, we have:
 ```{r tstar75}
 t_star = 75
 rEDM_pred[t_star + 1]
 pbsEDM_pred[t_star + 1]
 ```
+as noted above (below the figure).
 
 Using `pbsEDM` and $t^*=75$, the indices and weights of the nearest neighbours are:
 ```{r neigh75}
@@ -218,7 +218,7 @@ pbsEDM_res_full$neighbour_weight[t_star,]
 ```
 
 Change the value of $Y_{76}$ so that `rEDM::Simplex()` will not pick
-$\bf{x}_{77}$ as a nearest neighbour for $\bf{x}_{75}$, and see if get the same result as
+$\bf{x}_{77}$ as a nearest neighbour for $\bf{x}_{75}$, to verify if we get the same result as
 for `pbsEDM`.
 
 ```{r changedata75}
@@ -241,6 +241,9 @@ rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
 rEDM_change_pred[t_star+1]
 ```
 Again, we get the same result as obtained earlier using `pbsEDM`.
+
+Thus, we have demonstrated two examples for which `rEDM` has used $Y_{t^* + 1}$
+as a nearest neighbours, which is described as Aspect 2 in the manuscript.
 
 HERE
 
