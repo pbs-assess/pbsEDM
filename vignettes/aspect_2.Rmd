@@ -343,7 +343,6 @@ results (results not shown).
 So, we conclude that change `exclusionRadius` in the call to `rEDM::Simplex()`
 does not fix Aspect 2.
 
-
 ## Test that rEDM and pbsEDM results have not changed
 
 TODO: Mention Andy's code is available on request, but is not functionalised or generalisable for higher
@@ -392,3 +391,12 @@ code was written independently (although Andy had explained why his results
 differed to those from `rEDM`). This is a reassuring test of Luke's new code,
 which is more general and functionalised than Andy's, and can do more than just $E=2$.
 Thus, we will continue using the `pbsEDM` results.
+
+Also check that the `rEDM::Simplex()` calculations have not changed, by
+comparing a saved version in `pbsEDM` to those calculated above (if these give
+an error then `rEDM` has changed and the text above would need updating):
+```{r testExcl}
+testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
+testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
+testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
+```
