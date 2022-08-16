@@ -73,7 +73,7 @@ pbsEDM_pred_N
 
 The first three `NA`s demonstrate that we cannot predict $\hat{N}_1$ (because we do not know $N_0$), or
 $\hat{N}_2$ and $\hat{N}_3$ (because we cannot predict $\hat{Y}_1$ or
-$\hat{Y}_2$). Of note is the several negative predictions of $\hat{N}_t$, which
+$\hat{Y}_2$). Of note are the several negative predictions of $\hat{N}_t$, which
 are unrealistic because our data represent populations. The indices of these
 give the predicted time values (i.e. $t^* + 1$):
 ```{r indices}
@@ -81,7 +81,7 @@ which(pbsEDM_pred_N < 0)
 ```
 
 Of particular interest is the negative prediction for $\hat{N}_{101}$, which is
-likely the focus of an analysis (a predict next year's population from all
+likely the focus of an analysis (i.e. predict next year's population from all
 currently available data).
 
 ### Differences in correlation coefficient
@@ -101,20 +101,24 @@ pbsEDM_rho_N <- cor(c(input$N_t, NA),
 pbsEDM_rho_N
 ```
 
-Get 0.28, but check carefully about the NA removal, just compare the values from $t=4:100$:
+Get 0.28, but check carefully about the NA removal, just compare the values from
+$t=4:100$
 
 ```{r checking}
 pbsEDM_rho_N_check <- cor(input$N_t[4:100],
-                    pbsEDM_pred_N[4:100])
+                          pbsEDM_pred_N[4:100])
 pbsEDM_rho_N_check
 ```
 Gives the same answer, so is calculating properly.
 
 Obviously those negative predictions are going to have an impact, and we know
-that they are wrong. Could try replacing them with the minimum observed $N_t$:
+that they are wrong. Could try the simplest choice of replacing them with the
+minimum observed $N_t$:
 
 ```{r replace}
-N_t_min <- min(input$N_t[input$N_t > 0])
+length(which(pbsEDM_pred_N < 0))   # number of negative values
+
+N_t_min <- min(input$N_t)
 
 pbsEDM_pred_N_replace <- pbsEDM_pred_N
 pbsEDM_pred_N_replace[pbsEDM_pred_N_replace < 0] = N_t_min
@@ -122,17 +126,184 @@ pbsEDM_pred_N_replace[pbsEDM_pred_N_replace < 0] = N_t_min
 pbsEDM_rho_N_replace <- cor(c(input$N_t, NA),
                             pbsEDM_pred_N_replace,
                             use = "pairwise.complete.obs")
-pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100])
-                        # gives same
+pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gives same
+
 ```
-wtf? that comes out worse. Don't see how that can be as we've surely moved the
-predictions closer to the true values. HERE - check the above chunk.
+
+Surpisingly, that comes out worse (lower $\rho$). Don't see how that can be as we've surely moved the
+predictions closer to the true values. Investigate:
+
+```{r rhocalcs}
+sd_pred_N <- sd(pbsEDM_pred_N, na.rm=TRUE)
+sd_pred_N
+sd_pred_N_replace <- sd(pbsEDM_pred_N_replace, na.rm=TRUE)
+sd_pred_N_replace
+```
+So the vector with negatives replaced has a lower standard deviation, as
+expected (since the values are now less spread out). What about the means:
+```{r means}
+mean_pred_N <- mean(pbsEDM_pred_N, na.rm=TRUE)
+mean_pred_N
+mean_pred_N_replace <- mean(pbsEDM_pred_N_replace, na.rm=TRUE)
+mean_pred_N_replace
+```
+So replacing the negatives increases the mean, which makes sense as shifting 11
+values up. A figure will help:
+```{r replacefig}
+plot(c(input$N_t, NA),
+     pbsEDM_pred_N,
+     xlab = "Observed N",
+     ylab = "Predicted N",
+     main = "Red: change -ve predictions to min +ve observation")
+
+points(c(input$N_t, NA),
+       pbsEDM_pred_N_replace,
+       pch = 20,
+       col = "red")
+abline(h = mean_pred_N)
+abline(h = mean_pred_N_replace,
+       col = "red")
+abline(v = mean(input$N_t),
+       col = "grey")
+
+lm_fit  <- lm(pbsEDM_pred_N ~ c(input$N_t, NA))
+abline(lm_fit)
+lm_fit_replace  <- lm(pbsEDM_pred_N_replace ~ c(input$N_t, NA))
+abline(lm_fit_replace, col = "red")
+```
+
+General formula for $\rho$ is
+$$\rho = \dfrac{\mbox{E}[(X - \mu_X)(Y - \mu_Y)]}{\sigma_X \sigma_Y}$$
+so let $X$ here be the observed and $Y$ be the predicted.
+
+```{r values}
+vals <- dplyr::tibble(data = c(input$N_t, NA),
+               pbsEDM_pred_N,
+               pbsEDM_pred_N_replace) %>%
+  dplyr::mutate(X_minus_mu_X = data - mean(data, na.rm = TRUE),
+                Y_minus_mu_Y = pbsEDM_pred_N - mean_pred_N,
+                Y_minus_mu_Y_replace = pbsEDM_pred_N_replace -
+                  mean_pred_N_replace,
+                Y_calc_diff = Y_minus_mu_Y - Y_minus_mu_Y_replace,
+                numerator = X_minus_mu_X * Y_minus_mu_Y,
+                numerator_replace = X_minus_mu_X * Y_minus_mu_Y_replace,
+                numerator_diff = numerator - numerator_replace)
+dplyr::select(vals,
+              numerator,
+              numerator_replace,
+              numerator_diff) %>%
+  as.data.frame()
+sum(vals$numerator_diff, na.rm = TRUE)
+num <- mean(vals$numerator, na.rm = TRUE)
+num
+num_replace <- mean(vals$numerator_replace, na.rm = TRUE)
+num_replace
+# Compare replace with original
+num_replace/num
+# So replacing has reduced numerator
+sd_pred_N_replace / sd_pred_N
+# But has reduced numerator slightly more, such that
+manual_rho_increase <- (num_replace/num) / ( sd_pred_N_replace / sd_pred_N)
+manual_rho_increase
+rho_increase <- pbsEDM_rho_N_replace / pbsEDM_rho_N
+rho_increase
+```
+Hmm.... so I manually calc that $\rho$ should indeed increase, in contrast to
+my original calculation. Just work out $\rho$ manually:
+
+```{r rhomanual}
+sd_data <- sd(c(input$N_t, NA), na.rm = TRUE)
+rho_manual <- num / sd_pred_N / sd_data
+rho_manual
+pbsEDM_rho_N     # Those two should be the same
+rho_manual_replace <- num_replace / sd_pred_N_replace / sd_data
+rho_manual_replace
+pbsEDM_rho_N_replace
+```
+
+Aha -- in my manual calculations $\rho$ has increased when replacing the values.
+
+Suggests an error in my original calculations (which may also explain why the
+manual ones don't match the original ones).
+
+## Figure out the error
+
+Aha
+```{r aha}
+which(is.na(vals$X_minus_mu_X))
+# But for Y we have
+which(is.na(vals$Y_minus_mu_Y))
+```
+but we need to only use the complete ones in the manual calculations (assume
+this was taken care of in `cor()`, but maybe not correctly.
+
+Repeat the above calcs, but just reduce the tibble to exclude anything with
+NA's.
+```{r noNA}
+vals_no_NA <- dplyr::tibble(data = c(input$N_t, NA),
+               pbsEDM_pred_N,
+               pbsEDM_pred_N_replace)
+vals_no_NA <- vals_no_NA[-unique(which(is.na(vals_no_NA),
+                                       arr.ind=TRUE)[, "row"]),
+                         ] %>%     # Keep col names the same:
+  dplyr::mutate(X_minus_mu_X = data - mean(data),
+                Y_minus_mu_Y = pbsEDM_pred_N - mean_pred_N,
+                Y_minus_mu_Y_replace = pbsEDM_pred_N_replace -
+                  mean_pred_N_replace,
+                Y_calc_diff = Y_minus_mu_Y - Y_minus_mu_Y_replace,
+                numerator = X_minus_mu_X * Y_minus_mu_Y,
+                numerator_replace = X_minus_mu_X * Y_minus_mu_Y_replace,
+                numerator_diff = numerator - numerator_replace)
+dplyr::select(vals_no_NA,
+              numerator,
+              numerator_replace,
+              numerator_diff) %>%
+  as.data.frame()
+sum(vals_no_NA$numerator_diff)
+num_no_NA <- mean(vals_no_NA$numerator)
+num_no_NA
+num_no_NA_replace <- mean(vals_no_NA$numerator_replace)
+num_no_NA_replace
+# Compare replace with original
+num_no_NA_replace/num_no_NA
+# So replacing has reduced numerator
+
+sd_pred_no_NA <- sd(vals_no_NA$pbsEDM_pred_N)
+sd_pred_no_NA
+sd_pred_no_NA_replace <- sd(vals_no_NA$pbsEDM_pred_N_replace)
+sd_pred_no_NA_replace
+# So standard deviation has gone down with replacement, as found earlier, but
+#  the values are different to earlier:
+sd_pred_N
+sd_pred_N_replace
+
+# Aha - sd_pred_N included the t=101 value because it wasn't NA. So my
+#  manual calculations above are wrong because they're not omitting the rows
+#  with NA's, just the NA values.
+# This should match sd_pred_no_NA:
+sd(pbsEDM_pred_N[-101], na.rm=TRUE)   # It does
+# And this should match sd_pred_no_NA_replace:
+sd(pbsEDM_pred_N_replace[-101], na.rm=TRUE)   # it does.
+```
+
+
+Do the sample example from Wikipedia:
+```{r wikieg}
+#rho_manual_2 <- sum(vals$numerator, na.rm=TRUE) /
+```
+## I wonder if it's how the NA's are used.
 
 
 
+## Maybe mention at end
+
+think this helps show why rho isn't great to use. So sd of Nhat goes down (as
+expected) when replacing negative ones, but presumably not enough to compensate
+the change in the numerator
 
 ## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
 
+<!--
 TODO
 
 Here we run some tests to check that if any of the above results from `pbsEDM`
@@ -141,18 +312,19 @@ saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
 such failures should be investigated and this vignette updated).
 
 Check the default `rEDM` predictions have not changed.
-```{r testrEDM}
+{r testrEDM}
 testthat::expect_equal(NY_lags_example_3$rEDM.pred,
                        rEDM_res$Predictions)       # If no error then they match
-```
+
 
 Also check that the results with different values of `exclusionsRadius` have not changed:
-```{r testExcl}
+{r testExcl}
 testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
 testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
 testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
-```
+
 
 The test in the Independent Code section has already verified that the `pbsEDM`
 results have not changed (since they match the `my.pred` results from the original
 independent code).
+-->
