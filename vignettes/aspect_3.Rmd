@@ -133,6 +133,8 @@ pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gi
 Surpisingly, that comes out worse (lower $\rho$). Don't see how that can be as we've surely moved the
 predictions closer to the true values. Investigate:
 
+THESE ARE WRONG because include all time steps, but we want to globally exclude
+any with NA's.
 ```{r rhocalcs}
 sd_pred_N <- sd(pbsEDM_pred_N, na.rm=TRUE)
 sd_pred_N
@@ -175,6 +177,9 @@ abline(lm_fit_replace, col = "red")
 General formula for $\rho$ is
 $$\rho = \dfrac{\mbox{E}[(X - \mu_X)(Y - \mu_Y)]}{\sigma_X \sigma_Y}$$
 so let $X$ here be the observed and $Y$ be the predicted.
+
+HERE: CAN DELETE THIS CHUNK I THINK, as repeated below with no_NA, and this has
+some errors in it.
 
 ```{r values}
 vals <- dplyr::tibble(data = c(input$N_t, NA),
@@ -238,7 +243,7 @@ but we need to only use the complete ones in the manual calculations (assume
 this was taken care of in `cor()`, but maybe not correctly.
 
 Repeat the above calcs, but just reduce the tibble to exclude anything with
-NA's.
+NA's.  TODO DELETE THE ABOVE ONE I THINK
 ```{r noNA}
 vals_no_NA <- dplyr::tibble(data = c(input$N_t, NA),
                pbsEDM_pred_N,
@@ -247,9 +252,9 @@ vals_no_NA <- vals_no_NA[-unique(which(is.na(vals_no_NA),
                                        arr.ind=TRUE)[, "row"]),
                          ] %>%     # Keep col names the same:
   dplyr::mutate(X_minus_mu_X = data - mean(data),
-                Y_minus_mu_Y = pbsEDM_pred_N - mean_pred_N,
+                Y_minus_mu_Y = pbsEDM_pred_N - mean(pbsEDM_pred_N),
                 Y_minus_mu_Y_replace = pbsEDM_pred_N_replace -
-                  mean_pred_N_replace,
+                  mean(pbsEDM_pred_N_replace),
                 Y_calc_diff = Y_minus_mu_Y - Y_minus_mu_Y_replace,
                 numerator = X_minus_mu_X * Y_minus_mu_Y,
                 numerator_replace = X_minus_mu_X * Y_minus_mu_Y_replace,
@@ -286,14 +291,43 @@ sd(pbsEDM_pred_N[-101], na.rm=TRUE)   # It does
 sd(pbsEDM_pred_N_replace[-101], na.rm=TRUE)   # it does.
 ```
 
-
-Do the sample example from Wikipedia:
-```{r wikieg}
-#rho_manual_2 <- sum(vals$numerator, na.rm=TRUE) /
+So this should give the correct answer
+```{r rhonoNA}
+rho_no_NA <- cor(vals_no_NA$data,
+                 vals_no_NA$pbsEDM_pred_N)
+rho_no_NA
+rho_no_NA_replace <- cor(vals_no_NA$data,
+                         vals_no_NA$pbsEDM_pred_N_replace)
+rho_no_NA_replace
 ```
+These match my original calculations - my original manual ones were wrong.
+
+## Do the manual calcs on 'vals no NA'
+
+From sample example on Wikipedia
+```{r manualnoNA}
+rho_manual_no_NA <- sum(vals_no_NA$numerator) /
+  (sqrt( sum( (vals_no_NA$X_minus_mu_X)^2 ) ) *
+   sqrt( sum( (vals_no_NA$Y_minus_mu_Y)^2 ) ))
+rho_manual_no_NA
+pbsEDM_rho_N    # aha - matches
+
+rho_manual_no_NA_replace <- sum(vals_no_NA$numerator_replace) /
+  (sqrt( sum( (vals_no_NA$X_minus_mu_X)^2 ) ) *
+   sqrt( sum( (vals_no_NA$Y_minus_mu_Y_replace)^2 ) ))
+rho_manual_no_NA_replace
+pbsEDM_rho_N_replace    # MATCHES
+# BUT vals_no_NA has mean already in it ******* - now have fixed that above
+
+```
+
+HERE: so think my manual calcs now agree, so look at the details to understand
+why $\rho$ decreases. Or not overly worry, as it is small and could be just one
+influential point. Could sort them, if useful.
+
 ## I wonder if it's how the NA's are used.
 
-
+Yes, it was. I hadn't dealt with them properly.
 
 ## Maybe mention at end
 
