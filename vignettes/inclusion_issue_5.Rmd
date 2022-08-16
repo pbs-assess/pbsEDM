@@ -25,19 +25,7 @@ library(pbsEDM)
 
 This vignette was more for working things out. Now defining Aspects 1, 2 and 3
 in the manuscript, so creating aspect_2.Rmd (and maybe aspect_1.Rmd and
-aspect_3.Rmd if needed) based on this one.
-
-This vignette demonstrates the issue we found with
-calculations in the `rEDM` package, namely to do with the nearest neighbours
-that are used in the projection calculations. The calculations here use our
-`pbsEDM` package led by Luke Rogers, and are verified using manual code written
-independently by Andy Edwards. <!-- See our manuscript for a full explanation. -->
-
-The tibble `NY_lags_example_3` is saved in the package and contains a simple
-simulated population time
-series $N_t$ as `Nt`, with $t = 1, 2, 3, ..., 99, 100$. It also contains the
-lagged values $N_{t-1}$ as `Ntmin1`, and first differences $Y_t = N_{t+1} - N_t$
-as `Y_t`, with lagged values $Y_{t-1}$ as `Y_tmin1` and $Y_{t-2}$ as `Y_tmin2`:
+aspect_3.Rmd if needed) based on this one. And then can delete this.
 
 <!-- Change what's below based on
 edm-work/code/simulated/sockeye-simulated/sockeye-sim-edm.Snw - has the movie

@@ -2,7 +2,7 @@
 title: "Aspect 2 demonstration"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{inclusion_issue_4}
+  %\VignetteIndexEntry{aspect_2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

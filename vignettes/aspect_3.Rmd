@@ -1,0 +1,158 @@
+---
+title: "Aspect 3 demonstration"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{aspect_3}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "",
+  fig.width = 5,
+  fig.height = 5
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+## Introduction
+
+In the manuscript, Aspect 3 is that predicted values of lagged variables can
+give unrealistic negative predictions of the original unlagged populations.
+
+Taken some from `aspect_2.Rmd` and `inclusion_issue_5.Rmd`.
+
+Again use the simulated population time series from the manuscript, with
+first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
+extract them from the saved tibble `NY_lags_example_3`:
+
+```{r, t_and_Y}
+input <-  dplyr::select(NY_lags_example_3, t, N_t, Y_t) %>%
+  dplyr::rename(Time = t)
+input
+```
+
+## Calculations using pbsEDM (as done in Aspect 2 vignette)
+
+See the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
+for general details on using the code. Here do the simplex calculation for $E = 2$:
+```{r pbsEDM}
+pbsEDM_res_full <- pbsEDM::pbsEDM(input,
+                                  lags = list(Y_t = c(0:1)))   # Gives full calculations
+
+pbsEDM_pred_Y <- pbsEDM_res_full$X_forecast[-length(pbsEDM_res_full$X_forecast)]
+                                           # Just the predictions, excluding
+                                           #  t=101, so for t = 1:100
+```
+
+## Explaining the issue -- Aspect 3
+
+First stick with $Y_t$ calculations, convert to $N_t$. Then (at some point) try
+the $N_t$ calcs directly from inclusion 5 vignette, but they gave one incorrect
+calculations which was confusing (issue 29 I think).
+
+So use:
+
+$\hat{N}_{t+1} = N_t + \hat{Y}_t$
+
+or
+
+$\hat{N}_{t} = N_{t-1} + \hat{Y}_{t-1}$
+
+```{r Npred}
+pbsEDM_pred_N = c(NA,
+                  input$N_t + pbsEDM_pred_Y)
+pbsEDM_pred_N
+```
+
+The first three `NA`s demonstrate that we cannot predict $\hat{N}_1$ (because we do not know $N_0$), or
+$\hat{N}_2$ and $\hat{N}_3$ (because we cannot predict $\hat{Y}_1$ or
+$\hat{Y}_2$). Of note is the several negative predictions of $\hat{N}_t$, which
+are unrealistic because our data represent populations. The indices of these
+give the predicted time values (i.e. $t^* + 1$):
+```{r indices}
+which(pbsEDM_pred_N < 0)
+```
+
+Of particular interest is the negative prediction for $\hat{N}_{101}$, which is
+likely the focus of an analysis (a predict next year's population from all
+currently available data).
+
+### Differences in correlation coefficient
+
+The Pearson correlation coefficient, $\rho$, based on the estimated $\hat{Y}_t$
+and data $Y_t$ is
+```{r rhoY}
+pbsEDM_rho_Y <- pbsEDM_res_full$results$X_rho
+pbsEDM_rho_Y
+```
+
+But comparing the estimated $\hat{N}_t$ and original $N_t$ values gives:
+```{r rhoN}
+pbsEDM_rho_N <- cor(c(input$N_t, NA),
+                    pbsEDM_pred_N,
+                    use = "pairwise.complete.obs")
+pbsEDM_rho_N
+```
+
+Get 0.28, but check carefully about the NA removal, just compare the values from $t=4:100$:
+
+```{r checking}
+pbsEDM_rho_N_check <- cor(input$N_t[4:100],
+                    pbsEDM_pred_N[4:100])
+pbsEDM_rho_N_check
+```
+Gives the same answer, so is calculating properly.
+
+Obviously those negative predictions are going to have an impact, and we know
+that they are wrong. Could try replacing them with the minimum observed $N_t$:
+
+```{r replace}
+N_t_min <- min(input$N_t[input$N_t > 0])
+
+pbsEDM_pred_N_replace <- pbsEDM_pred_N
+pbsEDM_pred_N_replace[pbsEDM_pred_N_replace < 0] = N_t_min
+
+pbsEDM_rho_N_replace <- cor(c(input$N_t, NA),
+                            pbsEDM_pred_N_replace,
+                            use = "pairwise.complete.obs")
+pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100])
+                        # gives same
+```
+wtf? that comes out worse. Don't see how that can be as we've surely moved the
+predictions closer to the true values. HERE - check the above chunk.
+
+
+
+
+## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
+
+TODO
+
+Here we run some tests to check that if any of the above results from `pbsEDM`
+or `rEDM` have changed from when this vignette was written (some results are
+saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
+such failures should be investigated and this vignette updated).
+
+Check the default `rEDM` predictions have not changed.
+```{r testrEDM}
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       rEDM_res$Predictions)       # If no error then they match
+```
+
+Also check that the results with different values of `exclusionsRadius` have not changed:
+```{r testExcl}
+testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
+testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
+testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
+```
+
+The test in the Independent Code section has already verified that the `pbsEDM`
+results have not changed (since they match the `my.pred` results from the original
+independent code).
