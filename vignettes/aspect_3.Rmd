@@ -29,7 +29,7 @@ give unrealistic negative predictions of the original unlagged populations.
 Taken some from `aspect_2.Rmd` and `inclusion_issue_5.Rmd`.
 
 Again use the simulated population time series from the manuscript, with
-first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
+population size denoted $N_t$ and first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
 extract them from the saved tibble `NY_lags_example_3`:
 
 ```{r, t_and_Y}
@@ -53,281 +53,135 @@ pbsEDM_pred_Y <- pbsEDM_res_full$X_forecast[-length(pbsEDM_res_full$X_forecast)]
 
 ## Explaining the issue -- Aspect 3
 
-First stick with $Y_t$ calculations, convert to $N_t$. Then (at some point) try
-the $N_t$ calcs directly from inclusion 5 vignette, but they gave one incorrect
-calculations which was confusing (issue 29 I think).
+Use the $Y_t$ calculations and then convert to $N_t$. Equation (1) in the
+manuscript defines $Y_t$ as:
 
-So use:
+$Y_t = N_{t+1} - N_t$.
+
+So having estimated $\hat{Y}_t$ we can rearrange that to estimate $\hat{N}_{t+1}$ as:
 
 $\hat{N}_{t+1} = N_t + \hat{Y}_t$
 
 or
 
-$\hat{N}_{t} = N_{t-1} + \hat{Y}_{t-1}$
+$\hat{N}_t = N_{t-1} + \hat{Y}_{t-1}$,
 
+to give a vector of estimated $\hat{N}_t$ values:
 ```{r Npred}
 pbsEDM_pred_N = c(NA,
                   input$N_t + pbsEDM_pred_Y)
 pbsEDM_pred_N
 ```
 
-The first three `NA`s demonstrate that we cannot predict $\hat{N}_1$ (because we do not know $N_0$), or
+The first three `NA` values demonstrate that we cannot predict $\hat{N}_1$ (because we do not know $N_0$), or
 $\hat{N}_2$ and $\hat{N}_3$ (because we cannot predict $\hat{Y}_1$ or
-$\hat{Y}_2$). Of note are the several negative predictions of $\hat{N}_t$, which
-are unrealistic because our data represent populations. The indices of these
+$\hat{Y}_2$).
+
+Of note are the several negative predictions of $\hat{N}_t$, which
+are unrealistic because our data represent populations -- this is Aspect 3. The indices of these
 give the predicted time values (i.e. $t^* + 1$):
 ```{r indices}
 which(pbsEDM_pred_N < 0)
 ```
 
-Of particular interest is the negative prediction for $\hat{N}_{101}$, which is
-likely the focus of an analysis (i.e. predict next year's population from all
-currently available data).
+Of particular interest is the negative prediction for $\hat{N}_{101}$ of
+`r  pbsEDM_pred_N[101]`, since the
+aim of the analysis is often to predict next year's population from all
+currently available data.
 
-### Differences in correlation coefficient
+## Simple solution to Aspect 3
 
-The Pearson correlation coefficient, $\rho$, based on the estimated $\hat{Y}_t$
-and data $Y_t$ is
-```{r rhoY}
-pbsEDM_rho_Y <- pbsEDM_res_full$results$X_rho
-pbsEDM_rho_Y
-```
-
-But comparing the estimated $\hat{N}_t$ and original $N_t$ values gives:
-```{r rhoN}
-pbsEDM_rho_N <- cor(c(input$N_t, NA),
-                    pbsEDM_pred_N,
-                    use = "pairwise.complete.obs")
-pbsEDM_rho_N
-```
-
-Get 0.28, but check carefully about the NA removal, just compare the values from
-$t=4:100$
-
-```{r checking}
-pbsEDM_rho_N_check <- cor(input$N_t[4:100],
-                          pbsEDM_pred_N[4:100])
-pbsEDM_rho_N_check
-```
-Gives the same answer, so is calculating properly.
-
-Obviously those negative predictions are going to have an impact, and we know
-that they are wrong. Could try the simplest choice of replacing them with the
-minimum observed $N_t$:
-
+The simplest solution to Aspect 3 is to just replace the negative
+predictions $\hat{N}_t$ with the minimum observed value of $N_t$.
 ```{r replace}
-length(which(pbsEDM_pred_N < 0))   # number of negative values
-
 N_t_min <- min(input$N_t)
 
 pbsEDM_pred_N_replace <- pbsEDM_pred_N
 pbsEDM_pred_N_replace[pbsEDM_pred_N_replace < 0] = N_t_min
-
-pbsEDM_rho_N_replace <- cor(c(input$N_t, NA),
-                            pbsEDM_pred_N_replace,
-                            use = "pairwise.complete.obs")
-pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gives same
-
 ```
 
-Surpisingly, that comes out worse (lower $\rho$). Don't see how that can be as we've surely moved the
-predictions closer to the true values. Investigate:
+Graphically this is shown by plotting all the original $(N_t, \hat{N}_t)$ points
+as open black circles, then the set with the negative $\hat{N}_t$ values
+replaced as red filled circles (so that 11 points can be seen to change; the 1:1
+line is added in black):
 
-THESE ARE WRONG because include all time steps, but we want to globally exclude
-any with NA's.
-```{r rhocalcs}
-sd_pred_N <- sd(pbsEDM_pred_N, na.rm=TRUE)
-sd_pred_N
-sd_pred_N_replace <- sd(pbsEDM_pred_N_replace, na.rm=TRUE)
-sd_pred_N_replace
-```
-So the vector with negatives replaced has a lower standard deviation, as
-expected (since the values are now less spread out). What about the means:
-```{r means}
-mean_pred_N <- mean(pbsEDM_pred_N, na.rm=TRUE)
-mean_pred_N
-mean_pred_N_replace <- mean(pbsEDM_pred_N_replace, na.rm=TRUE)
-mean_pred_N_replace
-```
-So replacing the negatives increases the mean, which makes sense as shifting 11
-values up. A figure will help:
-```{r replacefig}
+```{r replacefig, echo=FALSE}
 plot(c(input$N_t, NA),
      pbsEDM_pred_N,
-     xlab = "Observed N",
-     ylab = "Predicted N",
+     xlab = "Observed N_t",
+     ylab = "Predicted N_t",
      main = "Red: change -ve predictions to min +ve observation")
 
 points(c(input$N_t, NA),
        pbsEDM_pred_N_replace,
        pch = 20,
        col = "red")
-abline(h = mean_pred_N)
-abline(h = mean_pred_N_replace,
-       col = "red")
-abline(v = mean(input$N_t),
-       col = "grey")
+abline(a = 0, b = 1)
+# abline(h = mean_pred_N)
+# abline(h = mean_pred_N_replace,
+#        col = "red")
+# abline(v = mean(input$N_t),
+#        col = "grey")
 
-lm_fit  <- lm(pbsEDM_pred_N ~ c(input$N_t, NA))
-abline(lm_fit)
-lm_fit_replace  <- lm(pbsEDM_pred_N_replace ~ c(input$N_t, NA))
-abline(lm_fit_replace, col = "red")
+# lm_fit  <- lm(pbsEDM_pred_N ~ c(input$N_t, NA))
+# abline(lm_fit)
+# lm_fit_replace  <- lm(pbsEDM_pred_N_replace ~ c(input$N_t, NA))
+# abline(lm_fit_replace, col = "red")
 ```
 
-General formula for $\rho$ is
-$$\rho = \dfrac{\mbox{E}[(X - \mu_X)(Y - \mu_Y)]}{\sigma_X \sigma_Y}$$
-so let $X$ here be the observed and $Y$ be the predicted.
+## Aspect 4 - good fit for the first-differenced values ($Y_t$) does not necessarily translate to a good fit to the original population sizes ($N_t$)
 
-HERE: CAN DELETE THIS CHUNK I THINK, as repeated below with no_NA, and this has
-some errors in it.
+The above simple fix solves Aspect 3 by removing unrealistic negative
+predictions. However, the above figure raises a further issue, in that the
+predicted values $\hat{N}_t$ do not seem to match the original data $N_t$ too
+well.
 
-```{r values}
-vals <- dplyr::tibble(data = c(input$N_t, NA),
-               pbsEDM_pred_N,
-               pbsEDM_pred_N_replace) %>%
-  dplyr::mutate(X_minus_mu_X = data - mean(data, na.rm = TRUE),
-                Y_minus_mu_Y = pbsEDM_pred_N - mean_pred_N,
-                Y_minus_mu_Y_replace = pbsEDM_pred_N_replace -
-                  mean_pred_N_replace,
-                Y_calc_diff = Y_minus_mu_Y - Y_minus_mu_Y_replace,
-                numerator = X_minus_mu_X * Y_minus_mu_Y,
-                numerator_replace = X_minus_mu_X * Y_minus_mu_Y_replace,
-                numerator_diff = numerator - numerator_replace)
-dplyr::select(vals,
-              numerator,
-              numerator_replace,
-              numerator_diff) %>%
-  as.data.frame()
-sum(vals$numerator_diff, na.rm = TRUE)
-num <- mean(vals$numerator, na.rm = TRUE)
-num
-num_replace <- mean(vals$numerator_replace, na.rm = TRUE)
-num_replace
-# Compare replace with original
-num_replace/num
-# So replacing has reduced numerator
-sd_pred_N_replace / sd_pred_N
-# But has reduced numerator slightly more, such that
-manual_rho_increase <- (num_replace/num) / ( sd_pred_N_replace / sd_pred_N)
-manual_rho_increase
-rho_increase <- pbsEDM_rho_N_replace / pbsEDM_rho_N
-rho_increase
+The correlation coefficient of $\hat{N}_t$ and $N_t$ before correcting the
+negative values is:
+```{r rhoN}
+pbsEDM_rho_N <- cor(c(input$N_t, NA),
+                    pbsEDM_pred_N,
+                    use = "pairwise.complete.obs")
+pbsEDM_rho_N
 ```
-Hmm.... so I manually calc that $\rho$ should indeed increase, in contrast to
-my original calculation. Just work out $\rho$ manually:
-
-```{r rhomanual}
-sd_data <- sd(c(input$N_t, NA), na.rm = TRUE)
-rho_manual <- num / sd_pred_N / sd_data
-rho_manual
-pbsEDM_rho_N     # Those two should be the same
-rho_manual_replace <- num_replace / sd_pred_N_replace / sd_data
-rho_manual_replace
-pbsEDM_rho_N_replace
+and after correcting the negative values it is
+```{r replacerho}
+pbsEDM_rho_N_replace <- cor(c(input$N_t, NA),
+                            pbsEDM_pred_N_replace,
+                            use = "pairwise.complete.obs")
+pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gives same
 ```
 
-Aha -- in my manual calculations $\rho$ has increased when replacing the values.
-
-Suggests an error in my original calculations (which may also explain why the
-manual ones don't match the original ones).
-
-## Figure out the error
-
-Aha
-```{r aha}
-which(is.na(vals$X_minus_mu_X))
-# But for Y we have
-which(is.na(vals$Y_minus_mu_Y))
-```
-but we need to only use the complete ones in the manual calculations (assume
-this was taken care of in `cor()`, but maybe not correctly.
-
-Repeat the above calcs, but just reduce the tibble to exclude anything with
-NA's.  TODO DELETE THE ABOVE ONE I THINK
-```{r noNA}
-vals_no_NA <- dplyr::tibble(data = c(input$N_t, NA),
-               pbsEDM_pred_N,
-               pbsEDM_pred_N_replace)
-vals_no_NA <- vals_no_NA[-unique(which(is.na(vals_no_NA),
-                                       arr.ind=TRUE)[, "row"]),
-                         ] %>%     # Keep col names the same:
-  dplyr::mutate(X_minus_mu_X = data - mean(data),
-                Y_minus_mu_Y = pbsEDM_pred_N - mean(pbsEDM_pred_N),
-                Y_minus_mu_Y_replace = pbsEDM_pred_N_replace -
-                  mean(pbsEDM_pred_N_replace),
-                Y_calc_diff = Y_minus_mu_Y - Y_minus_mu_Y_replace,
-                numerator = X_minus_mu_X * Y_minus_mu_Y,
-                numerator_replace = X_minus_mu_X * Y_minus_mu_Y_replace,
-                numerator_diff = numerator - numerator_replace)
-dplyr::select(vals_no_NA,
-              numerator,
-              numerator_replace,
-              numerator_diff) %>%
-  as.data.frame()
-sum(vals_no_NA$numerator_diff)
-num_no_NA <- mean(vals_no_NA$numerator)
-num_no_NA
-num_no_NA_replace <- mean(vals_no_NA$numerator_replace)
-num_no_NA_replace
-# Compare replace with original
-num_no_NA_replace/num_no_NA
-# So replacing has reduced numerator
-
-sd_pred_no_NA <- sd(vals_no_NA$pbsEDM_pred_N)
-sd_pred_no_NA
-sd_pred_no_NA_replace <- sd(vals_no_NA$pbsEDM_pred_N_replace)
-sd_pred_no_NA_replace
-# So standard deviation has gone down with replacement, as found earlier, but
-#  the values are different to earlier:
-sd_pred_N
-sd_pred_N_replace
-
-# Aha - sd_pred_N included the t=101 value because it wasn't NA. So my
-#  manual calculations above are wrong because they're not omitting the rows
-#  with NA's, just the NA values.
-# This should match sd_pred_no_NA:
-sd(pbsEDM_pred_N[-101], na.rm=TRUE)   # It does
-# And this should match sd_pred_no_NA_replace:
-sd(pbsEDM_pred_N_replace[-101], na.rm=TRUE)   # it does.
+The $\rho$ with the negatives corrected is unintuitively very slightly lower
+than the original value. But the more important point is that a $\rho$ of 0.28
+is much lower than that based on $Y_t$ and $\hat{Y}_t$, which is
+```{r rhoY}
+pbsEDM_rho_Y <- pbsEDM_res_full$results$X_rho
+pbsEDM_rho_Y
 ```
 
-So this should give the correct answer
-```{r rhonoNA}
-rho_no_NA <- cor(vals_no_NA$data,
-                 vals_no_NA$pbsEDM_pred_N)
-rho_no_NA
-rho_no_NA_replace <- cor(vals_no_NA$data,
-                         vals_no_NA$pbsEDM_pred_N_replace)
-rho_no_NA_replace
-```
-These match my original calculations - my original manual ones were wrong.
+This seems to have not been documented before, and so we define it as Aspect 4.
 
-## Do the manual calcs on 'vals no NA'
+Plotting  $\hat{Y}_t$ against $Y_t$ (these are the $E=2$ points in the
+manuscript's Figure~1(f):
 
-From sample example on Wikipedia
-```{r manualnoNA}
-rho_manual_no_NA <- sum(vals_no_NA$numerator) /
-  (sqrt( sum( (vals_no_NA$X_minus_mu_X)^2 ) ) *
-   sqrt( sum( (vals_no_NA$Y_minus_mu_Y)^2 ) ))
-rho_manual_no_NA
-pbsEDM_rho_N    # aha - matches
-
-rho_manual_no_NA_replace <- sum(vals_no_NA$numerator_replace) /
-  (sqrt( sum( (vals_no_NA$X_minus_mu_X)^2 ) ) *
-   sqrt( sum( (vals_no_NA$Y_minus_mu_Y_replace)^2 ) ))
-rho_manual_no_NA_replace
-pbsEDM_rho_N_replace    # MATCHES
-# BUT vals_no_NA has mean already in it ******* - now have fixed that above
-
+```{r Ycorr}
+plot(input$Y_t,
+     pbsEDM_pred_Y,
+     xlab = "Observed Y",
+     ylab = "Predicted Y")
+abline(a=0, b=1)
 ```
 
-HERE: so think my manual calcs now agree, so look at the details to understand
-why $\rho$ decreases. Or not overly worry, as it is small and could be just one
-influential point. Could sort them, if useful.
+showing a good correspondance, as given by the correlation coefficient of
+`r pbsEDM_rho_Y`.
 
-## I wonder if it's how the NA's are used.
+Thus, a good correspondance based on the first-differenced $Y_t$ values does not
+necessarily lead to good correspondance in the $N_t$ values, which is what we
+are interested in for practical situations.
 
-Yes, it was. I hadn't dealt with them properly.
+
+
 
 ## Maybe mention at end
 
