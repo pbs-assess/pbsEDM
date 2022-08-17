@@ -1,8 +1,8 @@
 ---
-title: "Aspect 3 demonstration"
+title: "Demonstration of Aspects 3 and 4"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{aspect_3}
+  %\VignetteIndexEntry{aspect_3_4}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -132,7 +132,7 @@ abline(a = 0, b = 1)
 ## Aspect 4 - good fit for the first-differenced values ($Y_t$) does not necessarily translate to a good fit to the original population sizes ($N_t$)
 
 The above simple fix solves Aspect 3 by removing unrealistic negative
-predictions. However, the above figure raises a further issue, in that the
+predictions. However, the above figure raises a fundamental issue, in that the
 predicted values $\hat{N}_t$ do not seem to match the original data $N_t$ too
 well.
 
@@ -152,7 +152,7 @@ pbsEDM_rho_N_replace <- cor(c(input$N_t, NA),
 pbsEDM_rho_N_replace    # cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gives same
 ```
 
-The $\rho$ with the negatives corrected is unintuitively very slightly lower
+The latter $\rho$ with the negatives corrected is (unintuitively) very slightly lower
 than the original value. But the more important point is that a $\rho$ of 0.28
 is much lower than that based on $Y_t$ and $\hat{Y}_t$, which is
 ```{r rhoY}
@@ -173,23 +173,25 @@ plot(input$Y_t,
 abline(a=0, b=1)
 ```
 
-showing a good correspondance, as given by the correlation coefficient of
+shows a good correspondence, as given by the correlation coefficient of
 `r pbsEDM_rho_Y`.
 
-Thus, a good correspondance based on the first-differenced $Y_t$ values does not
-necessarily lead to good correspondance in the $N_t$ values, which is what we
-are interested in for practical situations.
+Thus, a good correspondence based on the first-differenced $Y_t$ values does not
+necessarily lead to good correspondence in the $N_t$ values, which is what we
+are interested in for practical situations. Hence our recommendation that
+practitioners also check the fits of the predctions based on
+non-first-differenced values ($N_t$) and not just first-differenced values
+($Y_t$).
 
+HERE: Probably need something more -- should $E$ be selected based on this? How
+does $E=3$ look for this data set?
 
-
-
-## Maybe mention at end
-
-think this helps show why rho isn't great to use. So sd of Nhat goes down (as
-expected) when replacing negative ones, but presumably not enough to compensate
-the change in the numerator
+This is kind of related to $\rho$ not being great to use, but the above figure
+shows that we have to be careful.
 
 ## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
+
+TODO maybe.
 
 <!--
 TODO
