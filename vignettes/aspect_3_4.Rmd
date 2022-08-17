@@ -26,9 +26,7 @@ library(pbsEDM)
 In the manuscript, Aspect 3 is that predicted values of lagged variables can
 give unrealistic negative predictions of the original unlagged populations.
 
-Taken some from `aspect_2.Rmd` and `inclusion_issue_5.Rmd`.
-
-Again use the simulated population time series from the manuscript, with
+Again we use the simulated population time series from the manuscript, with
 population size denoted $N_t$ and first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
 extract them from the saved tibble `NY_lags_example_3`:
 
@@ -183,11 +181,103 @@ practitioners also check the fits of the predctions based on
 non-first-differenced values ($N_t$) and not just first-differenced values
 ($Y_t$).
 
-HERE: Probably need something more -- should $E$ be selected based on this? How
-does $E=3$ look for this data set?
+## Repeating analyses with $E=3$
 
-This is kind of related to $\rho$ not being great to use, but the above figure
-shows that we have to be careful.
+The above was all for the simplest embedding dimension of $E=2$. We repeat the
+calculations here for $E=3$, which is the embedding dimension selected for use
+by the EDM calculations. The code is available in the vignette code but not all
+of it is shown here. The first-differencing calculations remain the same, the higher embedding
+dimension just allows more lags (and more neighbours) to be used in the making predictions.
+
+```{r pbsEDM3}
+pbsEDM_res_full_E_3 <- pbsEDM::pbsEDM(input,
+                                      lags = list(Y_t = c(0:2)))   # Gives full calculations
+
+pbsEDM_pred_Y_E_3 <- pbsEDM_res_full_E_3$X_forecast[-length(pbsEDM_res_full$X_forecast)]
+                                           # Just the predictions, excluding
+                                           #  t=101, so for t = 1:100
+```
+
+```{r Npred3}
+pbsEDM_pred_N_E_3 = c(NA,
+                  input$N_t + pbsEDM_pred_Y_E_3)
+pbsEDM_pred_N_E_3
+```
+
+Interestingly, there are fewer negative predictions of $\hat{N}_t$ for $E=3$
+than the 11 we had for $E=2$. The indices of these
+give the predicted time values (i.e. $t^* + 1$):
+```{r indices3}
+which(pbsEDM_pred_N_E_3 < 0)
+```
+
+Though there is still a negative prediction for $\hat{N}_{101}$ of
+`r  pbsEDM_pred_N_E_3[101]`.
+
+Now solve Aspect 3 by replacing  the negative
+predictions $\hat{N}_t$ with the minimum observed value of $N_t$.
+```{r replace3}
+N_t_min <- min(input$N_t)
+
+pbsEDM_pred_N_E_3_replace <- pbsEDM_pred_N_E_3
+pbsEDM_pred_N_E_3_replace[pbsEDM_pred_N_E_3_replace < 0] = N_t_min
+```
+
+And repeat the above figure:
+
+```{r replacefig3, echo=FALSE}
+plot(c(input$N_t, NA),
+     pbsEDM_pred_N_E_3,
+     xlab = "Observed N_t",
+     ylab = "Predicted N_t",
+     main = "Red: change -ve predictions to min +ve observation")
+
+points(c(input$N_t, NA),
+       pbsEDM_pred_N_E_3_replace,
+       pch = 20,
+       col = "red")
+abline(a = 0, b = 1)
+```
+
+The above figure does look better (close to the 1:1 line) than for $E=2$.
+The correlation coefficient of $\hat{N}_t$ and $N_t$ before correcting the
+negative values is:
+```{r rhoN3}
+pbsEDM_rho_N_E_3 <- cor(c(input$N_t, NA),
+                        pbsEDM_pred_N_E_3,
+                        use = "pairwise.complete.obs")
+pbsEDM_rho_N_E_3
+```
+and after correcting the negative values it is
+```{r replacerho3}
+pbsEDM_rho_N_E_3_replace <- cor(c(input$N_t, NA),
+                                pbsEDM_pred_N_E_3_replace,
+                                use = "pairwise.complete.obs")
+pbsEDM_rho_N_E_3_replace
+```
+
+which again is slightly lower than the original value. But the $\rho$ has
+improved somewhat from that for $E=2$, but ist still not as high as based on $Y_t$ and $\hat{Y}_t$, which is
+```{r rhoY3}
+pbsEDM_rho_Y_E_3 <- pbsEDM_res_full_E_3$results$X_rho
+pbsEDM_rho_Y_E_3
+```
+
+So again, Aspect 4 occurs.
+
+As above, plotting  $\hat{Y}_t$ against $Y_t$ (these are the $E=3$ points in the
+manuscript's Figure~1(f):
+
+```{r Ycorr3}
+plot(input$Y_t,
+     pbsEDM_pred_Y_E_3,
+     xlab = "Observed Y",
+     ylab = "Predicted Y")
+abline(a=0, b=1)
+```
+
+shows a good correspondence, as given by the correlation coefficient of
+`r pbsEDM_rho_Y_E_3`.
 
 ## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
 
