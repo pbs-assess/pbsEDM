@@ -1,0 +1,93 @@
+---
+title: "pbsSmap example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pbsSmap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "",
+  fig.width = 5,
+  fig.height = 5
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup}
+library(pbsEDM)
+```
+
+## Introduction
+
+Example use of the `pbsSmap()` function for implementing the S-map algorithm,
+giving the results reported in the manuscript.
+
+Again we use the simulated population time series from the manuscript, with
+population size denoted $N_t$ and first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
+extract them from the saved tibble `NY_lags_example_3`:
+
+```{r, t_and_Y}
+input <-  dplyr::select(NY_lags_example_3, t, N_t, Y_t) %>%
+  dplyr::rename(Time = t)
+input
+```
+
+In the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
+we used the simplex algorithm and found the optimal embedding dimension to be $E
+= 3$, so we used that here.
+
+```{r, Efix}
+E_fix <- 3
+```
+
+## Calculations using pbsEDM::pbsSmap()
+
+Since $E = 3$ we use lags of 0, 1, and 2:
+```{r, pbsSmap}
+Smap_res <- pbsSmap(input,
+                    lags = list(Y_t = 0:2))
+# theta = 0 is default. Need to iterate through some values.
+
+Smap_res_01 <- pbsSmap(input,
+                       lags = list(Y_t = 0:2),
+                       theta = 0.1)
+```
+
+
+## Calculations using rEDM:: ??
+
+
+
+## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
+
+TODO maybe.
+
+<!--
+TODO
+
+Here we run some tests to check that if any of the above results from `pbsEDM`
+or `rEDM` have changed from when this vignette was written (some results are
+saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
+such failures should be investigated and this vignette updated).
+
+Check the default `rEDM` predictions have not changed.
+{r testrEDM}
+testthat::expect_equal(NY_lags_example_3$rEDM.pred,
+                       rEDM_res$Predictions)       # If no error then they match
+
+
+Also check that the results with different values of `exclusionsRadius` have not changed:
+{r testExcl}
+testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
+testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
+testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
+
+
+The test in the Independent Code section has already verified that the `pbsEDM`
+results have not changed (since they match the `my.pred` results from the original
+independent code).
+-->
