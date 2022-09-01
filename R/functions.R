@@ -638,11 +638,11 @@ pbsSmap <- function (N,
 #' @export
 #'
 smap_efficient <- function (N,
-                            lags,
-                            theta,
-                            p,
-                            first_difference,
-                            centre_and_scale) {
+                            lags = NULL,
+                            theta = 0,
+                            p = 1L,
+                            first_difference = FALSE,
+                            centre_and_scale = FALSE){
 
   #----------------- Define X -------------------------------------------------#
 
