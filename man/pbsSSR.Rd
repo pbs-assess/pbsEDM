@@ -9,7 +9,7 @@ pbsSSR(N, lags, p = 1L, first_difference = FALSE, centre_and_scale = FALSE)
 \arguments{
 \item{N}{[vector()], [matrix()] or [data.frame()] of time series
 for the response variable and covariate time series. Elements must be
-[numeric()]. If present, columns must have [colnames()] matching 
+[numeric()]. If present, columns must have [colnames()] matching
 \code{names(lags)}.}
 
 \item{lags}{[list()] of named integer vectors specifying the lags to use for

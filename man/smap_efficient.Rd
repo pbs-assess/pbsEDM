@@ -4,7 +4,14 @@
 \alias{smap_efficient}
 \title{SMap That Returns Only The Forecast Accuracy}
 \usage{
-smap_efficient(N, lags, theta, p, first_difference, centre_and_scale)
+smap_efficient(
+  N,
+  lags = NULL,
+  theta = 0,
+  p = 1L,
+  first_difference = FALSE,
+  centre_and_scale = FALSE
+)
 }
 \arguments{
 \item{N}{A data frame with named columns for the response variable and
@@ -26,4 +33,12 @@ each time series in \code{N}.}
 }
 \description{
 SMap That Returns Only The Forecast Accuracy
+}
+\examples{
+\donttest{
+ N <- data.frame(x = simple_ts)
+ lags <- list(x = 0:1)
+ m4 <- smap_efficient(N, lags, first_difference = TRUE)
+}
+# And see pbsSmap vignette.
 }

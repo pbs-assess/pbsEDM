@@ -133,6 +133,8 @@ N <- data.frame(x = simple_ts)
 lags <- list(x = 0:1)
 m4 <- pbsSmap(N, lags, first_difference = TRUE)
 
+
+# And see pbsSmap vignette.
 }
 \author{
 Luke A. Rogers

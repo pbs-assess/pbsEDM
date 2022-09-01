@@ -4,7 +4,14 @@
 \alias{smap_surrogates}
 \title{Perform Surrogate Test For Nonlinearity}
 \usage{
-smap_surrogates(N, lags, theta, p, first_difference, centre_and_scale)
+smap_surrogates(
+  N,
+  lags,
+  theta,
+  p = 1L,
+  first_difference = FALSE,
+  centre_and_scale = FALSE
+)
 }
 \arguments{
 \item{N}{A data frame with named columns for the response variable and
