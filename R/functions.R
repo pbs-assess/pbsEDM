@@ -786,14 +786,14 @@ smap_efficient <- function (N,
 #'
 #' @return [numeric()] Quantile for empirical delta rho among surrogates
 #' @export
-#'
+#' # See pbsSmap vignette for example use.
 #'
 smap_surrogates <- function (N,
                              lags,
                              theta,
-                             p,
-                             first_difference,
-                             centre_and_scale) {
+                             p = 1L,
+                             first_difference = FALSE,
+                             centre_and_scale = FALSE){
 
   # Compute the empirical delta rho --------------------------------------------
 
