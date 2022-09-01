@@ -47,7 +47,7 @@ E_fix <- 3
 ## Calculations using pbsEDM
 
 Since $E = 3$ we use lags of 0, 1, and 2, and test over a range of $\theta$,
-that represents the degree of local weighting:
+where $\theta$ represents the degree of local weighting:
 ```{r, pbsSmap1}
 theta_vec = seq(0, 5, 0.1)
 rho_vec <- smap_thetavec(input,
@@ -62,7 +62,7 @@ plot(theta_vec,
 ```
 
 Thus we can see that the forecast skill (measured by the correlation coefficient
-$\rho$ increases as $\theta$ increases. The value $\theta = 0$ represents the global
+$\rho$) increases as $\theta$ increases. The value $\theta = 0$ represents the global
 linear solution, with the solutions becoming more locally weighted (and hence
 nonlinear) as $\theta$ increases.
 
@@ -99,7 +99,9 @@ Nhat_101
 
 The latter gives $\hat{N}_{101}$, the projected value of the population at time
 step 101. This is different to the -0.017 calculated using just the simplex
-algorithm. So actually gets around Aspect 3 (predicting negative populations),
+algorithm with $E=3$ in the [`Demonstration of Aspects 3 and 4`](aspect_3.html)
+vignette TODO check link after rebuilding.
+So Aspect 3 (predicting a negative population) is avoided here,
 but there is no guarantee of this with the S-map algorithm.
 
 Regarding Aspect 3, we can check how many negative projected values (across the
@@ -120,6 +122,39 @@ predictions of $Y_t$ to actual values when using S-map compared to simplex.
 
 ## Calculations using rEDM
 
+```{r, rEDM1}
+# From Simplex:
+#rEDM_res <- rbind(c(1, input$Y_t[1], NA, NA),
+#                  rEDM_res)             # Add Time = 1 values, to give t = 1:100
+#
+#rEDM_pred <- rEDM_res$Predictions       # Just the predicted values
+
+
+rEDM_Smap <- rEDM::PredictNonlinear(dataFrame = input,
+                                    columns = "Y_t",
+                                    target = "Y_t",
+                                    lib = "1 99",
+                                    pred = "1 99",
+                                    theta = theta_vec,
+                                    E = 3,
+                                    verbose = TRUE)
+plot(theta_vec,
+     rho_vec,
+     xlab = expression("Degree of local weighting, " * theta),
+     ylab = expression("Forecast skill, " * rho),
+     ylim = c(0.7, 1))
+lines(theta_vec,
+      rEDM_Smap$rho,
+      col = "red")
+rEDM_Smap
+```
+The red line gives the `rEDM` results, which are close, but not exactly the
+same, as those from `pbsEDM` (black circles) derived earlier.
+
+So we now investigate whether Aspect 2 is occurring again in the `rEDM` calculations.
+
+HERE: so next try using `rEDM::SMap()` as it does give some output of predictions and
+S-map coefficients (not quite sure what those would be).
 
 
 
