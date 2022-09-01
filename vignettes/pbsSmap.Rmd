@@ -44,25 +44,89 @@ we used the simplex algorithm and found the optimal embedding dimension to be $E
 E_fix <- 3
 ```
 
-## Calculations using pbsEDM::pbsSmap()
+## Calculations using pbsEDM
 
-Since $E = 3$ we use lags of 0, 1, and 2:
-```{r, pbsSmap}
-Smap_res <- pbsSmap(input,
-                    lags = list(Y_t = 0:2))
-# theta = 0 is default. Need to iterate through some values.
+Since $E = 3$ we use lags of 0, 1, and 2, and test over a range of $\theta$,
+that represents the degree of local weighting:
+```{r, pbsSmap1}
+theta_vec = seq(0, 5, 0.1)
+rho_vec <- smap_thetavec(input,
+                         lags = list(Y_t = 0:2),
+                         theta_vec = theta_vec)
 
-Smap_res_01 <- pbsSmap(input,
-                       lags = list(Y_t = 0:2),
-                       theta = 0.1)
+plot(theta_vec,
+     rho_vec,
+     xlab = expression("Degree of local weighting, " * theta),
+     ylab = expression("Forecast skill, " * rho),
+     ylim = c(0.7, 1))
 ```
 
+Thus we can see that the forecast skill (measured by the correlation coefficient
+$\rho$ increases as $\theta$ increases. The value $\theta = 0$ represents the global
+linear solution, with the solutions becoming more locally weighted (and hence
+nonlinear) as $\theta$ increases.
 
-## Calculations using rEDM:: ??
+The maximum value of $\rho$ is, with corresponding $\theta$:
+```{r, pbsSmap2}
+max(rho_vec)
+theta_max <- theta_vec[which.max(rho_vec)]
+theta_max
+```
+
+We then test if this is signficantly different to the linear system with $\theta
+= 0$, using the surrogate test from TODO: Need Ref in manuscript
+```{r, pbsSmap3}
+rho_vec[1]     # rho at theta=0
+p_val <- smap_surrogates(input,
+                         lags = list(Y_t = 0:2),
+                         theta = theta_max)
+p_val
+```
+Since the p-value is $>0.05$, we conclude that there is not sufficient evidence
+that the system is nonlinear, since the fit is not significantly better to that
+from using $\theta = 0$. However, the focus of our application is in making
+projections, so we use the optimal $\theta$ for that:
+```{r, pbsSmap4}
+Smap_optimal <- pbsSmap(input,
+                        lags = list(Y_t = 0:2),
+                        theta = theta_max)
+
+Yhat_100 <- Smap_optimal$Y_forecast[100]
+
+Nhat_101 <- Yhat_100 + input$N_t[100]
+Nhat_101
+```
+
+The latter gives $\hat{N}_{101}$, the projected value of the population at time
+step 101. This is different to the -0.017 calculated using just the simplex
+algorithm. So actually gets around Aspect 3 (predicting negative populations),
+but there is no guarantee of this with the S-map algorithm.
+
+Regarding Aspect 3, we can check how many negative projected values (across the
+whole time series) arise from S-map calculations:
+```{r, pbsSmap5}
+pbsSmap_pred_Y <- Smap_optimal$Y_forecast[-length(Smap_optimal$Y_forecast)]
+                                           # Just the predictions for Y_t, excluding
+                                           #  t=101, so for t = 1:100
+pbsSmap_pred_N = c(NA,
+                   input$N_t + pbsSmap_pred_Y)
+pbsSmap_pred_N
+which(pbsSmap_pred_N < 0)
+```
+Thus there are only three time indices for which we obtain negative predictions
+of $N_t$ when using S-map, compared to six when using the simplex algorithm. This
+difference may be due to the higher correlation coefficient comparing
+predictions of $Y_t$ to actual values when using S-map compared to simplex.
+
+## Calculations using rEDM
 
 
 
-## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
+
+
+## Check if calculations differ between pbsEDM and rEDM
+
+## Test that pbsEDM and rEDM results have not changed - DO SOMETHING SIMILAR
 
 TODO maybe.
 
