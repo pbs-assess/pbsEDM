@@ -32,5 +32,5 @@ each time series in \code{N}.}
 [numeric()] Quantile for empirical delta rho among surrogates
 }
 \description{
-Perform Surrogate Test For Nonlinearity
+See pbsSmap vignette for example use.
 }

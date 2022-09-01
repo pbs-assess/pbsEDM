@@ -821,6 +821,8 @@ smap_thetavec <- function(N,
 
 #' Perform Surrogate Test For Nonlinearity
 #'
+#' See pbsSmap vignette for example use.
+#'
 #' @param N A data frame with named columns for the response variable and
 #'   covariate time series.
 #' @param lags A list of named integer vectors specifying the lags to use for
@@ -832,7 +834,7 @@ smap_thetavec <- function(N,
 #'
 #' @return [numeric()] Quantile for empirical delta rho among surrogates
 #' @export
-#' # See pbsSmap vignette for example use.
+#'
 #'
 smap_surrogates <- function (N,
                              lags,
