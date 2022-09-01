@@ -637,6 +637,14 @@ pbsSmap <- function (N,
 #' @return [numeric()] The forecast accuracy rho
 #' @export
 #'
+#' @examples
+#' \donttest{
+#'   # Adapted from pbsSmap()
+##'  N <- data.frame(x = simple_ts)
+##'  lags <- list(x = 0:1)
+##'  m4 <- smap_efficient(N, lags, first_difference = TRUE)
+##' }
+##'
 smap_efficient <- function (N,
                             lags = NULL,
                             theta = 0,
@@ -646,7 +654,7 @@ smap_efficient <- function (N,
 
   #----------------- Define X -------------------------------------------------#
 
-  # N <- pbsN(N = N, lags = lags, p = p)
+  N <- pbsN(N = N, lags = lags, p = p)
   Z <- pbsZ(N = N, first_difference = first_difference)
   Y <- pbsY(Z = Z, centre_and_scale = centre_and_scale)
   X <- pbsX(Y = Y, lags = lags)
