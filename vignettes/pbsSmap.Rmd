@@ -153,9 +153,105 @@ same, as those from `pbsEDM` (black circles) derived earlier.
 
 So we now investigate whether Aspect 2 is occurring again in the `rEDM` calculations.
 
-HERE: so next try using `rEDM::SMap()` as it does give some output of predictions and
-S-map coefficients (not quite sure what those would be).
+So use `rEDM::SMap()` for the previously calculated `theta_max`, as it gives
+more detailed output:
+```{r, rEDM2}
+rEDM_Smap_full <- rEDM::SMap(dataFrame = input,
+                             columns = "Y_t",
+                             target = "Y_t",
+                             lib = "1 99",
+                             pred = "1 99",
+                             theta = theta_max,
+                             E = 3,
+                             verbose = TRUE)
+rEDM_Smap_pred_Y <- c(NA,
+                      NA,
+                      rEDM_Smap_full$predictions$Predictions)
 
+plot(rEDM_Smap_pred_Y,
+     pbsSmap_pred_Y,
+     xlab = expression("rEDM predictions of " * Y_t),
+     ylab = expression("pbsSmap predictions of " * Y_t))
+abline(0, 1)
+```
+
+So the predicted values from the two sets of code are certainly similar, but not
+exactly the same.
+
+Work out which ones appear most different:
+```{r, rEDM3}
+epsilon <- 0.14
+different <- dplyr::tibble(t = input$Time,
+                           rEDM_Smap_pred_Y,
+                           pbsSmap_pred_Y) %>%
+  dplyr::mutate(diff = rEDM_Smap_pred_Y - pbsSmap_pred_Y)
+
+different_few <- dplyr::filter(different,
+                               abs(diff) > epsilon)
+
+different_few
+
+plot(rEDM_Smap_pred_Y,
+     pbsSmap_pred_Y,
+     xlab = expression("rEDM predictions of " * Y_t),
+     ylab = expression("pbsSmap predictions of " * Y_t))
+abline(0, 1)
+
+points(different_few$rEDM_Smap_pred_Y,
+       different_few$pbsSmap_pred_Y,
+       col = "red",
+       pch = 20)
+```
+
+So the largest difference occurs for $Y_{31}$, for which $t^* = 30$.
+
+NEXT: Actually, look at full details for that one (from pbsEDM output), and see
+if Aspect 2 applies, because the $t^*+1$ value has an influence. But it has
+correctly excluded indices from the library of candidate neighbours:
+
+```{r, pbsEDM6}
+t_star <- 30
+Smap_optimal$neighbour_index[t_star, ]
+sort(Smap_optimal$neighbour_index[t_star, ])
+```
+Note that this matches equation (7) and (therefore) Figure 4 in the
+manuscript. Such detailed output is not available from `rEDM`, so I think we
+need a detailed 3-d figure, and if Aspect 2 applies we should be able to colour
+those points that are incorrectly included by `rEDM` but excluded by `pbsEDM`.
+
+We can use the `plot_phase_3d()` function, which requires an input of class
+`pbsEDM`, so make that first:
+```{r, pbsEDM7}
+aa <- pbsEDM(NY_lags_example,
+             lags = list(Y_t = 0:2))
+
+plot_phase_3d(aa, tstar = 61, early.col.lines = NA) # looks like excluded are
+   # very close
+plot_phase_3d(aa, tstar = 15, early.col.lines = NA) # looks like excluded are
+                                        # far away, therefore may affect mean
+plot_phase_3d(aa, tstar = 30, early.col.lines = NA) # looks like excluded are
+                                        # maybe influential on the mean
+plot_phase_3d(aa, tstar = 94, early.col.lines = NA) # looks like fairly close
+
+```
+
+Interplay between being close and being far. Could just add the excluded ones as
+bonus data away from the tstar value (not at the end) in `pbsEDM` so they get
+included, and work out if the prediction from `rEDM` gives the same answer.
+
+
+
+TODO: Move to Aspect 2: actually irrelevant here as we're doing $E=3$. So look
+at numbers, maybe plot 3-d plot.
+
+Aside: looking at Aspect 2 and Fig S.3 (no - that's E=3, so are results . For $t^* = 75$ we get differences for
+simplex, can see that blowing up Fig S.3 and looking at the values:
+```{r, vals}
+input[73:76,]
+```
+so $(Y_{74}, Y_{75})$ and $(Y_{75}, Y_{76})$ are very close to each other, but
+the latter should be excluded as a nearest neighbour of the former. This should
+apply to S-map also though, so investigate....
 
 
 

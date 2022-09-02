@@ -636,6 +636,8 @@ plot_phase_2d <- function(values,
 ##' @param axes.col colour of orthogonal origin axes that go through (0, 0, 0)
 ##' @param par.mar.phase `par(mar)` to reset to after plotting 3d figure
 ##' @param par.mgp `par(mgp)` to reset to after plotting 3d figure
+##' @param tstar focal point to highlight (for `pbsEDM` vignette)
+##' @param angle_view manually specify the angle for viewing (to rotate plot)
 ##'
 ##' @return Plots figure to current device
 ##' @export
@@ -643,9 +645,9 @@ plot_phase_2d <- function(values,
 ##' @examples
 ##' \donttest{
 ##'  aa <- pbsEDM(NY_lags_example,
-##'               lags = list(N_t = 0:1),
+##'               lags = list(N_t = 0:2),
 ##'               first_difference = TRUE)
-##'   plot_phase_3d(aa)
+##'  plot_phase_3d(aa)
 ##' }
 plot_phase_3d <- function(obj,
                           par.mgp.3d = c(3, 10, 0),
@@ -663,7 +665,9 @@ plot_phase_3d <- function(obj,
                           early.col.lines = "lightgrey",
                           axes.col = "darkblue",
                           par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
-                          par.mgp = c(1.5, 0.5, 0)
+                          par.mgp = c(1.5, 0.5, 0),
+                          tstar = NA,
+                          angle_view = NA
                           ){
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$X_observed, na.rm = TRUE)),
@@ -671,6 +675,16 @@ plot_phase_3d <- function(obj,
   }
 
   if(is.null(last.time.to.plot)) last.time.to.plot <- length(obj$X_observed)
+
+  if(is.na(angle_view)){
+    if(is.na(tstar)){
+      angle_view <- 40 + last.time.to.plot} else {
+                                            angle_view <- 40 + tstar
+                                          } # to match movie
+  }
+
+
+  if(!is.na(tstar)) late.num = 1
 
   start = 1     # currently only works for 1
 
@@ -707,7 +721,7 @@ plot_phase_3d <- function(obj,
                                       zlim = axis.range,
                                       type = "n",
                                       box = FALSE,
-                                      angle = 40 + last.time.to.plot,
+                                      angle = angle_view,
                                       mar = par.mar.3d)
                                               # mar=c(5,3,4,3)+0.1 is default,set
                                               #  within scatterplot3d
@@ -757,6 +771,17 @@ plot_phase_3d <- function(obj,
                     pch = pch.plot,
                     col = col.plot)
     }
+  }
+
+  # Points to highlight for pbsSmap vignette, tstar and subsequent points that
+  #  are excluded from library as candidate neighours. Need the time increments.
+  if(!is.na(tstar)){
+    scat$points3d(obj$X[tstar:(tstar + 3), "Y_t_2"], # "Y_tmin2"
+                  obj$X[tstar:(tstar + 3), "Y_t_1"], # "Y_tmin1"
+                  obj$X[tstar:(tstar + 3), "Y_t_0"], # "Y_t"
+                  type = "h",
+                  pch = 16,
+                  col = c("blue", rep("red", 3)))
   }
 
   par(mar = par.mar.phase)   # scatterplot3d changes mar
