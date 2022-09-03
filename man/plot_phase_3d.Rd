@@ -21,7 +21,9 @@ plot_phase_3d(
   early.col.lines = "lightgrey",
   axes.col = "darkblue",
   par.mar.phase = c(3, 0, 1, 0),
-  par.mgp = c(1.5, 0.5, 0)
+  par.mgp = c(1.5, 0.5, 0),
+  tstar = NA,
+  angle_view = NA
 )
 }
 \arguments{
@@ -61,6 +63,10 @@ colour; not showing `N_t` here but keeping consistency with other plots}
 \item{par.mar.phase}{`par(mar)` to reset to after plotting 3d figure}
 
 \item{par.mgp}{`par(mgp)` to reset to after plotting 3d figure}
+
+\item{tstar}{focal point to highlight (for `pbsEDM` vignette)}
+
+\item{angle_view}{manually specify the angle for viewing (to rotate plot)}
 }
 \value{
 Plots figure to current device
@@ -73,9 +79,9 @@ Shows the first-differenced values in three-dimensional phase space, as
 \examples{
 \donttest{
  aa <- pbsEDM(NY_lags_example,
-              lags = list(N_t = 0:1),
+              lags = list(N_t = 0:2),
               first_difference = TRUE)
-  plot_phase_3d(aa)
+ plot_phase_3d(aa)
 }
 }
 \author{
