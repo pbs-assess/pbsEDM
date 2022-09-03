@@ -100,7 +100,7 @@ Nhat_101
 The latter gives $\hat{N}_{101}$, the projected value of the population at time
 step 101. This is different to the -0.017 calculated using just the simplex
 algorithm with $E=3$ in the [`Demonstration of Aspects 3 and 4`](aspect_3.html)
-vignette TODO check link after rebuilding.
+vignette.
 So Aspect 3 (predicting a negative population) is avoided here,
 but there is no guarantee of this with the S-map algorithm.
 
@@ -118,18 +118,14 @@ which(pbsSmap_pred_N < 0)
 Thus there are only three time indices for which we obtain negative predictions
 of $N_t$ when using S-map, compared to six when using the simplex algorithm. This
 difference may be due to the higher correlation coefficient comparing
-predictions of $Y_t$ to actual values when using S-map compared to simplex.
+predictions of $Y_t$ to actual values when using S-map compared to using simplex.
 
 ## Calculations using rEDM
 
+We now do the same S-map calculations using code from the `rEDM` package, to see
+if the library of candidate neighbours is correctly determined (Aspect 2).
+
 ```{r, rEDM1}
-# From Simplex:
-#rEDM_res <- rbind(c(1, input$Y_t[1], NA, NA),
-#                  rEDM_res)             # Add Time = 1 values, to give t = 1:100
-#
-#rEDM_pred <- rEDM_res$Predictions       # Just the predicted values
-
-
 rEDM_Smap <- rEDM::PredictNonlinear(dataFrame = input,
                                     columns = "Y_t",
                                     target = "Y_t",
@@ -137,7 +133,8 @@ rEDM_Smap <- rEDM::PredictNonlinear(dataFrame = input,
                                     pred = "1 99",
                                     theta = theta_vec,
                                     E = 3,
-                                    verbose = TRUE)
+                                    verbose = TRUE,
+                                    showPlot = FALSE)
 plot(theta_vec,
      rho_vec,
      xlab = expression("Degree of local weighting, " * theta),
@@ -146,14 +143,13 @@ plot(theta_vec,
 lines(theta_vec,
       rEDM_Smap$rho,
       col = "red")
-rEDM_Smap
 ```
+
 The red line gives the `rEDM` results, which are close, but not exactly the
 same, as those from `pbsEDM` (black circles) derived earlier.
 
-So we now investigate whether Aspect 2 is occurring again in the `rEDM` calculations.
-
-So use `rEDM::SMap()` for the previously calculated `theta_max`, as it gives
+We now investigate whether Aspect 2 is occurring in the `rEDM` calculations.
+We use `rEDM::SMap()` for the previously calculated `theta_max`, as it gives
 more detailed output:
 ```{r, rEDM2}
 rEDM_Smap_full <- rEDM::SMap(dataFrame = input,
@@ -180,7 +176,7 @@ exactly the same.
 
 Work out which ones appear most different:
 ```{r, rEDM3}
-epsilon <- 0.14
+epsilon <- 0.14     # Gives the four most different
 different <- dplyr::tibble(t = input$Time,
                            rEDM_Smap_pred_Y,
                            pbsSmap_pred_Y) %>%
@@ -205,84 +201,115 @@ points(different_few$rEDM_Smap_pred_Y,
 
 So the largest difference occurs for $Y_{31}$, for which $t^* = 30$.
 
-NEXT: Actually, look at full details for that one (from pbsEDM output), and see
-if Aspect 2 applies, because the $t^*+1$ value has an influence. But it has
-correctly excluded indices from the library of candidate neighbours:
+The `pbsEDM` output contains full details of calculations, so we can look at the
+neighbours of $\bf{x}_{30}$ (with the closest given first):
 
 ```{r, pbsEDM6}
 t_star <- 30
 Smap_optimal$neighbour_index[t_star, ]
+```
+
+By sorting them we can see the indices in the library:
+```{r, pbsEDM6b}
 sort(Smap_optimal$neighbour_index[t_star, ])
 ```
-Note that this matches equation (7) and (therefore) Figure 4 in the
-manuscript. Such detailed output is not available from `rEDM`, so I think we
-need a detailed 3-d figure, and if Aspect 2 applies we should be able to colour
-those points that are incorrectly included by `rEDM` but excluded by `pbsEDM`.
+This matches equation (7) and (therefore) Figure 4 in the
+manuscript. The correctly-omitted indices are given by
+```{r, pbsEDM6c}
+setdiff(3:100,sort(Smap_optimal$neighbour_index[t_star, ]))
+```
 
-We can use the `plot_phase_3d()` function, which requires an input of class
-`pbsEDM`, so make that first:
+We wish to see whether some of those indices are incorrectly included in the
+library of candidate neighbours for the S-map calculations in `rEDM`, but
+detailed output regarding nearest neighbours etc. is not available from the `rEDM` calculations.
+So first we visualise the focal point ${\bf x}_{t^*}$ and the three subsequent
+points that should be omitted from the library (as per equations 6 or 7), namely
+${\bf x}_{t^*+1}$, ${\bf x}_{t^*+2}$, and ${\bf x}_{t^*+3}$.
+We can use the `pbsEDM::plot_phase_3d()` function (which requires an input of class
+`pbsEDM` so we do the calculation here); for $t^* = 30$:
 ```{r, pbsEDM7}
 aa <- pbsEDM(NY_lags_example,
              lags = list(Y_t = 0:2))
+plot_phase_3d(aa, tstar = 30, early.col.lines = NA)
+```
 
-plot_phase_3d(aa, tstar = 61, early.col.lines = NA) # looks like excluded are
+The blue dot is ${\bf x}_{30}$, and the red dots are ${\bf x}_{31}$, ${\bf x}_{32}$,
+and ${\bf x}_{33}$. These are not the nearest neighbours in this case, but note that
+their erroneous inclusion would still affect the mean distance of all points from the
+focal point, and hence affect the estimate of ${\bf x}_{31}$ (via equation TODO).
+
+However, for $t^*=93$ (the value with the second largest different between
+the `pbsEDM` and `rEDM` results) we have:
+```{r, pbsEDM8}
+plot_phase_3d(aa, tstar = 93, early.col.lines = NA)
+```
+
+for which one of the red points is very close to the blue ${\bf x}_{93}$, and so
+its erroneous inclusion in the library would surely affect the prediction of
+${\hat Y}_{94}$.
+
+```{r, pbsEDM9, echo = FALSE, eval = FALSE}
+# keep for reference
+#plot_phase_3d(aa, tstar = 60, early.col.lines = NA, angle = 120) # excluded are
    # very close
-plot_phase_3d(aa, tstar = 15, early.col.lines = NA) # looks like excluded are
+#plot_phase_3d(aa, tstar = 14, early.col.lines = NA) # looks like excluded are
                                         # far away, therefore may affect mean
-plot_phase_3d(aa, tstar = 30, early.col.lines = NA) # looks like excluded are
-                                        # maybe influential on the mean
-plot_phase_3d(aa, tstar = 94, early.col.lines = NA) # looks like fairly close
-
 ```
 
-Interplay between being close and being far. Could just add the excluded ones as
-bonus data away from the tstar value (not at the end) in `pbsEDM` so they get
-included, and work out if the prediction from `rEDM` gives the same answer.
+We can test that assertion by including the extra three points as later dummy
+data and re-running the analysis in `pbsEDM`; being later in the time series
+they will not get automatically excluded because they will not be close in time
+to $t^*$:
+```{r, pbsEDMdummy}
+t_star = 93
+input_dummy <- rbind(input[1:99, ],
+                     input[(t_star - 1):(t_star + 3), ],
+                     input[100, ])
 
+Smap_optimal_dummy <- pbsSmap(input_dummy,
+                              lags = list(Y_t = 0:2),
+                              theta = theta_max)
 
-
-TODO: Move to Aspect 2: actually irrelevant here as we're doing $E=3$. So look
-at numbers, maybe plot 3-d plot.
-
-Aside: looking at Aspect 2 and Fig S.3 (no - that's E=3, so are results . For $t^* = 75$ we get differences for
-simplex, can see that blowing up Fig S.3 and looking at the values:
-```{r, vals}
-input[73:76,]
+Smap_optimal_dummy$Y_forecast[t_star+1]
 ```
-so $(Y_{74}, Y_{75})$ and $(Y_{75}, Y_{76})$ are very close to each other, but
-the latter should be excluded as a nearest neighbour of the former. This should
-apply to S-map also though, so investigate....
+That estimate is very close to that from `rEDM`:
+```{r, pbsEDMdummy2}
+rEDM_Smap_pred_Y[t_star+1]
+```
+and somewhat different to the original `pbsEDM` estimate:
+```{r, pbsEDMdummy3}
+Smap_optimal$Y_forecast[t_star+1]
+```
 
+The actual nearest neighbours are
+```{r, pbsEDMdummy4}
+Smap_optimal_dummy$neighbour_index[t_star, ]
+```
 
+So the second nearest neighbour now is for $t=103$, which is the dummy point in
+the state space added in, corresponding to $t=95$. So $t=95$ correctly gets
+excluded from the library of candidate neighbours in `pbsEDM`, but by adding it
+as dummy data later we have that neighbour to be included as $t=103$. The result
+is close to that from `rEDM`, suggesting that $t=95$ is erroneously included in
+the library for $t^* = 93$, and that Aspect 2 does indeed occur
+for the `rEDM` S-map code.
 
-## Check if calculations differ between pbsEDM and rEDM
+Note that the estimates of $\hat{Y}_{94}$ from `rEDM` and from `pbsEDM` with the
+dummy data added do not match exactly
+because the dummy $Y_t$ values create extra ${\bf x}_t$ points, which affect the mean of the
+distances of all points from ${\bf x}_{93}$.
 
-## Test that pbsEDM and rEDM results have not changed - DO SOMETHING SIMILAR
+## Test that pbsEDM and rEDM results have not changed
 
-TODO maybe.
+Just check that the results have not changed (due to any updates in the
+packages)::
 
-<!--
-TODO
+```{r, testrEDM}
+testthat::expect_equal(Nhat_101,
+                       0.5405147,
+                       tolerance = 0.000001)       # If no errors then they match
+testthat::expect_equal(different_few$diff,
+                       c(-0.1724516, -0.2447201,  0.1473963, -0.1927386),
+                       tolerance = 0.000001)
 
-Here we run some tests to check that if any of the above results from `pbsEDM`
-or `rEDM` have changed from when this vignette was written (some results are
-saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
-such failures should be investigated and this vignette updated).
-
-Check the default `rEDM` predictions have not changed.
-{r testrEDM}
-testthat::expect_equal(NY_lags_example_3$rEDM.pred,
-                       rEDM_res$Predictions)       # If no error then they match
-
-
-Also check that the results with different values of `exclusionsRadius` have not changed:
-{r testExcl}
-testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
-testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
-testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
-
-
-The test in the Independent Code section has already verified that the `pbsEDM`
-results have not changed (since they match the `my.pred` results from the original
-independent code).
--->
+```
