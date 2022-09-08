@@ -92,7 +92,7 @@ Smap_optimal <- pbsSmap(input,
                         theta = theta_max)
 
 Yhat_100 <- Smap_optimal$Y_forecast[100]
-
+Yhat_100
 Nhat_101 <- Yhat_100 + input$N_t[100]
 Nhat_101
 ```
@@ -228,9 +228,9 @@ ${\bf x}_{t^*+1}$, ${\bf x}_{t^*+2}$, and ${\bf x}_{t^*+3}$.
 We can use the `pbsEDM::plot_phase_3d()` function (which requires an input of class
 `pbsEDM` so we do the calculation here); for $t^* = 30$:
 ```{r, pbsEDM7}
-aa <- pbsEDM(NY_lags_example,
-             lags = list(Y_t = 0:2))
-plot_phase_3d(aa, tstar = 30, early.col.lines = NA)
+pbsEDM_simplex <- pbsEDM(NY_lags_example,
+                         lags = list(Y_t = 0:2))
+plot_phase_3d(pbsEDM_simplex, tstar = 30, early.col.lines = NA)
 ```
 
 The blue dot is ${\bf x}_{30}$, and the red dots are ${\bf x}_{31}$, ${\bf x}_{32}$,
@@ -241,7 +241,7 @@ focal point, and hence affect the estimate of ${\bf x}_{31}$ (via equation TODO)
 However, for $t^*=93$ (the value with the second largest different between
 the `pbsEDM` and `rEDM` results) we have:
 ```{r, pbsEDM8}
-plot_phase_3d(aa, tstar = 93, early.col.lines = NA)
+plot_phase_3d(pbsEDM_simplex, tstar = 93, early.col.lines = NA)
 ```
 
 for which one of the red points is very close to the blue ${\bf x}_{93}$, and so
@@ -250,9 +250,9 @@ ${\hat Y}_{94}$.
 
 ```{r, pbsEDM9, echo = FALSE, eval = FALSE}
 # keep for reference
-#plot_phase_3d(aa, tstar = 60, early.col.lines = NA, angle = 120) # excluded are
+#plot_phase_3d(pbsEDM_simplex, tstar = 60, early.col.lines = NA, angle = 120) # excluded are
    # very close
-#plot_phase_3d(aa, tstar = 14, early.col.lines = NA) # looks like excluded are
+#plot_phase_3d(pbsEDM_simplex, tstar = 14, early.col.lines = NA) # looks like excluded are
                                         # far away, therefore may affect mean
 ```
 
@@ -262,6 +262,20 @@ they will not get automatically excluded because they will not be close in time
 to $t^*$:
 ```{r, pbsEDMdummy}
 t_star = 93
+pbsEDM_simplex$X[t_star:(t_star+3), ]    # x(tstar) and next three
+
+# It looks like the third one here is the closest to the the first row, verified
+#  by the 0.677 value in:
+dist(pbsEDM_simplex$X[t_star:(t_star+3), ])
+
+# These are the distances of the four nearest neighbours from the simplex calc:
+pbsEDM_simplex$neighbour_distance[t_star, ]
+
+# So x(tstar+2) would have been the second nearest neighbour, but it is
+#  correctly excluded here (aspect 2) from the simplex calculation.
+# So now add the necessary values as dummy data, re-run S-map from pbsSmap, and
+#  see if it gets close to the rEDM calculation:
+
 input_dummy <- rbind(input[1:99, ],
                      input[(t_star - 1):(t_star + 3), ],
                      input[100, ])
@@ -285,11 +299,10 @@ The actual nearest neighbours are
 ```{r, pbsEDMdummy4}
 Smap_optimal_dummy$neighbour_index[t_star, ]
 ```
-
-So the second nearest neighbour now is for $t=103$, which is the dummy point in
-the state space added in, corresponding to $t=95$. So $t=95$ correctly gets
-excluded from the library of candidate neighbours in `pbsEDM`, but by adding it
-as dummy data later we have that neighbour to be included as $t=103$. The result
+So the second nearest neighbour now is indeed for $t=103$, which is the dummy point in
+the state space added in, corresponding to $t=95$. So $t=95$ was originally correctly
+excluded from the library of neighbours in `pbsSmap`, but by adding it
+as dummy data later we allow that neighbour to be included as $t=103$. The result
 is close to that from `rEDM`, suggesting that $t=95$ is erroneously included in
 the library for $t^* = 93$, and that Aspect 2 does indeed occur
 for the `rEDM` S-map code.
