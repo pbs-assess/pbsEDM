@@ -94,7 +94,7 @@ Now to plot the `pbsEDM` predictions again those from `rEDM`, and highlight
 in red those that differ:
 ```{r pbsredm}
 plot(rEDM_pred,
-     pbs_pred,
+     pbsEDM_pred,
      xlab = "rEDM predictions",
      ylab = "pbsEDM predictions")
 abline(a=0,
@@ -147,7 +147,7 @@ since these both contain $Y_{t^*+1}$.
 
 For $t^*=94$, we have the aforementioned discrepancy between calculations:
 ```{r tstar94}
-t_star = 94
+t_star <- 94
 rEDM_pred[t_star + 1]
 pbsEDM_pred[t_star + 1]
 ```
@@ -163,11 +163,19 @@ giving the above prediction for $Y_{95}$ of
 pbsEDM_pred[t_star+1]
 ```
 
-For `rEDM` the full details of nearest neighbours does not appear to be an
+For `rEDM` the full details of nearest neighbours do not appear to be an
 available output. However, here we show that $\bf{x}_{96}$ was used by `rEDM` as a nearest
-neighbour of $\bf{x}_{94}$. We simply change the value of
+neighbour of $\bf{x}_{94}$. We first
+simply change the value of
 $Y_{95}$ so that `rEDM::Simplex()` will not pick
-$\bf{x}_{96}$ as a nearest neighbour for $\bf{x}_{94}$, and see if we get the same result as
+
+$$\bf{x}_{95} = [Y_{95},~Y_{94}]$$
+
+or
+
+$$\bf{x}_{96} = [Y_{96}, ~Y_{95}]$$
+
+as a nearest neighbour of $\bf{x}_{94}$, and see if we get the same result as
 for `pbsEDM`.
 
 ```{r changedata}
@@ -190,18 +198,54 @@ rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
 rEDM_change_pred[t_star+1]
 ```
 
-That is the same value as obtained earlier using `pbsEDM`. Thus by moving
-$Y_{95}$ far away so that it definitely will not now be considered as a component of
-the nearest neighbour of $\bf{x}_{94}$, we have shown that $Y_{95}$ was
-originally being considered by `rEDM` as a nearest neighbour. But as explained
-in condition (d), this should not be the case.
+That is the same value as obtained
+earlier using `pbsEDM`.
+
+We now
+do the same calculation but changing
+$Y_{96}$ so that
+$$\bf{x}_{96} = [Y_{96}, ~Y_{95}]$$
+cannot be a nearest neighbour of
+$\bf{x}_{94}$ (but $\bf{x}_{95}$
+still can be):
+
+```{r changedata2}
+input_change <- input
+input_change[t_star+2, "Y_t"] = 7    # Move it far out of the way so it will not be a
+                                     #  nearest neighbour
+
+# Do Simplex calculation with same options as earlier
+rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
+                                 columns = "Y_t",
+                                 target = "Y_t",
+                                 lib = "1 99",
+                                 pred = "1 99",
+                                 E = 2,
+                                 verbose = TRUE)
+rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
+                         rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
+rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
+rEDM_change_pred[t_star+1]
+```
+Since this again agrees with the
+`pbsEDM` calculation, we conclude
+that
+$$\bf{x}_{96} = [Y_{96}, ~Y_{95}]$$
+
+was incorrectly
+being included in the library of
+candidate nearest neighbours by
+`rEDM`, since by moving $Y_{95}$ or
+$Y_{96}$ far away it is no longer a
+nearest neighbour, and so Aspect 2
+is shown to occur for `rEDM`.
 
 ### Calculations for $t^*=75$
 
 We now repeat the above calculations for $t^*=75$. Skipping some of the
 explanatory steps, we have:
 ```{r tstar75}
-t_star = 75
+t_star <- 75
 rEDM_pred[t_star + 1]
 pbsEDM_pred[t_star + 1]
 ```
@@ -214,8 +258,7 @@ pbsEDM_res_full$neighbour_weight[t_star,]
 ```
 
 Change the value of $Y_{76}$ so that `rEDM::Simplex()` will not pick
-$\bf{x}_{77}$ as a nearest neighbour for $\bf{x}_{75}$, to verify if we get the same result as
-for `pbsEDM`.
+$\bf{x}_{76}$ or $\bf{x}_{77}$ as a nearest neighbour for $\bf{x}_{75}$:
 
 ```{r changedata75}
 input[t_star+1, ]
@@ -236,10 +279,64 @@ rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
 rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
 rEDM_change_pred[t_star+1]
 ```
-Again, we get the same result as obtained earlier using `pbsEDM`.
+We indeed get the same result as
+obtained earlier using `pbsEDM`.
+
+Now instead change $Y_{77}$ so that
+$\bf{x}_{77}$ cannot be a nearest
+neighbour (but $\bf{x}_{76}$ still
+can be):
+```{r changedata75b}
+input[t_star+2, ]
+input_change <- input
+input_change[t_star+2, "Y_t"] = 7    # Move it far out of the way so it will not be a
+                                     #  nearest neighbour
+
+# Do Simplex calculation with same options as earlier
+rEDM_change_res <- rEDM::Simplex(dataFrame = input_change,
+                                 columns = "Y_t",
+                                 target = "Y_t",
+                                 lib = "1 99",
+                                 pred = "1 99",
+                                 E = 2,
+                                 verbose = TRUE)
+rEDM_change_res <- rbind(c(1, input_change$Y_t[1], NA, NA),
+                         rEDM_change_res)          # Add Time = 1 values, to give t = 1:100
+rEDM_change_pred <- rEDM_change_res$Predictions    # Just the predicted values
+rEDM_change_pred[t_star+1]
+```
+This does not match the `pbsEDM`
+result. Thus,
+since only replacing $Y_{t^*+1} = Y_{76}$ gives the matching result to
+`pbsEDM`, it must be the case that
+`rEDM` was considering
+$$\bf{x}_{t^*+1} =
+[Y_{t^*+1},~Y_{t^*}]$$
+
+i.e.
+
+$$\bf{x}_{76} = [Y_{76}, ~Y_{75}]$$
+to be a nearest neighbour of
+$\bf{x}_{75}$ (and not
+$\bf{x}_{77}$).
+
+Note that `rEDM`
+prediction of `r rEDM_change_pred[t_star+1]` is now
+very large. This is because `rEDM`
+is still finding $\bf{x}_{76}$ to be a
+nearest neighbour. In the next time
+step this moves to $\bf{x}_{77} =
+[Y_{77}, ~Y_{76}]$, but we have just
+made $Y_{77}$ very large and this
+value gets used in the calculation of
+$\hat{Y}_{76}$ (equation 13 in the
+manuscript), which is therefore very large.
 
 Thus, we have demonstrated two examples for which `rEDM` has used $Y_{t^* + 1}$
-as a nearest neighbours, which is described as Aspect 2 in the manuscript.
+as a nearest neighbours (through
+$\bf{x}_{t^*+2}$ for $t^*=94$ and
+$\bf{x}_{t^*+1}$ for $t^*=75$), and
+so Aspect 2 is occurring.
 
 ## Differences in $\rho$
 
@@ -390,7 +487,6 @@ Also check that the results with different values of `exclusionsRadius` have not
 ```{r testExcl}
 testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
 testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
-testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
 ```
 
 The test in the Independent Code section has already verified that the `pbsEDM`
