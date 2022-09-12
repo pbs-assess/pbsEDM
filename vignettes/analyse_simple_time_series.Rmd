@@ -22,10 +22,13 @@ library(pbsEDM)
 ```
 
 TODO: Axes in code are updated to be $Y_t$ not $X_t$ etc., but have to manually
-save the movies to GitHub, so not doing that now in case they change again.
+save the movies to GitHub, so not doing that now in case they change again. Plus
+some are saved in R/functions, I think just while developing. Move to here when finalised.
 
 TODO: Could simplify some of this, just save a vector also as `Nt_example`
 instead of using the tibble.
+
+TODO: Change calc2 to something else, see other vignettes.
 
 The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,

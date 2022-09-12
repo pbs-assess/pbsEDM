@@ -70,21 +70,26 @@ plot.pbsEDM = function(x,
   plot_time_series(values = x$N,  # $N_t,
                                         # TODO: why might as.vector() be needed , xt is okay
                    X.or.N = "N",
+                   label = "(a)",
                    ...)
 
   plot_time_series(values = x$X_observed,
                    X.or.N = "X",
+                   label = "(c)",
                    ...)
 
   plot_phase_2d(values = x$N,    # $N_t,
                 X.or.N = "N",
+                label = "(b)",
                 ...)
 
   plot_phase_2d(values = x$X_observed,
                 X.or.N = "X",
+                label = "(d)",
                 ...)
 
   plot_phase_3d(x,
+                label = "(e)",
                 ...)
   invisible()
 }
@@ -137,6 +142,7 @@ plot_pbsEDM_Evec <- function(E_res,
               ...)
 
   plot_pred_obs(E_res,
+                label = "(f)",
                 ...)
   invisible()
 }
@@ -206,6 +212,7 @@ plot_rho_Evec <- function(E_res,
 ##' @param E_cex Vector of sizes, one for each value of E
 ##' @param portrait dummy argument that allows `...` to be passed from
 ##'   `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.
+##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
 ##' @return Figure in the current plot enivironment
 ##' @export
 ##' @author Andrew Edwards
@@ -223,7 +230,8 @@ plot_pred_obs <- function(E_res,
                                      "black"),
                           last.time.to.plot = NULL,
                           E_cex = seq(1.7, 0.6, length = 5),
-                          portrait = NULL
+                          portrait = NULL,
+                          label = NULL
                           ){
 
   stopifnot("Need more distinct colours in E_cols"=
@@ -254,6 +262,13 @@ plot_pred_obs <- function(E_res,
        ylim = axes.range,
        asp = 1,
        type = "n")
+
+  if(!is.null(label)){
+    mtext(text = label,
+          at = axes.range[1],
+          adj = 1)
+  }
+
   abline(0, 1, col="grey")
   leg = vector()
 
@@ -301,6 +316,7 @@ plot_pred_obs <- function(E_res,
 ##' @param pt.type `type` value for `points()`
 ##' @param par.mgp `par("mgp")` values
 ##' @param add.legend logical, whether to add legend to the `N[t]` time series
+##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
@@ -321,7 +337,8 @@ plot_time_series <- function(values,
                              start = 1, # may not work for others
                              pt.type = "p",
                              par.mgp = c(1.5, 0.5, 0),
-                             add.legend = TRUE
+                             add.legend = TRUE,
+                             label = NULL
                              ){
   stopifnot(start == 1)
 
@@ -386,6 +403,13 @@ plot_time_series <- function(values,
              cex = 1,
              bty = "n")
     }
+
+    if(!is.null(label)){
+      mtext(text = label,
+            at = 0,
+            adj = 1)
+    }
+
   } else {
     XtLoc = -0.05 * max(t.axis.range)  # location to plot Xt on a vertical line,
     Xt.max.abs = max(abs( range(values[start:max_time],
@@ -401,6 +425,12 @@ plot_time_series <- function(values,
          ylim = Xt.axes.range,
          type = "n")                           # empty plot
     abline(v = 0.5*XtLoc, col="black")
+
+    if(!is.null(label)){
+      mtext(text = label,
+            at = XtLoc,
+            adj = 1)
+    }
   }
 
   iii = last.time.to.plot             # use iii since simpler
@@ -448,6 +478,7 @@ plot_time_series <- function(values,
 ##' @param early.col colour in which to plot earlier time step points
 ##' @param early.col.lines colour in which to plot earlier time step points
 ##' @param late.num final number of `N[t]` time steps to plot in a different colour
+##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
@@ -467,7 +498,8 @@ plot_phase_2d <- function(values,
                           late.col = "red",
                           early.col = "black",
                           early.col.lines = "lightgrey",
-                          late.num = 3
+                          late.num = 3,
+                          label = NULL
                           ){
 
   if(is.na(axis.range)) {
@@ -525,6 +557,12 @@ plot_phase_2d <- function(values,
          ylim = axis.range,
          type = "n")
     values.to.plot <- values[start:last.time.to.plot]
+  }
+
+  if(!is.null(label)){
+    mtext(text = label,
+          at = axis.range[1],
+          adj = 1)
   }
 
   if(cobwebbing) abline(0, 1, col="darkgrey")
@@ -638,7 +676,7 @@ plot_phase_2d <- function(values,
 ##' @param par.mgp `par(mgp)` to reset to after plotting 3d figure
 ##' @param tstar focal point to highlight (for `pbsEDM` vignette)
 ##' @param angle_view manually specify the angle for viewing (to rotate plot)
-##'
+##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
@@ -667,7 +705,8 @@ plot_phase_3d <- function(obj,
                           par.mar.phase = c(3, 0, 1, 0),  # to reset for normal figs
                           par.mgp = c(1.5, 0.5, 0),
                           tstar = NA,
-                          angle_view = NA
+                          angle_view = NA,
+                          label = NULL
                           ){
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$X_observed, na.rm = TRUE)),
@@ -745,6 +784,14 @@ plot_phase_3d <- function(obj,
 #                              pbsLag(obj$X_observed,
 #                                     1)[start:iii],  # "Y_tmin1"
   #                              pbsLag(obj$X_observed)[start:iii])  # "Y_t"
+
+  if(!is.null(label)){
+    legend("topleft",
+           bty = "n",
+           legend = label,
+           cex = 1.5)    # Plotting label as a fake legend ensures it's in the
+                         # same spot for the animation
+  }
 
   if(!all(is.na(values.to.plot))){
     proj.pts = scat$xyz.convert(pbsLag(values.to.plot,

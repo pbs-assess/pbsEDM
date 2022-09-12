@@ -16,7 +16,8 @@ plot_phase_2d(
   late.col = "red",
   early.col = "black",
   early.col.lines = "lightgrey",
-  late.num = 3
+  late.num = 3,
+  label = NULL
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 \item{early.col.lines}{colour in which to plot earlier time step points}
 
 \item{late.num}{final number of `N[t]` time steps to plot in a different colour}
+
+\item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
 }
 \value{
 Plots figure to current device

@@ -18,7 +18,8 @@ plot_time_series(
   start = 1,
   pt.type = "p",
   par.mgp = c(1.5, 0.5, 0),
-  add.legend = TRUE
+  add.legend = TRUE,
+  label = NULL
 )
 }
 \arguments{
@@ -50,6 +51,8 @@ final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 \item{par.mgp}{`par("mgp")` values}
 
 \item{add.legend}{logical, whether to add legend to the `N[t]` time series}
+
+\item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
 }
 \description{
 First value must be `t=1`. For non-differenced values `N_t`, shows the time

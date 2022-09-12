@@ -23,7 +23,8 @@ plot_phase_3d(
   par.mar.phase = c(3, 0, 1, 0),
   par.mgp = c(1.5, 0.5, 0),
   tstar = NA,
-  angle_view = NA
+  angle_view = NA,
+  label = NULL
 )
 }
 \arguments{
@@ -67,6 +68,8 @@ colour; not showing `N_t` here but keeping consistency with other plots}
 \item{tstar}{focal point to highlight (for `pbsEDM` vignette)}
 
 \item{angle_view}{manually specify the angle for viewing (to rotate plot)}
+
+\item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
 }
 \value{
 Plots figure to current device
