@@ -194,12 +194,13 @@ plot_rho_Evec <- function(E_res,
 ##' objects, for various values of `E`
 ##'
 ##' Plot the predicted versus observed values of `Y_t` for various values
-##' of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
+##' of `E`, using the output (a list of `pbsEDM` objects) from
+##' `pbsEDM_Evec()`. Each value of `t` corresponds to focal point `t* = t - 1`.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
 ##' @param E_components How many of the first E_res components to show
 ##' @param E_cols Vector of colours, one for each value of E
-##' @param last.time.to.plot Last time value of `N_t` to use when plotting.
+##' @param last.time.to.plot Last time value of `t` to use when plotting.
 ##' @param E_cex Vector of sizes, one for each value of E
 ##' @param portrait dummy argument that allows `...` to be passed from
 ##'   `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.
@@ -267,8 +268,8 @@ plot_pred_obs <- function(E_res,
   leg = vector()
 
   for(j in 1:E_components){
-    points(E_res[[j]]$X_observed[1:(last.time.to.plot-1)],
-           E_res[[j]]$X_forecast[1:(last.time.to.plot-1)],
+    points(E_res[[j]]$X_observed[1:last.time.to.plot],
+           E_res[[j]]$X_forecast[1:last.time.to.plot],
            pch = 16, # could note the final one differently (but not a star,
                      # since that's last N[t] not Y[t])
            col = E_cols[j],
