@@ -16,7 +16,7 @@ landscape (2x3, filled columnwise) for presentations.}
 \item{...}{additional arguments to be passed onto other plotting functions,
 in particular `last.time.to.plot` to plot only up to that time step (to
 loop through in a movie), and late.num to plot the final number of time
-steps in a different colour}
+steps in a different colour, or label.cex for (a) etc. label sizes.}
 }
 \value{
 Five panels in 2x3 or 3x2 format, in current plot environment

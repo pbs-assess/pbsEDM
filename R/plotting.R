@@ -42,7 +42,7 @@ gets3dusr = function(s3dobject)
 ##' @param ... additional arguments to be passed onto other plotting functions,
 ##'   in particular `last.time.to.plot` to plot only up to that time step (to
 ##'   loop through in a movie), and late.num to plot the final number of time
-##'   steps in a different colour
+##'   steps in a different colour, or label.cex for (a) etc. label sizes.
 ##' @return Five panels in 2x3 or 3x2 format, in current plot environment
 ##' @export
 ##' @author Andrew Edwards
@@ -104,26 +104,17 @@ plot.pbsEDM = function(x,
 ##' of `E`. See vignette "Analyse a simple time series" for full details.
 ##'
 ##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
-##' @param ... extra arguments to `plot.pbsEDM()`
+##' @param ... extra arguments to `plot.pbsEDM()`, such as label.cex
 ##' @return Six-panel figure in current plot environment
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
 ##' \donttest{
 ##'   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
-##'   plot_pbsEDM_Evec(aa_Evec)
+##'   plot_pbsEDM_Evec(aa_Evec, portrait = FALSE)
 ##'
 ##' # For manuscript figures:
 ##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##' postscript("six_panels_13.eps",   # 13 is last.time.to.plot
-##'             height = 5.36,
-##'             width = 9,
-##'             horizontal=FALSE,
-##'             paper="special")
-##' plot_pbsEDM_Evec(E_results,
-##'     last.time.to.plot = 13,
-##'     portrait = FALSE)
-##' dev.off()
 ##'
 ##' postscript("six_panels_all.eps",
 ##'            height = 5.36,
@@ -213,6 +204,7 @@ plot_rho_Evec <- function(E_res,
 ##' @param portrait dummy argument that allows `...` to be passed from
 ##'   `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.
 ##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
+##' @param label.cex size of label annotation
 ##' @return Figure in the current plot enivironment
 ##' @export
 ##' @author Andrew Edwards
@@ -231,7 +223,8 @@ plot_pred_obs <- function(E_res,
                           last.time.to.plot = NULL,
                           E_cex = seq(1.7, 0.6, length = 5),
                           portrait = NULL,
-                          label = NULL
+                          label = NULL,
+                          label.cex = 0.7
                           ){
 
   stopifnot("Need more distinct colours in E_cols"=
@@ -266,7 +259,8 @@ plot_pred_obs <- function(E_res,
   if(!is.null(label)){
     mtext(text = label,
           at = axes.range[1],
-          adj = 1)
+          adj = 1,
+          cex = label.cex)
   }
 
   abline(0, 1, col="grey")
@@ -317,6 +311,7 @@ plot_pred_obs <- function(E_res,
 ##' @param par.mgp `par("mgp")` values
 ##' @param add.legend logical, whether to add legend to the `N[t]` time series
 ##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
+##' @param label.cex size of label annotation
 ##' @export
 ##' @author Andrew Edwards
 ##' @examples
@@ -338,7 +333,8 @@ plot_time_series <- function(values,
                              pt.type = "p",
                              par.mgp = c(1.5, 0.5, 0),
                              add.legend = TRUE,
-                             label = NULL
+                             label = NULL,
+                             label.cex = 0.7
                              ){
   stopifnot(start == 1)
 
@@ -407,7 +403,8 @@ plot_time_series <- function(values,
     if(!is.null(label)){
       mtext(text = label,
             at = 0,
-            adj = 1)
+            adj = 1,
+            cex = label.cex)
     }
 
   } else {
@@ -429,7 +426,8 @@ plot_time_series <- function(values,
     if(!is.null(label)){
       mtext(text = label,
             at = XtLoc,
-            adj = 1)
+            adj = 1,
+            cex = label.cex)
     }
   }
 
@@ -499,7 +497,8 @@ plot_phase_2d <- function(values,
                           early.col = "black",
                           early.col.lines = "lightgrey",
                           late.num = 3,
-                          label = NULL
+                          label = NULL,
+                          label.cex = 0.7
                           ){
 
   if(is.na(axis.range)) {
@@ -562,7 +561,8 @@ plot_phase_2d <- function(values,
   if(!is.null(label)){
     mtext(text = label,
           at = axis.range[1],
-          adj = 1)
+          adj = 1,
+          cex = label.cex)
   }
 
   if(cobwebbing) abline(0, 1, col="darkgrey")
@@ -677,6 +677,7 @@ plot_phase_2d <- function(values,
 ##' @param tstar focal point to highlight (for `pbsEDM` vignette)
 ##' @param angle_view manually specify the angle for viewing (to rotate plot)
 ##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
+##' @param label.cex size of label annotation
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards
@@ -706,7 +707,8 @@ plot_phase_3d <- function(obj,
                           par.mgp = c(1.5, 0.5, 0),
                           tstar = NA,
                           angle_view = NA,
-                          label = NULL
+                          label = NULL,
+                          label.cex = 0.7
                           ){
   if(is.na(axis.range)) {
     axis.range <- c(min(0, min(obj$X_observed, na.rm = TRUE)),
@@ -786,11 +788,10 @@ plot_phase_3d <- function(obj,
   #                              pbsLag(obj$X_observed)[start:iii])  # "Y_t"
 
   if(!is.null(label)){
-    legend("topleft",
+    legend("topleft",    # Fake legend ensures it's fixed in the animation
            bty = "n",
            legend = label,
-           cex = 1.5)    # Plotting label as a fake legend ensures it's in the
-                         # same spot for the animation
+           cex = label.cex * 1.5) # Needs to be larger for 3-d
   }
 
   if(!all(is.na(values.to.plot))){

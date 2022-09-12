@@ -12,7 +12,8 @@ plot_pred_obs(
   last.time.to.plot = NULL,
   E_cex = seq(1.7, 0.6, length = 5),
   portrait = NULL,
-  label = NULL
+  label = NULL,
+  label.cex = 0.7
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ plot_pred_obs(
 `plot_pbsEDM_Evec()`, from which we want `last.time.to.plot`.}
 
 \item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
+
+\item{label.cex}{size of label annotation}
 }
 \value{
 Figure in the current plot enivironment

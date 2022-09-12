@@ -24,7 +24,8 @@ plot_phase_3d(
   par.mgp = c(1.5, 0.5, 0),
   tstar = NA,
   angle_view = NA,
-  label = NULL
+  label = NULL,
+  label.cex = 0.7
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ colour; not showing `N_t` here but keeping consistency with other plots}
 \item{angle_view}{manually specify the angle for viewing (to rotate plot)}
 
 \item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
+
+\item{label.cex}{size of label annotation}
 }
 \value{
 Plots figure to current device

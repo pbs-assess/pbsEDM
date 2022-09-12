@@ -11,7 +11,7 @@ plot_pbsEDM_Evec(E_res, ...)
 \arguments{
 \item{E_res}{List of `pbsEDM` objects as output from `pbsEDM_Evec()`}
 
-\item{...}{extra arguments to `plot.pbsEDM()`}
+\item{...}{extra arguments to `plot.pbsEDM()`, such as label.cex}
 }
 \value{
 Six-panel figure in current plot environment
@@ -25,19 +25,10 @@ of `E`. See vignette "Analyse a simple time series" for full details.
 \examples{
 \donttest{
   aa_Evec <- pbsEDM_Evec(NY_lags_example$N_t)
-  plot_pbsEDM_Evec(aa_Evec)
+  plot_pbsEDM_Evec(aa_Evec, portrait = FALSE)
 
 # For manuscript figures:
 E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-postscript("six_panels_13.eps",   # 13 is last.time.to.plot
-            height = 5.36,
-            width = 9,
-            horizontal=FALSE,
-            paper="special")
-plot_pbsEDM_Evec(E_results,
-    last.time.to.plot = 13,
-    portrait = FALSE)
-dev.off()
 
 postscript("six_panels_all.eps",
            height = 5.36,

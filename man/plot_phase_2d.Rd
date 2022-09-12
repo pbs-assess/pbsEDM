@@ -17,7 +17,8 @@ plot_phase_2d(
   early.col = "black",
   early.col.lines = "lightgrey",
   late.num = 3,
-  label = NULL
+  label = NULL,
+  label.cex = 0.7
 )
 }
 \arguments{
