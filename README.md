@@ -5,12 +5,12 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/luke-a-rogers/pbsEDM/workflows/R-CMD-check/badge.svg)](https://github.com/luke-a-rogers/pbsEDM/actions)
+[![R-CMD-check](https://github.com/pbs-assess/pbsEDM/workflows/R-CMD-check/badge.svg)](https://github.com/pbs-assess/pbsEDM/actions)
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Coverage
-status](https://codecov.io/gh/luke-a-rogers/pbsEDM/branch/master/graph/badge.svg)](https://codecov.io/github/luke-a-rogers/pbsEDM?branch=master)
+status](https://codecov.io/gh/pbs-assess/pbsEDM/branch/master/graph/badge.svg)](https://codecov.io/github/pbs-assess/pbsEDM?branch=master)
 <!-- badges: end -->
 
 An R package to implement the delay embedding methods of Empirical
@@ -19,7 +19,7 @@ Dynamic Modeling
 ## Installation
 
 ``` r
-devtools::install_github("luke-a-rogers/pbsEDM")
+devtools::install_github("pbs-assess/pbsEDM")
 ```
 
 ## Functionality
