@@ -1239,7 +1239,7 @@ plot_explain_edm_movie_save <- function(E_res,
                                         ...){
   pdf(pdf.filename,
       height = 5.36,
-      width = 9)
+      width = 5.36)
 
   plot_explain_edm_movie(E_res,
                          tstar = tstar)
