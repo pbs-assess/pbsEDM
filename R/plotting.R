@@ -1173,9 +1173,9 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main =
-                   as.expression(bquote("... and take a weighted average of the " *
-                                        italic(Y) [t] * " values to give " *
-                                        italic(Y) [ .(tstar+1)] * " which ...")),
+                   as.expression(bquote("... and take a weighted average of " *
+                                        italic(Y) [t] * " to give " *
+                                        italic(Y) [ .(tstar+1)])),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
@@ -1199,7 +1199,7 @@ plot_explain_edm_movie <- function(obj,
 
   plot_explain_edm(obj,
                    main = paste0(
-                     "... is hopefully close to the true known value."),
+                     "... which is hopefully close to the true known value."),
                    tstar.pch = 19,
                    tstar.cex = 1.2,
                    neigh.plot = TRUE,
