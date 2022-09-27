@@ -94,7 +94,7 @@ plot.pbsEDM = function(x,
   invisible()
 }
 
-##' Plot output from `pbsEDM_Evec()` as six panel plot, with data showns the
+##' Plot output from `pbsEDM_Evec()` as six panel plot, with data shown the
 ##'  same as for `plot.pbsEDM()` and sixth panel with predictions vs observation
 ##'  for each `E`
 ##'
@@ -136,6 +136,39 @@ plot_pbsEDM_Evec <- function(E_res,
                 label = "(f)",
                 ...)
   invisible()
+}
+
+
+##' Plot output from `plot_pbsEDM_Evec()` as six panel plot saved as
+##'  encapsulated postscript file for manuscript.
+##'
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param eps.filename filename to save to
+##' @param ... extra arguments to `plot_pbsEDM_Evec()`.
+##' @return Saved .eps file to use in manuscript
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##' plot_pbsEDM_Evec_figure(E_results)
+##' }
+plot_pbsEDM_Evec_figure <- function(E_res,
+                                    eps.filename = "six_panels_all.eps",
+                                    ...){
+
+  postscript(eps.filename,
+             height = 5.36,
+             width = 9,
+             horizontal=FALSE,
+             paper="special")
+
+  plot_pbsEDM_Evec(E_res,
+                   last.time.to.plot = NULL, # to automatically plot all
+                   portrait = FALSE,
+                   ...)
+
+  dev.off()
 }
 
 ##' Plot rho versus `E` for output from `pbsEDM_Evec()`

@@ -74,7 +74,7 @@ theta_max
 ```
 
 We then test if this is signficantly different to the linear system with $\theta
-= 0$, using the surrogate test from TODO: Need Ref in manuscript
+= 0$:
 ```{r, pbsSmap3}
 rho_vec[1]     # rho at theta=0
 p_val <- smap_surrogates(input,
@@ -311,6 +311,30 @@ Note that the estimates of $\hat{Y}_{94}$ from `rEDM` and from `pbsEDM` with the
 dummy data added do not match exactly
 because the dummy $Y_t$ values create extra ${\bf x}_t$ points, which affect the mean of the
 distances of all points from ${\bf x}_{93}$.
+
+## Check S-map equations in Supp (maybe DELETE)
+
+```{r, checking}
+t_star = 99
+dbar <- mean(Smap_optimal$X_distance[99,] , na.rm=TRUE)   # eqn S.15
+theta_max
+ui <- exp(- theta_max * Smap_optimal$neighbour_distance[t_star, ] / dbar)   # neighbours are sorted
+Ytstarplus1 <- sum(Smap_optimal$projected_value[t_star+1, ] * ui, na.rm=TRUE)/
+  sum(ui, na.rm=TRUE) # not exactly sure here, indexing may be off
+Ytstarplus1
+Smap_optimal$X_forecast[t_star+1]
+
+# Don't match. Manually do the projected values and remove the ineligible
+# neighbours (d'oh, forgot that - actually it's automatic).
+ui_unsorted <- exp(- theta_max * Smap_optimal$X_distance[t_star, ] / dbar)   # neighbours are unsorted
+ui_unsorted[c(1, 2, t_star, t_star+1, t_star+2)] <- NA   # need more if different t*
+projected_unsorted <- c(Smap_optimal$X_observed[-1], NA)
+Ytstarplus1_unsorted <- sum(ui_unsorted * projected_unsorted, na.rm=TRUE) /
+  sum(ui, na.rm = TRUE)   # NA's take care of ineligible neighbours - for t*=99
+                          # kind of automatic
+Ytstarplus1_unsorted      # same as above anyway
+Smap_optimal$X_forecast[t_star+1]
+```
 
 ## Test that pbsEDM and rEDM results have not changed
 
