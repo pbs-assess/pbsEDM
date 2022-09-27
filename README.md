@@ -22,13 +22,29 @@ Dynamic Modeling
 devtools::install_github("pbs-assess/pbsEDM")
 ```
 
-## Functionality
+## To reproduce the figures for the manuscript submitted to Methods in Ecology and Evolution
 
-TBA
+Figure 1 - 
 
-## Examples
+Figure 2 - 
 
-TBA
+Figure 3 -
+
+Figure 4 -
+
+Animated figures for the Appendix:
+
+Figure S.1 - 
+
+Figure S.2 - 
+
+```E_results <- pbsEDM_Evec(NY_lags_example$N_t)```
+
+```plot_explain_edm_movie_save(E_results[[1]])```
+
+Figure S.3 - 
+
+```plot_explain_edm_all_tstar_movie_save(E_results[[1]])```
 
 ## Workflow During Development
 

@@ -865,6 +865,8 @@ plot_phase_3d <- function(obj,
 ##' @param legend.plot if TRUE then do a legend and print value of `t*`
 ##' @param legend.inc.rEDM if TRUE then include `rEDM` in the legend (not wanted
 ##'   for first manuscript Figure).
+##' @param legend.bg background colour for legend (default white overrides the
+##'   grey lines, seems better)
 ##' @param font.main font for title, can't have bold with subscripts it seems,
 ##'   so set this for all plots.
 ##' @return single plot that explains one part of EDM, link together in a movie
@@ -922,6 +924,7 @@ plot_explain_edm <- function(obj,
                              true.val = FALSE,
                              legend.plot = TRUE,
                              legend.inc.rEDM = TRUE,
+                             legend.bg = "white",
                              font.main = 1){
   if(pred.rEDM){
     testthat::expect_equal(obj$X_observed, NY_lags_example$Y_t)
@@ -1063,7 +1066,8 @@ plot_explain_edm <- function(obj,
                    tstar.col,
                    "red",
                    "darkgreen"),
-             cex=0.85)} else {
+             cex=0.85,
+             bg = legend.bg)} else {
                         legend("bottomleft",
                                pch=c(tstar.pch, 19, 8, 1),
                                leg=c(expression(italic(t) * "*"),
@@ -1081,7 +1085,8 @@ plot_explain_edm <- function(obj,
                                      "red",
                                      tstar.col,
                                      "darkgreen"),
-                               cex=0.85)
+                               cex=0.85,
+                               bg = legend.bg)
                       }
 
     legend("topleft",
@@ -1238,7 +1243,7 @@ plot_explain_edm_movie_save <- function(E_res,
                                         tstar = 39,
                                         ...){
   pdf(pdf.filename,
-      height = 5.36,
+      height = 6,
       width = 5.36)
 
   plot_explain_edm_movie(E_res,
@@ -1268,8 +1273,8 @@ plot_explain_edm_all_tstar_movie_save <- function(E_res,
                                                     "explain_EDM_all_tstar_movie.pdf",
                                                   ...){
   pdf(pdf.filename,
-      height = 5.36,
-      width = 9)
+      height = 6,
+      width = 5.36)
 
   for(tstar_val in 2:(nrow(E_res$X) - 1)){    # For E=2
     plot_explain_edm(E_res,
