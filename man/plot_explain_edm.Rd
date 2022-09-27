@@ -21,6 +21,7 @@ plot_explain_edm(
   true.val = FALSE,
   legend.plot = TRUE,
   legend.inc.rEDM = TRUE,
+  legend.bg = "white",
   font.main = 1
 )
 }
@@ -61,6 +62,9 @@ may not work}
 \item{legend.inc.rEDM}{if TRUE then include `rEDM` in the legend (not wanted
 for first manuscript Figure).}
 
+\item{legend.bg}{background colour for legend (default white overrides the
+grey lines, seems better)}
+
 \item{font.main}{font for title, can't have bold with subscripts it seems,
 so set this for all plots.}
 }
@@ -71,8 +75,9 @@ single plot that explains one part of EDM, link together in a movie
 \description{
 Highlights a point to be projected, its nearest `E+1` neighbours, and then
 draw arrows to show where they go and so where the projection goes. Very
-useful for understanding and checking what EDM is doing. Call this multiple
-times using TODO to make a movie. Type `plot_explain_edm_movie` for example calls.
+useful for understanding and checking what EDM is doing. Type
+`plot_explain_edm_movie` for example calls, and use that function to save
+the movie. Use `plot_explain_edm_figure()` for single figure for manuscript.
 }
 \examples{
 \donttest{
@@ -88,26 +93,6 @@ times using TODO to make a movie. Type `plot_explain_edm_movie` for example call
                    neigh.plot = TRUE,
                    neigh.proj = TRUE)
 # Type plot_explain_edm_movie to see other examples
-# For manuscript:
-E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-postscript("explain_EDM.eps",
-           height = 6.5,
-           width = 6.5,
-           horizontal=FALSE,
-           paper="special")
-
-plot_explain_edm(E_results[[1]], tstar = 39,
-                 main = "",
-                 tstar.pch = 19,
-                 tstar.cex = 1.2,
-                 neigh.plot = TRUE,
-                 neigh.proj = TRUE,
-                 pred.plot = TRUE,
-                 pred.rEDM = FALSE,
-                 true.val = TRUE,
-                 legend.inc.rEDM = FALSE)
-dev.off()
-expect_equal(aa, E_results[[1]])  # is TRUE
 }
 }
 \author{

@@ -842,8 +842,9 @@ plot_phase_3d <- function(obj,
 ##'
 ##' Highlights a point to be projected, its nearest `E+1` neighbours, and then
 ##' draw arrows to show where they go and so where the projection goes. Very
-##' useful for understanding and checking what EDM is doing. Call this multiple
-##' times using TODO to make a movie. Type `plot_explain_edm_movie` for example calls.
+##' useful for understanding and checking what EDM is doing. Type
+##' `plot_explain_edm_movie` for example calls, and use that function to save
+##' the movie. Use `plot_explain_edm_figure()` for single figure for manuscript.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param tstar the time index, `t*` for `x(t*)` of the target point for which to make a
@@ -887,26 +888,6 @@ plot_phase_3d <- function(obj,
 ##'                    neigh.plot = TRUE,
 ##'                    neigh.proj = TRUE)
 ##' # Type plot_explain_edm_movie to see other examples
-##' # For manuscript:
-##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##' postscript("explain_EDM.eps",
-##'            height = 6.5,
-##'            width = 6.5,
-##'            horizontal=FALSE,
-##'            paper="special")
-##'
-##' plot_explain_edm(E_results[[1]], tstar = 39,
-##'                  main = "",
-##'                  tstar.pch = 19,
-##'                  tstar.cex = 1.2,
-##'                  neigh.plot = TRUE,
-##'                  neigh.proj = TRUE,
-##'                  pred.plot = TRUE,
-##'                  pred.rEDM = FALSE,
-##'                  true.val = TRUE,
-##'                  legend.inc.rEDM = FALSE)
-##' dev.off()
-##' expect_equal(aa, E_results[[1]])  # is TRUE
 ##' }
 plot_explain_edm <- function(obj,
                              tstar,
@@ -1095,6 +1076,44 @@ plot_explain_edm <- function(obj,
            bty = "n")
   }
 }
+
+##' Create and save encapsulated postscript file for manuscript to explain EDM.
+##'
+##' @param E_res List of `pbsEDM` objects as output from `pbsEDM_Evec()`
+##' @param eps.filename filename to save to
+##' @param tstar focal point to make projection from
+##' @return saved .eps file to use in manuscript.
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##' # For manuscript:
+##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
+##' plot_explain_edm_figure(E_results[[1]])
+##' }
+plot_explain_edm_figure <- function(E_res,
+                                    eps.filename = "explain_EDM.eps",
+                                    tstar = 39){
+  postscript(eps.filename,
+             height = 6.5,
+             width = 6.5,
+             horizontal=FALSE,
+             paper="special")
+
+  plot_explain_edm(E_res,
+                   tstar = tstar,
+                   main = "",
+                   tstar.pch = 19,
+                   tstar.cex = 1.2,
+                   neigh.plot = TRUE,
+                   neigh.proj = TRUE,
+                   pred.plot = TRUE,
+                   pred.rEDM = FALSE,
+                   true.val = TRUE,
+                   legend.inc.rEDM = FALSE)
+  dev.off()
+}
+
 
 ##' Create movie to explain EDM
 ##'

@@ -23,7 +23,7 @@ plot_pred_obs(
 
 \item{E_cols}{Vector of colours, one for each value of E}
 
-\item{last.time.to.plot}{Last time value of `N_t` to use when plotting.}
+\item{last.time.to.plot}{Last time value of `t` to use when plotting.}
 
 \item{E_cex}{Vector of sizes, one for each value of E}
 
@@ -39,7 +39,8 @@ Figure in the current plot enivironment
 }
 \description{
 Plot the predicted versus observed values of `Y_t` for various values
-of `E`, using the output (a list of `pbsEDM` objects) from `pbsEDM_Evec()`.
+of `E`, using the output (a list of `pbsEDM` objects) from
+`pbsEDM_Evec()`. Each value of `t` corresponds to focal point `t* = t - 1`.
 }
 \examples{
 \donttest{
