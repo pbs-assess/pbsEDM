@@ -535,6 +535,7 @@ plot_time_series <- function(values,
 ##' @param early.col.lines colour in which to plot earlier time step points
 ##' @param late.num final number of `N[t]` time steps to plot in a different colour
 ##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
+##' @param label.cex size of label annotation
 ##' @return Plots figure to current device
 ##' @export
 ##' @author Andrew Edwards

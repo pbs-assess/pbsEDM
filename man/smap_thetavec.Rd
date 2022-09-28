@@ -13,6 +13,8 @@ covariate time series.}
 \item{lags}{A list of named integer vectors specifying the lags to use for
 each time series in \code{N}.}
 
+\item{theta_vec}{Vector of theta values to use.}
+
 \item{...}{Further options to pass to `smap_efficient()`. In particular
 `first_difference` may need to be TRUE, the default is FALSE.}
 }

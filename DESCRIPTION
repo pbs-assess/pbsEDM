@@ -14,7 +14,7 @@ Authors@R:
              email = "andrew.edwards@dfo-mpo.gc.ca",
              comment = c(ORCID = "0000-0003-2749-8198"))
     )
-Description: The 'pbsEDM' package implements delay-embedding methods of Empirical Dynamic Modeling for nonlinear time-series analysis.
+Description: The 'pbsEDM' package implements some methods of Empirical Dynamic Modeling for nonlinear time-series analysis.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

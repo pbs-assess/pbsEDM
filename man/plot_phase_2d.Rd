@@ -48,6 +48,8 @@ final Y[t] used will be Y[t-1] (since Y[t] uses N[t+1])}
 \item{late.num}{final number of `N[t]` time steps to plot in a different colour}
 
 \item{label}{label to annotate plot, such as `(a)` etc. for six-panel figure}
+
+\item{label.cex}{size of label annotation}
 }
 \value{
 Plots figure to current device
