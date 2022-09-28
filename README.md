@@ -24,7 +24,6 @@ devtools::install_github("pbs-assess/pbsEDM")
 
 ## To reproduce and save the figures for the manuscript submitted to Methods in Ecology and Evolution
 
-
 ```E_results <- pbsEDM_Evec(NY_lags_example$N_t)```
 
 Figure 1 - ```plot_pbsEDM_Evec_save(E_results)```
@@ -39,7 +38,7 @@ Animated figures for the Appendix:
 
 Figure S.1 - 
 
-```plot_pbsEDM_Evec_movie(E_results)```
+```plot_pbsEDM_Evec_movie_save(E_results)```
 
 Figure S.2 - 
 
