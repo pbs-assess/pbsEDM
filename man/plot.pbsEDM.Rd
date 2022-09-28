@@ -27,8 +27,7 @@ and `Y_t` vs `Y_{t-1}`, and 3d phase plot of `Y_t` vs `Y_{t-1}` vs `Y_{t-2}`.
 See vignette "Analyse a simple time series".
 Only working if `N$N_t` values are in there (needs another switch if
 not). And very likely only works for univariate time series for now, not
-pred-prey for example. TODO, update if necessary. Works on `NY_lags_example`
-but likely need to generalise.
+pred-prey for example.
 }
 \examples{
 \donttest{

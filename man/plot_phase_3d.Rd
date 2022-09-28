@@ -66,7 +66,7 @@ colour; not showing `N_t` here but keeping consistency with other plots}
 
 \item{par.mgp}{`par(mgp)` to reset to after plotting 3d figure}
 
-\item{tstar}{focal point to highlight (for `pbsEDM` vignette)}
+\item{tstar}{focal point to highlight (for `pbsSmap` vignette)}
 
 \item{angle_view}{manually specify the angle for viewing (to rotate plot)}
 
@@ -80,7 +80,8 @@ Plots figure to current device
 \description{
 Shows the first-differenced values in three-dimensional phase space, as
   points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
-  to the next point in the time series.
+  to the next point in the time series. Can also highlight a $t^*$ value and
+  the points that should be excluded from the library of nearest neighbours.
 }
 \examples{
 \donttest{

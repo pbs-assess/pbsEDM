@@ -52,8 +52,7 @@ projection from}
 \item{pred.plot}{if TRUE then highlight forecasted value `x(t*+1)`}
 
 \item{pred.rEDM}{if TRUE then show predictions from `rEDM` for
-`NY_lags_example` saved values; obj must be `NY_lags_example` TODO do a test as
-may not work}
+`NY_lags_example` saved values; obj must be `NY_lags_example`}
 
 \item{true.val}{if TRUE then plot the true value of `x(t*+1)`}
 
