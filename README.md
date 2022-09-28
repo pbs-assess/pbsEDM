@@ -14,8 +14,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 
 <!-- badges: end -->
 
-An R Package to Implement some of the Delay Embedding Methods of Empirical
-Dynamic Modelling
+An R package to implement some of the methods of empirical dynamic modelling
 
 The name `pbsEDM` amalgamates our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with Empirical Dynamic Modelling (EDM), the focus of the package. The package was developed in conjuction with a manuscript currently being submitted. 
 
