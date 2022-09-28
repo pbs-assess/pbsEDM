@@ -30,11 +30,12 @@ instead of using the tibble.
 
 TODO: Change calc2 to something else, see other vignettes.
 
+This vignette shows how to use the simplex algorithm in `pbsEDM` to analyse a
+simple time series, and shows resulting graphics that help understand the
+algorithm (as described in the manuscript).
 The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
-$N_t$, which has column name `N_t`. See `?NY_lags_example` for full details, and
-the `inclusion_issue.Rmd` vignette for comparison our step-by-step calculations
-with results from the functions in `pbsEDM` and `rEDM`.
+$N_t$, which has column name `N_t`. See `?NY_lags_example` for full details.
 
 <!-- , the lagged value $N(t-1)$ as `Ntmin1`, and first difference
 $X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged
@@ -42,10 +43,14 @@ values). Also has results for embedding dimension 2, using both `rEDM` and Andy'
 function `EDM_pred_E_2()`.-->
 
 
-## Analyse with pbsEDM code
+## Plot the data in different ways
 
-Use only the `N_t` column from `NY_lags_example` and apply EDM
-calculations using lags of 0 and 1 ($E = 2$) with first differencing:
+We want to plot the data in different ways, for which it is easiest to first run
+the simplex algorithm (to create a `pbsEDM` object for which code automatically
+makes the figures).
+
+Use only the `N_t` column from `NY_lags_example` and apply the simplex algorithm
+using lags of 0 and 1 ($E = 2$) with first differencing:
 ```{r calc2}
 calc2 <- pbsEDM(NY_lags_example,
                 lags = list(N_t = c(0:1)),
@@ -60,9 +65,9 @@ For now we'll just use that to plot the data in various useful ways:
 plot(calc2,
      portrait = FALSE)
 ```
-The figure shows, before doing EDM, the data in various ways: time series of $N_t$ and $Y_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $Y_t$ vs $Y_{t-1}$ (as used for $E=2$) and $Y_t$ vs $Y_{t-1}$ vs $Y_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $Y_t$ time series panel, the values of $Y_t$ are also plotted in a vertical line (to the left of $t=0$) which is the one-dimensional equivalent of a phase plot for $E=1$.
+The figure shows, before using the results of the simplex algorithm, the data in various ways: time series of $N_t$ and $Y_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $Y_t$ vs $Y_{t-1}$ (as used for $E=2$) and $Y_t$ vs $Y_{t-1}$ vs $Y_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $Y_t$ time series panel, the values of $Y_t$ are also plotted in a vertical line (to the left of $t=0$) which is the one-dimensional equivalent of a phase plot for $E=1$.
 
-An animated movie (with EDM results) is shown later below; to create the movie
+An animated movie (with simlex results) is shown later below; to create the movie
 without the results use this code in an Rmarkdown document:
 ```{r datamovie, eval=FALSE, echo=TRUE}
 {r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
@@ -139,32 +144,22 @@ E_results[[3]]$results
 The conclusion from the figure would be that $E = 3$ gives the highest value of
 $\rho$, and so is best used for predictions.
 
-## Movie to demonstrate how EDM works
+## Movie to demonstrate the simplex algorithm
 
-Understanding of how EDM works can be enhanced with a specific animated
-example. With $t^* = 39$, shows the idea:
+Understanding of the simplex algorithm can be enhanced with a specific animated
+example. With $t^* = 39$ we have Figure S.2 from the manuscript:
 ```{r EDMmovie, eval = FALSE}
 # ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(calc2,
                        tstar = 39)  # 15 shows the idea nicely
-                                    # 75, 94 seem biggest difference to rEDM
 ```
 ![pbsEDM_movie_tstar_39.gif](pbsEDM_movie_tstar_39.gif).
 
-Now with $t^* = 75$ we get a different answer to that from rEDM (bit hard to see though):
+Such a movie is useful for checking any single prediction. For example, just
+change tstar to 15 (see the technical aside above to make a new movie):
 ```{r EDMmovie2, eval = FALSE}
-# ```{r EDMmovie2, animation.hook = 'gifski', interval = 5}
+# ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(calc2,
-                       tstar = 75)
+                       tstar = 15)  # 15 shows the idea nicely
 ```
-![pbsEDM_movie_tstar_75.gif](pbsEDM_movie_tstar_75.gif).
-
-Similarly for $t^* = 94$:
-```{r EDMmovie3, eval = FALSE}
-# ```{r EDMmovie3, animation.hook = 'gifski', interval = 5}
-plot_explain_edm_movie(calc2,
-                       tstar = 94)
-```
-![pbsEDM_movie_tstar_94.gif](pbsEDM_movie_tstar_94.gif).
-
-Such a movie is useful for checking any single prediction.
+![pbsEDM_movie_tstar_15.gif](pbsEDM_movie_tstar_15.gif).

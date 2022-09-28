@@ -22,11 +22,12 @@ The name `pbsEDM` amalgamates our workplace, the Pacific Biological Station (PBS
 The package implements the Simplex and S-map algorithms of Empirical Dynamic Modelling, and creates visualisations to help understand the methods, for example:
 
 
-.gif movie to explain
+TODO .gif movie to explain
 
-Users can also analyse their own data. The package should not really be used yet until the associated manuscript is reviewed (and the package will be more understandable in conjunction with the manuscript). However, it can be installed with
+Users can also analyse their own data. The package should not really be used yet until the associated manuscript is reviewed (and the package will be more understandable in conjunction with the manuscript). However, it can be installed directly from GitHub with
 
 ```
+install.packages("devtools")     # One-time installation if you don't already have devtools
 devtools::install_github("pbs-assess/pbsEDM")
 ```
 
@@ -42,11 +43,11 @@ The vignettes are already rendered here:
 The source code written in `Rmarkdown`, the R code that gets extracted from the
   `Rmarkdown` code, and the resulting .html files are all found within your library
   folder (where all your R libraries get saved), in
-  `library\pbsEDM\doc\`.
+  `library\pbsEDM\doc\`. Or you can look at the `vignettes\` folder on GitHub or locally.
 
 ## To reproduce and save the figures for the manuscript
 
-
+Just run the following code. Type the function name (or look at the help with ?<function_name>) to see what it does.
 ```
 E_results <- pbsEDM_Evec(NY_lags_example$N_t)
 
@@ -60,7 +61,7 @@ plot_library_size_save()              # Figure 4
 
 # Animated figures for the Appendix:
 
-plot_pbsEDM_Evec_movie_save(E_results)                # Figure S.1 - 
+plot_pbsEDM_Evec_movie_save(E_results)                # Figure S.1
 
 plot_explain_edm_movie_save(E_results[[1]])           # Figure S.2 
 
