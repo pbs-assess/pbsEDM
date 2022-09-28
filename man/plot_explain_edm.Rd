@@ -77,7 +77,7 @@ Highlights a point to be projected, its nearest `E+1` neighbours, and then
 draw arrows to show where they go and so where the projection goes. Very
 useful for understanding and checking what EDM is doing. Type
 `plot_explain_edm_movie` for example calls, and use that function to save
-the movie. Use `plot_explain_edm_figure()` for single figure for manuscript.
+the movie. Use `plot_explain_edm_save()` for single figure for manuscript.
 }
 \examples{
 \donttest{

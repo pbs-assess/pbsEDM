@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_pbsEDM_Evec}
 \alias{plot_pbsEDM_Evec}
-\title{Plot output from `pbsEDM_Evec()` as six panel plot, with data showns the
+\title{Plot output from `pbsEDM_Evec()` as six panel plot, with data shown the
  same as for `plot.pbsEDM()` and sixth panel with predictions vs observation
  for each `E`}
 \usage{

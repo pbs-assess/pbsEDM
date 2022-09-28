@@ -27,11 +27,11 @@ devtools::install_github("pbs-assess/pbsEDM")
 
 ```E_results <- pbsEDM_Evec(NY_lags_example$N_t)```
 
-Figure 1 - ```plot_pbsEDM_Evec_figure(E_results)```
+Figure 1 - ```plot_pbsEDM_Evec_save(E_results)```
 
-Figure 2 -  ```plot_explain_edm_figure(E_results[[1]])```
+Figure 2 -  ```plot_explain_edm_save(E_results[[1]])```
 
-Figure 3 - ```plot_rho_Evec_figure()```
+Figure 3 - ```plot_rho_Evec_save()```
 
 Figure 4 - ```plot_library_size_save()```
 

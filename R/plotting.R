@@ -151,11 +151,11 @@ plot_pbsEDM_Evec <- function(E_res,
 ##' @examples
 ##' \donttest{
 ##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##' plot_pbsEDM_Evec_figure(E_results)
+##' plot_pbsEDM_Evec_save(E_results)
 ##' }
-plot_pbsEDM_Evec_figure <- function(E_res,
-                                    eps.filename = "six_panels_all.eps",
-                                    ...){
+plot_pbsEDM_Evec_save <- function(E_res,
+                                  eps.filename = "six_panels_all.eps",
+                                  ...){
 
   postscript(eps.filename,
              height = 5.36,
@@ -231,7 +231,7 @@ plot_rho_Evec <- function(E_res,
 ##' @examples
 ##' \donttest{
 ##' }
-plot_rho_Evec_figure <- function(eps.filename = "rho_Evec.eps"){
+plot_rho_Evec_save <- function(eps.filename = "rho_Evec.eps"){
 
   # Use high E values to show the decrease
   E_results_17 <- pbsEDM_Evec(NY_lags_example$N_t,
@@ -903,7 +903,7 @@ plot_phase_3d <- function(obj,
 ##' draw arrows to show where they go and so where the projection goes. Very
 ##' useful for understanding and checking what EDM is doing. Type
 ##' `plot_explain_edm_movie` for example calls, and use that function to save
-##' the movie. Use `plot_explain_edm_figure()` for single figure for manuscript.
+##' the movie. Use `plot_explain_edm_save()` for single figure for manuscript.
 ##'
 ##' @param obj list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param tstar the time index, `t*` for `x(t*)` of the target point for which to make a
@@ -1148,11 +1148,11 @@ plot_explain_edm <- function(obj,
 ##' \donttest{
 ##' # For manuscript:
 ##' E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##' plot_explain_edm_figure(E_results[[1]])
+##' plot_explain_edm_save(E_results[[1]])
 ##' }
-plot_explain_edm_figure <- function(E_res,
-                                    eps.filename = "explain_EDM.eps",
-                                    tstar = 39){
+plot_explain_edm_save <- function(E_res,
+                                  eps.filename = "explain_EDM.eps",
+                                  tstar = 39){
   postscript(eps.filename,
              height = 6.5,
              width = 6.5,
@@ -1386,11 +1386,11 @@ plot_explain_edm_all_tstar_movie_save <- function(E_res,
 ##' @examples
 ##' \donttest{
 ##'   E_results <- pbsEDM_Evec(NY_lags_example$N_t)
-##'   plot_pbsEDM_Evec_movie(E_results)
+##'   plot_pbsEDM_Evec_movie_save(E_results)
 ##' }
-plot_pbsEDM_Evec_movie <- function(E_res,
-                                   pdf.filename = "six_panel_movie.pdf",
-                                   ...){
+plot_pbsEDM_Evec_movie_save <- function(E_res,
+                                        pdf.filename = "six_panel_movie.pdf",
+                                        ...){
   pdf(pdf.filename,
       height = 5.36,
       width = 9)
@@ -1598,7 +1598,6 @@ plot_library_size <- function(T = 50,
 ##' @return saved .eps file to use in manuscript.
 ##' @export
 ##' @author Andrew Edwards
-##' @examples
 plot_library_size_save <- function(eps.filename = "library_size.eps"){
   postscript(eps.filename,
              height = 6,
