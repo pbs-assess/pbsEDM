@@ -28,8 +28,6 @@ some are saved in R/functions, I think just while developing. Move to here when 
 TODO: Could simplify some of this, just save a vector also as `Nt_example`
 instead of using the tibble.
 
-TODO: Change calc2 to something else, see other vignettes.
-
 This vignette shows how to use the simplex algorithm in `pbsEDM` to analyse a
 simple time series, and shows resulting graphics that help understand the
 algorithm (as described in the manuscript).
@@ -51,38 +49,38 @@ makes the figures).
 
 Use only the `N_t` column from `NY_lags_example` and apply the simplex algorithm
 using lags of 0 and 1 ($E = 2$) with first differencing:
-```{r calc2}
-calc2 <- pbsEDM(NY_lags_example,
-                lags = list(N_t = c(0:1)),
-                first_difference = TRUE)
+```{r E2res}
+E_2_res <- pbsEDM(NY_lags_example,
+                  lags = list(N_t = c(0:1)),
+                  first_difference = TRUE)
 ```
 This creates a `pbsEDM` object which is a list of results (see `?pbsEDM` for full details):
 ```{r res}
-summary(calc2)
+summary(E_2_res)
 ```
 For now we'll just use that to plot the data in various useful ways:
 ```{r plotres, fig.width = 9, fig.height = 5.36}
-plot(calc2,
+plot(E_2_res,
      portrait = FALSE)
 ```
 The figure shows, before using the results of the simplex algorithm, the data in various ways: time series of $N_t$ and $Y_t$, plus phase plots of $N_t$ vs $N_{t-1}$, $Y_t$ vs $Y_{t-1}$ (as used for $E=2$) and $Y_t$ vs $Y_{t-1}$ vs $Y_{t-2}$ (as used for $E=3$). The last 3 values of $N_t$ are in red, with the final one as a star. In the $Y_t$ time series panel, the values of $Y_t$ are also plotted in a vertical line (to the left of $t=0$) which is the one-dimensional equivalent of a phase plot for $E=1$.
 
-An animated movie (with simlex results) is shown later below; to create the movie
+An animated movie (with simplex results) is shown later below; to create the movie
 without the results use this code in an Rmarkdown document:
 ```{r datamovie, eval=FALSE, echo=TRUE}
 {r, animation.hook = 'gifski', interval = 1.5, fig.width = 9, fig.height = 5.36}
 ## or for portrait use fig.width = 5.36, fig.height = 8
 for(iiii in 1:length(NY_lags_example$N_t)){
-  plot(calc2,
+  plot(E_2_res,
        last.time.to.plot = iiii,
        portrait = FALSE)
 }
 ```
 
-A lot of information is saved in the `calc2` list. See `?pbsEDM::pbsEDM`
+A lot of information is saved in the `E_2_res` list. See `?pbsEDM::pbsEDM`
 for full details, but, for example, useful summary statistics are given by
 ```{r useful}
-calc2$results
+E_2_res$results
 ```
 giving the embedding dimension $E$ (which is 2 here because we used lags of 0
 and 1), forecast skill (correlation coefficient $\rho$) and root-mean-square
@@ -135,7 +133,7 @@ plot_rho_Evec(E_results)
 
 Each `E_results` component corresponds to a value of $E$, for example
 ```{r usefulE}
-calc2$results
+E_2_res$results
 E_results[[1]]$results
 E_results[[2]]$results
 E_results[[3]]$results
@@ -150,7 +148,7 @@ Understanding of the simplex algorithm can be enhanced with a specific animated
 example. With $t^* = 39$ we have Figure S.2 from the manuscript:
 ```{r EDMmovie, eval = FALSE}
 # ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
-plot_explain_edm_movie(calc2,
+plot_explain_edm_movie(E_2_res,
                        tstar = 39)  # 15 shows the idea nicely
 ```
 ![pbsEDM_movie_tstar_39.gif](pbsEDM_movie_tstar_39.gif).
@@ -159,7 +157,7 @@ Such a movie is useful for checking any single prediction. For example, just
 change tstar to 15 (see the technical aside above to make a new movie):
 ```{r EDMmovie2, eval = FALSE}
 # ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
-plot_explain_edm_movie(calc2,
+plot_explain_edm_movie(E_2_res,
                        tstar = 15)  # 15 shows the idea nicely
 ```
 ![pbsEDM_movie_tstar_15.gif](pbsEDM_movie_tstar_15.gif).
