@@ -1,5 +1,4 @@
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.Rmd no longer generated from README.Rmd. Can edit here. -->
 
 # pbsEDM
 
