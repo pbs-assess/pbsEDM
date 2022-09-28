@@ -35,7 +35,7 @@ devtools::install_github("pbs-assess/pbsEDM")
 The vignettes are already rendered here:
 
 * [analyse_simple_time_series.html](analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
-* [aspect_2.html](aspect_2.html)   TODO
+* [aspect_2.html](aspect_2.html) Demonstration of Aspect 2.
 * [aspect_3_4.html](aspect_3_4.html) TODO
 * [pbsSmap.html](pbsSmap.html) TODO
 

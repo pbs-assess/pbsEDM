@@ -106,7 +106,7 @@ A movie of that is shown here:
 **Brief technical aside for full reproducibility**. That is a saved version to avoid R package building issues.
 To make the movie afresh, install the `gifski` package, delete the first line in
 the next chunk of code,
-uncomment the commented line and save the movie produced here direcly from the html as
+uncomment the commented line and save the movie produced here directly from the html as
 `pbsEDM_movie_1.gif`; see the text above the movie on
 [this page](https://htmlpreview.github.io/?https://raw.githubusercontent.com/andrew-edwards/sizeSpectra/master/doc/MEPS_IBTS_recommend.html)
 if you want more details of this.

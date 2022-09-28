@@ -23,11 +23,11 @@ library(pbsEDM)
 
 ## Introduction
 
-In the manuscript, the library contains the points that can be used to work out
+In the manuscript, the library contains the candidate points that can be used to determine
 the nearest neighbours of the focal point from which we are making a
-prediction. Aspect 2 in the manuscript concerns which points can be considered
+prediction. Aspect 2 concerns which points can be considered
 as being in the library, and which should be excluded. Here we find that
-occasionally `rEDM` inadvertently includes some points that should be excluded.
+occasionally `rEDM` includes some points that should be excluded.
 
 <!-- Simplifying down from inclusion_issue_5.Rmd, which was more for working -->
 <!-- things out. Now have text written up can keep the vignette simpler -->
@@ -43,7 +43,7 @@ input
 ```
 
 Note that `NY_lags_example_3` already contains results. At the end of this
-vignette we verifty that results using `rEDM` or `pbsEDM` have not changed (for
+vignette we verify that results using `rEDM` or `pbsEDM` have not changed (for
 example due to package updates) from those saved in `NY_lags_example_3`.
 
 We will do the simplex calculations for embedding dimension $E = 2$ using
@@ -161,6 +161,13 @@ pbsEDM_res_full$neighbour_weight[t_star,]
 giving the above prediction for $Y_{95}$ of
 ```{r pred95}
 pbsEDM_pred[t_star+1]
+```
+We can verify this calculation directly from equation (13) in the manuscript
+using the just-calculated weights and neighbour indices:
+```{r eqn13}
+sum(pbsEDM_res_full$neighbour_weight[t_star,] *
+    input[pbsEDM_res_full$neighbour_index[t_star,] + 1, "Y_t"]) /
+  sum(pbsEDM_res_full$neighbour_weight[t_star,])
 ```
 
 For `rEDM` the full details of nearest neighbours do not appear to be an
@@ -406,7 +413,7 @@ So $t^* = 75$, which we just found had changed with the `exclusionRadius`=1, is
 not shown here meaning that it now matches the `pbsEDM` result. Thus Aspect 2
 has been corrected for
 that value. But $t^* = 94$ is still different to the `pbsEDM` results, so the
-correction isn't global, and $t^* = 76$ is now different.
+correction is not global, and $t^* = 76$ is now different.
 
 So we now try setting `exclusionRadius`=2:
 ```{r exclusion2}
@@ -489,6 +496,6 @@ testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
 testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
 ```
 
-The test in the Independent Code section has already verified that the `pbsEDM`
+The test in the `Independent code` section has already verified that the `pbsEDM`
 results have not changed (since they match the `my.pred` results from the original
 independent code).
