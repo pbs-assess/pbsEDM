@@ -10,6 +10,9 @@
 *.txt
 *.html
 vignettes/*.R
+R/*.eps
+R/*.pdf
+
 
 # Mac OSX
 .DS_Store
