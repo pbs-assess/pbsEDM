@@ -222,6 +222,32 @@ plot_rho_Evec <- function(E_res,
   invisible()
 }
 
+##' Save `rho` versus `E` .eps figure for manuscript.
+##'
+##' @param eps.filename filename to save to
+##' @return plot of rho versus E saved as .eps
+##' @export
+##' @author Andrew Edwards
+##' @examples
+##' \donttest{
+##' }
+plot_rho_Evec_figure <- function(eps.filename = "rho_Evec.eps"){
+
+  # Use high E values to show the decrease
+  E_results_17 <- pbsEDM_Evec(NY_lags_example$N_t,
+                              E_vec = 1:16)  # go up to E=17
+
+  postscript(eps.filename,
+             height = 4.5,
+             width = 4.5,
+             horizontal=FALSE,
+             paper="special")
+
+  plot_rho_Evec(E_results_17)
+
+  dev.off()
+}
+
 
 ##' Plot predictions versus observed values of `Y_t` for list of `pbsEDM`
 ##' objects, for various values of `E`
@@ -1564,4 +1590,23 @@ plot_library_size <- function(T = 50,
   }
 
   return(C)
+}
+
+##' Save eps figure of the size of the library for manuscript.
+##'
+##' @param eps.filename filename to save to
+##' @return saved .eps file to use in manuscript.
+##' @export
+##' @author Andrew Edwards
+##' @examples
+plot_library_size_save <- function(eps.filename = "library_size.eps"){
+  postscript(eps.filename,
+             height = 6,
+             width = 6,
+             horizontal=FALSE,
+             paper="special")
+
+  plot_library_size()
+
+  dev.off()
 }

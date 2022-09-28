@@ -22,18 +22,18 @@ Dynamic Modeling
 devtools::install_github("pbs-assess/pbsEDM")
 ```
 
-## To reproduce the figures for the manuscript submitted to Methods in Ecology and Evolution
+## To reproduce and save the figures for the manuscript submitted to Methods in Ecology and Evolution
 
 
 ```E_results <- pbsEDM_Evec(NY_lags_example$N_t)```
 
-Figure 1 - 
+Figure 1 - ```plot_pbsEDM_Evec_figure(E_results)```
 
 Figure 2 -  ```plot_explain_edm_figure(E_results[[1]])```
 
-Figure 3 -
+Figure 3 - ```plot_rho_Evec_figure()```
 
-Figure 4 -
+Figure 4 - ```plot_library_size_save()```
 
 Animated figures for the Appendix:
 
