@@ -280,32 +280,15 @@ abline(a=0, b=1)
 shows a good correspondence, as given by the correlation coefficient of
 `r pbsEDM_rho_Y_E_3`.
 
-## Test that rEDM and pbsEDM results have not changed - DO SOMETHING SIMILAR
-
-TODO maybe.
-
-<!--
-TODO
+## Test that results have not changed
 
 Here we run some tests to check that if any of the above results from `pbsEDM`
-or `rEDM` have changed from when this vignette was written (some results are
+have changed from when this vignette was written (some results are
 saved in `NY_lags_example_3`). The tests will give errors if they fail (and any
 such failures should be investigated and this vignette updated).
 
-Check the default `rEDM` predictions have not changed.
-{r testrEDM}
-testthat::expect_equal(NY_lags_example_3$rEDM.pred,
-                       rEDM_res$Predictions)       # If no error then they match
-
-
-Also check that the results with different values of `exclusionsRadius` have not changed:
-{r testExcl}
-testthat::expect_equal(check_rEDM_excl_1, rEDM_pred_excl_1)
-testthat::expect_equal(check_rEDM_excl_2, rEDM_pred_excl_2)
-testthat::expect_equal(check_rEDM_excl_3, rEDM_pred_excl_3)
-
-
-The test in the Independent Code section has already verified that the `pbsEDM`
-results have not changed (since they match the `my.pred` results from the original
-independent code).
--->
+Check the `pbsEDM` $Y_t$ predictions for $E=2$ have not changed:
+```{r testpred}
+testthat::expect_equal(NY_lags_example_3$my.pred,
+                       pbsEDM_pred_Y)             # If no error then they still match
+```
