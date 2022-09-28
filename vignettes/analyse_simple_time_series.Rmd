@@ -21,13 +21,6 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 library(pbsEDM)
 ```
 
-TODO: Axes in code are updated to be $Y_t$ not $X_t$ etc., but have to manually
-save the movies to GitHub, so not doing that now in case they change again. Plus
-some are saved in R/functions, I think just while developing. Move to here when finalised.
-
-TODO: Could simplify some of this, just save a vector also as `Nt_example`
-instead of using the tibble.
-
 This vignette shows how to use the simplex algorithm in `pbsEDM` to analyse a
 simple time series, and shows resulting graphics that help understand the
 algorithm (as described in the manuscript).
@@ -146,18 +139,36 @@ $\rho$, and so is best used for predictions.
 
 Understanding of the simplex algorithm can be enhanced with a specific animated
 example. With $t^* = 39$ we have Figure S.2 from the manuscript:
-```{r EDMmovie, eval = FALSE}
-# ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
+```{r EDMmovie2, eval = FALSE}
+# ```{r EDMmovie2, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(E_2_res,
-                       tstar = 39)  # 15 shows the idea nicely
+                       tstar = 39)
 ```
 ![pbsEDM_movie_tstar_39.gif](pbsEDM_movie_tstar_39.gif).
 
-Such a movie is useful for checking any single prediction. For example, just
-change tstar to 15 (see the technical aside above to make a new movie):
-```{r EDMmovie2, eval = FALSE}
-# ```{r EDMmovie, animation.hook = 'gifski', interval = 8}
+Such a movie is useful for checking any single prediction. For example, with
+$t^* = 15$ (see the technical aside above to make a new movie):
+```{r EDMmovie3, eval = FALSE}
+# ```{r EDMmovie3, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(E_2_res,
-                       tstar = 15)  # 15 shows the idea nicely
+                       tstar = 15)
 ```
 ![pbsEDM_movie_tstar_15.gif](pbsEDM_movie_tstar_15.gif).
+
+And changing to $t^* = 75$ shows the removal of an invalid candidate nearest
+neighbour from the library:
+(Aspect 2):
+```{r EDMmovie4, eval = FALSE}
+# ```{r EDMmovie4, animation.hook = 'gifski', interval = 8}
+plot_explain_edm_movie(E_2_res,
+                       tstar = 75)
+```
+
+![pbsEDM_movie_tstar_75.gif](pbsEDM_movie_tstar_75.gif).
+
+Or just in the R console you can create a pdf version of the movie with:
+```{r EDMmovie5, eval = FALSE}
+plot_explain_edm_movie_save(E_2_res,
+                            pdf.filename = "movie_tstar_75.pdf",
+                            tstar = 75)
+```
