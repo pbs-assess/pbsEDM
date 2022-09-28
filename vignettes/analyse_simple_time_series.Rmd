@@ -79,7 +79,7 @@ giving the embedding dimension $E$ (which is 2 here because we used lags of 0
 and 1), forecast skill (correlation coefficient $\rho$) and root-mean-square
 error between the observations and the predictions.
 
-## Make forecasts using different values of E
+## Make predictions using different values of E
 
 Now use the simplex algorithm for different values of embedding dimension $E$,
 where, for example $E=2$ uses first-difference values $Y_t$ and $Y_{t-1}$:
@@ -133,7 +133,7 @@ E_results[[3]]$results
 ```
 
 The conclusion from the figure would be that $E = 3$ gives the highest value of
-$\rho$, and so is best used for forecasting $N_{101}$. This is given by:
+$\rho$, and so is best used for forecasting $\hat{N}_{101}$. This is given by:
 
 ```{r Nforecast}
 E_results[[2]]$results           # [[2]] refers to E=3
@@ -141,7 +141,7 @@ E_results[[2]]$Y_forecast[100]   # the forecast for Y_{100}
 E_results[[2]]$N_forecast[101]   # the forecast for N_{101}
 ```
 
-In this case we obtain a negative forecast for $N_{101}$ (which is explored as Aspect 3).
+In this case we obtain a negative forecast of $\hat{N}_{101}$ (which is explored as Aspect 3).
 
 ## Movie to demonstrate the simplex algorithm for $E=2$
 
@@ -175,13 +175,13 @@ plot_explain_edm_movie(E_2_res,
 ![pbsEDM_movie_tstar_75.gif](pbsEDM_movie_tstar_75.gif).
 
 For the prediction of $Y_{100}$ we set $t^* = 99$ to give:
-<!-- ```{r EDMmovie6, eval = FALSE} -->
-```{r EDMmovie6, animation.hook = 'gifski', interval = 8}
+```{r EDMmovie6, eval = FALSE}
+# ```{r EDMmovie6, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(E_2_res,
                        tstar = 99)
 ```
 
-<!-- ![pbsEDM_movie_tstar_9.gif](pbsEDM_movie_tstar_99.gif). -->
+![pbsEDM_movie_tstar_99.gif](pbsEDM_movie_tstar_99.gif).
 
 In this case there are no candidate nearest neighbours to cross out, because
 $t^* = T-1$ and all defined points are candidates. This can be seen in matrix (6) in the
