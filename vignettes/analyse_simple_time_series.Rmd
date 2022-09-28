@@ -22,7 +22,7 @@ library(pbsEDM)
 ```
 
 This vignette shows how to use the simplex algorithm in `pbsEDM` to analyse a
-simple time series, and shows resulting graphics that help understand the
+simple time series and forecast the next value, and shows resulting graphics that help understand the
 algorithm (as described in the manuscript).
 The tibble `NY_lags_example` is saved in the package and contains several columns,
 though we are only going to use the original time series of simulated population numbers,
@@ -133,9 +133,17 @@ E_results[[3]]$results
 ```
 
 The conclusion from the figure would be that $E = 3$ gives the highest value of
-$\rho$, and so is best used for predictions.
+$\rho$, and so is best used for forecasting $N_{101}$. This is given by:
 
-## Movie to demonstrate the simplex algorithm
+```{r Nforecast}
+E_results[[2]]$results           # [[2]] refers to E=3
+E_results[[2]]$Y_forecast[100]   # the forecast for Y_{100}
+E_results[[2]]$N_forecast[101]   # the forecast for N_{101}
+```
+
+In this case we obtain a negative forecast for $N_{101}$ (which is explored as Aspect 3).
+
+## Movie to demonstrate the simplex algorithm for $E=2$
 
 Understanding of the simplex algorithm can be enhanced with a specific animated
 example. With $t^* = 39$ we have Figure S.2 from the manuscript:
@@ -156,8 +164,8 @@ plot_explain_edm_movie(E_2_res,
 ![pbsEDM_movie_tstar_15.gif](pbsEDM_movie_tstar_15.gif).
 
 And changing to $t^* = 75$ shows the removal of an invalid candidate nearest
-neighbour from the library:
-(Aspect 2):
+neighbour from the library that would get used as a nearest neighbour if not
+removed (Aspect 2):
 ```{r EDMmovie4, eval = FALSE}
 # ```{r EDMmovie4, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(E_2_res,
@@ -166,9 +174,33 @@ plot_explain_edm_movie(E_2_res,
 
 ![pbsEDM_movie_tstar_75.gif](pbsEDM_movie_tstar_75.gif).
 
-Or just in the R console you can create a pdf version of the movie with:
+For the prediction of $Y_{100}$ we set $t^* = 99$ to give:
+<!-- ```{r EDMmovie6, eval = FALSE} -->
+```{r EDMmovie6, animation.hook = 'gifski', interval = 8}
+plot_explain_edm_movie(E_2_res,
+                       tstar = 99)
+```
+
+<!-- ![pbsEDM_movie_tstar_9.gif](pbsEDM_movie_tstar_99.gif). -->
+
+In this case there are no candidate nearest neighbours to cross out, because
+$t^* = T-1$ and all defined points are candidates. This can be seen in matrix (6) in the
+manuscript by setting $E=2$, $T=100$ and $t^* = 99$ (besides ${\bf x}_{t^*}$,
+only rows with a $\times$ get crossed out and since these are undefined they do
+not show up on the above plot anyway).
+Also there is no known true value of $Y_{100}$ in the final plot.
+
+In the R console you can create a pdf version of any such movie with, for example:
 ```{r EDMmovie5, eval = FALSE}
 plot_explain_edm_movie_save(E_2_res,
                             pdf.filename = "movie_tstar_75.pdf",
                             tstar = 75)
+```
+
+## Further details of the calculations
+
+The intermediate calculations of the simplex algorithm are saved in the output
+for perusal (see `?pbsEDM`). For example, to see the nearest neighbours for each valid $t^*$:
+```{r output}
+E_2_res$neighbour_index
 ```

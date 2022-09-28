@@ -1009,6 +1009,8 @@ plot_explain_edm <- function(obj,
                         min(tstar + 2, nrow(obj$X)),
                         nrow(obj$X) - 1,
                         nrow(obj$X))
+    lib.remove.ind <- lib.remove.ind[ - which(lib.remove.ind == tstar)]   # don't want to cross out tstar
+                                                                          # (happens for tstar = T-1 for forecast)
     points(Xtmin1[lib.remove.ind],
            Xt[lib.remove.ind],
            pch = 4,
