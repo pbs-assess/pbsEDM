@@ -84,7 +84,7 @@ which(pbsEDM_pred_N < 0)
 
 Of particular interest is the negative prediction for $\hat{N}_{101}$ of
 `r  pbsEDM_pred_N[101]`, since the
-aim of the analysis is often to predict next year's population from all
+aim of the analysis is generally to forecast next year's population from all
 currently available data.
 
 ## Simple solution to Aspect 3
@@ -184,9 +184,10 @@ non-first-differenced values ($N_t$) and not just first-differenced values
 ## Repeating analyses with $E=3$
 
 The above was all for the simplest embedding dimension of $E=2$. We repeat the
-calculations here for $E=3$, which is the embedding dimension selected for use
-by the EDM calculations. The code is available in the vignette code but not all
-of it is shown here. The first-differencing calculations remain the same, the higher embedding
+calculations here for $E=3$, which is the optimal embedding dimension (based on
+the maximum $\rho$ value), and so should be used for forecasting.
+The code is available in the vignette code but not all
+of it is echoed here. The first-differencing calculations remain the same, the higher embedding
 dimension just allows more lags (and more neighbours) to be used in the making predictions.
 
 ```{r pbsEDM3}
