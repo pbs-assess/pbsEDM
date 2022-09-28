@@ -21,8 +21,7 @@ The name `pbsEDM` amalgamates our workplace, the Pacific Biological Station (PBS
 
 The package implements the Simplex and S-map algorithms of Empirical Dynamic Modelling, and creates visualisations to help understand the methods, for example:
 
-
-TODO .gif movie to explain
+![](vignettes/pbsEDM_movie_tstar_39.gif)
 
 Users can also analyse their own data. The package should not really be used yet until the associated manuscript is reviewed (and the package will be more understandable in conjunction with the manuscript). However, it can be installed directly from GitHub with
 
@@ -35,7 +34,7 @@ devtools::install_github("pbs-assess/pbsEDM")
 
 The vignettes are already rendered here:
 
-* [analyse_simple_time_series.html](analyse_simple_time_series.html) How to analyse a simple time series. 
+* [analyse_simple_time_series.html](analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
 * [aspect_2.html](aspect_2.html)   TODO
 * [aspect_3_4.html](aspect_3_4.html) TODO
 * [pbsSmap.html](pbsSmap.html) TODO
