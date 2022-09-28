@@ -33,8 +33,7 @@ gets3dusr = function(s3dobject)
 ##' See vignette "Analyse a simple time series".
 ##' Only working if `N$N_t` values are in there (needs another switch if
 ##' not). And very likely only works for univariate time series for now, not
-##' pred-prey for example. TODO, update if necessary. Works on `NY_lags_example`
-##' but likely need to generalise.
+##' pred-prey for example.
 ##'
 ##' @param x list object of class `pbsEDM`, an output from `pbsEDM()`
 ##' @param portrait if TRUE then plots panels in portrait mode for manuscripts/Rmarkdown (3x2), false is
@@ -67,8 +66,7 @@ plot.pbsEDM = function(x,
   #                                          # though last will have NA # not
   #                                          # incorporated fully yet
 
-  plot_time_series(values = x$N,  # $N_t,
-                                        # TODO: why might as.vector() be needed , xt is okay
+  plot_time_series(values = x$N,  # $N_t
                    X.or.N = "N",
                    label = "(a)",
                    ...)
@@ -218,7 +216,7 @@ plot_rho_Evec <- function(E_res,
        tcl = -0.2,
        labels = rep("", 11))
 
-  # TODO see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
+  # see EDMsimulate/report/sockeye-sim-edm.rnw for adding other plots
   invisible()
 }
 
@@ -712,7 +710,8 @@ plot_phase_2d <- function(values,
 ##'
 ##' Shows the first-differenced values in three-dimensional phase space, as
 ##'   points showing lags of 0, 1 and 2. Cobwebbing shows how one point iterates
-##'   to the next point in the time series.
+##'   to the next point in the time series. Can also highlight a $t^*$ value and
+##'   the points that should be excluded from the library of nearest neighbours.
 ##'
 ##' @param obj `pbsEDM` object
 ##' @param par.mgp.3d `par(mgp)` values
@@ -734,7 +733,7 @@ plot_phase_2d <- function(values,
 ##' @param axes.col colour of orthogonal origin axes that go through (0, 0, 0)
 ##' @param par.mar.phase `par(mar)` to reset to after plotting 3d figure
 ##' @param par.mgp `par(mgp)` to reset to after plotting 3d figure
-##' @param tstar focal point to highlight (for `pbsEDM` vignette)
+##' @param tstar focal point to highlight (for `pbsSmap` vignette)
 ##' @param angle_view manually specify the angle for viewing (to rotate plot)
 ##' @param label label to annotate plot, such as `(a)` etc. for six-panel figure
 ##' @param label.cex size of label annotation
@@ -919,8 +918,7 @@ plot_phase_3d <- function(obj,
 ##' @param neigh.proj if TRUE then highlight projections of neighbours to `x(t*)`
 ##' @param pred.plot if TRUE then highlight forecasted value `x(t*+1)`
 ##' @param pred.rEDM if TRUE then show predictions from `rEDM` for
-##'   `NY_lags_example` saved values; obj must be `NY_lags_example` TODO do a test as
-##'   may not work
+##'   `NY_lags_example` saved values; obj must be `NY_lags_example`
 ##' @param true.val if TRUE then plot the true value of `x(t*+1)`
 ##' @param legend.plot if TRUE then do a legend and print value of `t*`
 ##' @param legend.inc.rEDM if TRUE then include `rEDM` in the legend (not wanted

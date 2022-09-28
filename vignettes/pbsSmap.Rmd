@@ -97,7 +97,7 @@ Nhat_101 <- Yhat_100 + input$N_t[100]
 Nhat_101
 ```
 
-The latter gives $\hat{N}_{101}$, the projected value of the population at time
+The latter gives $\hat{N}_{101}$, the forecast of the population at time
 step 101. This is different to the -0.017 calculated using just the simplex
 algorithm with $E=3$ in the [`Demonstration of Aspects 3 and 4`](aspect_3.html)
 vignette.
@@ -213,15 +213,18 @@ By sorting them we can see the indices in the library:
 ```{r, pbsEDM6b}
 sort(Smap_optimal$neighbour_index[t_star, ])
 ```
-This matches equation (7) and (therefore) Figure 4 in the
-manuscript. The correctly-omitted indices are given by
+This matches equation (7) in the
+manuscript, with the correctly-omitted indices in equation (6) given by
 ```{r, pbsEDM6c}
-setdiff(3:100,sort(Smap_optimal$neighbour_index[t_star, ]))
+c(1:(E_fix - 1),
+  setdiff(E_fix:nrow(input),
+          sort(Smap_optimal$neighbour_index[t_star, ])))
 ```
 
 We wish to see whether some of those indices are incorrectly included in the
 library of candidate neighbours for the S-map calculations in `rEDM`, but
 detailed output regarding nearest neighbours etc. is not available from the `rEDM` calculations.
+
 So first we visualise the focal point ${\bf x}_{t^*}$ and the three subsequent
 points that should be omitted from the library (as per equations 6 or 7), namely
 ${\bf x}_{t^*+1}$, ${\bf x}_{t^*+2}$, and ${\bf x}_{t^*+3}$.
@@ -230,18 +233,22 @@ We can use the `pbsEDM::plot_phase_3d()` function (which requires an input of cl
 ```{r, pbsEDM7}
 pbsEDM_simplex <- pbsEDM(NY_lags_example,
                          lags = list(Y_t = 0:2))
-plot_phase_3d(pbsEDM_simplex, tstar = 30, early.col.lines = NA)
+plot_phase_3d(pbsEDM_simplex,
+              tstar = 30,
+              early.col.lines = NA)
 ```
 
 The blue dot is ${\bf x}_{30}$, and the red dots are ${\bf x}_{31}$, ${\bf x}_{32}$,
 and ${\bf x}_{33}$. These are not the nearest neighbours in this case, but note that
 their erroneous inclusion would still affect the mean distance of all points from the
-focal point, and hence affect the estimate of ${\bf x}_{31}$ (via equation TODO).
+focal point (equation S.14 in the manuscript), and hence affect the estimate of ${\bf x}_{31}$.
 
 However, for $t^*=93$ (the value with the second largest different between
 the `pbsEDM` and `rEDM` results) we have:
 ```{r, pbsEDM8}
-plot_phase_3d(pbsEDM_simplex, tstar = 93, early.col.lines = NA)
+plot_phase_3d(pbsEDM_simplex,
+              tstar = 93,
+              early.col.lines = NA)
 ```
 
 for which one of the red points is very close to the blue ${\bf x}_{93}$, and so
@@ -311,30 +318,6 @@ Note that the estimates of $\hat{Y}_{94}$ from `rEDM` and from `pbsEDM` with the
 dummy data added do not match exactly
 because the dummy $Y_t$ values create extra ${\bf x}_t$ points, which affect the mean of the
 distances of all points from ${\bf x}_{93}$.
-
-## Check S-map equations in Supp (maybe DELETE)
-
-```{r, checking}
-t_star = 99
-dbar <- mean(Smap_optimal$X_distance[99,] , na.rm=TRUE)   # eqn S.15
-theta_max
-ui <- exp(- theta_max * Smap_optimal$neighbour_distance[t_star, ] / dbar)   # neighbours are sorted
-Ytstarplus1 <- sum(Smap_optimal$projected_value[t_star+1, ] * ui, na.rm=TRUE)/
-  sum(ui, na.rm=TRUE) # not exactly sure here, indexing may be off
-Ytstarplus1
-Smap_optimal$X_forecast[t_star+1]
-
-# Don't match. Manually do the projected values and remove the ineligible
-# neighbours (d'oh, forgot that - actually it's automatic).
-ui_unsorted <- exp(- theta_max * Smap_optimal$X_distance[t_star, ] / dbar)   # neighbours are unsorted
-ui_unsorted[c(1, 2, t_star, t_star+1, t_star+2)] <- NA   # need more if different t*
-projected_unsorted <- c(Smap_optimal$X_observed[-1], NA)
-Ytstarplus1_unsorted <- sum(ui_unsorted * projected_unsorted, na.rm=TRUE) /
-  sum(ui, na.rm = TRUE)   # NA's take care of ineligible neighbours - for t*=99
-                          # kind of automatic
-Ytstarplus1_unsorted      # same as above anyway
-Smap_optimal$X_forecast[t_star+1]
-```
 
 ## Test that pbsEDM and rEDM results have not changed
 
