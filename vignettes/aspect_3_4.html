@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Demonstration of Aspects 3 and 4</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Demonstration of Aspects 3 and 4</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pbsEDM)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In the manuscript, Aspect 3 is that predicted values of lagged variables can give unrealistic negative predictions of the original unlagged populations.</p>
+<p>Again we use the simulated population time series from the manuscript, with population size denoted <span class="math inline">\(N_t\)</span> and first-differenced values denoted <span class="math inline">\(Y_t\)</span> at <span class="math inline">\(t = 1, 2, 3, ..., 99, 100\)</span>. We extract them from the saved tibble <code>NY_lags_example_3</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span>  dplyr<span class="sc">::</span><span class="fu">select</span>(NY_lags_example_3, t, N_t, Y_t) <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Time =</span> t)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>input</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 100 × 3</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Time    N_t     Y_t</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>   <span class="sc">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>   <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span>     <span class="dv">1</span> <span class="fl">0.0995</span> <span class="sc">-</span><span class="fl">0.0565</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">2</span>     <span class="dv">2</span> <span class="fl">0.0430</span>  <span class="fl">0.0592</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">3</span>     <span class="dv">3</span> <span class="fl">0.102</span>   <span class="fl">5.24</span>  </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a> <span class="dv">4</span>     <span class="dv">4</span> <span class="fl">5.34</span>   <span class="sc">-</span><span class="fl">4.85</span>  </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">5</span>     <span class="dv">5</span> <span class="fl">0.489</span>  <span class="sc">-</span><span class="fl">0.461</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a> <span class="dv">6</span>     <span class="dv">6</span> <span class="fl">0.0281</span>  <span class="fl">0.273</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a> <span class="dv">7</span>     <span class="dv">7</span> <span class="fl">0.301</span>   <span class="fl">0.802</span> </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> <span class="fl">1.10</span>   <span class="sc">-</span><span class="fl">0.889</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> <span class="fl">0.214</span>  <span class="sc">-</span><span class="fl">0.203</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span> <span class="fl">0.0116</span>  <span class="fl">0.498</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># … with 90 more rows</span></span></code></pre></div>
+</div>
+<div id="calculations-using-pbsedm-as-done-in-aspect-2-vignette" class="section level2">
+<h2>Calculations using pbsEDM (as done in Aspect 2 vignette)</h2>
+<p>See the <a href="analyse_simple_time_series.html"><code>analyse_simple_time_series</code></a> vignette for general details on using the code. Here do the simplex calculation for <span class="math inline">\(E = 2\)</span>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)))   <span class="co"># Gives full calculations</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_Y <span class="ot">&lt;-</span> pbsEDM_res_full<span class="sc">$</span>X_forecast[<span class="sc">-</span><span class="fu">length</span>(pbsEDM_res_full<span class="sc">$</span>X_forecast)]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                                           <span class="co"># Just the predictions, excluding</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                           <span class="co">#  t=101, so for t = 1:100</span></span></code></pre></div>
+</div>
+<div id="explaining-the-issue-aspect-3" class="section level2">
+<h2>Explaining the issue – Aspect 3</h2>
+<p>Use the <span class="math inline">\(Y_t\)</span> calculations and then convert to <span class="math inline">\(N_t\)</span>. Equation (1) in the manuscript defines <span class="math inline">\(Y_t\)</span> as:</p>
+<p><span class="math inline">\(Y_t = N_{t+1} - N_t\)</span>.</p>
+<p>So having estimated <span class="math inline">\(\hat{Y}_t\)</span> we can rearrange that to estimate <span class="math inline">\(\hat{N}_{t+1}\)</span> as:</p>
+<p><span class="math inline">\(\hat{N}_{t+1} = N_t + \hat{Y}_t\)</span></p>
+<p>or</p>
+<p><span class="math inline">\(\hat{N}_t = N_{t-1} + \hat{Y}_{t-1}\)</span>,</p>
+<p>to give a vector of estimated <span class="math inline">\(\hat{N}_t\)</span> values:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NA</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                  input<span class="sc">$</span>N_t <span class="sc">+</span> pbsEDM_pred_Y)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">1</span>]           <span class="cn">NA</span>           <span class="cn">NA</span>           <span class="cn">NA</span>  <span class="fl">0.289056951</span>  <span class="fl">0.080767036</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">6</span>]  <span class="fl">0.323171929</span>  <span class="fl">0.928236616</span>  <span class="fl">0.564487644</span>  <span class="fl">0.160840312</span>  <span class="fl">0.214919277</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a> [<span class="dv">11</span>]  <span class="fl">0.188081305</span>  <span class="fl">1.870277859</span>  <span class="fl">0.848967821</span> <span class="sc">-</span><span class="fl">0.186782556</span>  <span class="fl">0.472983601</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a> [<span class="dv">16</span>]  <span class="fl">1.511592770</span>  <span class="fl">0.264533104</span>  <span class="fl">0.129067595</span>  <span class="fl">0.537826197</span>  <span class="fl">1.312944032</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a> [<span class="dv">21</span>]  <span class="fl">1.189225618</span>  <span class="fl">0.035381865</span>  <span class="fl">0.492890733</span>  <span class="fl">1.724009413</span>  <span class="fl">0.596981270</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a> [<span class="dv">26</span>]  <span class="fl">0.292465039</span>  <span class="fl">0.336031436</span>  <span class="fl">3.270535429</span> <span class="sc">-</span><span class="fl">0.209085029</span> <span class="sc">-</span><span class="fl">0.043220123</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a> [<span class="dv">31</span>]  <span class="fl">0.246312809</span>  <span class="fl">1.629919507</span>  <span class="fl">0.864091894</span>  <span class="fl">0.524613472</span>  <span class="fl">0.654938572</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a> [<span class="dv">36</span>]  <span class="fl">3.127322908</span>  <span class="fl">0.569965314</span> <span class="sc">-</span><span class="fl">0.004757061</span>  <span class="fl">0.572585015</span>  <span class="fl">0.811802618</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a> [<span class="dv">41</span>]  <span class="fl">0.542189068</span> <span class="sc">-</span><span class="fl">0.099017870</span>  <span class="fl">0.595349716</span>  <span class="fl">2.449084662</span>  <span class="fl">0.463668377</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a> [<span class="dv">46</span>]  <span class="fl">0.102119992</span>  <span class="fl">0.340738472</span>  <span class="fl">2.556576048</span>  <span class="fl">1.754532592</span>  <span class="fl">0.589200849</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a> [<span class="dv">51</span>]  <span class="fl">0.670929400</span>  <span class="fl">0.943198372</span>  <span class="fl">1.150053582</span>  <span class="fl">0.455634536</span>  <span class="fl">0.458084504</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a> [<span class="dv">56</span>]  <span class="fl">2.777014513</span>  <span class="fl">1.260254677</span>  <span class="fl">0.680811701</span>  <span class="fl">0.673512249</span> <span class="sc">-</span><span class="fl">0.089713336</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a> [<span class="dv">61</span>]  <span class="fl">0.161031341</span>  <span class="fl">0.884064826</span>  <span class="fl">1.201644648</span> <span class="sc">-</span><span class="fl">0.327110872</span>  <span class="fl">0.354760473</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a> [<span class="dv">66</span>]  <span class="fl">3.091878781</span>  <span class="fl">0.648183475</span>  <span class="fl">0.533000180</span>  <span class="fl">0.162013062</span>  <span class="fl">0.838731150</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a> [<span class="dv">71</span>]  <span class="fl">2.721361096</span>  <span class="fl">1.500177086</span>  <span class="fl">0.656452630</span>  <span class="fl">0.729903148</span>  <span class="fl">1.571699704</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a> [<span class="dv">76</span>]  <span class="fl">0.868052867</span>  <span class="fl">1.432177984</span> <span class="sc">-</span><span class="fl">0.202367304</span>  <span class="fl">1.722143019</span>  <span class="fl">0.698477857</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a> [<span class="dv">81</span>]  <span class="fl">0.862226246</span>  <span class="fl">0.525000396</span> <span class="sc">-</span><span class="fl">0.273715469</span>  <span class="fl">0.172071468</span>  <span class="fl">0.963282419</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a> [<span class="dv">86</span>]  <span class="fl">0.256963514</span>  <span class="fl">1.069679229</span>  <span class="fl">0.191447880</span>  <span class="fl">0.234257651</span>  <span class="fl">3.292525084</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a> [<span class="dv">91</span>]  <span class="fl">2.932298485</span>  <span class="fl">0.672288601</span>  <span class="fl">0.197920085</span>  <span class="fl">1.443603711</span>  <span class="fl">0.203009936</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a> [<span class="dv">96</span>]  <span class="fl">1.404749959</span>  <span class="fl">0.155923957</span> <span class="sc">-</span><span class="fl">0.164964599</span>  <span class="fl">0.889735172</span>  <span class="fl">0.593538416</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>[<span class="dv">101</span>] <span class="sc">-</span><span class="fl">0.075774284</span></span></code></pre></div>
+<p>The first three <code>NA</code> values demonstrate that we cannot predict <span class="math inline">\(\hat{N}_1\)</span> (because we do not know <span class="math inline">\(N_0\)</span>), or <span class="math inline">\(\hat{N}_2\)</span> and <span class="math inline">\(\hat{N}_3\)</span> (because we cannot predict <span class="math inline">\(\hat{Y}_1\)</span> or <span class="math inline">\(\hat{Y}_2\)</span>).</p>
+<p>Of note are the several negative predictions of <span class="math inline">\(\hat{N}_t\)</span>, which are unrealistic because our data represent populations – this is Aspect 3. The indices of these give the predicted time values (i.e. <span class="math inline">\(t^* + 1\)</span>):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(pbsEDM_pred_N <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a> [<span class="dv">1</span>]  <span class="dv">14</span>  <span class="dv">29</span>  <span class="dv">30</span>  <span class="dv">38</span>  <span class="dv">42</span>  <span class="dv">60</span>  <span class="dv">64</span>  <span class="dv">78</span>  <span class="dv">83</span>  <span class="dv">98</span> <span class="dv">101</span></span></code></pre></div>
+<p>Of particular interest is the negative prediction for <span class="math inline">\(\hat{N}_{101}\)</span> of -0.0757743, since the aim of the analysis is generally to forecast next year’s population from all currently available data.</p>
+</div>
+<div id="simple-solution-to-aspect-3" class="section level2">
+<h2>Simple solution to Aspect 3</h2>
+<p>The simplest solution to Aspect 3 is to just replace the negative predictions <span class="math inline">\(\hat{N}_t\)</span> with the minimum observed value of <span class="math inline">\(N_t\)</span>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>N_t_min <span class="ot">&lt;-</span> <span class="fu">min</span>(input<span class="sc">$</span>N_t)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_replace <span class="ot">&lt;-</span> pbsEDM_pred_N</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_replace[pbsEDM_pred_N_replace <span class="sc">&lt;</span> <span class="dv">0</span>] <span class="ot">=</span> N_t_min</span></code></pre></div>
+<p>Graphically this is shown by plotting all the original <span class="math inline">\((N_t, \hat{N}_t)\)</span> points as open black circles, then the set with the negative <span class="math inline">\(\hat{N}_t\)</span> values replaced as red filled circles (so that 11 points can be seen to change; the 1:1 line is added in black):</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="aspect-4---good-fit-for-the-first-differenced-values-y_t-does-not-necessarily-translate-to-a-good-fit-to-the-original-population-sizes-n_t" class="section level2">
+<h2>Aspect 4 - good fit for the first-differenced values (<span class="math inline">\(Y_t\)</span>) does not necessarily translate to a good fit to the original population sizes (<span class="math inline">\(N_t\)</span>)</h2>
+<p>The above simple fix solves Aspect 3 by removing unrealistic negative predictions. However, the above figure raises a fundamental issue, in that the predicted values <span class="math inline">\(\hat{N}_t\)</span> do not seem to match the original data <span class="math inline">\(N_t\)</span> too well.</p>
+<p>The correlation coefficient of <span class="math inline">\(\hat{N}_t\)</span> and <span class="math inline">\(N_t\)</span> before correcting the negative values is:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">c</span>(input<span class="sc">$</span>N_t, <span class="cn">NA</span>),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                    pbsEDM_pred_N,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2816586</span></span></code></pre></div>
+<p>and after correcting the negative values it is</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_replace <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">c</span>(input<span class="sc">$</span>N_t, <span class="cn">NA</span>),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                            pbsEDM_pred_N_replace,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_replace    <span class="co"># cor(input$N_t[4:100], pbsEDM_pred_N_replace[4:100]) gives same</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2815723</span></span></code></pre></div>
+<p>The latter <span class="math inline">\(\rho\)</span> with the negatives corrected is (unintuitively) very slightly lower than the original value. But the more important point is that a <span class="math inline">\(\rho\)</span> of 0.28 is much lower than that based on <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(\hat{Y}_t\)</span>, which is</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_Y <span class="ot">&lt;-</span> pbsEDM_res_full<span class="sc">$</span>results<span class="sc">$</span>X_rho</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_Y</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.6950458</span></span></code></pre></div>
+<p>This seems to have not been documented before, and so we define it as Aspect 4.</p>
+<p>Plotting <span class="math inline">\(\hat{Y}_t\)</span> against <span class="math inline">\(Y_t\)</span> (these are the <span class="math inline">\(E=2\)</span> points in the manuscript’s Figure~1(f):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(input<span class="sc">$</span>Y_t,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>     pbsEDM_pred_Y,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Observed Y&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Predicted Y&quot;</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>shows a good correspondence, as given by the correlation coefficient of 0.6950458.</p>
+<p>Thus, a good correspondence based on the first-differenced <span class="math inline">\(Y_t\)</span> values does not necessarily lead to good correspondence in the <span class="math inline">\(N_t\)</span> values, which is what we are interested in for practical situations. Hence our recommendation that practitioners also check the fits of the predctions based on non-first-differenced values (<span class="math inline">\(N_t\)</span>) and not just first-differenced values (<span class="math inline">\(Y_t\)</span>).</p>
+</div>
+<div id="repeating-analyses-with-e3" class="section level2">
+<h2>Repeating analyses with <span class="math inline">\(E=3\)</span></h2>
+<p>The above was all for the simplest embedding dimension of <span class="math inline">\(E=2\)</span>. We repeat the calculations here for <span class="math inline">\(E=3\)</span>, which is the optimal embedding dimension (based on the maximum <span class="math inline">\(\rho\)</span> value), and so should be used for forecasting. The code is available in the vignette code but not all of it is echoed here. The first-differencing calculations remain the same, the higher embedding dimension just allows more lags (and more neighbours) to be used in the making predictions.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full_E_3 <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>)))   <span class="co"># Gives full calculations</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_Y_E_3 <span class="ot">&lt;-</span> pbsEDM_res_full_E_3<span class="sc">$</span>X_forecast[<span class="sc">-</span><span class="fu">length</span>(pbsEDM_res_full<span class="sc">$</span>X_forecast)]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                                           <span class="co"># Just the predictions, excluding</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                                           <span class="co">#  t=101, so for t = 1:100</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_E_3 <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NA</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                  input<span class="sc">$</span>N_t <span class="sc">+</span> pbsEDM_pred_Y_E_3)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_E_3</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">1</span>]          <span class="cn">NA</span>          <span class="cn">NA</span>          <span class="cn">NA</span>          <span class="cn">NA</span>  <span class="fl">0.10834726</span>  <span class="fl">0.33008215</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">7</span>]  <span class="fl">1.04036231</span>  <span class="fl">2.15592299</span>  <span class="fl">0.37484762</span>  <span class="fl">0.09915660</span>  <span class="fl">0.60033270</span>  <span class="fl">1.59956925</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a> [<span class="dv">13</span>]  <span class="fl">0.87171962</span> <span class="sc">-</span><span class="fl">0.15335391</span>  <span class="fl">0.40039725</span>  <span class="fl">2.50894451</span>  <span class="fl">0.49583773</span>  <span class="fl">0.10635031</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a> [<span class="dv">19</span>]  <span class="fl">0.69242754</span>  <span class="fl">0.47099554</span>  <span class="fl">0.18043911</span>  <span class="fl">0.10409712</span>  <span class="fl">0.18602403</span>  <span class="fl">2.21020567</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a> [<span class="dv">25</span>]  <span class="fl">0.13268314</span>  <span class="fl">0.10812465</span>  <span class="fl">0.36672820</span>  <span class="fl">2.64714822</span>  <span class="fl">0.13385234</span> <span class="sc">-</span><span class="fl">0.04919500</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a> [<span class="dv">31</span>]  <span class="fl">0.23476617</span>  <span class="fl">2.42319229</span>  <span class="fl">0.69172740</span> <span class="sc">-</span><span class="fl">0.03731750</span>  <span class="fl">0.64090651</span>  <span class="fl">3.44270949</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a> [<span class="dv">37</span>]  <span class="fl">0.59600482</span>  <span class="fl">0.02323667</span>  <span class="fl">0.71649997</span>  <span class="fl">1.67828584</span>  <span class="fl">0.38803656</span> <span class="sc">-</span><span class="fl">0.08031999</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a> [<span class="dv">43</span>]  <span class="fl">0.58042342</span>  <span class="fl">1.88830299</span>  <span class="fl">0.56424862</span>  <span class="fl">0.10137357</span>  <span class="fl">0.61261156</span>  <span class="fl">1.86142929</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a> [<span class="dv">49</span>]  <span class="fl">0.33742196</span>  <span class="fl">0.38147960</span>  <span class="fl">0.71561119</span>  <span class="fl">1.22174880</span>  <span class="fl">0.09897486</span>  <span class="fl">0.52585366</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a> [<span class="dv">55</span>]  <span class="fl">0.52999263</span>  <span class="fl">0.69456827</span>  <span class="fl">0.20316213</span>  <span class="fl">0.41659986</span>  <span class="fl">0.45044799</span>  <span class="fl">0.41317003</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a> [<span class="dv">61</span>]  <span class="fl">0.14350786</span>  <span class="fl">0.32691113</span>  <span class="fl">0.54000740</span> <span class="sc">-</span><span class="fl">0.05256441</span>  <span class="fl">0.24630492</span>  <span class="fl">0.25841100</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a> [<span class="dv">67</span>]  <span class="fl">0.41682371</span>  <span class="fl">0.33920542</span>  <span class="fl">0.15695968</span>  <span class="fl">0.79403825</span>  <span class="fl">3.52931316</span>  <span class="fl">0.67379832</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a> [<span class="dv">73</span>]  <span class="fl">0.43361838</span>  <span class="fl">0.57137651</span>  <span class="fl">0.93463812</span>  <span class="fl">0.56336821</span>  <span class="fl">0.73657075</span>  <span class="fl">1.01210337</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a> [<span class="dv">79</span>]  <span class="fl">0.42935157</span>  <span class="fl">0.71637109</span>  <span class="fl">0.60004653</span>  <span class="fl">1.13442686</span>  <span class="fl">0.28179738</span>  <span class="fl">0.13252378</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a> [<span class="dv">85</span>]  <span class="fl">0.95989989</span>  <span class="fl">1.93591645</span>  <span class="fl">0.81300598</span>  <span class="fl">0.15110446</span>  <span class="fl">0.22055427</span>  <span class="fl">0.79121191</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a> [<span class="dv">91</span>]  <span class="fl">0.18114840</span>  <span class="fl">0.72204494</span>  <span class="fl">0.27225152</span>  <span class="fl">0.89213949</span>  <span class="fl">0.12320664</span>  <span class="fl">1.31670810</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a> [<span class="dv">97</span>]  <span class="fl">0.67552555</span>  <span class="fl">1.07061602</span>  <span class="fl">0.83889444</span>  <span class="fl">0.68944671</span> <span class="sc">-</span><span class="fl">0.01671682</span></span></code></pre></div>
+<p>Interestingly, there are fewer negative predictions of <span class="math inline">\(\hat{N}_t\)</span> for <span class="math inline">\(E=3\)</span> than the 11 we had for <span class="math inline">\(E=2\)</span>. The indices of these give the predicted time values (i.e. <span class="math inline">\(t^* + 1\)</span>):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(pbsEDM_pred_N_E_3 <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="dv">14</span>  <span class="dv">30</span>  <span class="dv">34</span>  <span class="dv">42</span>  <span class="dv">64</span> <span class="dv">101</span></span></code></pre></div>
+<p>Though there is still a negative prediction for <span class="math inline">\(\hat{N}_{101}\)</span> of -0.0167168.</p>
+<p>Now solve Aspect 3 by replacing the negative predictions <span class="math inline">\(\hat{N}_t\)</span> with the minimum observed value of <span class="math inline">\(N_t\)</span>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>N_t_min <span class="ot">&lt;-</span> <span class="fu">min</span>(input<span class="sc">$</span>N_t)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_E_3_replace <span class="ot">&lt;-</span> pbsEDM_pred_N_E_3</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred_N_E_3_replace[pbsEDM_pred_N_E_3_replace <span class="sc">&lt;</span> <span class="dv">0</span>] <span class="ot">=</span> N_t_min</span></code></pre></div>
+<p>And repeat the above figure:</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>The above figure does look better (close to the 1:1 line) than for <span class="math inline">\(E=2\)</span>. The correlation coefficient of <span class="math inline">\(\hat{N}_t\)</span> and <span class="math inline">\(N_t\)</span> before correcting the negative values is:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_E_3 <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">c</span>(input<span class="sc">$</span>N_t, <span class="cn">NA</span>),</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                        pbsEDM_pred_N_E_3,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_E_3</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.5367339</span></span></code></pre></div>
+<p>and after correcting the negative values it is</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_E_3_replace <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">c</span>(input<span class="sc">$</span>N_t, <span class="cn">NA</span>),</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                                pbsEDM_pred_N_E_3_replace,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_N_E_3_replace</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.5361547</span></span></code></pre></div>
+<p>which again is slightly lower than the original value. But the <span class="math inline">\(\rho\)</span> has improved somewhat from that for <span class="math inline">\(E=2\)</span>, but ist still not as high as based on <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(\hat{Y}_t\)</span>, which is</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_Y_E_3 <span class="ot">&lt;-</span> pbsEDM_res_full_E_3<span class="sc">$</span>results<span class="sc">$</span>X_rho</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho_Y_E_3</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8281812</span></span></code></pre></div>
+<p>So again, Aspect 4 occurs.</p>
+<p>As above, plotting <span class="math inline">\(\hat{Y}_t\)</span> against <span class="math inline">\(Y_t\)</span> (these are the <span class="math inline">\(E=3\)</span> points in the manuscript’s Figure~1(f):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(input<span class="sc">$</span>Y_t,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>     pbsEDM_pred_Y_E_3,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Observed Y&quot;</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Predicted Y&quot;</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>shows a good correspondence, as given by the correlation coefficient of 0.8281812.</p>
+</div>
+<div id="test-that-results-have-not-changed" class="section level2">
+<h2>Test that results have not changed</h2>
+<p>Here we run some tests to check that if any of the above results from <code>pbsEDM</code> have changed from when this vignette was written (some results are saved in <code>NY_lags_example_3</code>). The tests will give errors if they fail (and any such failures should be investigated and this vignette updated).</p>
+<p>Check the <code>pbsEDM</code> <span class="math inline">\(Y_t\)</span> predictions for <span class="math inline">\(E=2\)</span> have not changed:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(NY_lags_example_3<span class="sc">$</span>my.pred,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                       pbsEDM_pred_Y)             <span class="co"># If no error then they still match</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Aspect 2 demonstration</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Aspect 2 demonstration</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pbsEDM)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In the manuscript, the library contains the candidate points that can be used to determine the nearest neighbours of the focal point from which we are making a prediction. Aspect 2 concerns which points can be considered as being in the library, and which should be excluded. Here we find that occasionally <code>rEDM</code> includes some points that should be excluded.</p>
+<!-- Simplifying down from inclusion_issue_5.Rmd, which was more for working -->
+<!-- things out. Now have text written up can keep the vignette simpler -->
+<p>We use the simulated population time series from the manuscript, with first-differenced values denoted <span class="math inline">\(Y_t\)</span> at <span class="math inline">\(t = 1, 2, 3, ..., 99, 100\)</span>. We extract them from the saved tibble <code>NY_lags_example_3</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span>  dplyr<span class="sc">::</span><span class="fu">select</span>(NY_lags_example_3, t, Y_t) <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Time =</span> t)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>input</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 100 × 2</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Time     Y_t</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>   <span class="sc">&lt;</span>int<span class="sc">&gt;</span>   <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span>     <span class="dv">1</span> <span class="sc">-</span><span class="fl">0.0565</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">2</span>     <span class="dv">2</span>  <span class="fl">0.0592</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">3</span>     <span class="dv">3</span>  <span class="fl">5.24</span>  </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a> <span class="dv">4</span>     <span class="dv">4</span> <span class="sc">-</span><span class="fl">4.85</span>  </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">5</span>     <span class="dv">5</span> <span class="sc">-</span><span class="fl">0.461</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a> <span class="dv">6</span>     <span class="dv">6</span>  <span class="fl">0.273</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a> <span class="dv">7</span>     <span class="dv">7</span>  <span class="fl">0.802</span> </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> <span class="sc">-</span><span class="fl">0.889</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> <span class="sc">-</span><span class="fl">0.203</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span>  <span class="fl">0.498</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># … with 90 more rows</span></span></code></pre></div>
+<p>Note that <code>NY_lags_example_3</code> already contains results. At the end of this vignette we verify that results using <code>rEDM</code> or <code>pbsEDM</code> have not changed (for example due to package updates) from those saved in <code>NY_lags_example_3</code>.</p>
+<p>We will do the simplex calculations for embedding dimension <span class="math inline">\(E = 2\)</span> using <code>rEDM</code> and <code>pbsEDM</code> (and also compare with some earlier independent code).</p>
+</div>
+<div id="calculations-with-redm" class="section level2">
+<h2>Calculations with rEDM</h2>
+<p>First, use the <code>rEDM</code> package:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(rEDM)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">&quot;rEDM&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">&#39;1.13.0&#39;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># &#39;1.13.0&#39;, published 2022-06-17</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rEDM_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                          <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                          <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                          <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                          <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># lib and pred overlap, so leave-one-out</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                          <span class="co">#  cross-validation is used.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>rEDM_res <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                  rEDM_res)             <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>rEDM_pred <span class="ot">&lt;-</span> rEDM_res<span class="sc">$</span>Predictions       <span class="co"># Just the predicted values</span></span></code></pre></div>
+</div>
+<div id="calculations-using-pbsedm" class="section level2">
+<h2>Calculations using pbsEDM</h2>
+<p>See the <a href="analyse_simple_time_series.html"><code>analyse_simple_time_series</code></a> vignette for general details on using the code. Here do the simplex calculation as just done using <code>rEDM</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)))   <span class="co"># Gives full calculations</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred <span class="ot">&lt;-</span> pbsEDM_res_full<span class="sc">$</span>X_forecast[<span class="sc">-</span><span class="fu">length</span>(pbsEDM_res_full<span class="sc">$</span>X_forecast)]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                                           <span class="co"># Just the predictions, excluding</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                                           <span class="co">#  t=101, so for t = 1:100</span></span></code></pre></div>
+</div>
+<div id="compare-redm-results-with-those-from-pbsedm" class="section level2">
+<h2>Compare <code>rEDM</code> results with those from <code>pbsEDM</code></h2>
+<p>Now to plot the <code>pbsEDM</code> predictions again those from <code>rEDM</code>, and highlight in red those that differ:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rEDM_pred,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>     pbsEDM_pred,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;rEDM predictions&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;pbsEDM predictions&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">b=</span><span class="dv">1</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">col=</span><span class="st">&quot;grey&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Work out the ones more than epsilon away</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>epsilon <span class="ot">=</span> <span class="fl">0.0001</span>      <span class="co"># Small value for how different the predictions can be</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>different <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">t =</span> input<span class="sc">$</span>Time,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                           rEDM_pred,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                           pbsEDM_pred) <span class="sc">%&gt;%</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">abs</span>(rEDM_pred <span class="sc">-</span> pbsEDM_pred) <span class="sc">&gt;</span> epsilon)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(different<span class="sc">$</span>rEDM_pred,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>       different<span class="sc">$</span>pbsEDM_pred,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">20</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>The time indices correspond to the predicted times, so represent <span class="math inline">\(t^*+1\)</span> values, where <span class="math inline">\(t^*\)</span> is the focal time from which we make predictions:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>different</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 2 × 3</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      t rEDM_pred pbsEDM_pred</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">76</span>     <span class="fl">1.37</span>        <span class="fl">0.838</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">95</span>     <span class="fl">0.177</span>       <span class="fl">0.412</span></span></code></pre></div>
+<p>So there are two time indices for which results differ between <code>pbsEDM</code> and <code>rEDM</code>, corresponding to <span class="math inline">\(t^* =\)</span> 75 and 94.</p>
+</div>
+<div id="explaining-the-issue-aspect-2" class="section level2">
+<h2>Explaining the issue – Aspect 2</h2>
+<p>As defined in the manuscript, vector <span class="math inline">\(\bf{\tilde{x}}_t\)</span> has components defined by the lagged values of scalars <span class="math inline">\(Y_t\)</span>. For <span class="math inline">\(E=2\)</span> we have <span class="math display">\[\bf{\tilde{x}}_t = [Y_t, ~Y_{t-1}].\]</span> For focal time <span class="math inline">\(t^*\)</span>, we know <span class="math inline">\(Y_{t^*}\)</span> and are trying to predict <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
+<p>Aspect 2 in the manuscript is explicitly defined by exclusion condition (d), namely that the library of allowable nearest neighbours cannot include any <span class="math inline">\(\bf{x}_t\)</span> that includes <span class="math inline">\(Y_{t^*+1}\)</span>, since we are trying to predict <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
+<p>Thus, the library cannot include <span class="math display">\[\bf{x}_{t^*+1} = [Y_{t^*+1}, ~Y_{t^*}]\]</span> or <span class="math display">\[\bf{x}_{t^*+2} = [Y_{t^*+2}, ~Y_{t^*+1}]\]</span> since these both contain <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
+<div id="calculations-for-t94" class="section level3">
+<h3>Calculations for <span class="math inline">\(t^*=94\)</span></h3>
+<p>For <span class="math inline">\(t^*=94\)</span>, we have the aforementioned discrepancy between calculations:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>t_star <span class="ot">&lt;-</span> <span class="dv">94</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>rEDM_pred[t_star <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.1773531</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred[t_star <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
+<p>With <code>pbsEDM</code>, the nearest neighbours are saved as output, and for <span class="math inline">\(t^*=94\)</span> have indices and weights:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full<span class="sc">$</span>neighbour_index[t_star,]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="dv">6</span> <span class="dv">57</span> <span class="dv">88</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full<span class="sc">$</span>neighbour_weight[t_star,]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.3678794</span> <span class="fl">0.3205861</span> <span class="fl">0.2895013</span></span></code></pre></div>
+<p>giving the above prediction for <span class="math inline">\(Y_{95}\)</span> of</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
+<p>We can verify this calculation directly from equation (13) in the manuscript using the just-calculated weights and neighbour indices:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pbsEDM_res_full<span class="sc">$</span>neighbour_weight[t_star,] <span class="sc">*</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    input[pbsEDM_res_full<span class="sc">$</span>neighbour_index[t_star,] <span class="sc">+</span> <span class="dv">1</span>, <span class="st">&quot;Y_t&quot;</span>]) <span class="sc">/</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(pbsEDM_res_full<span class="sc">$</span>neighbour_weight[t_star,])</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
+<p>For <code>rEDM</code> the full details of nearest neighbours do not appear to be an available output. However, here we show that <span class="math inline">\(\bf{x}_{96}\)</span> was used by <code>rEDM</code> as a nearest neighbour of <span class="math inline">\(\bf{x}_{94}\)</span>. We first simply change the value of <span class="math inline">\(Y_{95}\)</span> so that <code>rEDM::Simplex()</code> will not pick</p>
+<p><span class="math display">\[\bf{x}_{95} = [Y_{95},~Y_{94}]\]</span></p>
+<p>or</p>
+<p><span class="math display">\[\bf{x}_{96} = [Y_{96}, ~Y_{95}]\]</span></p>
+<p>as a nearest neighbour of <span class="math inline">\(\bf{x}_{94}\)</span>, and see if we get the same result as for <code>pbsEDM</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>input[t_star<span class="sc">+</span><span class="dv">1</span>, ]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 1 × 2</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>   Time    Y_t</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">95</span> <span class="sc">-</span><span class="fl">0.799</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>input_change <span class="ot">&lt;-</span> input</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>input_change[t_star<span class="sc">+</span><span class="dv">1</span>, <span class="st">&quot;Y_t&quot;</span>] <span class="ot">=</span> <span class="dv">7</span>    <span class="co"># Move it far out of the way so it will not be a</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                                     <span class="co">#  nearest neighbour</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Do Simplex calculation with same options as earlier</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input_change,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input_change<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>                         rEDM_change_res)          <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred <span class="ot">&lt;-</span> rEDM_change_res<span class="sc">$</span>Predictions    <span class="co"># Just the predicted values</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
+<p>That is the same value as obtained earlier using <code>pbsEDM</code>.</p>
+<p>We now do the same calculation but changing <span class="math inline">\(Y_{96}\)</span> so that <span class="math display">\[\bf{x}_{96} = [Y_{96}, ~Y_{95}]\]</span> cannot be a nearest neighbour of <span class="math inline">\(\bf{x}_{94}\)</span> (but <span class="math inline">\(\bf{x}_{95}\)</span> still can be):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>input_change <span class="ot">&lt;-</span> input</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>input_change[t_star<span class="sc">+</span><span class="dv">2</span>, <span class="st">&quot;Y_t&quot;</span>] <span class="ot">=</span> <span class="dv">7</span>    <span class="co"># Move it far out of the way so it will not be a</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="co">#  nearest neighbour</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Do Simplex calculation with same options as earlier</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input_change,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input_change<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                         rEDM_change_res)          <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred <span class="ot">&lt;-</span> rEDM_change_res<span class="sc">$</span>Predictions    <span class="co"># Just the predicted values</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
+<p>Since this again agrees with the <code>pbsEDM</code> calculation, we conclude that <span class="math display">\[\bf{x}_{96} = [Y_{96}, ~Y_{95}]\]</span></p>
+<p>was incorrectly being included in the library of candidate nearest neighbours by <code>rEDM</code>, since by moving <span class="math inline">\(Y_{95}\)</span> or <span class="math inline">\(Y_{96}\)</span> far away it is no longer a nearest neighbour, and so Aspect 2 is shown to occur for <code>rEDM</code>.</p>
+</div>
+<div id="calculations-for-t75" class="section level3">
+<h3>Calculations for <span class="math inline">\(t^*=75\)</span></h3>
+<p>We now repeat the above calculations for <span class="math inline">\(t^*=75\)</span>. Skipping some of the explanatory steps, we have:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>t_star <span class="ot">&lt;-</span> <span class="dv">75</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>rEDM_pred[t_star <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">1.367744</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>pbsEDM_pred[t_star <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8378772</span></span></code></pre></div>
+<p>as noted above (below the figure).</p>
+<p>Using <code>pbsEDM</code> and <span class="math inline">\(t^*=75\)</span>, the indices and weights of the nearest neighbours are:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full<span class="sc">$</span>neighbour_index[t_star,]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">80</span> <span class="dv">79</span> <span class="dv">87</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full<span class="sc">$</span>neighbour_weight[t_star,]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.3678794</span> <span class="fl">0.3227933</span> <span class="fl">0.3133825</span></span></code></pre></div>
+<p>Change the value of <span class="math inline">\(Y_{76}\)</span> so that <code>rEDM::Simplex()</code> will not pick <span class="math inline">\(\bf{x}_{76}\)</span> or <span class="math inline">\(\bf{x}_{77}\)</span> as a nearest neighbour for <span class="math inline">\(\bf{x}_{75}\)</span>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>input[t_star<span class="sc">+</span><span class="dv">1</span>, ]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 1 × 2</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>   Time    Y_t</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">76</span> <span class="sc">-</span><span class="fl">0.415</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>input_change <span class="ot">&lt;-</span> input</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>input_change[t_star<span class="sc">+</span><span class="dv">1</span>, <span class="st">&quot;Y_t&quot;</span>] <span class="ot">=</span> <span class="dv">7</span>    <span class="co"># Move it far out of the way so it will not be a</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                     <span class="co">#  nearest neighbour</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Do Simplex calculation with same options as earlier</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input_change,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input_change<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                         rEDM_change_res)          <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred <span class="ot">&lt;-</span> rEDM_change_res<span class="sc">$</span>Predictions    <span class="co"># Just the predicted values</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8378772</span></span></code></pre></div>
+<p>We indeed get the same result as obtained earlier using <code>pbsEDM</code>.</p>
+<p>Now instead change <span class="math inline">\(Y_{77}\)</span> so that <span class="math inline">\(\bf{x}_{77}\)</span> cannot be a nearest neighbour (but <span class="math inline">\(\bf{x}_{76}\)</span> still can be):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>input[t_star<span class="sc">+</span><span class="dv">2</span>, ]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 1 × 2</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>   Time   Y_t</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">77</span>  <span class="fl">1.37</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>input_change <span class="ot">&lt;-</span> input</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>input_change[t_star<span class="sc">+</span><span class="dv">2</span>, <span class="st">&quot;Y_t&quot;</span>] <span class="ot">=</span> <span class="dv">7</span>    <span class="co"># Move it far out of the way so it will not be a</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>                                     <span class="co">#  nearest neighbour</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Do Simplex calculation with same options as earlier</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input_change,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>rEDM_change_res <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input_change<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                         rEDM_change_res)          <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred <span class="ot">&lt;-</span> rEDM_change_res<span class="sc">$</span>Predictions    <span class="co"># Just the predicted values</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">6.960745</span></span></code></pre></div>
+<p>This does not match the <code>pbsEDM</code> result. Thus, since only replacing <span class="math inline">\(Y_{t^*+1} = Y_{76}\)</span> gives the matching result to <code>pbsEDM</code>, it must be the case that <code>rEDM</code> was considering <span class="math display">\[\bf{x}_{t^*+1} =
+[Y_{t^*+1},~Y_{t^*}]\]</span></p>
+<p>i.e.</p>
+<p><span class="math display">\[\bf{x}_{76} = [Y_{76}, ~Y_{75}]\]</span> to be a nearest neighbour of <span class="math inline">\(\bf{x}_{75}\)</span> (and not <span class="math inline">\(\bf{x}_{77}\)</span>).</p>
+<p>Note that <code>rEDM</code> prediction of 6.960745 is now very large. This is because <code>rEDM</code> is still finding <span class="math inline">\(\bf{x}_{76}\)</span> to be a nearest neighbour. In the next time step this moves to <span class="math inline">\(\bf{x}_{77} = [Y_{77}, ~Y_{76}]\)</span>, but we have just made <span class="math inline">\(Y_{77}\)</span> very large and this value gets used in the calculation of <span class="math inline">\(\hat{Y}_{76}\)</span> (equation 13 in the manuscript), which is therefore very large.</p>
+<p>Thus, we have demonstrated two examples for which <code>rEDM</code> has used <span class="math inline">\(Y_{t^* + 1}\)</span> as a nearest neighbours (through <span class="math inline">\(\bf{x}_{t^*+2}\)</span> for <span class="math inline">\(t^*=94\)</span> and <span class="math inline">\(\bf{x}_{t^*+1}\)</span> for <span class="math inline">\(t^*=75\)</span>), and so Aspect 2 is occurring.</p>
+</div>
+</div>
+<div id="differences-in-rho" class="section level2">
+<h2>Differences in <span class="math inline">\(\rho\)</span></h2>
+<p>Since the results differ for <code>pbsEDM</code> and <code>rEDM</code>, we expect a slight difference in the overall Pearson correlation coefficient:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rEDM_rho <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">ComputeError</span>(rEDM_res<span class="sc">$</span>Observations,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                               rEDM_res<span class="sc">$</span>Predictions)<span class="sc">$</span>rho</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>rEDM_rho</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.6929147</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho <span class="ot">&lt;-</span> pbsEDM_res_full<span class="sc">$</span>results<span class="sc">$</span>X_rho</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.6950458</span></span></code></pre></div>
+<p>So the correlation coefficient is actually slight higher for the <code>pbsEDM</code> results compared to the <code>rEDM</code> results. Thus, for this example there is an improved fit from accommodating Aspect 2 (in <code>pbsEDM</code>). So accuracy of <code>rEDM</code> can be improved by accommodating Aspect 2 (this not guaranteed, but these results show that it will not necessarily give worse results).</p>
+</div>
+<div id="try-alternative-exclusionradius-settings-for-redm" class="section level2">
+<h2>Try alternative <code>exclusionRadius</code> settings for <code>rEDM</code></h2>
+<p>We now try changing the <code>exclusionRadius</code> input value in <code>rEDM::Simplex</code>, which (from <code>?rEDM::Simplex</code>) “excludes vectors from the search space of nearest neighbors if their relative time index is within exclusionRadius.”</p>
+<p>So, re-using the above code and trying <code>exclusionRadius</code>=1 (the default is 0):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_1 <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">exclusionRadius =</span> <span class="dv">1</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_1 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>                         rEDM_res_excl_1)             <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>rEDM_pred_excl_1 <span class="ot">&lt;-</span> rEDM_res_excl_1<span class="sc">$</span>Predictions       <span class="co"># Just the predicted values</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>different_excl <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">t =</span> input<span class="sc">$</span>Time,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>                                pbsEDM_pred,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>                                rEDM_pred,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>                                rEDM_pred_excl_1)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co"># See what has changed from original rEDM results</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(different_excl,</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>              <span class="fu">abs</span>(rEDM_pred <span class="sc">-</span> rEDM_pred_excl_1) <span class="sc">&gt;</span> epsilon)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 2 × 4</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>      t pbsEDM_pred rEDM_pred rEDM_pred_excl_1</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">76</span>       <span class="fl">0.838</span>     <span class="fl">1.37</span>             <span class="fl">0.838</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span> </span></code></pre></div>
+<p>The <span class="math inline">\(t\)</span> values shown are for the predictions at <span class="math inline">\(t = t^* + 1\)</span>. So the <code>rEDM</code> results have changed for <span class="math inline">\(t^* = 75\)</span> (which is good) and for 76 (which was not expected), but not for the desired <span class="math inline">\(t^* = 94\)</span>.</p>
+<p>Now check what is different to <code>pbsEDM</code> results:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(different_excl,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">abs</span>(pbsEDM_pred <span class="sc">-</span> rEDM_pred_excl_1) <span class="sc">&gt;</span> epsilon)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 2 × 4</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      t pbsEDM_pred rEDM_pred rEDM_pred_excl_1</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span> </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">95</span>       <span class="fl">0.412</span>     <span class="fl">0.177</span>            <span class="fl">0.177</span></span></code></pre></div>
+<p>So <span class="math inline">\(t^* = 75\)</span>, which we just found had changed with the <code>exclusionRadius</code>=1, is not shown here meaning that it now matches the <code>pbsEDM</code> result. Thus Aspect 2 has been corrected for that value. But <span class="math inline">\(t^* = 94\)</span> is still different to the <code>pbsEDM</code> results, so the correction is not global, and <span class="math inline">\(t^* = 76\)</span> is now different.</p>
+<p>So we now try setting <code>exclusionRadius</code>=2:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_2 <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">target =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lib =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">pred =</span> <span class="st">&quot;1 99&quot;</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">E =</span> <span class="dv">2</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">exclusionRadius =</span> <span class="dv">2</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_2 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, input<span class="sc">$</span>Y_t[<span class="dv">1</span>], <span class="cn">NA</span>, <span class="cn">NA</span>),</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                         rEDM_res_excl_2)             <span class="co"># Add Time = 1 values, to give t = 1:100</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>rEDM_pred_excl_2 <span class="ot">&lt;-</span> rEDM_res_excl_2<span class="sc">$</span>Predictions       <span class="co"># Just the predicted values</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>different_excl <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">mutate</span>(different_excl,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>                                rEDM_pred_excl_2)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># See what has changed from original rEDM results</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(different_excl,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>              <span class="fu">abs</span>(rEDM_pred <span class="sc">-</span> rEDM_pred_excl_2) <span class="sc">&gt;</span> epsilon)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 4 × 5</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>      t pbsEDM_pred rEDM_pred rEDM_pred_excl_1 rEDM_pred_excl_2</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">76</span>       <span class="fl">0.838</span>     <span class="fl">1.37</span>             <span class="fl">0.838</span>            <span class="fl">0.838</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span>             <span class="fl">1.03</span> </span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>    <span class="dv">95</span>       <span class="fl">0.412</span>     <span class="fl">0.177</span>            <span class="fl">0.177</span>            <span class="fl">0.412</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>    <span class="dv">97</span>      <span class="sc">-</span><span class="fl">0.798</span>    <span class="sc">-</span><span class="fl">0.798</span>           <span class="sc">-</span><span class="fl">0.798</span>            <span class="fl">0.755</span></span></code></pre></div>
+<p>So with <code>exclusionRadius</code>=2, the <code>rEDM</code> results have changed from the original predictions for <span class="math inline">\(t^* = 75, 76, 94\)</span> and <span class="math inline">\(96\)</span>. Checking what is now different to the <code>pbsEDM</code> results:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(different_excl,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">abs</span>(pbsEDM_pred <span class="sc">-</span> rEDM_pred_excl_2) <span class="sc">&gt;</span> epsilon)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 2 × 5</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>      t pbsEDM_pred rEDM_pred rEDM_pred_excl_1 rEDM_pred_excl_2</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span>             <span class="fl">1.03</span> </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">97</span>      <span class="sc">-</span><span class="fl">0.798</span>    <span class="sc">-</span><span class="fl">0.798</span>           <span class="sc">-</span><span class="fl">0.798</span>            <span class="fl">0.755</span></span></code></pre></div>
+<p>So <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span> are different to the <code>pbsEDM</code> results. So while setting <code>exclusionRadius</code> equal to 2 seems to have ‘fixed’ Aspect 2 for <span class="math inline">\(t^* = 75\)</span> and <span class="math inline">\(94\)</span>, this has led to incorrect predictions for <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span>.</p>
+<p>Repeating the above with <code>exclusionRadius</code>=3 leads to five differences with the <code>pbsEDM</code> results (results not shown).</p>
+<p>So, we conclude that change <code>exclusionRadius</code> in the call to <code>rEDM::Simplex()</code> does not fix Aspect 2.</p>
+</div>
+<div id="independent-code" class="section level2">
+<h2>Independent code</h2>
+<p>Aspect 2 was originally figured out using other code (written by Andrew Edwards) to help understand EDM. The results are saved as <code>NY_lags_example_3$my.pred</code>. The predictions agree with those calculated here using <code>pbsEDM</code>:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(NY_lags_example_3<span class="sc">$</span>my.pred,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                       pbsEDM_pred)</span></code></pre></div>
+<p>The original code also allowed independent verification of the above results (for example by explicitly allowing <span class="math inline">\(Y_{t^* + 1}\)</span> to be used as a nearest neighbour). The original code is available on request, but is not functionalised or generalisable for <span class="math inline">\(E&gt;2\)</span>, and is now superceded by the functions in <code>pbsEDM</code>. Note that writing of the <code>pbsEDM</code> code was led by Luke Rogers, using functions that were independently written from the original code. Hence the original code also served as an independent check of some of the <code>pbsEDM</code> code.</p>
+</div>
+<div id="test-that-redm-and-pbsedm-results-have-not-changed" class="section level2">
+<h2>Test that rEDM and pbsEDM results have not changed</h2>
+<p>Here we run some tests to check that if any of the above results from <code>pbsEDM</code> or <code>rEDM</code> have changed from when this vignette was written (some results are saved in <code>NY_lags_example_3</code>). The tests will give errors if they fail (and any such failures should be investigated and this vignette updated).</p>
+<p>Check the default <code>rEDM</code> predictions have not changed.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(NY_lags_example_3<span class="sc">$</span>rEDM.pred,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                       rEDM_res<span class="sc">$</span>Predictions)       <span class="co"># If no error then they match</span></span></code></pre></div>
+<p>Also check that the results with different values of <code>exclusionsRadius</code> have not changed:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(check_rEDM_excl_1, rEDM_pred_excl_1)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(check_rEDM_excl_2, rEDM_pred_excl_2)</span></code></pre></div>
+<p>The test in the <code>Independent code</code> section has already verified that the <code>pbsEDM</code> results have not changed (since they match the <code>my.pred</code> results from the original independent code).</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
