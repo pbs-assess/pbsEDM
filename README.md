@@ -16,9 +16,9 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 
 An R package to implement some of the methods of empirical dynamic modelling
 
-The name `pbsEDM` amalgamates our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with Empirical Dynamic Modelling (EDM), the focus of the package. The package was developed in conjuction with a manuscript currently being submitted. 
+The name `pbsEDM` combines our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with empirical dynamic modelling (EDM), the focus of the package. The package was developed in conjuction with a manuscript currently being submitted. 
 
-The package implements the Simplex and S-map algorithms of Empirical Dynamic Modelling, and creates visualisations to help understand the methods, for example:
+The package implements the simplex and S-map algorithms of empirical dynamic modelling, and creates visualisations to help understand the methods, for example:
 
 ![](vignettes/pbsEDM_movie_tstar_39.gif)
 
@@ -33,7 +33,7 @@ devtools::install_github("pbs-assess/pbsEDM")
 
 The vignettes are already rendered here:
 
-* [analyse_simple_time_series.html](analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
+* [analyse_simple_time_series.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/doc/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
 * [aspect_2.html](aspect_2.html) Demonstration of Aspect 2.
 * [aspect_3_4.html](aspect_3_4.html) Demonstrations of Aspects 3 and 4.
 * [pbsSmap.html](pbsSmap.html) Demonstration of S-map code.
