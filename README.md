@@ -33,10 +33,10 @@ devtools::install_github("pbs-assess/pbsEDM")
 
 The vignettes are already rendered here:
 
-* [analyse_simple_time_series.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/doc/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
-* [aspect_2.html](aspect_2.html) Demonstration of Aspect 2.
-* [aspect_3_4.html](aspect_3_4.html) Demonstrations of Aspects 3 and 4.
-* [pbsSmap.html](pbsSmap.html) Demonstration of S-map code.
+* [analyse_simple_time_series.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
+* [aspect_2.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/aspect_2.html) Demonstration of Aspect 2.
+* [aspect_3_4.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/aspect_3_4.html) Demonstrations of Aspects 3 and 4.
+* [pbsSmap.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/pbsSmap.html) Demonstration of S-map code.
 
 The source code written in `Rmarkdown`, the R code that gets extracted from the
   `Rmarkdown` code, and the resulting .html files are all found within your library
