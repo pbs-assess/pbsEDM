@@ -247,6 +247,29 @@ $Y_{96}$ far away it is no longer a
 nearest neighbour, and so Aspect 2
 is shown to occur for `rEDM`.
 
+As a further check, we test the new `exclusion_radius` option with a value of 0,
+which should match the `rEDM` default results.
+
+```{r excl0}
+pbsEDM_res_excl_0_full <- pbsEDM::pbsEDM(input,
+                                         lags = list(Y_t = c(0:1)),
+                                         exclusion_radius = 0)
+pbsEDM_pred_excl_0 <- pbsEDM_res_excl_0_full$X_forecast[-length(pbsEDM_res_excl_0_full$X_forecast)]
+
+plot(rEDM_pred,
+     pbsEDM_pred_excl_0,
+     xlab = "rEDM predictions",
+     ylab = "pbsEDM predictions")
+abline(a=0,
+       b=1,
+       col="grey")
+
+testthat::expect_equal(rEDM_pred, pbsEDM_pred_excl_0,
+                       tolerance = epsilon)            # No error means they match
+```
+
+So this is a useful test for our code with `exclusion_radius = 0`.
+
 ### Calculations for $t^*=75$
 
 We now repeat the above calculations for $t^*=75$. Skipping some of the
@@ -458,6 +481,33 @@ results (results not shown).
 
 So, we conclude that change `exclusionRadius` in the call to `rEDM::Simplex()`
 does not fix Aspect 2.
+
+## Check our `exclusion_radius` setting
+
+Also try `exclusion_radius = 7` as a further check, comparing with `rEDM` calculations:
+```{r excl7}
+pbsEDM_res_excl_7_full <- pbsEDM::pbsEDM(input,
+                                         lags = list(Y_t = c(0:1)),
+                                         exclusion_radius = 7)
+pbsEDM_pred_excl_7 <- pbsEDM_res_excl_7_full$X_forecast[-length(pbsEDM_res_excl_7_full$X_forecast)]
+
+rEDM_res_7 <- rEDM::Simplex(dataFrame = input,
+                            columns = "Y_t",
+                            target = "Y_t",
+                            lib = "1 99",
+                            pred = "1 99",
+                            E = 2,
+                            verbose = TRUE,
+                            exclusionRadius = 7)
+
+rEDM_res_7 <- rbind(c(1, input$Y_t[1], NA, NA),
+                  rEDM_res_7)             # Add Time = 1 values, to give t = 1:100
+
+rEDM_pred_7 <- rEDM_res_7$Predictions       # Just the predicted values
+
+testthat::expect_equal(rEDM_pred_7, pbsEDM_pred_excl_7,
+                       tolerance = epsilon)            # No error means they match
+```
 
 ## Independent code
 
