@@ -120,13 +120,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -355,7 +362,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> <span class="fl">1.10</span>   <span class="sc">-</span><span class="fl">0.889</span> </span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> <span class="fl">0.214</span>  <span class="sc">-</span><span class="fl">0.203</span> </span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span> <span class="fl">0.0116</span>  <span class="fl">0.498</span> </span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># … with 90 more rows</span></span></code></pre></div>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ 90 more rows</span></span></code></pre></div>
 </div>
 <div id="calculations-using-pbsedm-as-done-in-aspect-2-vignette" class="section level2">
 <h2>Calculations using pbsEDM (as done in Aspect 2 vignette)</h2>

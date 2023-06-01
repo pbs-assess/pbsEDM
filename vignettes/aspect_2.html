@@ -120,13 +120,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -357,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> <span class="sc">-</span><span class="fl">0.889</span> </span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> <span class="sc">-</span><span class="fl">0.203</span> </span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span>  <span class="fl">0.498</span> </span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># … with 90 more rows</span></span></code></pre></div>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ 90 more rows</span></span></code></pre></div>
 <p>Note that <code>NY_lags_example_3</code> already contains results. At the end of this vignette we verify that results using <code>rEDM</code> or <code>pbsEDM</code> have not changed (for example due to package updates) from those saved in <code>NY_lags_example_3</code>.</p>
 <p>We will do the simplex calculations for embedding dimension <span class="math inline">\(E = 2\)</span> using <code>rEDM</code> and <code>pbsEDM</code> (and also compare with some earlier independent code).</p>
 </div>
@@ -366,7 +373,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>First, use the <code>rEDM</code> package:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(rEDM)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">&quot;rEDM&quot;</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">&#39;1.13.0&#39;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">&#39;1.14.0&#39;</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># &#39;1.13.0&#39;, published 2022-06-17</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rEDM_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
