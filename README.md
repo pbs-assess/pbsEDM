@@ -5,8 +5,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/pbs-assess/pbsEDM/workflows/R-CMD-check/badge.svg)](https://github.com/pbs-assess/pbsEDM/actions)
-[![Coverage
-status](https://codecov.io/gh/pbs-assess/pbsEDM/branch/master/graph/badge.svg)](https://codecov.io/github/pbs-assess/pbsEDM?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/pbs-assess/pbsEDM/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pbs-assess/pbsEDM?branch=main)
 
 <!-- [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
