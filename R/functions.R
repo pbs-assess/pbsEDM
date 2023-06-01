@@ -11,13 +11,9 @@
 #' @param first_difference Logical. First-difference each time series?
 #' @param centre_and_scale Logical. Centre and scale each time series?
 #' @param exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
-#'   candidate nearest neighbours. Default is `half` as used for our manuscript
-#'   (see equation (6)), to only
-#'   exclude the next $E$ values, where embedding dimension $E$  is defined as the
-#'   number of lags specified in `lags`. If `exclusion_radius` is an integer,
-#'   then that number of values after \emph{and} before ${\bf x}_t^*$ are
-#'   excluded, to match the `exclusionRadius` setting in `rEDM::Simplex()` TODO
-#'   check vignette gives matching results.
+#'   candidate nearest neighbours; either default of `half` as used for our manuscript
+#'   (see equation (6)), or a number to match
+#'   the `exclusionRadius` setting in `rEDM::Simplex()`. See ?pbsDist for more details.
 #' @param verbose Logical. Print progress?
 #'
 #' @details The name of the first element in \code{lags} must match the name of
@@ -146,8 +142,14 @@ pbsEDM <- function (N,
 
   if (verbose) cat("defining neighbour distances\n")
   # Distances between points in state space (row vectors in X)
-  X_distance <- pbsDist(X, lags, p, first_difference)   # Isn't first
-                                        # differencing already done above?
+  X_distance <- pbsDist(X,
+                        lags,
+                        p,
+                        first_difference,
+                        exclusion_radius = exclusion_radius)
+                                        # Think first_difference
+                                        # is still needed to keep track
+                                        # of what to exclude in pbsDist().
 
   #----------------- Create neighbour index matrix ----------------------------#
   # TODO: Continue from here (notation and algorithm)
