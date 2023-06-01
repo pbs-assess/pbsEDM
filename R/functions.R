@@ -13,7 +13,7 @@
 #' @param exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
 #'   candidate nearest neighbours; either default of `half` as used for our manuscript
 #'   (see equation (6)), or a number to match
-#'   the `exclusionRadius` setting in `rEDM::Simplex()`. See ?pbsDist for more details.
+#'   the `exclusionRadius` setting in `rEDM::Simplex()`. See `?pbsDist` for more details.
 #' @param verbose Logical. Print progress?
 #'
 #' @details The name of the first element in \code{lags} must match the name of
@@ -253,6 +253,7 @@ pbsEDM <- function (N,
       p = as.integer(p),
       first_difference = first_difference,
       centre_and_scale = centre_and_scale,
+      exclusion_radius = exclusion_radius,
       results = results
     ),
     class = "pbsEDM"
@@ -303,6 +304,10 @@ pbsEDM_Evec <- function(N_t,
 #' @param p The integer forecast distance.
 #' @param first_difference Logical. First-difference each time series?
 #' @param centre_and_scale Logical. Centre and scale each time series?
+#' @param exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
+#'   candidate nearest neighbours; either default of `half` as used for our manuscript
+#'   (see equation (6)), or a number to match
+#'   the `exclusionRadius` setting in `rEDM::Simplex()`. See `?pbsDist` for more details.
 #' @param verbose Logical. Print progress?
 #'
 #' @details The name of the first element in \code{lags} must match the name of
@@ -414,6 +419,7 @@ pbsSmap <- function (N,
                      p = 1L,
                      first_difference = FALSE,
                      centre_and_scale = FALSE,
+                     exclusion_radius = "half",
                      verbose = FALSE) {
 
   tictoc::tic("pbsEDM")
@@ -448,7 +454,11 @@ pbsSmap <- function (N,
 
   if (verbose) cat("defining neighbour distances\n")
   # Distances between points in state space (row vectors in X)
-  X_distance <- pbsDist(X, lags, p, first_difference)
+  X_distance <- pbsDist(X,
+                        lags,
+                        p,
+                        first_difference,
+                        exclusion_radius = exclusion_radius)
 
   #----------------- Create neighbour index matrix ----------------------------#
   # TODO: Continue from here (notation and algorithm)
@@ -630,6 +640,7 @@ pbsSmap <- function (N,
       p = as.integer(p),
       first_difference = first_difference,
       centre_and_scale = centre_and_scale,
+      exclusion_radius = exclusion_radius,
       results = results
     ),
     class = c("pbsEDM", "pbsSmap")
@@ -646,6 +657,10 @@ pbsSmap <- function (N,
 #' @param p The integer forecast distance.
 #' @param first_difference Logical. First-difference each time series?
 #' @param centre_and_scale Logical. Centre and scale each time series?
+#' @param exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
+#'   candidate nearest neighbours; either default of `half` as used for our manuscript
+#'   (see equation (6)), or a number to match
+#'   the `exclusionRadius` setting in `rEDM::Simplex()`. See `?pbsDist` for more details.
 #'
 #' @return [numeric()] The forecast accuracy rho
 #' @export
@@ -662,7 +677,8 @@ smap_efficient <- function (N,
                             theta = 0,
                             p = 1L,
                             first_difference = FALSE,
-                            centre_and_scale = FALSE){
+                            centre_and_scale = FALSE,
+                            exclusion_radius = "half"){
 
   #----------------- Define X -------------------------------------------------#
 
@@ -674,7 +690,11 @@ smap_efficient <- function (N,
   #----------------- Exclude disallowed neighbours ----------------------------#
 
   # Distances between points in state space (row vectors in X)
-  X_distance <- pbsDist(X, lags, p, first_difference)
+  X_distance <- pbsDist(X,
+                        lags,
+                        p,
+                        first_difference,
+                        exclusion_radius = exclusion_radius)
 
   #----------------- Create neighbour index matrix ----------------------------#
   # TODO: Continue from here (notation and algorithm)
