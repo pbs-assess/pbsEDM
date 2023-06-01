@@ -10,6 +10,14 @@
 #' @param p The integer forecast distance.
 #' @param first_difference Logical. First-difference each time series?
 #' @param centre_and_scale Logical. Centre and scale each time series?
+#' @param exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
+#'   candidate nearest neighbours. Default is `half` as used for our manuscript
+#'   (see equation (6)), to only
+#'   exclude the next $E$ values, where embedding dimension $E$  is defined as the
+#'   number of lags specified in `lags`. If `exclusion_radius` is an integer,
+#'   then that number of values after \emph{and} before ${\bf x}_t^*$ are
+#'   excluded, to match the `exclusionRadius` setting in `rEDM::Simplex()` TODO
+#'   check vignette gives matching results.
 #' @param verbose Logical. Print progress?
 #'
 #' @details The name of the first element in \code{lags} must match the name of
@@ -72,7 +80,6 @@
 #' \item \code{projected_weight} [matrix()] Projected neighbour weight by
 #'   projected time (row) and neighbour distance rank (column)
 #'
-#'
 #' \item \code{lags} [list()] A named list of integer vectors specifying the
 #'   lags to use for each time  series in \code{N}
 #'
@@ -107,7 +114,8 @@ pbsEDM <- function (N,
                     p = 1L,
                     first_difference = FALSE,
                     centre_and_scale = FALSE,
-                    verbose = FALSE) {
+                    exclusion_radius = "half",
+                    verbose = FALSE){
 
   #----------------- Check arguments ------------------------------------------#
 
@@ -138,7 +146,8 @@ pbsEDM <- function (N,
 
   if (verbose) cat("defining neighbour distances\n")
   # Distances between points in state space (row vectors in X)
-  X_distance <- pbsDist(X, lags, p, first_difference)
+  X_distance <- pbsDist(X, lags, p, first_difference)   # Isn't first
+                                        # differencing already done above?
 
   #----------------- Create neighbour index matrix ----------------------------#
   # TODO: Continue from here (notation and algorithm)
@@ -147,7 +156,8 @@ pbsEDM <- function (N,
   # nbr_inds is an nrow(X) x num_nbrs matrix of X row indices
   lags_size <- unlist(lags, use.names = FALSE)
   lags_name <- rep(names(lags), lengths(lags))
-  num_nbrs <- length(lags_size) + 1
+  E <- length(lags_size)
+  num_nbrs <- E + 1
   seq_nbrs <- seq_len(num_nbrs)
   nbr_inds <- t(apply(X_distance, 1, order))[, seq_nbrs]
   nbr_inds[which(rowSums(!is.na(X_distance)) < num_nbrs), ] <- NA
@@ -205,7 +215,6 @@ pbsEDM <- function (N,
   N_rmse <- sqrt(mean((N_observed - N_forecast)^2, na.rm = TRUE))
   X_rho <- stats::cor(X_observed, X_forecast, use = "pairwise.complete.obs")
   X_rmse <- sqrt(mean((X_observed - X_forecast)^2, na.rm = TRUE))
-  E <- length(lags_size)
   results <- data.frame(E = E,
                         N_rho = N_rho,
                         N_rmse = N_rmse,
