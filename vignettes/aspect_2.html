@@ -344,7 +344,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pbsEDM)</span></code></pre></div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>In the manuscript, the library contains the candidate points that can be used to determine the nearest neighbours of the focal point from which we are making a prediction. Aspect 2 concerns which points can be considered as being in the library, and which should be excluded. Here we find that occasionally <code>rEDM</code> includes some points that should be excluded.</p>
+<p>In the manuscript, the library contains the candidate points that can be used to determine the nearest neighbours of the focal point from which we are making a prediction. Aspect 2 concerns which points can be considered as being in the library, and which should be excluded. Here we show how our suggested approach differs slightly from that in <code>rEDM</code>, giving minor changes in results. We also provide options to test alternative assumptions about which candidate neighours to exclude.</p>
 <!-- Simplifying down from inclusion_issue_5.Rmd, which was more for working -->
 <!-- things out. Now have text written up can keep the vignette simpler -->
 <p>We use the simulated population time series from the manuscript, with first-differenced values denoted <span class="math inline">\(Y_t\)</span> at <span class="math inline">\(t = 1, 2, 3, ..., 99, 100\)</span>. We extract them from the saved tibble <code>NY_lags_example_3</code>:</p>
@@ -374,7 +374,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(rEDM)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">&quot;rEDM&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">&#39;1.14.0&#39;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># &#39;1.13.0&#39;, published 2022-06-17</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># We used &#39;1.14.0&#39; was published 7th January 2023</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rEDM_res <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
@@ -393,7 +393,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="calculations-using-pbsedm" class="section level2">
 <h2>Calculations using pbsEDM</h2>
-<p>See the <a href="analyse_simple_time_series.html"><code>analyse_simple_time_series</code></a> vignette for general details on using the code. Here do the simplex calculation as just done using <code>rEDM</code>:</p>
+<p>See the <a href="analyse_simple_time_series.html"><code>analyse_simple_time_series</code></a> vignette for general details on using the code. Here do the simplex calculation using <code>pbsEDM</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_full <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)))   <span class="co"># Gives full calculations</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -434,11 +434,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">95</span>     <span class="fl">0.177</span>       <span class="fl">0.412</span></span></code></pre></div>
 <p>So there are two time indices for which results differ between <code>pbsEDM</code> and <code>rEDM</code>, corresponding to <span class="math inline">\(t^* =\)</span> 75 and 94.</p>
 </div>
-<div id="explaining-the-issue-aspect-2" class="section level2">
-<h2>Explaining the issue – Aspect 2</h2>
+<div id="explaining-the-differences" class="section level2">
+<h2>Explaining the differences</h2>
 <p>As defined in the manuscript, vector <span class="math inline">\(\bf{\tilde{x}}_t\)</span> has components defined by the lagged values of scalars <span class="math inline">\(Y_t\)</span>. For <span class="math inline">\(E=2\)</span> we have <span class="math display">\[\bf{\tilde{x}}_t = [Y_t, ~Y_{t-1}].\]</span> For focal time <span class="math inline">\(t^*\)</span>, we know <span class="math inline">\(Y_{t^*}\)</span> and are trying to predict <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
-<p>Aspect 2 in the manuscript is explicitly defined by exclusion condition (d), namely that the library of allowable nearest neighbours cannot include any <span class="math inline">\(\bf{x}_t\)</span> that includes <span class="math inline">\(Y_{t^*+1}\)</span>, since we are trying to predict <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
-<p>Thus, the library cannot include <span class="math display">\[\bf{x}_{t^*+1} = [Y_{t^*+1}, ~Y_{t^*}]\]</span> or <span class="math display">\[\bf{x}_{t^*+2} = [Y_{t^*+2}, ~Y_{t^*+1}]\]</span> since these both contain <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
+<p>In the manuscript we presented exclusion condition (d), namely that the library of allowable nearest neighbours cannot include any <span class="math inline">\(\bf{x}_t\)</span> that includes <span class="math inline">\(Y_{t^*+1}\)</span>, since we are trying to predict <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
+<p>Thus, the library does not include <span class="math display">\[\bf{x}_{t^*+1} = [Y_{t^*+1}, ~Y_{t^*}]\]</span> or <span class="math display">\[\bf{x}_{t^*+2} = [Y_{t^*+2}, ~Y_{t^*+1}]\]</span> since these both contain <span class="math inline">\(Y_{t^*+1}\)</span>.</p>
 <div id="calculations-for-t94" class="section level3">
 <h3>Calculations for <span class="math inline">\(t^*=94\)</span></h3>
 <p>For <span class="math inline">\(t^*=94\)</span>, we have the aforementioned discrepancy between calculations:</p>
@@ -507,8 +507,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>rEDM_change_pred[t_star<span class="sc">+</span><span class="dv">1</span>]</span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4123431</span></span></code></pre></div>
 <p>Since this again agrees with the <code>pbsEDM</code> calculation, we conclude that <span class="math display">\[\bf{x}_{96} = [Y_{96}, ~Y_{95}]\]</span></p>
-<p>was incorrectly being included in the library of candidate nearest neighbours by <code>rEDM</code>, since by moving <span class="math inline">\(Y_{95}\)</span> or <span class="math inline">\(Y_{96}\)</span> far away it is no longer a nearest neighbour, and so Aspect 2 is shown to occur for <code>rEDM</code>.</p>
-<p>As a further check, we test the new <code>exclusion_radius</code> option with a value of 0, which should match the <code>rEDM</code> default results.</p>
+<p>was being included in the library of candidate nearest neighbours by <code>rEDM</code>, since by moving <span class="math inline">\(Y_{95}\)</span> or <span class="math inline">\(Y_{96}\)</span> far away it is no longer a nearest neighbour.</p>
+<p>As a further check, we test our new <code>exclusion_radius</code> option in <code>pbsEDM::pbsEDM()</code> with a value of 0, which should match the <code>rEDM</code> default results.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_excl_0_full <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)),</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">exclusion_radius =</span> <span class="dv">0</span>)</span>
@@ -525,7 +525,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(rEDM_pred, pbsEDM_pred_excl_0,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">tolerance =</span> epsilon)            <span class="co"># No error means they match</span></span></code></pre></div>
-<p>So this is a useful test for our code with <code>exclusion_radius = 0</code>.</p>
+<p>This shows that we can reproduced the <code>rEDM</code> results using <code>pbsEDM</code> with <code>exclusion_radius = 0</code>.</p>
 </div>
 <div id="calculations-for-t75" class="section level3">
 <h3>Calculations for <span class="math inline">\(t^*=75\)</span></h3>
@@ -593,7 +593,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>i.e.</p>
 <p><span class="math display">\[\bf{x}_{76} = [Y_{76}, ~Y_{75}]\]</span> to be a nearest neighbour of <span class="math inline">\(\bf{x}_{75}\)</span> (and not <span class="math inline">\(\bf{x}_{77}\)</span>).</p>
 <p>Note that <code>rEDM</code> prediction of 6.960745 is now very large. This is because <code>rEDM</code> is still finding <span class="math inline">\(\bf{x}_{76}\)</span> to be a nearest neighbour. In the next time step this moves to <span class="math inline">\(\bf{x}_{77} = [Y_{77}, ~Y_{76}]\)</span>, but we have just made <span class="math inline">\(Y_{77}\)</span> very large and this value gets used in the calculation of <span class="math inline">\(\hat{Y}_{76}\)</span> (equation 13 in the manuscript), which is therefore very large.</p>
-<p>Thus, we have demonstrated two examples for which <code>rEDM</code> has used <span class="math inline">\(Y_{t^* + 1}\)</span> as a nearest neighbours (through <span class="math inline">\(\bf{x}_{t^*+2}\)</span> for <span class="math inline">\(t^*=94\)</span> and <span class="math inline">\(\bf{x}_{t^*+1}\)</span> for <span class="math inline">\(t^*=75\)</span>), and so Aspect 2 is occurring.</p>
+<p>Thus, we have demonstrated two examples for which <code>rEDM</code> has used <span class="math inline">\(Y_{t^* + 1}\)</span> as a nearest neighbours (through <span class="math inline">\(\bf{x}_{t^*+2}\)</span> for <span class="math inline">\(t^*=94\)</span> and <span class="math inline">\(\bf{x}_{t^*+1}\)</span> for <span class="math inline">\(t^*=75\)</span>).</p>
 </div>
 </div>
 <div id="differences-in-rho" class="section level2">
@@ -606,11 +606,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho <span class="ot">&lt;-</span> pbsEDM_res_full<span class="sc">$</span>results<span class="sc">$</span>X_rho</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>pbsEDM_rho</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.6950458</span></span></code></pre></div>
-<p>So the correlation coefficient is actually slight higher for the <code>pbsEDM</code> results compared to the <code>rEDM</code> results. Thus, for this example there is an improved fit from accommodating Aspect 2 (in <code>pbsEDM</code>). So accuracy of <code>rEDM</code> can be improved by accommodating Aspect 2 (this not guaranteed, but these results show that it will not necessarily give worse results).</p>
+<p>So the correlation coefficient is actually slight higher for the <code>pbsEDM</code> results compared to the <code>rEDM</code> results. Thus, for this example there is an improved fit from accommodating our suggested neighbour exclusions.</p>
 </div>
 <div id="try-alternative-exclusionradius-settings-for-redm" class="section level2">
 <h2>Try alternative <code>exclusionRadius</code> settings for <code>rEDM</code></h2>
-<p>We now try changing the <code>exclusionRadius</code> input value in <code>rEDM::Simplex</code>, which (from <code>?rEDM::Simplex</code>) “excludes vectors from the search space of nearest neighbors if their relative time index is within exclusionRadius.”</p>
+<p>We now try changing the <code>exclusionRadius</code> input value in <code>rEDM::Simplex</code>, which (from <code>?rEDM::Simplex</code>) “excludes vectors from the search space of nearest neighbors if their relative time index is within exclusionRadius”. This excludes temporal neighbours both forward and backwards in time, whereas we suggest (our equation (6)) to just remove the <span class="math inline">\(E\)</span> forward neighbours.</p>
 <p>So, re-using the above code and trying <code>exclusionRadius</code>=1 (the default is 0):</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_1 <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
@@ -648,7 +648,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span> </span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">95</span>       <span class="fl">0.412</span>     <span class="fl">0.177</span>            <span class="fl">0.177</span></span></code></pre></div>
-<p>So <span class="math inline">\(t^* = 75\)</span>, which we just found had changed with the <code>exclusionRadius</code>=1, is not shown here meaning that it now matches the <code>pbsEDM</code> result. Thus Aspect 2 has been corrected for that value. But <span class="math inline">\(t^* = 94\)</span> is still different to the <code>pbsEDM</code> results, so the correction is not global, and <span class="math inline">\(t^* = 76\)</span> is now different.</p>
+<p>So <span class="math inline">\(t^* = 75\)</span>, which we just found had changed with the <code>exclusionRadius</code>=1, is not shown here meaning that it now matches the <code>pbsEDM</code> result. But <span class="math inline">\(t^* = 94\)</span> is still different to the <code>pbsEDM</code> results, so the correction is not global, and <span class="math inline">\(t^* = 76\)</span> is now different.</p>
 <p>So we now try setting <code>exclusionRadius</code>=2:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rEDM_res_excl_2 <span class="ot">&lt;-</span> rEDM<span class="sc">::</span><span class="fu">Simplex</span>(<span class="at">dataFrame =</span> input,</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">columns =</span> <span class="st">&quot;Y_t&quot;</span>,</span>
@@ -677,7 +677,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span>             <span class="fl">1.03</span> </span>
 <span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>    <span class="dv">95</span>       <span class="fl">0.412</span>     <span class="fl">0.177</span>            <span class="fl">0.177</span>            <span class="fl">0.412</span></span>
 <span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>    <span class="dv">97</span>      <span class="sc">-</span><span class="fl">0.798</span>    <span class="sc">-</span><span class="fl">0.798</span>           <span class="sc">-</span><span class="fl">0.798</span>            <span class="fl">0.755</span></span></code></pre></div>
-<p>So with <code>exclusionRadius</code>=2, the <code>rEDM</code> results have changed from the original predictions for <span class="math inline">\(t^* = 75, 76, 94\)</span> and <span class="math inline">\(96\)</span>. Checking what is now different to the <code>pbsEDM</code> results:</p>
+<p>So with <code>exclusionRadius</code>=2, the <code>rEDM</code> results have changed from the original <code>rEDM</code> predictions for <span class="math inline">\(t^* = 75, 76, 94\)</span> and <span class="math inline">\(96\)</span>. Checking what is now different to the <code>pbsEDM</code> results:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(different_excl,</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">abs</span>(pbsEDM_pred <span class="sc">-</span> rEDM_pred_excl_2) <span class="sc">&gt;</span> epsilon)</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 2 × 5</span></span>
@@ -685,13 +685,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>int<span class="sc">&gt;</span>       <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>            <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>    <span class="dv">77</span>      <span class="sc">-</span><span class="fl">0.381</span>    <span class="sc">-</span><span class="fl">0.381</span>            <span class="fl">1.03</span>             <span class="fl">1.03</span> </span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>    <span class="dv">97</span>      <span class="sc">-</span><span class="fl">0.798</span>    <span class="sc">-</span><span class="fl">0.798</span>           <span class="sc">-</span><span class="fl">0.798</span>            <span class="fl">0.755</span></span></code></pre></div>
-<p>So <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span> are different to the <code>pbsEDM</code> results. So while setting <code>exclusionRadius</code> equal to 2 seems to have ‘fixed’ Aspect 2 for <span class="math inline">\(t^* = 75\)</span> and <span class="math inline">\(94\)</span>, this has led to incorrect predictions for <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span>.</p>
+<p>So <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span> are different to the <code>pbsEDM</code> results. So while setting <code>exclusionRadius</code> equal to 2 seems to have led to results agreeing for <span class="math inline">\(t^* = 75\)</span> and <span class="math inline">\(94\)</span>, predictions now differ for <span class="math inline">\(t^* = 76\)</span> and <span class="math inline">\(96\)</span>.</p>
 <p>Repeating the above with <code>exclusionRadius</code>=3 leads to five differences with the <code>pbsEDM</code> results (results not shown).</p>
-<p>So, we conclude that change <code>exclusionRadius</code> in the call to <code>rEDM::Simplex()</code> does not fix Aspect 2.</p>
+<p>So, as expected, changing <code>exclusionRadius</code> in the call to <code>rEDM::Simplex()</code> does not give exactly the same results as our suggested default.</p>
 </div>
 <div id="check-our-exclusion_radius-setting" class="section level2">
 <h2>Check our <code>exclusion_radius</code> setting</h2>
-<p>Also try <code>exclusion_radius = 7</code> as a further check, comparing with <code>rEDM</code> calculations:</p>
+<p>We also try <code>exclusion_radius = 7</code> in <code>pbsEDM::pbsEDM()</code>, just picking 7 as a new example, as a further check of our code, comparing with <code>rEDM</code> calculations:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pbsEDM_res_excl_7_full <span class="ot">&lt;-</span> pbsEDM<span class="sc">::</span><span class="fu">pbsEDM</span>(input,</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">lags =</span> <span class="fu">list</span>(<span class="at">Y_t =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)),</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">exclusion_radius =</span> <span class="dv">7</span>)</span>
@@ -713,10 +713,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(rEDM_pred_7, pbsEDM_pred_excl_7,</span>
 <span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>                       <span class="at">tolerance =</span> epsilon)            <span class="co"># No error means they match</span></span></code></pre></div>
+<p>Thus, the calculations agree.</p>
 </div>
 <div id="independent-code" class="section level2">
 <h2>Independent code</h2>
-<p>Aspect 2 was originally figured out using other code (written by Andrew Edwards) to help understand EDM. The results are saved as <code>NY_lags_example_3$my.pred</code>. The predictions agree with those calculated here using <code>pbsEDM</code>:</p>
+<p>Some of the above differences were originally figured out using other independent code (written by Andrew Edwards) to help understand EDM. The results are saved as <code>NY_lags_example_3$my.pred</code>. The predictions agree with those calculated here using <code>pbsEDM</code>:</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(NY_lags_example_3<span class="sc">$</span>my.pred,</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>                       pbsEDM_pred)</span></code></pre></div>
 <p>The original code also allowed independent verification of the above results (for example by explicitly allowing <span class="math inline">\(Y_{t^* + 1}\)</span> to be used as a nearest neighbour). The original code is available on request, but is not functionalised or generalisable for <span class="math inline">\(E&gt;2\)</span>, and is now superceded by the functions in <code>pbsEDM</code>. Note that writing of the <code>pbsEDM</code> code was led by Luke Rogers, using functions that were independently written from the original code. Hence the original code also served as an independent check of some of the <code>pbsEDM</code> code.</p>

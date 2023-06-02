@@ -28,12 +28,6 @@ The tibble `NY_lags_example` is saved in the package and contains several column
 though we are only going to use the original time series of simulated population numbers,
 $N_t$, which has column name `N_t`. See `?NY_lags_example` for full details.
 
-<!-- , the lagged value $N(t-1)$ as `Ntmin1`, and first difference
-$X(t) = N(t+1) - N(t)$ as `Xt` (and `Xtmin1` and `Xtmin2` the lagged
-values). Also has results for embedding dimension 2, using both `rEDM` and Andy's original
-function `EDM_pred_E_2()`.-->
-
-
 ## Plot the data in different ways
 
 We want to plot the data in different ways, for which it is easiest to first run
@@ -164,8 +158,8 @@ plot_explain_edm_movie(E_2_res,
 ![pbsEDM_movie_tstar_15.gif](pbsEDM_movie_tstar_15.gif).
 
 And changing to $t^* = 75$ shows the removal of an invalid candidate nearest
-neighbour from the library that would get used as a nearest neighbour if not
-removed (Aspect 2):
+neighbour from the library (right next to the blue solid circle) that would
+clearly have been used as a nearest neighbour if not removed:
 ```{r EDMmovie4, eval = FALSE}
 # ```{r EDMmovie4, animation.hook = 'gifski', interval = 8}
 plot_explain_edm_movie(E_2_res,

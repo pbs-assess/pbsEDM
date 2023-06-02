@@ -26,8 +26,10 @@ library(pbsEDM)
 In the manuscript, the library contains the candidate points that can be used to determine
 the nearest neighbours of the focal point from which we are making a
 prediction. Aspect 2 concerns which points can be considered
-as being in the library, and which should be excluded. Here we find that
-occasionally `rEDM` includes some points that should be excluded.
+as being in the library, and which should be excluded. Here we show how our
+suggested approach differs slightly from that in `rEDM`, giving minor changes in
+results. We also provide options to test alternative assumptions about which
+candidate neighours to exclude.
 
 <!-- Simplifying down from inclusion_issue_5.Rmd, which was more for working -->
 <!-- things out. Now have text written up can keep the vignette simpler -->
@@ -56,7 +58,7 @@ First, use the `rEDM` package:
 ```{r rEDM}
 # library(rEDM)
 packageVersion("rEDM")
-# '1.13.0', published 2022-06-17
+# We used '1.14.0' was published 7th January 2023
 
 rEDM_res <- rEDM::Simplex(dataFrame = input,
                           columns = "Y_t",
@@ -77,8 +79,7 @@ rEDM_pred <- rEDM_res$Predictions       # Just the predicted values
 ## Calculations using pbsEDM
 
 See the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
-for general details on using the code. Here do the simplex calculation as just
-done using `rEDM`:
+for general details on using the code. Here do the simplex calculation using `pbsEDM`:
 ```{r pbsEDM}
 pbsEDM_res_full <- pbsEDM::pbsEDM(input,
                                   lags = list(Y_t = c(0:1)))   # Gives full calculations
@@ -124,7 +125,7 @@ different
 So there are two time indices for which results differ between `pbsEDM` and
 `rEDM`, corresponding to $t^* =$ `r different$t[1] - 1` and `r different$t[2] - 1`.
 
-## Explaining the issue -- Aspect 2
+## Explaining the differences
 
 As defined in the manuscript, vector $\bf{\tilde{x}}_t$ has components defined by
 the lagged values of scalars $Y_t$. For $E=2$ we have
@@ -132,12 +133,12 @@ $$\bf{\tilde{x}}_t = [Y_t, ~Y_{t-1}].$$
 For focal time $t^*$, we know $Y_{t^*}$ and are trying to predict
 $Y_{t^*+1}$.
 
-Aspect 2 in the manuscript is explicitly defined by exclusion condition (d),
+In the manuscript we presented exclusion condition (d),
 namely that the library of allowable nearest neighbours cannot include
 any $\bf{x}_t$ that includes $Y_{t^*+1}$, since we are trying to predict
 $Y_{t^*+1}$.
 
-Thus, the library cannot include
+Thus, the library does not include
 $$\bf{x}_{t^*+1} = [Y_{t^*+1}, ~Y_{t^*}]$$
 or
 $$\bf{x}_{t^*+2} = [Y_{t^*+2}, ~Y_{t^*+1}]$$
@@ -239,15 +240,15 @@ Since this again agrees with the
 that
 $$\bf{x}_{96} = [Y_{96}, ~Y_{95}]$$
 
-was incorrectly
+was
 being included in the library of
 candidate nearest neighbours by
 `rEDM`, since by moving $Y_{95}$ or
 $Y_{96}$ far away it is no longer a
-nearest neighbour, and so Aspect 2
-is shown to occur for `rEDM`.
+nearest neighbour.
 
-As a further check, we test the new `exclusion_radius` option with a value of 0,
+As a further check, we test our new `exclusion_radius` option in
+`pbsEDM::pbsEDM()` with a value of 0,
 which should match the `rEDM` default results.
 
 ```{r excl0}
@@ -268,7 +269,7 @@ testthat::expect_equal(rEDM_pred, pbsEDM_pred_excl_0,
                        tolerance = epsilon)            # No error means they match
 ```
 
-So this is a useful test for our code with `exclusion_radius = 0`.
+This shows that we can reproduced the `rEDM` results using `pbsEDM` with `exclusion_radius = 0`.
 
 ### Calculations for $t^*=75$
 
@@ -365,8 +366,7 @@ manuscript), which is therefore very large.
 Thus, we have demonstrated two examples for which `rEDM` has used $Y_{t^* + 1}$
 as a nearest neighbours (through
 $\bf{x}_{t^*+2}$ for $t^*=94$ and
-$\bf{x}_{t^*+1}$ for $t^*=75$), and
-so Aspect 2 is occurring.
+$\bf{x}_{t^*+1}$ for $t^*=75$).
 
 ## Differences in $\rho$
 
@@ -383,16 +383,16 @@ pbsEDM_rho
 
 So the correlation coefficient is actually slight higher for the `pbsEDM`
 results compared to the `rEDM` results. Thus, for this example there is an
-improved fit from accommodating Aspect 2 (in `pbsEDM`). So accuracy of `rEDM`
-can be improved by accommodating Aspect 2 (this not guaranteed, but these
-results show that it will not necessarily give worse results).
+improved fit from accommodating our suggested neighbour exclusions.
 
 ## Try alternative `exclusionRadius` settings for `rEDM`
 
 We now try changing the `exclusionRadius` input value in `rEDM::Simplex`, which (from `?rEDM::Simplex`)
 "excludes vectors
 from the search space of nearest neighbors if their relative time
-index is within  exclusionRadius."
+index is within  exclusionRadius". This excludes temporal neighbours both
+forward and backwards in time, whereas we suggest (our equation (6)) to just
+remove the $E$ forward neighbours.
 
 So, re-using the above code and trying `exclusionRadius`=1 (the
 default is 0):
@@ -433,9 +433,8 @@ dplyr::filter(different_excl,
 ```
 
 So $t^* = 75$, which we just found had changed with the `exclusionRadius`=1, is
-not shown here meaning that it now matches the `pbsEDM` result. Thus Aspect 2
-has been corrected for
-that value. But $t^* = 94$ is still different to the `pbsEDM` results, so the
+not shown here meaning that it now matches the `pbsEDM` result.
+But $t^* = 94$ is still different to the `pbsEDM` results, so the
 correction is not global, and $t^* = 76$ is now different.
 
 So we now try setting `exclusionRadius`=2:
@@ -463,7 +462,7 @@ dplyr::filter(different_excl,
 ```
 
 So with `exclusionRadius`=2, the `rEDM` results have changed from the original
-predictions for $t^* = 75, 76, 94$ and $96$. Checking what is now different to the
+`rEDM` predictions for $t^* = 75, 76, 94$ and $96$. Checking what is now different to the
 `pbsEDM` results:
 
 ```{r excl2diff}
@@ -473,18 +472,19 @@ dplyr::filter(different_excl,
 
 So $t^* = 76$ and $96$ are different to the `pbsEDM` results. So while setting
 `exclusionRadius` equal to 2
-seems to have 'fixed' Aspect 2 for $t^* = 75$ and $94$, this has led to incorrect
-predictions for $t^* = 76$ and $96$.
+seems to have led to results agreeing for $t^* = 75$ and $94$, predictions now
+differ for $t^* = 76$ and $96$.
 
 Repeating the above with `exclusionRadius`=3 leads to five differences with the `pbsEDM`
 results (results not shown).
 
-So, we conclude that change `exclusionRadius` in the call to `rEDM::Simplex()`
-does not fix Aspect 2.
+So, as expected, changing `exclusionRadius` in the call to `rEDM::Simplex()`
+does not give exactly the same results as our suggested default.
 
 ## Check our `exclusion_radius` setting
 
-Also try `exclusion_radius = 7` as a further check, comparing with `rEDM` calculations:
+We also try `exclusion_radius = 7` in `pbsEDM::pbsEDM()`, just picking 7 as a
+new example, as a further check of our code, comparing with `rEDM` calculations:
 ```{r excl7}
 pbsEDM_res_excl_7_full <- pbsEDM::pbsEDM(input,
                                          lags = list(Y_t = c(0:1)),
@@ -509,9 +509,12 @@ testthat::expect_equal(rEDM_pred_7, pbsEDM_pred_excl_7,
                        tolerance = epsilon)            # No error means they match
 ```
 
+Thus, the calculations agree.
+
 ## Independent code
 
-Aspect 2 was originally figured out using other code (written by Andrew
+Some of the above differences were originally figured out using other
+independent code (written by Andrew
 Edwards) to help understand EDM. The results are saved as
 `NY_lags_example_3$my.pred`. The predictions agree with those calculated here
 using `pbsEDM`:
