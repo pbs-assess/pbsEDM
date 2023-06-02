@@ -1,5 +1,5 @@
 ---
-title: "Demonstration of negative predictions and differences in correlation coefficients"
+title: "Negative predictions and differences in correlation coefficients"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{negative_predictions}
@@ -25,7 +25,9 @@ library(pbsEDM)
 
 Here we provide reproducible details of our results in the manuscript that predicted values of lagged variables can
 give unrealistic negative predictions of the original unlagged populations,
-and demonstrate a simple proposed solution.
+and demonstrate a simple proposed solution. We also show how correlations based
+on predictions of lagged variables can differ somewhat from those based on the
+predictions of the actual populations (which is what we are interested in).
 
 Again we use the simulated population time series from the manuscript, with
 population size denoted $N_t$ and first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
@@ -37,7 +39,7 @@ input <-  dplyr::select(NY_lags_example_3, t, N_t, Y_t) %>%
 input
 ```
 
-## Calculations using pbsEDM (as done in Aspect 2 vignette)
+## Calculations using pbsEDM (as done in the aspect 2 vignette)
 
 See the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
 for general details on using the code. Here do the simplex calculation for $E = 2$:
@@ -50,7 +52,7 @@ pbsEDM_pred_Y <- pbsEDM_res_full$X_forecast[-length(pbsEDM_res_full$X_forecast)]
                                            #  t=101, so for t = 1:100
 ```
 
-## Explaining the issue -- Aspect 3
+## Explaining how negative population predictions arise
 
 Use the $Y_t$ calculations and then convert to $N_t$. Equation (1) in the
 manuscript defines $Y_t$ as:
@@ -77,7 +79,10 @@ $\hat{N}_2$ and $\hat{N}_3$ (because we cannot predict $\hat{Y}_1$ or
 $\hat{Y}_2$).
 
 Of note are the several negative predictions of $\hat{N}_t$, which
-are unrealistic because our data represent populations -- this is Aspect 3. The indices of these
+are unrealistic because our data represent populations (and negative
+zooplankton, for example, [do not
+exist](https://www.tandfonline.com/doi/full/10.1080/14689360600552944?scroll=top&needAccess=true&role=tab&aria-labelledby=full-article).
+The indices of these
 give the predicted time values (i.e. $t^* + 1$):
 ```{r indices}
 which(pbsEDM_pred_N < 0)
@@ -88,9 +93,9 @@ Of particular interest is the negative prediction for $\hat{N}_{101}$ of
 aim of the analysis is generally to forecast next year's population from all
 currently available data.
 
-## Simple solution to Aspect 3
+## Simple solution
 
-The simplest solution to Aspect 3 is to just replace the negative
+The simplest solution this is to just replace the negative
 predictions $\hat{N}_t$ with the minimum observed value of $N_t$.
 ```{r replace}
 N_t_min <- min(input$N_t)
@@ -104,7 +109,7 @@ as open black circles, then the set with the negative $\hat{N}_t$ values
 replaced as red filled circles (so that 11 points can be seen to change; the 1:1
 line is added in black):
 
-```{r replacefig, echo=FALSE}
+```{r replacefig}
 plot(c(input$N_t, NA),
      pbsEDM_pred_N,
      xlab = "Observed N_t",
@@ -128,10 +133,10 @@ abline(a = 0, b = 1)
 # abline(lm_fit_replace, col = "red")
 ```
 
-## Aspect 4 - good fit for the first-differenced values ($Y_t$) does not necessarily translate to a good fit to the original population sizes ($N_t$)
+## A good fit for the first-differenced values ($Y_t$) does not necessarily translate to a good fit to the original population sizes ($N_t$)
 
-The above simple fix solves Aspect 3 by removing unrealistic negative
-predictions. However, the above figure raises a fundamental issue, in that the
+The above simple fix removes unrealistic negative
+predictions. However, the figure raises a fundamental issue, in that the
 predicted values $\hat{N}_t$ do not seem to match the original data $N_t$ too
 well.
 
@@ -159,7 +164,7 @@ pbsEDM_rho_Y <- pbsEDM_res_full$results$X_rho
 pbsEDM_rho_Y
 ```
 
-This seems to have not been documented before, and so we define it as Aspect 4.
+We highlight it as something for practioners to be aware of.
 
 Plotting  $\hat{Y}_t$ against $Y_t$ (these are the $E=2$ points in the
 manuscript's Figure~1(f):
@@ -178,7 +183,7 @@ shows a good correspondence, as given by the correlation coefficient of
 Thus, a good correspondence based on the first-differenced $Y_t$ values does not
 necessarily lead to good correspondence in the $N_t$ values, which is what we
 are interested in for practical situations. Hence our recommendation that
-practitioners also check the fits of the predctions based on
+practitioners also check the fits of the predictions based on
 non-first-differenced values ($N_t$) and not just first-differenced values
 ($Y_t$).
 
@@ -187,8 +192,7 @@ non-first-differenced values ($N_t$) and not just first-differenced values
 The above was all for the simplest embedding dimension of $E=2$. We repeat the
 calculations here for $E=3$, which is the optimal embedding dimension (based on
 the maximum $\rho$ value), and so should be used for forecasting.
-The code is available in the vignette code but not all
-of it is echoed here. The first-differencing calculations remain the same, the higher embedding
+The first-differencing calculations remain the same, the higher embedding
 dimension just allows more lags (and more neighbours) to be used in the making predictions.
 
 ```{r pbsEDM3}
@@ -216,7 +220,7 @@ which(pbsEDM_pred_N_E_3 < 0)
 Though there is still a negative prediction for $\hat{N}_{101}$ of
 `r  pbsEDM_pred_N_E_3[101]`.
 
-Now solve Aspect 3 by replacing  the negative
+Now replace the negative
 predictions $\hat{N}_t$ with the minimum observed value of $N_t$.
 ```{r replace3}
 N_t_min <- min(input$N_t)
@@ -265,8 +269,6 @@ pbsEDM_rho_Y_E_3 <- pbsEDM_res_full_E_3$results$X_rho
 pbsEDM_rho_Y_E_3
 ```
 
-So again, Aspect 4 occurs.
-
 As above, plotting  $\hat{Y}_t$ against $Y_t$ (these are the $E=3$ points in the
 manuscript's Figure~1(f):
 
@@ -281,7 +283,7 @@ abline(a=0, b=1)
 shows a good correspondence, as given by the correlation coefficient of
 `r pbsEDM_rho_Y_E_3`.
 
-## Test that results have not changed
+## Test that the results have not changed
 
 Here we run some tests to check that if any of the above results from `pbsEDM`
 have changed from when this vignette was written (some results are
