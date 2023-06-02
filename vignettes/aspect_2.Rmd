@@ -509,7 +509,8 @@ testthat::expect_equal(rEDM_pred_7, pbsEDM_pred_excl_7,
                        tolerance = epsilon)            # No error means they match
 ```
 
-Thus, the calculations agree.
+Thus, the calculations agree (and we checke they also do for all values of
+`exclusion_radius` up to 10).
 
 ## Independent code
 
