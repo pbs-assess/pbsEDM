@@ -269,7 +269,7 @@ testthat::expect_equal(rEDM_pred, pbsEDM_pred_excl_0,
                        tolerance = epsilon)            # No error means they match
 ```
 
-This shows that we can reproduced the `rEDM` results using `pbsEDM` with `exclusion_radius = 0`.
+This shows that we can reproduce the `rEDM` results using `pbsEDM` with `exclusion_radius = 0`.
 
 ### Calculations for $t^*=75$
 

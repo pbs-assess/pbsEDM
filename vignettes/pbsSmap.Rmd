@@ -36,9 +36,9 @@ input <-  dplyr::select(NY_lags_example_3, t, N_t, Y_t) %>%
 input
 ```
 
-In the [`analyse_simple_time_series`](analyse_simple_time_series.html) vignette
+In the [`negative_predictions`](negative_predictions.html) vignette
 we used the simplex algorithm and found the optimal embedding dimension to be $E
-= 3$, so we used that here.
+= 3$, so we use that here.
 
 ```{r, Efix}
 E_fix <- 3
@@ -99,12 +99,12 @@ Nhat_101
 
 The latter gives $\hat{N}_{101}$, the forecast of the population at time
 step 101. This is different to the -0.017 calculated using just the simplex
-algorithm with $E=3$ in the [`Demonstration of Aspects 3 and 4`](aspect_3.html)
+algorithm with $E=3$ in the [`negative_predictions`](negative_predictions.html)
 vignette.
-So Aspect 3 (predicting a negative population) is avoided here,
+So prediction of a negative future population is avoided here,
 but there is no guarantee of this with the S-map algorithm.
 
-Regarding Aspect 3, we can check how many negative projected values (across the
+Related to this, we can check how many negative projected values (across the
 whole time series) arise from S-map calculations:
 ```{r, pbsSmap5}
 pbsSmap_pred_Y <- Smap_optimal$Y_forecast[-length(Smap_optimal$Y_forecast)]
@@ -123,7 +123,7 @@ predictions of $Y_t$ to actual values when using S-map compared to using simplex
 ## Calculations using rEDM
 
 We now do the same S-map calculations using code from the `rEDM` package, to see
-if the library of candidate neighbours is correctly determined (Aspect 2).
+how the library of candidate neighbours compares to our default `pbsEDM` library.
 
 ```{r, rEDM1}
 rEDM_Smap <- rEDM::PredictNonlinear(dataFrame = input,
@@ -147,9 +147,7 @@ lines(theta_vec,
 
 The red line gives the `rEDM` results, which are close, but not exactly the
 same, as those from `pbsEDM` (black circles) derived earlier.
-
-We now investigate whether Aspect 2 is occurring in the `rEDM` calculations.
-We use `rEDM::SMap()` for the previously calculated `theta_max`, as it gives
+We now use `rEDM::SMap()` for the previously calculated `theta_max`, as it gives
 more detailed output:
 ```{r, rEDM2}
 rEDM_Smap_full <- rEDM::SMap(dataFrame = input,
@@ -214,14 +212,14 @@ By sorting them we can see the indices in the library:
 sort(Smap_optimal$neighbour_index[t_star, ])
 ```
 This matches equation (7) in the
-manuscript, with the correctly-omitted indices in equation (6) given by
+manuscript, with the omitted indices in equation (6) given by
 ```{r, pbsEDM6c}
 c(1:(E_fix - 1),
   setdiff(E_fix:nrow(input),
           sort(Smap_optimal$neighbour_index[t_star, ])))
 ```
 
-We wish to see whether some of those indices are incorrectly included in the
+We wish to see whether some of those indices are included in the
 library of candidate neighbours for the S-map calculations in `rEDM`, but
 detailed output regarding nearest neighbours etc. is not available from the `rEDM` calculations.
 
@@ -240,7 +238,7 @@ plot_phase_3d(pbsEDM_simplex,
 
 The blue dot is ${\bf x}_{30}$, and the red dots are ${\bf x}_{31}$, ${\bf x}_{32}$,
 and ${\bf x}_{33}$. These are not the nearest neighbours in this case, but note that
-their erroneous inclusion would still affect the mean distance of all points from the
+their inclusion would still affect the mean distance of all points from the
 focal point (equation S.14 in the manuscript), and hence affect the estimate of ${\bf x}_{31}$.
 
 However, for $t^*=93$ (the value with the second largest different between
@@ -252,7 +250,7 @@ plot_phase_3d(pbsEDM_simplex,
 ```
 
 for which one of the red points is very close to the blue ${\bf x}_{93}$, and so
-its erroneous inclusion in the library would surely affect the prediction of
+its inclusion in the library would surely affect the prediction of
 ${\hat Y}_{94}$.
 
 ```{r, pbsEDM9, echo = FALSE, eval = FALSE}
@@ -279,7 +277,7 @@ dist(pbsEDM_simplex$X[t_star:(t_star+3), ])
 pbsEDM_simplex$neighbour_distance[t_star, ]
 
 # So x(tstar+2) would have been the second nearest neighbour, but it is
-#  correctly excluded here (aspect 2) from the simplex calculation.
+#  excluded here from the simplex calculation.
 # So now add the necessary values as dummy data, re-run S-map from pbsSmap, and
 #  see if it gets close to the rEDM calculation:
 
@@ -310,9 +308,8 @@ So the second nearest neighbour now is indeed for $t=103$, which is the dummy po
 the state space added in, corresponding to $t=95$. So $t=95$ was originally correctly
 excluded from the library of neighbours in `pbsSmap`, but by adding it
 as dummy data later we allow that neighbour to be included as $t=103$. The result
-is close to that from `rEDM`, suggesting that $t=95$ is erroneously included in
-the library for $t^* = 93$, and that Aspect 2 does indeed occur
-for the `rEDM` S-map code.
+is close to that from `rEDM`, suggesting that $t=95$ is included in
+the library for $t^* = 93$, unlike in `pbsSmap`.
 
 Note that the estimates of $\hat{Y}_{94}$ from `rEDM` and from `pbsEDM` with the
 dummy data added do not match exactly
