@@ -1,8 +1,8 @@
 ---
-title: "Demonstration of Aspects 3 and 4"
+title: "Demonstration of negative predictions and differences in correlation coefficients"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{aspect_3_4}
+  %\VignetteIndexEntry{negative_predictions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,9 @@ library(pbsEDM)
 
 ## Introduction
 
-In the manuscript, Aspect 3 is that predicted values of lagged variables can
-give unrealistic negative predictions of the original unlagged populations.
+Here we provide reproducible details of our results in the manuscript that predicted values of lagged variables can
+give unrealistic negative predictions of the original unlagged populations,
+and demonstrate a simple proposed solution.
 
 Again we use the simulated population time series from the manuscript, with
 population size denoted $N_t$ and first-differenced values denoted $Y_t$ at $t = 1, 2, 3, ..., 99, 100$. We
