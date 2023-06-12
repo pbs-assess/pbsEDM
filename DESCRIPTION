@@ -1,6 +1,6 @@
 Package: pbsEDM
 Type: Package
-Title: An R Package to Implement Some of the Methods of Empirical Dynamic Modelling
+Title: An R package to implement some of the methods of empirical dynamic modelling
 Version: 1.0.0
 Authors@R:
     c(person(given = c("Luke", "A."),
@@ -14,7 +14,9 @@ Authors@R:
              email = "andrew.edwards@dfo-mpo.gc.ca",
              comment = c(ORCID = "0000-0003-2749-8198"))
     )
-Description: The 'pbsEDM' package implements some methods of empirical dynamic modelling for nonlinear time-series analysis.
+Description: Implements some methods of empirical dynamic modelling (EDM) for nonlinear time-series analysis. The name `pbsEDM` combines our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with EDM, continuing a long tradition of R packages from PBS. The package was developed in conjuction with a manuscript currently under review.
+URL: https://github.com/pbs-assess/pbsEDM
+BugReports: https://github.com/pbs-assess/pbsEDM/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

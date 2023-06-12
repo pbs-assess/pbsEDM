@@ -15,7 +15,7 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 
 An R package to implement some of the methods of empirical dynamic modelling
 
-The name `pbsEDM` combines our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with empirical dynamic modelling (EDM), the focus of the package. The package was developed in conjuction with a manuscript currently being submitted. 
+The name `pbsEDM` combines our workplace, the Pacific Biological Station (PBS) in British Columbia, Canada, with empirical dynamic modelling (EDM), the focus of the package. The package was developed in conjuction with a manuscript currently under review. 
 
 The package implements the simplex and S-map algorithms of empirical dynamic modelling, and creates visualisations to help understand the methods, for example:
 
@@ -33,7 +33,7 @@ devtools::install_github("pbs-assess/pbsEDM")
 The vignettes are already rendered here:
 
 * [analyse_simple_time_series.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
-* [aspect_2.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/aspect_2.html) Demonstration of Aspect 2.
+* [aspect_2.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/aspect_2.html) Detailing of aspect 2.
 * [negative_predictions.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/negative_predictions.html) Demonstrations of getting negative predictions, and also how the correlation coefficients differ between looking at predictions of lagged values and predictions of the actual population values.
 * [pbsSmap.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/pbsSmap.html) Demonstration of S-map code.
 
@@ -65,3 +65,12 @@ plot_explain_edm_movie_save(E_results[[1]])           # Figure S.2
 plot_explain_edm_all_tstar_movie_save(E_results[[1]]) # Figure S.3
 ```
 
+## Citation
+
+If you use our package then please cite it so that we can keep track and will continue to update it. See citation("pbsEDM") for a bibTeX entry, or use:
+
+Rogers, L. A., and Edwards, A. M. (2023). pbsEDM: An R package to implement some of the methods of empirical dynamic modelling. Available at https://github.com/pbs-assess/pbsEDM.
+
+## Issues, problems
+
+Please report any problems as a [GitHub Issue](https://github.com/pbs-assess/pbsEDM/issues) or by email, using a minimal working example if possible (and please check the closed issues first).

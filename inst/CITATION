@@ -1,0 +1,18 @@
+citHeader("To cite pbsEDM please use:")
+
+citEntry(
+  entry    = "misc",
+  title    =
+  "pbsEDM: An R package to implement some of the methods of empirical dynamic modelling)",
+  author   = "L. A. Rogers and A. M. Edwards",
+  journal  = "",
+  year     = "2023",
+  volume   = "",
+  number   = "",
+  pages    = "",
+  note     = "Available at https://github.com/pbs-assess/pbsEDM",
+  url      = "https://github.com/pbs-assess/pbsEDM",
+  textVersion = paste(
+
+  )
+)
