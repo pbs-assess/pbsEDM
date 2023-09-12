@@ -66,7 +66,7 @@ if (FALSE) {
     beyond = FALSE,
     weight = NULL,
     n_weight = 1,
-    cores = 4
+    cores = 1
   )
   tibble::view(f01$ranks)
   tibble::view(f01$summary)
@@ -76,4 +76,3 @@ if (FALSE) {
 }
 
 ```
-

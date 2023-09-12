@@ -20,96 +20,96 @@
 #' @export
 #'
 mve <- function (data,
-								 response,
-								 lags,
-								 index = 50L,
-								 buffer = 10L,
-								 window = integer(0),
-								 metric = "rmse",
-								 beyond = FALSE,
-								 weight = NULL,
-								 n_weight = ceiling(sqrt(2^length(unlist(lags)))),
-								 cores = NULL) {
-	
-	# Check arguments ------------------------------------------------------------
-	
-	checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
-	checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
-	
-	# Create subset lags ---------------------------------------------------------
-	
-	subset_lags <- create_subset_lags(lags)
-	
-	# Apply running empirical dynamic modeling -----------------------------------
-	
-	if (is.null(cores)) {
-		# Apply in sequence
-		forecasts <- lapply(
-			subset_lags,
-			FUN = single_view_embedding,
-			data = data,
-			response = response,
-			index = index,
-			buffer = buffer,
-			window = window,
-			metric = metric,
-			beyond = beyond,
-			superset = lags
-		)
-	} else {
-		if (.Platform$OS.type == "unix") {
-			# Apply in parallel via forking
-			forecasts <- parallel::mclapply(
-				subset_lags,
-				FUN = single_view_embedding,
-				data = data,
-				response = response,
-				index = index,
-				buffer = buffer,
-				window = window,
-				metric = metric,
-				beyond = beyond,
-				superset = lags,
-				mc.cores = cores
-			)
-		} else {
-			# Apply in parallel via sockets
-			# cl <- parallel::makeCluster(cores)
-			# parallel::clusterEvalQ(cl, library()) # TODO: packages needed
-			# results_list <- parallel::parLapply()
-			stop("eedm parallel via sockets not yet implemented R/functions.R")
-		}
-	}
-	
-	# Weight redm forecasts ------------------------------------------------------
-	
-	weighted <- weight_single_view_embeddings(forecasts, metric, weight, n_weight)
-	
-	# Return results object ------------------------------------------------------
-	
-	return(
-		structure(
-			list(
-				data = data,
-				observed = c(dplyr::pull(data, response), NA),
-				forecast = c(rep(NA_real_, index - 1), weighted$results$forecast),
-				response = response,
-				lags = lags,
-				index = index,
-				buffer = buffer,
-				window = window,
-				metric = metric,
-				beyond = beyond,
-				n_weight = n_weight,
-				raw_forecasts = forecasts,
-				ranks = weighted$ranks,
-				summary = weighted$summary,
-				hindsight = weighted$hindsight,
-				results = weighted$results
-			),
-			class = "mve"
-		)
-	)
+                 response,
+                 lags,
+                 index = 50L,
+                 buffer = 10L,
+                 window = integer(0),
+                 metric = "rmse",
+                 beyond = FALSE,
+                 weight = NULL,
+                 n_weight = ceiling(sqrt(2^length(unlist(lags)))),
+                 cores = NULL) {
+
+  # Check arguments ------------------------------------------------------------
+
+  checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
+  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
+
+  # Create subset lags ---------------------------------------------------------
+
+  subset_lags <- create_subset_lags(lags)
+
+  # Apply running empirical dynamic modeling -----------------------------------
+
+  if (is.null(cores)) {
+    # Apply in sequence
+    forecasts <- lapply(
+      subset_lags,
+      FUN = single_view_embedding,
+      data = data,
+      response = response,
+      index = index,
+      buffer = buffer,
+      window = window,
+      metric = metric,
+      beyond = beyond,
+      superset = lags
+    )
+  } else {
+    if (.Platform$OS.type == "unix") {
+      # Apply in parallel via forking
+      forecasts <- parallel::mclapply(
+                               subset_lags,
+                               FUN = single_view_embedding,
+                               data = data,
+                               response = response,
+                               index = index,
+                               buffer = buffer,
+                               window = window,
+                               metric = metric,
+                               beyond = beyond,
+                               superset = lags,
+                               mc.cores = cores
+                             )
+    } else {
+      # Apply in parallel via sockets
+      # cl <- parallel::makeCluster(cores)
+      # parallel::clusterEvalQ(cl, library()) # TODO: packages needed
+      # results_list <- parallel::parLapply()
+      stop("eedm parallel via sockets not yet implemented R/functions.R")
+    }
+  }
+
+  # Weight redm forecasts ------------------------------------------------------
+
+  weighted <- weight_single_view_embeddings(forecasts, metric, weight, n_weight)
+
+  # Return results object ------------------------------------------------------
+
+  return(
+    structure(
+      list(
+        data = data,
+        observed = c(dplyr::pull(data, response), NA),
+        forecast = c(rep(NA_real_, index - 1), weighted$results$forecast),
+        response = response,
+        lags = lags,
+        index = index,
+        buffer = buffer,
+        window = window,
+        metric = metric,
+        beyond = beyond,
+        n_weight = n_weight,
+        raw_forecasts = forecasts,
+        ranks = weighted$ranks,
+        summary = weighted$summary,
+        hindsight = weighted$hindsight,
+        results = weighted$results
+      ),
+      class = "mve"
+    )
+  )
 }
 
 #' Single View Embedding
@@ -132,63 +132,63 @@ mve <- function (data,
 #' @export
 #'
 single_view_embedding <- function (data,
-																	 response,
-																	 lags,
-																	 index = 50L,
-																	 buffer = 10L,
-																	 window = integer(0),
-																	 metric = "rmse",
-																	 beyond = FALSE,
-																	 superset = NULL) {
-	
-	# Check arguments ------------------------------------------------------------
-	
-	checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
-	checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
-	
-	# Define the state space reconstruction --------------------------------------
-	
-	ssr <- state_space_reconstruction(data, response, lags)
-	
-	# Compute state space distances between points -------------------------------
-	
-	# - Rows in X are points in the SSR
-	# - Each row in X_distance corresponds to a focal point in the SSR
-	# - Each column in X_distance corresponds to a potential neighbour in the SSR
-	# - Elements of X_distance correspond to distances to neighbours
-	# - NA elements indicate disallowed neighbours for a given focal point
-	
-	distances <- state_space_distances(ssr, index, buffer)
-	
-	# Compute centred and scaled forecasts ---------------------------------------
-	
-	# - Create neighbour index matrix
-	# - Create neighbour matrices
-	# - Project neighbour matrices
-	# - Compute X_forecast vector
-	
-	ssr_forecasts <- state_space_forecasts(ssr, distances, beyond)
-	
-	# Define observed ------------------------------------------------------------
-	
-	observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]
-	
-	# Compute forecast -----------------------------------------------------------
-	
-	forecast <- untransform_forecasts(observed, ssr_forecasts)
-	
-	# Return results -------------------------------------------------------------
-	
-	rows <- seq_along(forecast)
-	
-	tibble::tibble(
-		set = rep(0:1, c(index - 1, nrow(data) - index + 2))[rows],
-		time = seq_len(nrow(data) + 1L)[rows],
-		points = c(0, as.vector(apply(distances, 1, function (x) sum(!is.na(x)))))[rows],
-		dim = rep(ncol(ssr), nrow(data) + 1L)[rows],
-		observed = observed,
-		forecast = forecast,
-		forecast_metrics(observed, forecast, window, metric),
-		superset_columns(data, lags, superset)
-	)
+                                   response,
+                                   lags,
+                                   index = 50L,
+                                   buffer = 10L,
+                                   window = integer(0),
+                                   metric = "rmse",
+                                   beyond = FALSE,
+                                   superset = NULL) {
+
+  # Check arguments ------------------------------------------------------------
+
+  checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
+  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
+
+  # Define the state space reconstruction --------------------------------------
+
+  ssr <- state_space_reconstruction(data, response, lags)
+
+  # Compute state space distances between points -------------------------------
+
+  # - Rows in X are points in the SSR
+  # - Each row in X_distance corresponds to a focal point in the SSR
+  # - Each column in X_distance corresponds to a potential neighbour in the SSR
+  # - Elements of X_distance correspond to distances to neighbours
+  # - NA elements indicate disallowed neighbours for a given focal point
+
+  distances <- state_space_distances(ssr, index, buffer)
+
+  # Compute centred and scaled forecasts ---------------------------------------
+
+  # - Create neighbour index matrix
+  # - Create neighbour matrices
+  # - Project neighbour matrices
+  # - Compute X_forecast vector
+
+  ssr_forecasts <- state_space_forecasts(ssr, distances, beyond)
+
+  # Define observed ------------------------------------------------------------
+
+  observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]
+
+  # Compute forecast -----------------------------------------------------------
+
+  forecast <- untransform_forecasts(observed, ssr_forecasts)
+
+  # Return results -------------------------------------------------------------
+
+  rows <- seq_along(forecast)
+
+  tibble::tibble(
+            set = rep(0:1, c(index - 1, nrow(data) - index + 2))[rows],
+            time = seq_len(nrow(data) + 1L)[rows],
+            points = c(0, as.vector(apply(distances, 1, function (x) sum(!is.na(x)))))[rows],
+            dim = rep(ncol(ssr), nrow(data) + 1L)[rows],
+            observed = observed,
+            forecast = forecast,
+            forecast_metrics(observed, forecast, window, metric),
+            superset_columns(data, lags, superset)
+          )
 }
