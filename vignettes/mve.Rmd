@@ -1,0 +1,79 @@
+---
+title: "mve"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mve}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7.1,
+  fig.height = 6,
+  fig.retina = 2
+)
+```
+
+```{r setup}
+library(pbsEDM)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(ggplot2)
+```
+
+
+```{r visualize}
+# Larkin
+ggplot(data = larkin, aes(x = time, y = recruits)) +
+  geom_line()
+
+# Ricker
+ggplot(data = ricker, aes(x = time, y = recruits)) +
+  geom_line()
+
+```
+
+```{r forecast}
+# Larkin
+if (FALSE) {
+  f0 <- pbsEDM::single_view_embedding(
+    data = larkin,
+    response = "recruits",
+    lags = list(spawners = 0:8),
+    index = 60,
+    buffer = 10,
+    window = integer(0),
+    metric = "rmse",
+    beyond = FALSE
+  )
+  tibble::view(f0)
+}
+
+# Larkin
+if (FALSE) {
+  f01 <- pbsEDM::mve(
+    data = larkin,
+    response = "recruits",
+    lags = list(spawners = 0:8),
+    index = 60,
+    buffer = 10,
+    window = integer(0),
+    metric = "rmse",
+    beyond = FALSE,
+    weight = NULL,
+    n_weight = 1,
+    cores = 4
+  )
+  tibble::view(f01$ranks)
+  tibble::view(f01$summary)
+  tibble::view(f01$hindsight)
+  tibble::view(f01$results)
+  tibble::view(f01$forecast)
+}
+
+```
+

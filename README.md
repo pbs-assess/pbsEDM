@@ -5,6 +5,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/pbs-assess/pbsEDM/workflows/R-CMD-check/badge.svg)](https://github.com/pbs-assess/pbsEDM/actions)
+
 [![Codecov test coverage](https://codecov.io/gh/pbs-assess/pbsEDM/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pbs-assess/pbsEDM?branch=main)
 
 <!-- [![Project Status: WIP – Initial development is in progress, but there
@@ -42,9 +43,14 @@ The source code written in `Rmarkdown`, the R code that gets extracted from the
   folder (where all your R libraries get saved), in
   `library\pbsEDM\doc\`. Or you can look at the `vignettes\` folder on GitHub or locally.
 
+<<<<<<< HEAD
 ## To reproduce and save the figures for the manuscript
 
 Just run the following code. Type the function name (or look at the help with ?<function_name>) to see what it does.
+=======
+``` r
+devtools::install_github("pbs-assess/pbsEDM")
+>>>>>>> feature/implement-mve
 ```
 E_results <- pbsEDM_Evec(NY_lags_example$N_t)
 
