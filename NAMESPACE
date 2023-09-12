@@ -57,9 +57,7 @@ export(single_view_embedding)
 export(smaape)
 export(smap_efficient)
 export(smap_surrogates)
-<<<<<<< HEAD
 export(smap_thetavec)
-=======
 export(srmse)
 export(state_space_distances)
 export(state_space_forecasts)
@@ -67,7 +65,6 @@ export(state_space_reconstruction)
 export(superset_columns)
 export(untransform_forecasts)
 export(weight_single_view_embeddings)
->>>>>>> feature/implement-mve
 importFrom(magrittr,"%>%")
 importFrom(rlang,":=")
 importFrom(rlang,.data)
