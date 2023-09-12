@@ -11,7 +11,7 @@ single_view_embedding(
   index = 50L,
   buffer = 10L,
   window = integer(0),
-  metric = "mamse",
+  metric = "rmse",
   beyond = FALSE,
   superset = NULL
 )

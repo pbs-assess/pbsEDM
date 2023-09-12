@@ -10,7 +10,8 @@ smap_efficient(
   theta = 0,
   p = 1L,
   first_difference = FALSE,
-  centre_and_scale = FALSE
+  centre_and_scale = FALSE,
+  exclusion_radius = "half"
 )
 }
 \arguments{
@@ -27,6 +28,11 @@ each time series in \code{N}.}
 \item{first_difference}{Logical. First-difference each time series?}
 
 \item{centre_and_scale}{Logical. Centre and scale each time series?}
+
+\item{exclusion_radius}{Number of points around ${\bf x}_t^*$ to exclude as
+candidate nearest neighbours; either default of `half` as used for our manuscript
+(see equation (6)), or a number to match
+the `exclusionRadius` setting in `rEDM::Simplex()`. See `?pbsDist` for more details.}
 }
 \value{
 [numeric()] The forecast accuracy rho

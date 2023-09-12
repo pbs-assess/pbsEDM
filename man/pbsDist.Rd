@@ -4,7 +4,7 @@
 \alias{pbsDist}
 \title{Compute Distances Between Allowed Points in the State Space Reconstruction}
 \usage{
-pbsDist(X, lags, p = 1L, first_difference = FALSE)
+pbsDist(X, lags, p = 1L, first_difference = FALSE, exclusion_radius = "half")
 }
 \arguments{
 \item{X}{[matrix()] with named [numeric()] columns.}
@@ -15,6 +15,15 @@ each time series in \code{N}.}
 \item{p}{[integer()] The forecast distance.}
 
 \item{first_difference}{[logical()] First-difference each time series?}
+
+\item{@param}{exclusion_radius Number of points around ${\bf x}_t^*$ to exclude as
+candidate nearest neighbours. Default is `half` as used for our manuscript
+(see equation (6)), to only
+exclude the next $E$ values, where embedding dimension $E$  is defined as the
+number of lags specified in `lags`. If `exclusion_radius` is an integer,
+then that number of values after \emph{and} before ${\bf x}_t^*$ are
+excluded, to match the `exclusionRadius` setting in `rEDM::Simplex()`; use
+0 to match the default in `rEDM::Simplex()`.}
 }
 \value{
 [pbsDist()] [matrix()] of allowed distances
