@@ -13,7 +13,7 @@
 #'
 binary <- function (x, digits = NULL) {
 	# Check arguments
-	
+
 	# Compute binary vector
 	v <- c()
 	while (x > 0) {
@@ -52,25 +52,25 @@ binary <- function (x, digits = NULL) {
 #' create_lags(matrix(rep(1:10, 2), nrow = 10), c(0, -1))
 #'
 create_lags <- function (x, n = 1L) {
-	
+
 	# 0.0 Check arguments --------------------------------------------------------
-	
+
 	stopifnot(
 		is.matrix(x) || is.numeric(x),
 		is.numeric(n))
-	
+
 	# 1.0 Define m and n ---------------------------------------------------------
-	
+
 	# Coerce to matrix
 	m <- as.matrix(x)
-	
+
 	# Define lags
 	if (length(n) == 1) {
 		n <- rep(n, ncol(m))
 	}
-	
+
 	# 2.0 Create lags of m -------------------------------------------------------
-	
+
 	# Create positive or negative lags and buffer by NAs
 	for (i in seq_along(n)) {
 		if (n[i] >= 0) {
@@ -79,17 +79,17 @@ create_lags <- function (x, n = 1L) {
 			m[, i] <- c(m[, i], rep(NA_real_, floor(-n[i])))[seq_along(m[, i]) - n[i]]
 		}
 	}
-	
+
 	# 3.0 Coerce m to vector or matrix -------------------------------------------
-	
+
 	if (is.vector(x)) {
 		m <- as.vector(m)
 	} else if (is.matrix(x)) {
 		m <- as.matrix(m)
 	}
-	
+
 	# 4.0 Return m ---------------------------------------------------------------
-	
+
 	return(m)
 }
 
@@ -107,7 +107,7 @@ create_lags <- function (x, n = 1L) {
 #'
 create_subset_lags <- function (lags) {
 	# Check arguments
-	
+
 	# Create subset lags
 	len <- length(unlist(lags))
 	num <- 2^len - 1
@@ -153,8 +153,8 @@ forecast_metrics <- function (x, y, k = integer(0), metric = "mamse") {
 	m <- matrix(c(x, y), ncol = 2)
 	# Return metrics
 	tibble::tibble(
-		mre = runner::runner(m, f = eedm::matric, k = k, fun = eedm::mre),
-		!!metric := runner::runner(m, f = eedm::matric, k = k, fun = get(metric))
+		mre = runner::runner(m, f = matric, k = k, fun = mre),
+		!!metric := runner::runner(m, f = matric, k = k, fun = get(metric))
 	)
 }
 
@@ -212,26 +212,26 @@ superset_columns <- function (data,
 #'
 #'
 state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
-	
+
 	# Check arguments ------------------------------------------------------------
-	
+
 	checkmate::assert_integerish(index, lower = 1, upper = nrow(ssr) + 1, len = 1)
 	checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
 	checkmate::assert_number(index - buffer, lower = 1)
-	
+
 	# Compute distances ----------------------------------------------------------
-	
+
 	# Avoid partial component distances
 	ssr_na <- ssr
 	ssr_na[is.na(rowSums(ssr)), ] <- NA_real_
-	
+
 	# Compute the distance matrix
 	distances <- as.matrix(stats::dist(ssr_na))
-	
+
 	# Exclude focal point and future neighbours ----------------------------------
-	
+
 	distances[upper.tri(distances, diag = TRUE)] <- NA_real_
-	
+
 	# Exclude points with a missing value ----------------------------------------
 	# - Neighbours of focal points that themselves contain missing values
 	# - Neighbours that contain missing values
@@ -241,13 +241,13 @@ state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
 	distances[na_rows, ] <- NA_real_
 	distances[, na_rows] <- NA_real_
 	distances[, na_proj] <- NA_real_
-	
+
 	# Exclude focal points in the training set -----------------------------------
-	
+
 	distances[seq_len(index - buffer - 1L), ] <- NA_real_
-	
+
 	# Return the distance matrix -------------------------------------------------
-	
+
 	return(distances)
 }
 
@@ -264,43 +264,43 @@ state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
 #' @export
 #'
 state_space_forecasts <- function (X, distance, beyond = FALSE) {
-	
+
 	# Check arguments ------------------------------------------------------------
-	
-	
+
+
 	# Create neighbour index matrix ----------------------------------------------
-	
+
 	num_nbrs <- ncol(X) + 1
 	seq_nbrs <- seq_len(num_nbrs)
 	nbr_inds <- t(apply(distance, 1, order))[, seq_nbrs, drop = FALSE]
 	nbr_inds[which(rowSums(!is.na(distance)) < num_nbrs), ] <- NA
 	nbr_inds <- rbind(nbr_inds, array(NA, dim = c(1, num_nbrs)))
-	
+
 	# Create neighbour matrices --------------------------------------------------
-	
+
 	nbr_vals <- t(apply(nbr_inds, 1, function (x, y) y[x, 1], y = X))
 	nbr_dist <- t(apply(distance, 1, sort, na.last = TRUE))[, seq_nbrs]
 	nbr_wts <- t(apply(nbr_dist, 1, function (x) exp(-x / x[1])))
 	nbr_wts <- rbind(nbr_wts, array(NA, dim = c(1, num_nbrs)))
-	
+
 	# Project neighbour matrices -------------------------------------------------
-	
+
 	proj_inds <- create_lags(nbr_inds, 1L) + 1L
 	proj_vals <- t(apply(proj_inds, 1, function (x, y) y[x, 1], y = X))
 	proj_wts <- create_lags(nbr_wts, 1L)
-	
+
 	# Compute X_forecast ---------------------------------------------------------
-	
+
 	X_forecast <- as.vector(rowSums(proj_vals * proj_wts) / rowSums(proj_wts))
-	
+
 	# Forecast beyond ssr? -------------------------------------------------------
-	
+
 	if (!beyond) {
 		X_forecast <- X_forecast[seq_len(nrow(X))]
 	}
-	
+
 	# Return X_forecast ----------------------------------------------------------
-	
+
 	return(X_forecast)
 }
 
@@ -326,28 +326,28 @@ state_space_forecasts <- function (X, distance, beyond = FALSE) {
 #' state_space_reconstruction(d, response = "x", lags = list(y = c(0, 1, 2, 3)))
 #'
 state_space_reconstruction <- function (data, response, lags) {
-	
+
 	# Check arguments ------------------------------------------------------------
-	
-	
+
+
 	# Define values --------------------------------------------------------------
-	
+
 	col_names <- c(response, names(lags))
 	lag_sizes <- unlist(lags, use.names = FALSE)
 	lag_names <- rep(names(lags), lengths(lags))
-	
+
 	# Create Z -------------------------------------------------------------------
-	
+
 	Z <- as.matrix(data[, col_names, drop = FALSE])
 	Z_means <- apply(Z, 2, mean, na.rm = TRUE)
 	Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
-	
+
 	# Create Y -------------------------------------------------------------------
-	
+
 	Y <- t((t(Z) - Z_means) / Z_sds)
-	
+
 	# Create X -------------------------------------------------------------------
-	
+
 	X <- cbind(
 		Y[, response, drop = FALSE],
 		create_lags(
@@ -356,9 +356,9 @@ state_space_reconstruction <- function (data, response, lags) {
 		)
 	)
 	colnames(X) <- c(response, paste0(lag_names, "_", lag_sizes))
-	
+
 	# Return ssr -----------------------------------------------------------------
-	
+
 	return(structure(X, class = "state_space_reconstruction"))
 }
 
@@ -395,9 +395,9 @@ untransform_forecasts <- function (x, y) {
 #' @return [list()]
 #' @export
 #'
-weight_single_view_embeddings <- function (forecasts, 
-																					 metric, 
-																					 weight, 
+weight_single_view_embeddings <- function (forecasts,
+																					 metric,
+																					 weight,
 																					 n_weight) {
 	# Define ranks
 	ranks <- forecasts %>%
@@ -438,8 +438,8 @@ weight_single_view_embeddings <- function (forecasts,
 	# Define results
 	results <- forecast %>%
 		dplyr::mutate(
-			mre = runner::runner(m, f = eedm::matric, fun = eedm::mre),
-			!!metric := runner::runner(m, f = eedm::matric, fun = get(metric))
+			mre = runner::runner(m, f = matric, fun = mre),
+			!!metric := runner::runner(m, f = matric, fun = get(metric))
 		) %>%
 		dplyr::filter(.data$set == 1) %>%
 		dplyr::select(.data$time:.data[[metric]])
