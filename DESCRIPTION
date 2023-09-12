@@ -20,11 +20,7 @@ BugReports: https://github.com/pbs-assess/pbsEDM/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-<<<<<<< HEAD
 RoxygenNote: 7.2.0
-=======
-RoxygenNote: 7.1.2
->>>>>>> feature/implement-mve
 Imports:
     dplyr,
     scatterplot3d,
