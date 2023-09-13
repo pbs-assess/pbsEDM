@@ -1,5 +1,17 @@
 #' Multi-View Embedding
 #'
+#' From Luke's email (TODO tidy up when done):
+#' Good to hear from you! Yes, what you describe is the main idea behind
+#' multiview embedding (MVE). It uses the `2^N - 1` subsets of the superset
+#' state space reconstruction of covariates and covariate lags, giving all
+#' possible embedding dimensions and embedding combinations that you're looking
+#' for.
+#' Andy asked: is single-view embedding just standard EDM, and Luke said:
+#' I think MVE was originally a generalization of S-mapping, but we've implemented it as a generalization of EDM. So in our case, single-view embedding would be EDM, but other authors might hear 'single-view embedding' and think 'S-mapping'.
+#' Worth double-checking because this is just from memory ;)
+#' TODO TODO TODO check the definitions; stick with mve for now to get it all
+#' working.
+#'
 #' @param data [matrix()] or [data.frame()] with named [numeric()] columns
 #' @param response [character()] column name of the response variable in
 #'   \code{data}
