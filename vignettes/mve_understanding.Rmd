@@ -2,7 +2,7 @@
 title: "mve_understanding"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{mve}
+  %\VignetteIndexEntry{mve_understanding}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,22 +25,98 @@ library(magrittr)
 library(ggplot2)
 ```
 
-Adapting Luke's original `mve.Rmd` to dig into his mve functions. Also going to
-use the same default time series as in `analyse_simple_time_series.Rmd` as used
-for the first manuscript.
+Adapting Luke's original `mve.Rmd` to dig into his mve functions. Was going
+use the same default time series as in `analyse_simple_time_series.Rmd` but
+that's univariate, so stick with his larkin one.
 
-```{r visualize}
-# Larkin
-ggplot(data = larkin, aes(x = time, y = recruits)) +
-  geom_line()
-
-# Ricker
-ggplot(data = ricker, aes(x = time, y = recruits)) +
-  geom_line()
-
+```{r larkin}
+larkin
 ```
 
-```{r forecast}
+```{r visualize}
+plot(larkin$time,
+     larkin$recruits,
+     type = "o",
+     ylim = c(0, 0.2))
+```
+
+This is different format to what we have in `salmon_sim()`, so switching to
+ours.
+<!-- Returns are the total returns in year $t$, $r_3, r_4$, and $r_5$ are the
+recruits from year $t$ that will return later. These are $R'_t$ in our write up,
+so change to $R_prime_t$. Actually, not quite. So switching to ours. TODO delete -->
+<!-- me when no longer needed -->
+
+```{r simulated}
+simulated <- EDMsimulate::salmon_sim()
+simulated
+```
+
+Here's what we have in `EDMsimulate::sim_and_fit` and `..._realisations()`, so adapt those
+(not evaluating here):
+```{r simandfit, eval = FALSE}
+# sim_and_fit():
+sim_and_fit <- function(salmon_sim_args = list(),
+                        pbsEDM_args = list(
+                          lags = list(R_switch = 0,
+                                      S_t = 0:3)),
+                        R_switch = "R_prime_t"){
+
+  stopifnot(R_switch %in% c("R_t", "R_prime_t"))
+  stopifnot(names(pbsEDM_args$lags)[1] == "R_switch")
+  names(pbsEDM_args$lags)[1] <- R_switch
+
+  simulated <- do.call(salmon_sim,
+                       salmon_sim_args)
+
+  simulated_use <- simulated
+  simulated_use[nrow(simulated_use), R_switch] = NA    # Ensure no
+                                        # knowledge of it for pbsEDM(), so it
+                                        # doesn't affect the rho values (else it does)
+
+  fit <- do.call(pbsEDM::pbsEDM,
+                 c(list(N = simulated_use),
+                   pbsEDM_args))
+
+  to_return <- list(simulated = simulated,
+                    fit = fit)
+  # concatenated list, with simulated tibble first then list of all results from pbsEDM
+  return(to_return) # for now, probably want to scale down or have option to
+                    # just return basic results for when doing many simulations
+}
+
+# sim_and_fit_realisations(), part of:
+    if(edm_fit){
+      fit_edm <- do.call(pbsEDM::pbsEDM,
+                         c(list(N = all_sims[[m]]),
+                           pbsEDM_args))
+
+      testthat::expect_equal(dplyr::pull(all_sims[[m]], R_switch),
+                             fit_edm$N_observed[-(T+1)])  # Extra check
+
+      fit_edm_full_series[m, ]  <- t(c(m,
+                                       fit_edm$N_forecast))
+
+      res_realisations[m, "R_switch_T_edm_fit"] = fit_edm$N_forecast[T] # TODO
+                                        # double check what to do when pbsedm
+                                        # arguments change
+      res_realisations[m, "E"] = fit_edm$results$E  # Though will need specific
+                                                    # lags also kept track of or specified
+      res_realisations[m, "N_rho"] = fit_edm$results$N_rho
+      res_realisations[m, "N_rmse"] = fit_edm$results$N_rmse
+      res_realisations[m, "X_rho"] = fit_edm$results$X_rho
+      res_realisations[m, "X_rmse"] = fit_edm$results$X_rmse
+    }
+```
+
+First just try a simple call to `single_view_embedding`, and based on the top
+function above, use
+`{r lagstouse, eval = FALSE}
+lags = list(R_prime_t = 0,
+            S_t = 0:3))
+```
+
+```{r forecast, eval = FALSE}
 # Larkin
 if(TRUE){
   f0 <- pbsEDM::single_view_embedding(
