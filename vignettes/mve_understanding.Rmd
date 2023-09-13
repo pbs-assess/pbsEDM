@@ -1,5 +1,5 @@
 ---
-title: "mve"
+title: "mve_understanding"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{mve}
@@ -25,8 +25,9 @@ library(magrittr)
 library(ggplot2)
 ```
 
-This is Luke's original. Andy adapting in `mve_understanding` to understand
-deatils behind functions.
+Adapting Luke's original `mve.Rmd` to dig into his mve functions. Also going to
+use the same default time series as in `analyse_simple_time_series.Rmd` as used
+for the first manuscript.
 
 ```{r visualize}
 # Larkin
