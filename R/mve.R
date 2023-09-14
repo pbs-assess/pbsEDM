@@ -5,10 +5,16 @@
 #' multiview embedding (MVE). It uses the `2^N - 1` subsets of the superset
 #' state space reconstruction of covariates and covariate lags, giving all
 #' possible embedding dimensions and embedding combinations that you're looking
-#' for.
+#' for. [Andy: Ye and Sugihara 2016 exclude those that have no 0 lag variables,
+#' though I guess we could do them all, but can you project then?]
 #' Andy asked: is single-view embedding just standard EDM, and Luke said:
-#' I think MVE was originally a generalization of S-mapping, but we've implemented it as a generalization of EDM. So in our case, single-view embedding would be EDM, but other authors might hear 'single-view embedding' and think 'S-mapping'.
+#' I think MVE was originally a generalization of S-mapping, but we've
+#' implemented it as a generalization of EDM. So in our case, single-view
+#' embedding would be EDM, but other authors might hear 'single-view embedding'
+#' and think 'S-mapping'.
 #' Worth double-checking because this is just from memory ;)
+#'  Andy: TODO don't think that's quite right, checking
+#' the code.
 #' TODO TODO TODO check the definitions; stick with mve for now to get it all
 #' working.
 #'
@@ -183,7 +189,7 @@ single_view_embedding <- function (data,
 
   # Define observed ------------------------------------------------------------
 
-  observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]
+  observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]    # NA seems to get added then removed, at least in mve_understanding.Rmd example
 
   # Compute forecast -----------------------------------------------------------
 

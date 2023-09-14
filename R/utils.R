@@ -236,6 +236,7 @@ state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
   # - Neighbours of focal points that themselves contain missing values
   # - Neighbours that contain missing values
   # - Neighbours that project to points that contain missing values
+  # - TODO does this deal with our Aspect from first manuscript???
   na_rows <- which(is.na(rowSums(ssr)))
   na_proj <- subset(na_rows - 1L, na_rows - 1L > 0)
   distances[na_rows, ] <- NA_real_
@@ -316,7 +317,8 @@ state_space_forecasts <- function (X, distance, beyond = FALSE) {
 #'
 #' @return [state_space_reconstruction()] [matrix()] with unlagged response
 #'   and lagged explanatory variables centred on their means and scaled by
-#'   their respective standard deviations.
+#'   their respective standard deviations, with automatically generated column
+#'   names.
 #'
 #' @export
 #'
