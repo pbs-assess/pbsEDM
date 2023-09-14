@@ -6,9 +6,11 @@
 #' state space reconstruction of covariates and covariate lags, giving all
 #' possible embedding dimensions and embedding combinations that you're looking
 #' for. [Andy: Ye and Sugihara 2016 exclude those that have no 0 lag variables,
-#' though I guess we could do them all, but can you project then?]
+#' since presumably they're just shifted - keep in for now and check results
+#' agree maybe].
 #' Andy asked: is single-view embedding just standard EDM, and Luke said:
-#' I think MVE was originally a generalization of S-mapping, but we've
+#' I think MVE was originally a generalization of S-mapping [Andy: no, for MVE
+#' they just use the single nearest neighbour in each view], but we've
 #' implemented it as a generalization of EDM. So in our case, single-view
 #' embedding would be EDM, but other authors might hear 'single-view embedding'
 #' and think 'S-mapping'.

@@ -29,6 +29,25 @@ Adapting Luke's original `mve.Rmd` to dig into his mve functions. Was going
 use the same default time series as in `analyse_simple_time_series.Rmd` but
 that's univariate, so stick with his larkin one.
 
+Hao and Sugihara (2016) define, for, say Hastings and Powell x-y-z food-chain
+model:
+
+- univariate: use only x and its lags, or y and its lags, or z and its lags; not
+  sure if they do simplex, don't think so.
+- multivarate: do every $E$-sized combination of x, y, z with lags (excluding
+  any that have no lags of 0), and take the one with the highest $\rho$ and use
+  that to make the forecast;
+- multiview embedding: do every $E$-sized combination of x, y, z with lags (excluding
+  any that have no lags of 0), and take the $\sqrt{m}$ views with highest $\rho$ , where $m$ is number of
+  $E$-dimensional combinations, and average the forecast from each one, to give
+  the forecast. Important: unlike Simplex, which uses $E + 1$ nearest
+  neighbours, this takes the single neares neighbour from each view and averages
+  over those. For Simplex the weighting of neighbours depends on their distance,
+  which can be quite sensitive to noise (Hao and Sugihara).
+
+Not sure how $E$ gets prescribed, though could loop over it.
+
+
 ```{r larkin}
 larkin
 ```
@@ -234,19 +253,10 @@ sve_on_simulated_manually <- tibble(set = rep(0:1,
                                     observed = observed,
                                     forecast = forecast,
                                     forecast_metrics(observed, forecast, integer(0),
-                                                     "rmse"),   # all NA's
-                                                       # though, running rms
-                                                       # error but with window
-                                                       # of 0, so all NA's
-                                                       # through
-                                                       # runner::runner() I
-                                                       # think. Not sure the
-                                                       # point of it, just
-                                                       # leave. BUT were not all
-                                                       # NA's in
-                                                       # sve_on_simulated. OKAY
-                                                       # - 0 gives all NA's, but
-                                                       # integer(0) does not; strange
+                                                     "rmse"),   # 0 gives all NA's, but
+                                                       # integer(0) does not;
+                                                       # strange. Not quite sure
+                                                       # what these are.
                                     superset_columns(simulated, lags_use, NULL))
 
 superset_columns(simulated, lags_use, NULL)   # so creates extra columns, all 1's
@@ -267,9 +277,9 @@ expect_equal(sve_on_simulated,
 
 
 
-HERE
+## Now deconstruct mve
 
-Use as template when get to mve:
+Use as template when get to mve. First, Luke's Larkin call:
 
 ```{r larkinmve}
 # Larkin
@@ -287,10 +297,101 @@ if(FALSE){
     n_weight = 1,
     cores = NULL)
 
-  f01$ranks
+  f01$ranks    # 51,000 rows!
   f01$summary
   f01$hindsight
   f01$results
   f01$forecast
 }
 ```
+
+Now to do on our simulated values, using similar call:
+
+```{r mvecalc}
+lags_use_multi <- list(R_prime_t = 0,
+                       S_t = 0:3)
+mve_on_simulated <- mve(data = simulated,
+                        response = "R_prime_t",
+                        lags = lags_use_multi,   # when I had this as lags_use,
+                        # first six non-NA forecast values were
+                        # same as for lags_use_multi, but not the rest
+                        index = index_val,
+                        buffer = buffer_val,
+                        window = integer(0),
+                        metric = "rmse",
+                        beyond = FALSE,
+                        weight = NULL,
+                        n_weight = 1,
+                        cores = NULL)
+
+mve_on_simulated
+```
+Deconstruct `mve()` to understand the steps.
+
+```{r mvedeconstruct1}
+lags_use
+subset_lags <- create_subset_lags(lags_use)
+subset_lags
+```
+
+So that gives every combination, including some without any 0-lags. That's just
+univariate, so try multi:
+```{r mvedeconstruct2}
+subset_lags_multi <- create_subset_lags(lags_use_multi)
+# Order is not intuitive, but looks to cover them all (took a while to figure
+# out formatting)
+subset_lags_multi
+```
+
+Now do the calcs:
+```{r mvecalcs}
+mve_forecasts <- lapply(
+  subset_lags_multi,
+  FUN = single_view_embedding,
+  data = simulated,
+  response = "R_prime_t",
+  index = index_val,
+  buffer = buffer_val,
+  window = integer(0),
+  metric = "rmse",
+  beyond = FALSE,
+  superset = lags_use_multi)
+
+weighted <- weight_single_view_embeddings(mve_forecasts,
+                                          "rmse",
+                                          weight = NULL,
+                                          n_weight = 1)
+weighted
+
+mve_on_simulated_manually <- structure(
+  list(
+    data = simulated,
+    observed = c(dplyr::pull(simulated, "R_prime_t"), NA),
+    forecast = c(rep(NA_real_, index_val - 1), weighted$results$forecast),
+    response = "R_prime_t",
+    lags = lags_use_multi,
+    index = index_val,
+    buffer = buffer_val,
+    window = integer(0),
+    metric = "rmse",
+    beyond = FALSE,
+    n_weight = 1,
+    raw_forecasts = mve_forecasts,
+    ranks = weighted$ranks,
+    summary = weighted$summary,
+    hindsight = weighted$hindsight,
+    results = weighted$results),
+  class = "mve")
+
+expect_equal(mve_on_simulated,
+             mve_on_simulated_manually)
+
+tail(mve_on_simulated$results)
+```
+
+Next - don't think this actually gives the best forecast for the next step. Does
+return the values for each view.
+
+- Figure out the settings. Use more of the data, not sure why there's all the
+  NA's (think it's to get rid of transients, but that should be at the
+  simulation stage not fitting stage).
