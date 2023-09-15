@@ -39,7 +39,7 @@
 #' @return [list()]
 #' @export
 #'
-mve <- function (data,
+multiview_embedding <- function (data,
                  response,
                  lags,
                  index = 50L,
@@ -127,7 +127,7 @@ mve <- function (data,
         hindsight = weighted$hindsight,
         results = weighted$results
       ),
-      class = "mve"
+      class = "multiview_embedding"
     )
   )
 }

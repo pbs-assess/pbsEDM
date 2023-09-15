@@ -25,7 +25,7 @@ library(magrittr)
 library(ggplot2)
 ```
 
-Adapting Luke's original `mve.Rmd` to dig into his mve functions. Was going
+Adapting Luke's original `mve.Rmd` to dig into his multiview embedding functions. Was going
 use the same default time series as in `analyse_simple_time_series.Rmd` but
 that's univariate, so stick with his larkin one.
 
@@ -47,9 +47,9 @@ model:
 
 - Luke's `single_view_embedding()` does one embedding, which can be multivariate. So
 basically can do one of the 3d plots in Hao and Sugihara (2016). Then gets
-called repeatedly by `mve()` to do all of them.
+called repeatedly by `multiview_embedding()` to do all of them.
 
-Not sure how $E$ gets prescribed, though could loop over it. In `mve()` looks
+Not sure how $E$ gets prescribed, though could loop over it. In `multiview_embedding()` looks
 like it will just do all potential combinations (andy $E$) based on the `lags` argument.
 
 
@@ -279,14 +279,14 @@ expect_equal(sve_on_simulated,
 
 
 
-## Now deconstruct mve
+## Now deconstruct multiview_embedding
 
-Use as template when get to mve. First, Luke's Larkin call:
+Use as template when get to `multiview_embedding`. First, Luke's Larkin call:
 
 ```{r larkinmve}
 # Larkin
 if(FALSE){
-  f01 <- pbsEDM::mve(
+  f01 <- pbsEDM::multiview_embedding(
     data = larkin,
     response = "recruits",
     lags = list(spawners = 0:8),
@@ -314,7 +314,7 @@ lags_use_multi <- list(R_t = 0,
                        S_t = 0:3)
 # TODO Think that may not make sense, as Luke always has a response variable as
 # well. So you shouldn't use R_t for both, presumably.
-mve_on_simulated <- mve(data = simulated,
+mve_on_simulated <- multiview_embedding(data = simulated,
                         response = "R_t",
                         lags = lags_use_multi,   # when I had this as lags_use,
                         # first six non-NA forecast values were
@@ -330,7 +330,7 @@ mve_on_simulated <- mve(data = simulated,
 
 mve_on_simulated
 ```
-Deconstruct `mve()` to understand the steps.
+Deconstruct `multiview_embedding()` to understand the steps.
 
 ```{r mvedeconstruct1}
 lags_use
@@ -385,7 +385,7 @@ mve_on_simulated_manually <- structure(
     summary = weighted$summary,
     hindsight = weighted$hindsight,
     results = weighted$results),
-  class = "mve")
+  class = "multiview_embedding")
 
 expect_equal(mve_on_simulated,
              mve_on_simulated_manually)
