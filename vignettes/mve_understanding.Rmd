@@ -66,10 +66,6 @@ plot(larkin$time,
 
 This is different format to what we have in `salmon_sim()`, so switching to
 ours.
-<!-- Returns are the total returns in year $t$, $r_3, r_4$, and $r_5$ are the
-recruits from year $t$ that will return later. These are $R'_t$ in our write up,
-so change to $R_prime_t$. Actually, not quite. So switching to ours. TODO delete -->
-<!-- me when no longer needed -->
 
 ```{r simulated}
 simulated <- EDMsimulate::salmon_sim()
@@ -78,7 +74,7 @@ simulated
 
 Here's what we have in `EDMsimulate::sim_and_fit` and `..._realisations()`, so adapt those
 (not evaluating here), though we are going to use `R_t` primarily, not
-`R_prime_t`, just want to be able to switch.:
+the default `R_prime_t`, just want to be able to switch:
 ```{r simandfit, eval = FALSE}
 # sim_and_fit():
 sim_and_fit <- function(salmon_sim_args = list(),
@@ -137,7 +133,7 @@ sim_and_fit <- function(salmon_sim_args = list(),
 First just try a simple call to `single_view_embedding`, and based on the top
 function above, use
 ```{r lagstouse}
-lags_use <- list(# R_prime_t = 0,  # not for single_view I think
+lags_use <- list(# R_t = 0,  # not for single_view I think
                  S_t = 0:3)
 ```
 
@@ -167,7 +163,7 @@ trace what is being done. Then change arguments.
 index_val <- 60
 buffer_val <- 10
 sve_on_simulated <- single_view_embedding(data = simulated,
-                                          response = "R_prime_t",
+                                          response = "R_t",
                                           lags = lags_use,
                                           index = index_val,   # not sure what this is
                                           buffer = buffer_val,  # number of forecasts
@@ -191,7 +187,7 @@ methods:
 
 ```{r ss}
 ssr <- state_space_reconstruction(data = simulated,
-                                  response = "R_prime_t",
+                                  response = "R_t",
                                   lags = lags_use)
 head(simulated)
 head(ssr)
@@ -234,7 +230,7 @@ ssr_forecasts
 
 
 observed <- c(dplyr::pull(simulated,
-                          "R_prime_t"),
+                          "R_t"),
               NA)[seq_along(ssr_forecasts)]  # Not sure what NA does, gets
                                         # ignored anyway.
 observed   # vector of observations
@@ -314,12 +310,12 @@ if(FALSE){
 Now to do on our simulated values, using similar call:
 
 ```{r mvecalc}
-lags_use_multi <- list(R_prime_t = 0,
+lags_use_multi <- list(R_t = 0,
                        S_t = 0:3)
 # TODO Think that may not make sense, as Luke always has a response variable as
-# well. So you shouldn't use R_prime_t for both, presumably.
+# well. So you shouldn't use R_t for both, presumably.
 mve_on_simulated <- mve(data = simulated,
-                        response = "R_prime_t",
+                        response = "R_t",
                         lags = lags_use_multi,   # when I had this as lags_use,
                         # first six non-NA forecast values were
                         # same as for lags_use_multi, but not the rest
@@ -357,7 +353,7 @@ mve_forecasts <- lapply(
   subset_lags_multi,
   FUN = single_view_embedding,
   data = simulated,
-  response = "R_prime_t",
+  response = "R_t",
   index = index_val,
   buffer = buffer_val,
   window = integer(0),
@@ -374,9 +370,9 @@ weighted
 mve_on_simulated_manually <- structure(
   list(
     data = simulated,
-    observed = c(dplyr::pull(simulated, "R_prime_t"), NA),
+    observed = c(dplyr::pull(simulated, "R_t"), NA),
     forecast = c(rep(NA_real_, index_val - 1), weighted$results$forecast),
-    response = "R_prime_t",
+    response = "R_t",
     lags = lags_use_multi,
     index = index_val,
     buffer = buffer_val,
