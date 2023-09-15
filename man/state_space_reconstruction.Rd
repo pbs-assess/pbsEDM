@@ -16,7 +16,8 @@ state_space_reconstruction(data, response, lags)
 \value{
 [state_space_reconstruction()] [matrix()] with unlagged response
   and lagged explanatory variables centred on their means and scaled by
-  their respective standard deviations.
+  their respective standard deviations, with automatically generated column
+  names.
 }
 \description{
 Rows are centred and scaled points in the state-space
