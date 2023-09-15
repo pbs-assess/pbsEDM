@@ -204,7 +204,7 @@ distances <- state_space_distances(ssr,
                                         # before index. Not sure why, vaguely
                                         # remember a discussion about it. TODO
 
-# From single_view_embedding() for this (changin X to ssr, X_distance to distances)
+# From single_view_embedding() for this (changing X to ssr, X_distance to distances)
   # - Rows in X are points in the SSR
   # - Each row in X_distance corresponds to a focal point in the SSR
   # - Each column in X_distance corresponds to a potential neighbour in the SSR
@@ -410,7 +410,78 @@ So, for `single_view_embedding` figure out what the following do:
 4. beyond (default is FALSE and hasn't been changed)
 5 superset (default is NULL and hasn't been changed)
 
-Chat with Carie:
+1. Change `index` value, it gets used in `state_space_distances()` in:
+
+```{r ssd, eval = FALSE}
+# Exclude focal points in the training set -----------------------------------
+
+distances[seq_len(index - buffer - 1L), ] <- NA_real_
+```
+We want to do leave-one-out instead, so maybe just don't need this at all? TODO
+think more.
+
+Also want to change
+```{r ssd2, eval = FALSE}
+# Exclude focal point and future neighbours ----------------------------------
+
+distances[upper.tri(distances, diag = TRUE)] <- NA_real_
+```
+to just exclude the focal point -- we are okay with having future neighbours, as
+is the usual situation in EDM.
+
+HERE Go through each stage of `state_space_distances()`, checking what happens
+as we go along. Above we had
+
+
+```{r distances1}
+# distances <- state_space_distances(ssr,
+#                                   index = index_val,
+#                                   buffer = buffer_val)
+
+distances_1 <- state_space_distances(ssr,
+                                     index = 60, # 0 gives error
+                                     buffer = 1) # 0 gives error, not sure what
+                                     # this really means yet
+
+# Do smaller one to understand
+ssr_small <- ssr[1:20, ]
+ssr_small
+distances_2 <- state_space_distances(ssr_small,
+                                     index = 2, # 0 gives error
+                                     buffer = 1) # 0 gives error, not sure what
+distances_2
+distances_2[1:10, 1:10]
+# Think want to get rid of the restrictions of index and buffer - maybe just
+# make a simpler function. Not sure why we'd always exclude the fourth time
+# point. HERE TODO
+```
+
+
+
+
+```{r index}
+
+
+sve_on_simulated_2 <- single_view_embedding(data = simulated,
+                                            response = "R_t",
+                                            lags = lags_use,
+                                            index = index_val,   # not sure what this is
+                                            buffer = buffer_val,  # number of forecasts
+                                            # prior to index, not sure exatly
+                                            # what that means
+                                            window = integer(0),  # forecast
+                                            # metric moving window width, aha -
+                                            # our issue with before and after I
+                                            # think maybe
+                                            metric = "rmse",  # presumably the
+                                            # metric to test something
+                                            beyond = FALSE)
+sve_on_simulated %>% as.data.frame()
+summary(sve_on_simulated)
+
+
+
+## Chat with Carie:
 
 We will use `R_t` with lags of 1, 2, and 3.
 `S_t` with lags 1 to 7. When we need the forecast for `R_t` we don't yet know

@@ -129,12 +129,12 @@ create_subset_lags <- function (lags) {
   return(out)
 }
 
-#' Forecast Metrics
+#' Forecast Metrics With Rolling Windows (we don't need for salmon)
 #'
 #' @param x [numeric()] [vector()] observed values
 #' @param y [numeric()] [vector()] forecast values
 #' @param k [numeric()] scalar size of the trailing running window. Uses all
-#'   previous data when \code{k = integer(0)}.
+#'   previous data when \code{k = integer(0)}.  TODO we don't want this.
 #' @param metric [character()]
 #'
 #' @importFrom rlang :=
@@ -229,6 +229,7 @@ state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
   distances <- as.matrix(stats::dist(ssr_na))
 
   # Exclude focal point and future neighbours ----------------------------------
+# ***TODO*** we don't want to do this either
 
   distances[upper.tri(distances, diag = TRUE)] <- NA_real_
 
