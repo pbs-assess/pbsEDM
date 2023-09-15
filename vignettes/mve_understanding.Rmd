@@ -45,7 +45,12 @@ model:
   over those. For Simplex the weighting of neighbours depends on their distance,
   which can be quite sensitive to noise (Hao and Sugihara).
 
-Not sure how $E$ gets prescribed, though could loop over it.
+- Luke's `single_view_embedding()` does one embedding, which can be multivariate. So
+basically can do one of the 3d plots in Hao and Sugihara (2016). Then gets
+called repeatedly by `mve()` to do all of them.
+
+Not sure how $E$ gets prescribed, though could loop over it. In `mve()` looks
+like it will just do all potential combinations (andy $E$) based on the `lags` argument.
 
 
 ```{r larkin}
@@ -72,7 +77,8 @@ simulated
 ```
 
 Here's what we have in `EDMsimulate::sim_and_fit` and `..._realisations()`, so adapt those
-(not evaluating here):
+(not evaluating here), though we are going to use `R_t` primarily, not
+`R_prime_t`, just want to be able to switch.:
 ```{r simandfit, eval = FALSE}
 # sim_and_fit():
 sim_and_fit <- function(salmon_sim_args = list(),
@@ -310,6 +316,8 @@ Now to do on our simulated values, using similar call:
 ```{r mvecalc}
 lags_use_multi <- list(R_prime_t = 0,
                        S_t = 0:3)
+# TODO Think that may not make sense, as Luke always has a response variable as
+# well. So you shouldn't use R_prime_t for both, presumably.
 mve_on_simulated <- mve(data = simulated,
                         response = "R_prime_t",
                         lags = lags_use_multi,   # when I had this as lags_use,
@@ -395,3 +403,28 @@ return the values for each view.
 - Figure out the settings. Use more of the data, not sure why there's all the
   NA's (think it's to get rid of transients, but that should be at the
   simulation stage not fitting stage).
+- We want to do leave-one-out due for calculating $\rho$, due to short time
+  series.
+
+So, for `single_view_embedding` figure out what the following do:
+
+1. index:
+2. buffer
+3. windows
+4. beyond (default is FALSE and hasn't been changed)
+5 superset (default is NULL and hasn't been changed)
+
+Chat with Carie:
+
+We will use `R_t` with lags of 1, 2, and 3.
+`S_t` with lags 1 to 7. When we need the forecast for `R_t` we don't yet know
+`S_t` because that is calculated at the end of the year.
+Number of 5-dimensional (half the max) combinations is
+```{r combinations}
+choose(10, 1:10)
+choose(10, 1:10) %>% sum()
+choose(10, 1:10) %>% sum() %>% sqrt()
+```
+So that's manageable.
+
+Should calculate $\rho$ only on what we care about, i.e. `R_t`.
