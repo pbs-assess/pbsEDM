@@ -183,7 +183,7 @@ summary(sve_on_simulated)
 Looks like it's only using information up to that point in time, going by the
 points column. Don't think we need that (i.e. use all the data) as we're going
 to test performance on the $T+1$ point. Deconstruct the function to understand
-methods:
+methods (see later for simpler example):
 
 ```{r ss}
 ssr <- state_space_reconstruction(data = simulated,
@@ -450,9 +450,8 @@ distances[upper.tri(distances, diag = TRUE)] <- NA_real_
 to just exclude the focal point -- we are okay with having future neighbours, as
 is the usual situation in EDM.
 
-HERE Go through each stage of `state_space_distances()`, checking what happens
+Go through each stage of `state_space_distances()`, checking what happens
 as we go along. Above we had
-
 
 ```{r distances1}
 # distances <- state_space_distances(ssr,
@@ -463,26 +462,48 @@ distances_1 <- state_space_distances(ssr,
                                      index = 60, # 0 gives error
                                      buffer = 1) # 0 gives error, not sure what
                                      # this really means yet
+```
 
-# Do smaller one to understand
-ssr_small <- ssr[1:20, ]
+Do smaller one to understand:
+```{r distances1b
+# Above we defined
+# ssr <- state_space_reconstruction(data = simulated,
+#                                  response = "R_t",
+#                                  lags = lags_use)  # = S_t of 0, 1, 2, 3
+
+ssr_small <- ssr[1:10, ]
 ssr_small
-distances_2 <- state_space_distances(ssr_small,
+distances_small <- state_space_distances(ssr_small,
                                      index = 2, # 0 gives error
                                      buffer = 1) # 0 gives error, not sure what
-distances_2
-distances_2[1:10, 1:10]
+distances_small
+
 # Think want to get rid of the restrictions of index and buffer - maybe just
 # make a simpler function. Not sure why we'd always exclude the fourth time
 # point. HERE TODO
+
+```
+TODO Think we want the upper triangle to not be
+NA's, feel that this is the not using future values part, but his kind of hidden.
+
+
+So, first three points of `ssr_small` do not exist because of the lags carrying on:
+```{r distances2}
+ssr_forecasts_small <- state_space_forecasts(ssr_small,
+                                             distances_small,
+                                             beyond = FALSE)
+ssr_forecasts_small
+
+
 ```
 
-
-
+Aha - TODO check aren't allowed to have `response = R_t` and lag of `R_t` of 0;
+think some of my confusion is the extra response thing. TOOD Check that response
+always gets added on to lags - think it does, so need to be careful on how to define.
 
 ```{r index}
 
-
+# Maybe change name here
 sve_on_simulated_2 <- single_view_embedding(data = simulated,
                                             response = "R_t",
                                             lags = lags_use,

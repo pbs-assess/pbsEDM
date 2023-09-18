@@ -168,7 +168,7 @@ pbsEDM <- function (N,
 
   # nbr_vals is a matrix of values from X[, 1] corresponding to nbr_inds
   nbr_vals <- t(apply(nbr_inds, 1, function(x, y) y[x, 1], y = X))
-  nbr_dist <- t(apply(X_distance, 1, sort, na.last = T))[, seq_nbrs]
+  nbr_dist <- t(apply(X_distance, 1, sort, na.last = TRUE))[, seq_nbrs]
   nbr_wgts <- t(apply(nbr_dist, 1, function(x) exp(-x / x[1])))
 
   #----------------- Project neighbour matrices -------------------------------#
