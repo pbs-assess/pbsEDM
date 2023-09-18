@@ -402,17 +402,38 @@ return the values for each view.
 - We want to do leave-one-out due for calculating $\rho$, due to short time
   series.
 
+## Check that multiview that includes lag of response variable of 0 should not
+##  be included - or rather realise that of course it should!
+
+So the first combination of lags is (currently) just `R_t` with lag of 0, which
+is the response variable, so presumably the results come out really well, or
+just a bunch of NA's. No - was thinking wrong. See #16 notes and below
+
+```{r checkspurious}
+subset_lags_multi[[1]]
+mve_on_simulated$raw_forecasts[[1]] %>% as.data.frame()
+```
+
+Actually, it shouldn't be perfect should it, as we're excluding the $t^*$
+value. Hence it's using the next nearest neighbour in 1-d `R_t` space, which is
+obviously not itself. This is all fine then -- the 1-d space is likely a poor
+representation of the dynamics. So we can include lag of 0.
+
+## Carrying on
+
 So, for `single_view_embedding` figure out what the following do:
 
 1. index:
 2. buffer
 3. windows
 4. beyond (default is FALSE and hasn't been changed)
-5 superset (default is NULL and hasn't been changed)
+5. superset (default is NULL and hasn't been changed)
+
+So:
 
 1. Change `index` value, it gets used in `state_space_distances()` in:
 
-```{r ssd, eval = FALSE}
+```{r ssd1, eval = FALSE}
 # Exclude focal points in the training set -----------------------------------
 
 distances[seq_len(index - buffer - 1L), ] <- NA_real_
@@ -420,7 +441,7 @@ distances[seq_len(index - buffer - 1L), ] <- NA_real_
 We want to do leave-one-out instead, so maybe just don't need this at all? TODO
 think more.
 
-Also want to change
+ Also want to change
 ```{r ssd2, eval = FALSE}
 # Exclude focal point and future neighbours ----------------------------------
 
@@ -478,12 +499,17 @@ sve_on_simulated_2 <- single_view_embedding(data = simulated,
                                             beyond = FALSE)
 sve_on_simulated %>% as.data.frame()
 summary(sve_on_simulated)
-
+```
 
 
 ## Chat with Carie:
 
-We will use `R_t` with lags of 1, 2, and 3.
+Think Andy and Carrie have been not on the same page about what is being
+forecast -- will chat Tuesday and resolve. TODO
+
+We will use `R_t` with lags of 1, 2, and 3. Andy thinks now do want lag 0
+also, see Issue 16. Check our thinking of $t^*$ is the same - discuss as it
+isn't TODO.
 `S_t` with lags 1 to 7. When we need the forecast for `R_t` we don't yet know
 `S_t` because that is calculated at the end of the year.
 Number of 5-dimensional (half the max) combinations is
