@@ -1,29 +1,37 @@
-#' State Space Distance Matrix
+#' State Space Distance Matrix for Single View Embedding
 #'
-#' @details Row index corresponds to focal point time. Column index
-#'   corresponds to neighbour point time. The value represents the distance
-#'   from the focal point to the neighbour point. Disallowed focal point
-#'   and neighbour combinations have value NA.
+#' Given a state-space reconstruction, return the distances between focal points
+#'   (rows) and each candidate nearest neighbour, having ruled out non-candidate
+#'   potential neighbours. Adapted from `state_space_distances()`.
+#'
 #'
 #' @param ssr [matrix()] a state space reconstruction in which the rows
-#'   are points in the state space
-#' @param index [integer()] time index of the first value to forecast
-#' @param buffer [integer()] number of values to forecast before \code{index}
+#'   are points in the state space, each row is a time
+#' @param index [integer()] TODO removetime index of the first value to forecast
+#' @param buffer [integer()] TODO removenumber of values to forecast before \code{index}
 #'
 #' @author Luke A. Rogers
 #'
 #' @return [matrix()] of allowed neighbour distances, rows corresponding to
-#'   focal point time, columns to neighbour point time.
+#'   focal point time, columns to neighbour point time. The value represents the
+#'   distance from the focal point to the neighbour point. Disallowed focal
+#'   point and neighbour combinations have value NA. Original
+#'   `state_space_distances()` had an upper triangular matrix to exclude future
+#'   points, but not doing that here -- want to utilise the full state-space
+#'   reconstruction.
+#'
 #' @export
 #'
 #'
-state_space_distances <- function (ssr, index = 50L, buffer = 10L) {
+state_space_distances <- function(ssr,
+                                  index = 50L,  # Prob remove
+                                  buffer = 10L){ # Prob remove
 
   # Check arguments ------------------------------------------------------------
 
-  checkmate::assert_integerish(index, lower = 1, upper = nrow(ssr) + 1, len = 1)
-  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
-  checkmate::assert_number(index - buffer, lower = 1)
+  # checkmate::assert_integerish(index, lower = 1, upper = nrow(ssr) + 1, len = 1)
+  # checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
+  # checkmate::assert_number(index - buffer, lower = 1)
 
   # Compute distances ----------------------------------------------------------
 

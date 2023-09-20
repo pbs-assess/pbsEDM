@@ -21,9 +21,9 @@
 #' the ethos of Takens' theorem.
 #' - In Simplex the above would be repeated for different `E`, in multiview we
 #' will repeat this for different views (state space reconstructions) in
-#' `multiview_embedding()`.
+#' `multiview_embedding()`, which will call the current function.
 #'
-#' Return the projected values of the ssr, to then be used to calculate  the
+#' Return the projected values of the ssr, to then be used to calculate the
 #' correlation coefficient (or metric of interest) and make the forecast if this
 #' particular sve is deemed good.
 #'
@@ -44,7 +44,15 @@ state_space_forecasts_for_sve <- function(ssr_input,
                                           num_nbrs = 1,
                                           beyond = FALSE){
 
-  # TODO not changed any code yet, just writing the help
+  # TODO not changed any code yet, just writing the help. Adapt code based on
+  # the above description. Remove un-needed arguments, just do the algorithm.
+  # TODO may want a minimum number of candidate nearest neighbours to choose
+  # from? See distances_small - maybe just require a simple rule. Think about
+  # how this relates to Figure 4 of manuscript 1. The upper triangular NA's are
+  # confusing me - think take them out as actually may be wrong (get that
+  # symmetry means they're not strictly needed, but makes it hard to see the
+  # library of candidate nearest neighbours for each t^*. HERE HERE So do that
+  # in state_space_distances, or make state_space_distances_for_sve().
 
   # Create neighbour index matrix ----------------------------------------------
 browser()

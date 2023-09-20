@@ -487,7 +487,7 @@ TODO Think we want the upper triangle to not be
 NA's, feel that this is the not using future values part, but his kind of hidden.
 
 
-So, first three points of `ssr_small` do not exist because of the lags carrying on:
+So, first three points of `ssr_small` do not exist because of the lags. Carrying on:
 ```{r distances2}
 ssr_forecasts_small <- state_space_forecasts(ssr_small,
                                              distances_small,
