@@ -37,7 +37,7 @@ state_space_distances <- function(ssr,
 
   # Avoid partial component distances
   ssr_na <- ssr
-  ssr_na[is.na(rowSums(ssr)), ] <- NA_real_
+  ssr_na[is.na(rowSums(ssr)), ] <- NA
 
   # Compute the distance matrix (careful if debugging as have 'distances' in vignette)
   distances <- as.matrix(stats::dist(ssr_na))    # Usual Euclidean L2-norm
@@ -58,7 +58,7 @@ state_space_distances <- function(ssr,
   # start state_space_distances_for_sve().
 
   # This seems to really just change diag to NA not 0.
-  distances[upper.tri(distances, diag = TRUE)] <- NA_real_
+  distances[upper.tri(distances, diag = TRUE)] <- NA
 
   # Exclude points by using NA ----------------------------------------
 
@@ -69,22 +69,22 @@ state_space_distances <- function(ssr,
   na_rows <- which(is.na(rowSums(ssr)))                # Rows with NA's
   na_proj <- subset(na_rows - 1L, na_rows - 1L > 0)    # Valid rows that project to na_rows
   # Exclude focal points that contain missing values
-  distances[na_rows, ] <- NA_real_      # Think already covered automatically,
+  distances[na_rows, ] <- NA      # Think already covered automatically,
                                         # but keep; not sure how distance would
                                         # be calculated.
 
   # Neighbours that contain missing values
-  distances[, na_rows] <- NA_real_      # Again, not sure if they'd be defined.
+  distances[, na_rows] <- NA      # Again, not sure if they'd be defined.
 
   # Neighbours that project to points that contain missing values. This seems
   # like it wouldn't always fall out automatically.
-  distances[, na_proj] <- NA_real_
+  distances[, na_proj] <- NA
 
   # Exclude focal points in the training set -----------------------------------
   #  Not quite sure about this, but with index = 2 and buffer = 1 (and five dimensions)this just
   #  refers to rows that have NA's. May be more important in other situations.
-  # distances[seq_len(index - buffer - 1L), ] <- NA_real_
-  distances[1:(index - buffer - 1), ] <- NA_real_
+  # distances[seq_len(index - buffer - 1L), ] <- NA
+  distances[1:(index - buffer - 1), ] <- NA
 
   # Return the distance matrix -------------------------------------------------
 
