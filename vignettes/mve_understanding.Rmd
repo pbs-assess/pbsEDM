@@ -441,8 +441,10 @@ So:
 
 distances[seq_len(index - buffer - 1L), ] <- NA_real_
 ```
-We want to do leave-one-out instead, so maybe just don't need this at all? TODO
-think more.
+We want to do leave-one-out instead, so maybe just don't need this at all? Have
+ done this in `state_space_distances_for_sve()` and then
+ `state_space_forecasts_for_sve()`; following is figuring out how to do those
+ and then doing them.
 
  Also want to change
 ```{r ssd2, eval = FALSE}
@@ -468,7 +470,7 @@ distances_1 <- state_space_distances(ssr,
 ```
 
 Do smaller one to understand:
-```{r distances1b
+```{r distances1b}
 # Above we defined
 # ssr <- state_space_reconstruction(data = simulated,
 #                                  response = "R_t",
@@ -496,15 +498,10 @@ ssr_forecasts_small <- state_space_forecasts(ssr_small,
 ssr_forecasts_small
 
 ssr_forecasts_small_for_sve <- state_space_forecasts_for_sve(ssr_small,
-                                                             distances_small_for_sve,
-                                                             beyond = FALSE)
+                                                             distances_small_for_sve)
 ssr_forecasts_small_for_sve
 
 ```
-
-Aha - TODO check aren't allowed to have `response = R_t` and lag of `R_t` of 0;
-think some of my confusion is the extra response thing. TOOD Check that response
-always gets added on to lags - think it does, so need to be careful on how to define.
 
 ```{r index}
 
@@ -553,20 +550,74 @@ ssr_small_2_orig_fun <- state_space_reconstruction(data = simulated_small_2,
 ssr_small_2 <- state_space_reconstruction_for_sve(data = simulated_small_2,
                                                    response = "R_t",
                                                    lags = lags_use_multi)
-# Okay, in the function it puts the response variable first as "R_t", but if
+# Okay, in the function it puts the response variable first as "R_t_s" (I added
+# s for scaled), but if
 # we've prescribed a lag of 0 for "R_t" you get an identical column but labelled
-# "R_t_0":
+# "R_t_s_0". BUT, not all state spaces will include a zero lag of "R_t". Stick
+# with the response column for now - I think it may be slightly inefficient
+# (could be calculated once for all ssr's, rather than for each ssr), but we do
+# need the scaled version calculated (can also check on the non-scaled predictions).
 
-# TODO I don't see the need for extra first column. Wait to hear back from Luke.
+# Example of ssr without repeated first column:
+state_space_reconstruction_for_sve(data = simulated_small_2,
+                                   response = "R_t",
+                                   lags = list(R_t = 1,
+                                               S_t = 0:3)) %>% head()
 
-HERE - decide what to name the columns in the above
-function. Can't stick with R_t if it has then been first-differenced and scaled (even without first differencing I've just realised it was confusing sticking with the same names, but I like the annotating of lag number afterwards, so keep that. Maybe Rs_t, Ss_t_0 etc. where s is scaled (having first-differenced).
 head(ssr_small_2)
+```
 
+## Where we are at
 
+So `single_view_embedding_for_sve()` [cumbersome name but consistent for now
+with what I've been doing] now being created as I go along, based on
+`single_view_embedding()`.
 
+TODO Still need to exclude invalid $t^*$. Starting fresh:
+```{r again}
+ssr_new <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
+                                              response = "R_t",
+                                              lags = lags_use_multi)
+ssr_new     # Has the correct NA's in top two rows and final row
+
+# Calculate the distances between all points
+distances_new <- state_space_distances_for_sve(ssr_new)
+
+# Note that column 14 is not filled because it projects to the undefined row 15,
+# so no point in having it as a neighbour. Row 14 is filled because 14 can be a
+# valid t_star.
+
+# Since `ssr_new` contains the response variable, I think that
+#`distances_new` is considering it, which we don't want. Check:
+
+distances_new_drop_response <- state_space_distances_for_sve(ssr_new[, -1])
+
+# YES, they are difference. Suggest adding response option to
+# state_space_distances_for_sve() and dropping it from calculations. TODO TODO
+# TODO. No, just strip reponse_scaled out as a vector from ssr. Or actually use
+# ssr calc but just for response with lag of 0.
+
+forecasts_new <- state_space_forecasts_for_sve(ssr_new,
+                                               distances_new)
+
+# TODO Then back to L111 in `state_space_forecasts_for_sve.R`
+
+HERE:
+   remove response from call to state_space_reconstruction_for_sve, then call it
+   a second time with just the response variable and no lags.
+
+i.e. this will work, without the duplicated column, and then (within calling
+                                                              function) remove
+                                                              the 0 from column name
+response_s <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
+                                                 response = "R_t",  # this won't
+                                                   # then be needed
+                                                 lags = list(R_t = 0))
 
 ```
+
+
+
 ## Chat with Carie:
 
 Think Andy and Carrie have been not on the same page about what is being

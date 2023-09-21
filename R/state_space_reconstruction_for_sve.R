@@ -1,7 +1,8 @@
 #' State Space Reconstruction for Single View Embedding (and then Multiview)
 #'
 #' Given data of variables, a list of lags, and a defined response variable
-#' (TODO: never quite sure why one has to be specified, have asked Luke), create matrix (S.10)
+#' (TODO: never quite sure why one has to be specified, have asked Luke, think
+#' it's slightly inefficient but keeping it for now), create matrix (S.10)
 #' from our first manuscript. Absolute numbers are first differenced (for each
 #' column, i.e. each original variable), then standardised (centred and scaled),
 #' and then the lagged matrix is created.
@@ -17,9 +18,12 @@
 #' @author Andrew M. Edward and Luke A. Rogers
 #'
 #' @return [state_space_reconstruction()] [matrix()] with unlagged response
-#'   and lagged explanatory variables that are first differenced and then centred on their means and scaled by
+#'   and lagged explanatory variables that are first differenced and then centred on their means and divided by
 #'   their respective standard deviations, with automatically generated column
-#'   names.
+#'   names in the following style: for a variable called `S_t` and lags of 0, 1,
+#'   2, the scaled variable and lagged names are `S_t_s_0, `S_t_s_1, and
+#'   `S_t_s_2, where the last number is the lag and `s` stands for scaled. First
+#'   column is the scaled response variable.
 #'
 #' @export
 #'
@@ -32,7 +36,6 @@ state_space_reconstruction_for_sve <- function(data,
                                                lags){
 
   # Define values --------------------------------------------------------------
-browser()
   col_names <- c(response, names(lags))
   lag_sizes <- unlist(lags, use.names = FALSE)
   lag_names <- rep(names(lags), lengths(lags))
@@ -61,9 +64,11 @@ browser()
       lag_sizes
     )
   )
-  colnames(X) <- c(response, paste0(lag_names, "_", lag_sizes))
-# TODO here we can add s in for scaled, as they're not the same as the original data
-  # Return ssr -----------------------------------------------------------------
+
+  # Rename with lags explicitly given, and "_s" to denote scaled (and
+  # first-differenced), to distinguish from raw values. So like going from N_{t,k}
+  # to Y_{t-lag,k} in our first manuscript Appendix.
+  colnames(X) <- c(paste0(response, "_s"), paste0(lag_names, "_s_", lag_sizes))
 
   return(structure(X, class = "state_space_reconstruction"))
 }

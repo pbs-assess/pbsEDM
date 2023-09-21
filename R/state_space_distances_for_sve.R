@@ -54,7 +54,7 @@ state_space_distances_for_sve <- function(ssr){
   #                                      first three rows and columns.
   # Though think this is what is happening here, except for the 0's maybe.
 
-  # Exclude focal point
+  # Exclude focal point (i.e. distance from itself)
   diag(distances) <- NA
 
   # This does not deal with our Aspect 2 from first manuscript because

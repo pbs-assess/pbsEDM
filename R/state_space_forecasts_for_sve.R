@@ -57,8 +57,6 @@ state_space_forecasts_for_sve <- function(ssr_input,
   # how this relates to Figure 4 of manuscript 1.
 
   # Create neighbour index matrix ----------------------------------------------
-browser()
-
 
   #num_nbrs <- ncol(ssr_input) + 1
   #seq_nbrs <- 1:num_nbrs
@@ -76,13 +74,42 @@ browser()
   # We just want the t value of the nearest neighbour for each t*, using valid
   # t* times.
 
+
+  # TODO exclude invalid t*'s
+
+  # TODO exclude invalid candidate nearest neighbours - likely needs to be done
+  #  in earlier loop, will depend on t* given our Figure 4.
+
+browser()
+
   nearest_neighbour_index <- rep(NA, nrow(distance))
-  for(i in 1:nrow(distance)){
+
+  for(t_star in 1:nrow(distance)){
     # If want to have a minimum number neighbours then do it here: but not
     # needed now it's symmetric and we can have future neighbours, which we do
     # for real data.
-    if(!all(is.na(distance[i, ]))){  #ignore rows of NA's
-      nearest_neighbour_index[i] <- which.min(distance[i, ])
+    if(!all(is.na(distance[t_star, ]))){  # ignore rows of NA's (distance
+                                        # calculation has taken care of ssr rows
+                                        # with any NA's. Includes first ones and
+                                        # row T.
+
+    # further invalid t_star are:
+    # - T-1 because we don't know where it goes (so can't test how well this ssr
+    #  performs, but do want to know the nearest neighbour to make a forecast,
+    #  hence do need the distances row)
+
+
+    # Invalid candidate nearest neighbours are rows (see first manuscript, page 16)
+    # - t* itself (already have NA as distance to itself, so that's taken care
+    # of)
+    # - x_t thart are not fully defined; again, taken care of above as row of
+    # NA's in distance
+    # - T - 1 as we need to know where it goes to use for predictin; also taken
+    # care of in distances (T - 1 column is NA's)
+    # - we think we should not use any X_t that includes the quantity we are trying
+    # to predict. For univariate this was anything including Y_{t^*+1}; for
+    # multivariate (HERE HERE HERE TODO
+      nearest_neighbour_index[t_star] <- which.min(distance[t_star, ])
     }
   }
 
@@ -132,11 +159,6 @@ browser()
   #  return(ssr_input_forecast)
 
 
-
-  # TODO exclude invalid t*'s
-
-  # TODO exclude invalid candidate nearest neighbours - likely needs to be done
-  #  in earlier loop, will depend on t* given our Figure 4.
 
   # Then just want to add one to the indices to produce the projections for
   # each one.
