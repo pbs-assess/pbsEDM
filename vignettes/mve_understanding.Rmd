@@ -29,6 +29,8 @@ Adapting Luke's original `mve.Rmd` to dig into his multiview embedding functions
 use the same default time series as in `analyse_simple_time_series.Rmd` but
 that's univariate, so stick with his larkin one.
 
+Andy has updated several functions and appended the names with `for_sve()`.
+
 Hao and Sugihara (2016) define, for, say Hastings and Powell x-y-z food-chain
 model:
 
@@ -188,7 +190,8 @@ methods (see later for simpler example):
 ```{r ss}
 ssr <- state_space_reconstruction(data = simulated,
                                   response = "R_t",
-                                  lags = lags_use)
+                                  lags = lags_use)   # deconstructing later,
+                                        # realised it doesn't do first-differencing
 head(simulated)
 head(ssr)
 ```
@@ -474,18 +477,16 @@ Do smaller one to understand:
 ssr_small <- ssr[1:10, ]
 ssr_small
 distances_small <- state_space_distances(ssr_small,
-                                     index = 2, # 0 gives error
-                                     buffer = 1) # 0 gives error, not sure what
+                                         index = 2, # 0 gives error
+                                         buffer = 1) # 0 gives error, not sure what
 distances_small
 
-# Think want to get rid of the restrictions of index and buffer - maybe just
-# make a simpler function. Not sure why we'd always exclude the fourth time
-# point. HERE TODO
+# Now adapted to not have index or buffer, and return symmetric matrix not lower
+# triangular (plus extra NA's)
 
+distances_small_for_sve <- state_space_distances_for_sve(ssr_small)
+distances_small_for_sve
 ```
-TODO Think we want the upper triangle to not be
-NA's, feel that this is the not using future values part, but his kind of hidden.
-
 
 So, first three points of `ssr_small` do not exist because of the lags. Carrying on:
 ```{r distances2}
@@ -494,6 +495,10 @@ ssr_forecasts_small <- state_space_forecasts(ssr_small,
                                              beyond = FALSE)
 ssr_forecasts_small
 
+ssr_forecasts_small_for_sve <- state_space_forecasts_for_sve(ssr_small,
+                                                             distances_small_for_sve,
+                                                             beyond = FALSE)
+ssr_forecasts_small_for_sve
 
 ```
 
@@ -522,7 +527,46 @@ sve_on_simulated %>% as.data.frame()
 summary(sve_on_simulated)
 ```
 
+## Figuring out ssr - need first differencing also
 
+Realised that `state_space_reconstruction()` doesn't do what we say in Appendix
+of first manuscript. So deconstructing it and writing `state_space_reconstruction_for_sve()`.
+
+Do first 15 of rows of `simulated`, starting fresh here:
+```{r ssrforsve}
+simulated_small_2 <- simulated[1:15, ]
+
+# Above had
+ssr <- state_space_reconstruction(data = simulated,
+                                  response = "R_t",
+                                  lags = lags_use)   # deconstructing later,
+                                        # realised it doesn't do first-differencing
+
+lags_use_multi
+
+ssr_small_2_orig_fun <- state_space_reconstruction(data = simulated_small_2,
+                                                   response = "R_t",
+                                                   lags = lags_use_multi)
+
+# Now new function that also does first-differencing; am digging into to check I
+# understand, then including first differening early on in this new one:
+ssr_small_2 <- state_space_reconstruction_for_sve(data = simulated_small_2,
+                                                   response = "R_t",
+                                                   lags = lags_use_multi)
+# Okay, in the function it puts the response variable first as "R_t", but if
+# we've prescribed a lag of 0 for "R_t" you get an identical column but labelled
+# "R_t_0":
+
+# TODO I don't see the need for extra first column. Wait to hear back from Luke.
+
+HERE - decide what to name the columns in the above
+function. Can't stick with R_t if it has then been first-differenced and scaled (even without first differencing I've just realised it was confusing sticking with the same names, but I like the annotating of lag number afterwards, so keep that. Maybe Rs_t, Ss_t_0 etc. where s is scaled (having first-differenced).
+head(ssr_small_2)
+
+
+
+
+```
 ## Chat with Carie:
 
 Think Andy and Carrie have been not on the same page about what is being

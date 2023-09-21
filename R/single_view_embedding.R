@@ -1,4 +1,4 @@
-#' Single View Embedding
+#' Single View Embedding - TODO Andy adapting
 #'
 #' @param data [matrix()] or [data.frame()] with named [numeric()] columns
 #' @param response [character()] column name of the response variable in
@@ -29,8 +29,8 @@ single_view_embedding <- function (data,
 
   # Check arguments ------------------------------------------------------------
 
-  checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
-  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
+#  checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
+#  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
 
   # Define the state space reconstruction --------------------------------------
 
@@ -47,7 +47,7 @@ single_view_embedding <- function (data,
   distances <- state_space_distances(ssr, index, buffer)
 
   # Compute centred and scaled forecasts ---------------------------------------
-
+# HERE this seems out of order
   # - Create neighbour index matrix
   # - Create neighbour matrices
   # - Project neighbour matrices

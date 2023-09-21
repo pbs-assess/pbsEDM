@@ -15,7 +15,7 @@ state_space_forecasts <- function (X, distance, beyond = FALSE) {
   # Check arguments ------------------------------------------------------------
 
   # Create neighbour index matrix ----------------------------------------------
-browser()
+
   num_nbrs <- ncol(X) + 1
   seq_nbrs <- 1:num_nbrs
   # For each t* (row), the nearest neighbour's index goes in first column,

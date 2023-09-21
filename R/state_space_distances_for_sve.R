@@ -7,8 +7,6 @@
 #'
 #' @param ssr [matrix()] a state space reconstruction in which the rows
 #'   are points in the state space, each row is a time
-#' @param index [integer()] TODO removetime index of the first value to forecast
-#' @param buffer [integer()] TODO removenumber of values to forecast before \code{index}
 #'
 #' @author Luke A. Rogers
 #'
@@ -23,9 +21,7 @@
 #' @export
 #'
 #'
-state_space_distances <- function(ssr,
-                                  index = 50L,  # Prob remove
-                                  buffer = 10L){ # Prob remove
+state_space_distances_for_sve <- function(ssr){
 
   # Check arguments ------------------------------------------------------------
 
@@ -35,11 +31,16 @@ state_space_distances <- function(ssr,
 
   # Compute distances ----------------------------------------------------------
 
-  # Avoid partial component distances
+  # Avoid partial component distances (any row with an NA just becomes all NA's,
+  # since the point does not exist)
   ssr_na <- ssr
   ssr_na[is.na(rowSums(ssr)), ] <- NA
 
-  # Compute the distance matrix (careful if debugging as have 'distances' in vignette)
+  # Compute the distance matrix (careful if debugging as have 'distances' in
+  # vignette), which has dimension nrow(ssr_na) * nrow(ssr_na). Columns are
+  # time points also. This automatically makes the first C columns all NA's if the
+  # first C rows are all NA's (except diagonal is 0, this gets fixed next).
+
   distances <- as.matrix(stats::dist(ssr_na))    # Usual Euclidean L2-norm
                                         # (Pythagoras); as.matrix is more intiuitve
   # distances_all <- as.matrix(stats::dist(ssr_na,
@@ -53,40 +54,36 @@ state_space_distances <- function(ssr,
   #                                      first three rows and columns.
   # Though think this is what is happening here, except for the 0's maybe.
 
-  # Exclude focal point and future neighbours ----------------------------------
-  # Do not think we want to do this for our application, so don't do it when
-  # start state_space_distances_for_sve().
+  # Exclude focal point
+  diag(distances) <- NA
 
-  # This seems to really just change diag to NA not 0.
-  distances[upper.tri(distances, diag = TRUE)] <- NA
+  # This does not deal with our Aspect 2 from first manuscript because
+  #  are just calculating the distances here, not prescribing a specific focal point.
 
-  # Exclude points by using NA ----------------------------------------
+  na_rows <- which(is.na(rowSums(ssr)))         # Incomplete rows of ssr
 
-
-
-  # - TODO does this deal with our Aspect from first manuscript???
-
-  na_rows <- which(is.na(rowSums(ssr)))                # Rows with NA's
-  na_proj <- subset(na_rows - 1L, na_rows - 1L > 0)    # Valid rows that project to na_rows
   # Exclude focal points that contain missing values
   distances[na_rows, ] <- NA      # Think already covered automatically,
-                                        # but keep; not sure how distance would
-                                        # be calculated.
+                                  # but keep just in case; not sure how distance would
+                                  # be calculated.
 
   # Neighbours that contain missing values
   distances[, na_rows] <- NA      # Again, not sure if they'd be defined.
 
   # Neighbours that project to points that contain missing values. This seems
   # like it wouldn't always fall out automatically.
+  na_proj <- subset(na_rows - 1,
+                    na_rows - 1 > 0)            # Valid rows that project to na_rows
+
   distances[, na_proj] <- NA
 
   # Exclude focal points in the training set -----------------------------------
   #  Not quite sure about this, but with index = 2 and buffer = 1 (and five dimensions)this just
   #  refers to rows that have NA's. May be more important in other situations.
   # distances[seq_len(index - buffer - 1L), ] <- NA
-  distances[1:(index - buffer - 1), ] <- NA
+  # distances[1:(index - buffer - 1), ] <- NA
 
-  # Return the distance matrix -------------------------------------------------
+  # Return the distances matrix -------------------------------------------------
 
   return(distances)
 }
