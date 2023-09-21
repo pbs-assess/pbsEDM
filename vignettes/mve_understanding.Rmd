@@ -1,4 +1,4 @@
----
+l---
 title: "mve_understanding"
 output: rmarkdown::html_vignette
 vignette: >
@@ -576,43 +576,35 @@ with what I've been doing] now being created as I go along, based on
 TODO Still need to exclude invalid $t^*$. Starting fresh:
 ```{r again}
 ssr_new <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
-                                              response = "R_t",
                                               lags = lags_use_multi)
 ssr_new     # Has the correct NA's in top two rows and final row
 
+response_s <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
+                                                 response_only = TRUE,
+                                                 lags = list(R_t = 0))
+
+response_s  # Just what we're considering as the response variable, properly
+            #  labelled
+
 # Calculate the distances between all points
 distances_new <- state_space_distances_for_sve(ssr_new)
-
+distances_new
 # Note that column 14 is not filled because it projects to the undefined row 15,
 # so no point in having it as a neighbour. Row 14 is filled because 14 can be a
 # valid t_star.
 
+# Now fixed, this helped figure it out:
 # Since `ssr_new` contains the response variable, I think that
 #`distances_new` is considering it, which we don't want. Check:
-
-distances_new_drop_response <- state_space_distances_for_sve(ssr_new[, -1])
-
+# distances_new_drop_response <- state_space_distances_for_sve(ssr_new[, -1])
 # YES, they are difference. Suggest adding response option to
-# state_space_distances_for_sve() and dropping it from calculations. TODO TODO
-# TODO. No, just strip reponse_scaled out as a vector from ssr. Or actually use
-# ssr calc but just for response with lag of 0.
+# state_space_distances_for_sve() and dropping it from calculations. Done.
 
 forecasts_new <- state_space_forecasts_for_sve(ssr_new,
                                                distances_new)
 
 # TODO Then back to L111 in `state_space_forecasts_for_sve.R`
 
-HERE:
-   remove response from call to state_space_reconstruction_for_sve, then call it
-   a second time with just the response variable and no lags.
-
-i.e. this will work, without the duplicated column, and then (within calling
-                                                              function) remove
-                                                              the 0 from column name
-response_s <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
-                                                 response = "R_t",  # this won't
-                                                   # then be needed
-                                                 lags = list(R_t = 0))
 
 ```
 
