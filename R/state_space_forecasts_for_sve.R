@@ -88,12 +88,12 @@ state_space_forecasts_for_sve <- function(ssr_input,
     #  - t_star's for which distance is a row of NA's (distance calculation has
     #  taken care of ssr rows with any NA's; this includes first ones and
     #  row T = nrow(distance).
-    # - Also ignore t_star = T-1 because we don't know where it goes (so can't
-    #  test how well this ssr performs, but do want to know the nearest
-    #  neighbour to make a forecast, hence do need the distances row)
-
-    if(!all(is.na(distance[t_star, ])) &
-       t_star != nrow(distance) - 1){
+    # - Was going to ignore t_star = T-1 because we don't know where it goes (so can't
+    #  test how well this ssr performs), but we do need it to make the actual
+    #  forecast into the future - calculation of rho will ignore this value
+    #  anyway because the known value at T will be NA.
+    if(!all(is.na(distance[t_star, ]))){
+       # & t_star != nrow(distance) - 1){
 
       # Invalid candidate nearest neighbours are rows (see first manuscript, page 16):
       # - t* itself (already have NA as distance to itself, so that's taken care

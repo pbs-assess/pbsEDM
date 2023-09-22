@@ -10,7 +10,9 @@
 #' @param lags [list()] of a named vector of lags for each explanatory
 #'   variable.
 #' @param metric [character()]
-#' @param superset [list()] superset of lags corresponding to parent SSR TODO NEEDED??
+#' @param superset [list()] superset of lags corresponding to parent SSR TODO
+#'   NEEDED?? No, it will be kept track of within sve function and from what was
+#'   called, no need to repeat.
 #'
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
@@ -56,10 +58,17 @@ single_view_embedding_for_sve <- function(data,
                                                                            use.names = FALSE)))
 
 
-  response_s_prediction <- HERE # see vignette
+  # Take off the final one because we are shifting (predicting t_star+1 from the
+  # prediction indices for each t_star; need NA at beginning.
+  response_s_prediction <- c(NA,
+                             response_s[prediction_indices[-length(prediction_indices)]])
+
   # Define observed ------------------------------------------------------------
   # observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]    # NA seems to get added then removed, at least in mve_understanding.Rmd example
 
+
+
+  # HERE # see vignette - need to untransofrm
 
   # Compute forecast -----------------------------------------------------------
 

@@ -25,6 +25,8 @@ library(magrittr)
 library(ggplot2)
 ```
 
+Jump to Where we are at section.
+
 Adapting Luke's original `mve.Rmd` to dig into his multiview embedding functions. Was going
 use the same default time series as in `analyse_simple_time_series.Rmd` but
 that's univariate, so stick with his larkin one.
@@ -573,8 +575,15 @@ So `single_view_embedding_for_sve()` [cumbersome name but consistent for now
 with what I've been doing] now being created as I go along, based on
 `single_view_embedding()`.
 
-TODO Still need to exclude invalid $t^*$. Starting fresh:
+Starting fresh (so can just run from here):
 ```{r again}
+simulated <- EDMsimulate::salmon_sim()
+lags_use_multi <- list(R_t = 0,
+                       S_t = 0:3)
+
+# TODO not sure why this fails:
+#  expect_equal(EDMsimulate::salmon_sim()[1:15, ], EDMsimulate::salmon_sim(T = 15))
+
 ssr_new <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
                                               lags = lags_use_multi)
 ssr_new     # Has the correct NA's in top two rows and final row
@@ -584,7 +593,8 @@ response_s <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
                                                  lags = list(R_t = 0))
 
 response_s  # Just what we're considering as the response variable, properly
-            #  labelled
+            #  labelled; don't have a first-differenced value for T (as no
+            #  T+1). This value is what we want to forecast.
 
 # Calculate the distances between all points
 distances_new <- state_space_distances_for_sve(ssr_new)
@@ -604,9 +614,15 @@ prediction_indices <- state_space_forecasts_for_sve(ssr_new,
                                                     distances_new,
                                                     max_lag = max(unlist(lags_use_multi,
                                                                          use.names = FALSE)))
+# Those are the indices to use the make the prediction of where each t_star will
+# go for t_star+1.
 
+response_s_predicted <- c(NA,
+                          response_s[prediction_indices[-length(prediction_indices)]])
+# Take off the final one because we are shifting (predicting t_star+1 from the
+# prediction indices for each t_star; need NA at beginning.
 
-response_s_predicted <- response_s[prediction_indices]
+response_s_predicted
 
 rho_response_s <- cor(response_s,
                       response_s_predicted,
@@ -617,7 +633,10 @@ rho_response_s
 Can also calculate $\rho$ on the untransformed original response variable.
 
 NEXT HERE: Need to untransform, but `untransform_variables()` needs to be
-updated to un-first difference also.Can check it works for original.
+updated to un-first difference also. Can testcheck it works for original.
+
+Then put that into `single_view_embedding_for_sve()`, work out what should be
+returned, and then call the proper thing from the relevant mve function.
 
 TODO Can prob delete un-needed in `state_space_forecasts_for_sve.R`
 

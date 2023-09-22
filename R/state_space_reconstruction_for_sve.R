@@ -11,6 +11,8 @@
 #' gave in Appendix S1 of first manuscript, and to not have the response as an
 #' output (as it was getting used in the distance calculations later).
 #'
+#' If this function changes then need to update `untransform_predictions()` also.
+#'
 #' @param data [matrix()] or [data.frame()] with variables as named columns
 #' @param lags [list()] of a named vector of lags for each explanatory variable
 #' @param response_only if TRUE then `data` can only have one column and
