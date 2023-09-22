@@ -26,8 +26,17 @@ single_view_embedding_for_sve <- function(data,
   # Define the state space reconstruction, using scaled variables --------------
 
   ssr <- state_space_reconstruction_for_sve(data,
-                                            response,
                                             lags)
+
+  # Also need scaled response variable
+  response_as_lag <- list(xxx = 0)
+  names(response_as_lag) <- response
+
+  response_s <- state_space_reconstruction_for_sve(data,
+                                                   response = response,
+                                                   lags = response_as_lag,
+                                                   response_only = TRUE)
+
 
   # Compute state space distances between points -------------------------------
 
@@ -38,17 +47,19 @@ single_view_embedding_for_sve <- function(data,
 
   distances <- state_space_distances_for_sve(ssr)
 
-  # Make forecasts for all allowable focal times $t^*$, taking into account the
+  # Make predictions for all allowable focal times $t^*$, taking into account the
   # candidate nearest neighbours
 
-  ssr_forecasts <- state_space_forecasts_for_sve(ssr,
-                                                 distances)
+  prediction_indices <- state_space_forecasts_for_sve(ssr,
+                                                      distances,
+                                                      max_lag = max(unlist(lags,
+                                                                           use.names = FALSE)))
 
-  # TODO ANdy got to HERE, now editing state_space_forecasts_for_sve() to deal
-  # with valid focal times.
+
+  response_s_prediction <- HERE # see vignette
   # Define observed ------------------------------------------------------------
+  # observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]    # NA seems to get added then removed, at least in mve_understanding.Rmd example
 
-  observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]    # NA seems to get added then removed, at least in mve_understanding.Rmd example
 
   # Compute forecast -----------------------------------------------------------
 

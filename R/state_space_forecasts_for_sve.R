@@ -32,6 +32,7 @@
 #' @param ssr_input [matrix()] a state space reconstruction in which the rows
 #'   are points in the state space
 #' @param distance [matrix()] of distances of allowed neighbours
+#' @param max_lag [numeric()] maximum lag used to create the ssr
 #'
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
@@ -44,7 +45,8 @@
 #' @export
 #'
 state_space_forecasts_for_sve <- function(ssr_input,
-                                          distance){
+                                          distance,
+                                          max_lag){
 #                                          min_number_neighbours = 1, # minimum
                                             # number of neighbours in order to
                                             # pick the closest, TODO implement
@@ -72,15 +74,7 @@ state_space_forecasts_for_sve <- function(ssr_input,
 
 
   # We just want the t value of the nearest neighbour for each t*, using valid
-  # t* times.
-
-
-  # TODO exclude invalid t*'s
-
-  # TODO exclude invalid candidate nearest neighbours - likely needs to be done
-  #  in earlier loop, will depend on t* given our Figure 4.
-
-browser()
+  # t* times and valid candidate nearest neighbours.
 
   nearest_neighbour_index <- rep(NA, nrow(distance))
 
@@ -88,28 +82,43 @@ browser()
     # If want to have a minimum number neighbours then do it here: but not
     # needed now it's symmetric and we can have future neighbours, which we do
     # for real data.
-    if(!all(is.na(distance[t_star, ]))){  # ignore rows of NA's (distance
-                                        # calculation has taken care of ssr rows
-                                        # with any NA's. Includes first ones and
-                                        # row T.
 
-    # further invalid t_star are:
-    # - T-1 because we don't know where it goes (so can't test how well this ssr
-    #  performs, but do want to know the nearest neighbour to make a forecast,
-    #  hence do need the distances row)
+    # Work out nearest neighbours for each t_star, but ignore (leave
+    #  nearest_neighbour_index[t_star] as NA):
+    #  - t_star's for which distance is a row of NA's (distance calculation has
+    #  taken care of ssr rows with any NA's; this includes first ones and
+    #  row T = nrow(distance).
+    # - Also ignore t_star = T-1 because we don't know where it goes (so can't
+    #  test how well this ssr performs, but do want to know the nearest
+    #  neighbour to make a forecast, hence do need the distances row)
 
+    if(!all(is.na(distance[t_star, ])) &
+       t_star != nrow(distance) - 1){
 
-    # Invalid candidate nearest neighbours are rows (see first manuscript, page 16)
-    # - t* itself (already have NA as distance to itself, so that's taken care
-    # of)
-    # - x_t thart are not fully defined; again, taken care of above as row of
-    # NA's in distance
-    # - T - 1 as we need to know where it goes to use for predictin; also taken
-    # care of in distances (T - 1 column is NA's)
-    # - we think we should not use any X_t that includes the quantity we are trying
-    # to predict. For univariate this was anything including Y_{t^*+1}; for
-    # multivariate (HERE HERE HERE TODO
-      nearest_neighbour_index[t_star] <- which.min(distance[t_star, ])
+      # Invalid candidate nearest neighbours are rows (see first manuscript, page 16):
+      # - t* itself (already have NA as distance to itself, so that's taken care
+      # of)
+      # - x_t that are not fully defined; again, taken care of above as row of
+      # NA's in distance
+      # - T - 1 as we need to know where it goes to use for prediction; also taken
+      # care of in distances (T - 1 column is NA's)
+      # - we think we should not use any X_t that includes the quantity we are trying
+      # to predict. For univariate this was anything including Y_{t^*+1}; for
+      # multivariate it includes any row with a Y_{t^*+1, k}; turns out this is
+      # rows t*+1 to t* + max_lag + 1.
+
+      # So for t_star we look at the row distance[t_star, ], but need to set
+      #  values corresponding to invalid candidate neighbours to NA.
+
+      # which.min ignores NA's, we just need to
+      candidate_neighbours_distances <- as.vector(distance[t_star, ])
+
+      # Set non-candidate nearest neighbours to NA
+      max_index_of_invalid_neighbour <- min(t_star + max_lag + 1,
+                                            nrow(distance))  # So don't overshoot
+      candidate_neighbours_distances[(t_star + 1):max_index_of_invalid_neighbour] <- NA
+
+      nearest_neighbour_index[t_star] <- which.min(candidate_neighbours_distances)
     }
   }
 

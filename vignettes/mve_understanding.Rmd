@@ -1,4 +1,4 @@
-l---
+---
 title: "mve_understanding"
 output: rmarkdown::html_vignette
 vignette: >
@@ -600,15 +600,26 @@ distances_new
 # YES, they are difference. Suggest adding response option to
 # state_space_distances_for_sve() and dropping it from calculations. Done.
 
-forecasts_new <- state_space_forecasts_for_sve(ssr_new,
-                                               distances_new)
+prediction_indices <- state_space_forecasts_for_sve(ssr_new,
+                                                    distances_new,
+                                                    max_lag = max(unlist(lags_use_multi,
+                                                                         use.names = FALSE)))
 
-# TODO Then back to L111 in `state_space_forecasts_for_sve.R`
 
+response_s_predicted <- response_s[prediction_indices]
 
+rho_response_s <- cor(response_s,
+                      response_s_predicted,
+                      use = "pairwise.complete.obs")
+rho_response_s
 ```
 
+Can also calculate $\rho$ on the untransformed original response variable.
 
+NEXT HERE: Need to untransform, but `untransform_variables()` needs to be
+updated to un-first difference also.Can check it works for original.
+
+TODO Can prob delete un-needed in `state_space_forecasts_for_sve.R`
 
 ## Chat with Carie:
 
