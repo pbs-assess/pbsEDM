@@ -47,9 +47,8 @@ untransform_predictions <- function (N_observed,
   }
   N_predicted[min_t_Y_predicted] <- NA   # For first-differencing, haven't
                                         # predictd this one so set to NA
-  # So will return a prediction vector of original N_t, but also with N_{T+1},
-  #  which is what we are ultimately after.
 
-  # Return predictions in original absolute space
+  # Return a prediction vector of original N_t, but also with N_{T+1},
+  #  which is what we are ultimately after. So in original absolute space
   return(N_predicted)
 }

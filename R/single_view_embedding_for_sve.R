@@ -10,20 +10,20 @@
 #' @param lags [list()] of a named vector of lags for each explanatory
 #'   variable.
 #' @param metric [character()]
-#' @param superset [list()] superset of lags corresponding to parent SSR TODO
-#'   NEEDED?? No, it will be kept track of within sve function and from what was
-#'   called, no need to repeat.
 #'
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
-#' @return [data.frame()]
+#' @return [tibble()] with columns `response`, `response_predicted` (so both in
+#'  original absolute numbers, and then `response_s` and `response_s_predicted`
+#'  both in scaled (first differenced and then scaled) co-ordinates, so we can then
+#'  calculate both types of correlation coefficient (or whatever else) to rank each
+#'  individual single view embedding.
+
 #' @export
 #'
 single_view_embedding_for_sve <- function(data,
                                           response,
-                                          lags,
-                                          metric = "rmse",
-                                          superset = NULL) {
+                                          lags){
 
   # Define the state space reconstruction, using scaled variables --------------
 
@@ -35,10 +35,8 @@ single_view_embedding_for_sve <- function(data,
   names(response_as_lag) <- response
 
   response_s <- state_space_reconstruction_for_sve(data,
-                                                   response = response,
                                                    lags = response_as_lag,
                                                    response_only = TRUE)
-
 
   # Compute state space distances between points -------------------------------
 
@@ -54,38 +52,39 @@ single_view_embedding_for_sve <- function(data,
 
   prediction_indices <- state_space_forecasts_for_sve(ssr,
                                                       distances,
-                                                      max_lag = max(unlist(lags,
-                                                                           use.names = FALSE)))
-
+                                                      max_lag =
+                                                        max(unlist(lags,
+                                                                   use.names = FALSE)))
 
   # Take off the final one because we are shifting (predicting t_star+1 from the
   # prediction indices for each t_star; need NA at beginning.
-  response_s_prediction <- c(NA,
+  response_s_predicted <- c(NA,
                              response_s[prediction_indices[-length(prediction_indices)]])
 
+
+
   # Define observed ------------------------------------------------------------
-  # observed <- c(dplyr::pull(data, response), NA)[seq_along(ssr_forecasts)]    # NA seems to get added then removed, at least in mve_understanding.Rmd example
+  response_observed <- dplyr::pull(data,
+                                   response)
 
+  # Back transform and unlag to give predictions for original response variable
+  response_abs_predicted <- untransform_predictions(N_observed = response_observed,
+                                                    Y_predicted = response_s_predicted,
+                                                    max_lag = max(unlist(lags,
+                                                      use.names = FALSE)))
+  # What to return. Lags is an input so don't need that, can just have a tibble
+  #  of things that are calculated within this function. Can calculate rho etc outside.
+  to_return <- tibble::tibble(
+                         response_obs = c(response_observed, NA),     # Since
+                                        # predicted will have T+1 prediction
+                         response_pred = response_abs_predicted,
+                         response_scaled = c(response_s, NA),
+                         response_scaled_predicted = c(response_s_predicted, NA))
 
+  names(to_return) <- c(response,
+                        paste0(response, "_predicted"),
+                        paste0(response, "_s"),
+                        paste0(response, "_s_predicted"))
 
-  # HERE # see vignette - need to untransofrm
-
-  # Compute forecast -----------------------------------------------------------
-
-  forecast <- untransform_forecasts(observed, ssr_forecasts)
-
-  # Return results -------------------------------------------------------------
-
-  rows <- seq_along(forecast)
-
-  tibble::tibble(
-            set = rep(0:1, c(index - 1, nrow(data) - index + 2))[rows],
-            time = seq_len(nrow(data) + 1L)[rows],
-            points = c(0, as.vector(apply(distances, 1, function (x) sum(!is.na(x)))))[rows],
-            dim = rep(ncol(ssr), nrow(data) + 1L)[rows],
-            observed = observed,
-            forecast = forecast,
-            forecast_metrics(observed, forecast, window, metric),
-            superset_columns(data, lags, superset)
-          )
+  to_return
 }

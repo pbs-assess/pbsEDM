@@ -573,7 +573,7 @@ head(ssr_small_2)
 
 So `single_view_embedding_for_sve()` [cumbersome name but consistent for now
 with what I've been doing] now being created as I go along, based on
-`single_view_embedding()`.
+`single_view_embedding()`. This is to help write the function.
 
 Starting fresh (so can just run from here):
 ```{r again}
@@ -584,11 +584,12 @@ lags_use_multi <- list(R_t = 0,
 # TODO not sure why this fails:
 #  expect_equal(EDMsimulate::salmon_sim()[1:15, ], EDMsimulate::salmon_sim(T = 15))
 
-ssr_new <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
+simulated_small_3 <- simulated[1:15, ]
+ssr_new <- state_space_reconstruction_for_sve(data = simulated_small_3,
                                               lags = lags_use_multi)
 ssr_new     # Has the correct NA's in top two rows and final row
 
-response_s <- state_space_reconstruction_for_sve(data = simulated[1:15, ],
+response_s <- state_space_reconstruction_for_sve(data = simulated_small_3,
                                                  response_only = TRUE,
                                                  lags = list(R_t = 0))
 
@@ -603,13 +604,6 @@ distances_new
 # so no point in having it as a neighbour. Row 14 is filled because 14 can be a
 # valid t_star.
 
-# Now fixed, this helped figure it out:
-# Since `ssr_new` contains the response variable, I think that
-#`distances_new` is considering it, which we don't want. Check:
-# distances_new_drop_response <- state_space_distances_for_sve(ssr_new[, -1])
-# YES, they are difference. Suggest adding response option to
-# state_space_distances_for_sve() and dropping it from calculations. Done.
-
 prediction_indices <- state_space_forecasts_for_sve(ssr_new,
                                                     distances_new,
                                                     max_lag = max(unlist(lags_use_multi,
@@ -617,38 +611,60 @@ prediction_indices <- state_space_forecasts_for_sve(ssr_new,
 # Those are the indices to use the make the prediction of where each t_star will
 # go for t_star+1.
 
-response_s_predicted <- c(NA,
-                          response_s[prediction_indices[-length(prediction_indices)]])
 # Take off the final one because we are shifting (predicting t_star+1 from the
 # prediction indices for each t_star; need NA at beginning.
+response_s_predicted <- c(NA,
+                          response_s[prediction_indices[-length(prediction_indices)]])
 
 response_s_predicted
 
 rho_response_s <- cor(response_s,
                       response_s_predicted,
-                      use = "pairwise.complete.obs")
+                      use = "pairwise.complete.obs") %>% as.vector()
+
 rho_response_s
 ```
 
 Can also calculate $\rho$ on the untransformed original response variable.
 
-NEXT HERE: Need to untransform, working on `untransform_predictions()`
-updated to un-first difference also. Can testcheck it works for original.
+Now untransform the scaling and first differencing.
 
 ```{r untransform}
-N_observed <- simulated[1:15, ]$"R_t"
+N_observed <- simulated_small_3$"R_t"
 N_predicted <- untransform_predictions(N_observed = N_observed,
                                        Y_predicted = response_s_predicted,
                                        max_lag = max(unlist(lags_use_multi,
                                                             use.names = FALSE)))
-cor(N_observed, N_predicted[-length(N_predicted)], use =
-                                                     "pairwise.complete.obs")  # Also need to remove first non-NA one
-# Very low, but only a few points to get things working
+rho_orig <- cor(N_observed, N_predicted[-length(N_predicted)], use =
+                                                                 "pairwise.complete.obs")
+rho_orig
+# Low, but only a few points to get things working
+# Leave the rho and other calculations to outside of the function, though do
+# need the rho for the state space.
 ```
-
 
 Then put that into `single_view_embedding_for_sve()`, work out what should be
 returned, and then call the proper thing from the relevant mve function.
+```{r singleview}
+sve_predicted_for_sve <- single_view_embedding_for_sve(
+  data = simulated_small_3,
+  response = "R_t",
+  lags = lags_use_multi)
+
+sve_predicted_for_sve
+
+rho_orig_from_function <- cor(sve_predicted_for_sve$R_t,
+                              sve_predicted_for_sve$R_t_predicted,
+                              use = "pairwise.complete.obs")
+expect_equal(rho_orig, rho_orig_from_function)
+
+rho_response_s_from_function <- cor(sve_predicted_for_sve$R_t_s,
+                                    sve_predicted_for_sve$R_t_s_predicted,
+                                    use = "pairwise.complete.obs")
+rho_response_s_from_function
+expect_equal(rho_response_s, rho_response_s_from_function)
+```
+
 
 TODO Can prob delete un-needed in `state_space_forecasts_for_sve.R`
 
