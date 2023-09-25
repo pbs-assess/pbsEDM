@@ -20,6 +20,10 @@
 #'   variable and must be lag of 0). The variable specified is considered the
 #'   response variable and is being rescaled and renamed here, and renamed, for
 #'   example, `R_t_s`.
+#' @param max_allowed_cor maximum allowed correlation between two axes (actually
+#'   once their lagged, could change it to raw data if needed), if the
+#'   correlation is greater than this then function stops and gives an
+#'   error. TODO change to just giving NA in results maybe.
 #'
 #' @author Andrew M. Edward and Luke A. Rogers
 #'
@@ -41,13 +45,15 @@
 #' # embedding, then do
 #' response_scaled <- state_space_reconstruction_for_sve(d, lags = list(x = 0))
 #' names(response_scaled) <- substr(names(response_scaled), 1,
-#'   nchar(names(response_scaled)) - 2)   TODO check these
+#'   nchar(names(response_scaled)) - 2)   TODO check these - think done in
+#'   function now
 #'
 #' }
 state_space_reconstruction_for_sve <- function(data,
                                                lags,
-                                               response_only = FALSE){
-
+                                               response_only = FALSE,
+                                               max_allowed_cor = 0.95){
+browser()
   # Define values --------------------------------------------------------------
   col_names <- names(lags)
   lag_sizes <- unlist(lags, use.names = FALSE)
@@ -65,6 +71,21 @@ state_space_reconstruction_for_sve <- function(data,
                                   rep(NA, ncol(data)))
 
   Z <- as.matrix(data_first_differenced[, col_names, drop = FALSE])
+
+  Z_cor <- cor(Z, use = "pairwise.complete.obs")
+  # TODO check what this will do for just one, Z will be a vector so should need tweaking
+  if(max(Z_cor - diag(diag(Z_cor))) > max_allowed_cor){
+    stop(paste("State space reconstruction using lag names",
+                lag_names,
+                "with corresponding lag sizes",
+                lag_sizes,
+                "has at least two highly correlated axes. Try reducing `max_allowed_cor`
+                 or exclude the correlated axes from `lags` (may not be an easy option
+                 yet, may have to edit code)."))
+  }
+
+
+
   Z_means <- apply(Z, 2, mean, na.rm = TRUE)
   Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)
 

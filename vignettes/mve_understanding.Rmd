@@ -581,13 +581,18 @@ simulated <- EDMsimulate::salmon_sim()
 lags_use_multi <- list(R_t = 0,
                        S_t = 0:3)
 
-# TODO not sure why this fails:
+# TODO not sure why this fails, might be the use of random numbers
 #  expect_equal(EDMsimulate::salmon_sim()[1:15, ], EDMsimulate::salmon_sim(T = 15))
+
+TODO HERE Redo with simulation with changing harvest rate. And change error in
+`state_space_reconstruction_for_sve.R` to something more useful.
 
 simulated_small_3 <- simulated[1:15, ]
 ssr_new <- state_space_reconstruction_for_sve(data = simulated_small_3,
                                               lags = lags_use_multi)
-ssr_new     # Has the correct NA's in top two rows and final row
+ssr_new     # Has the correct NA's in top two rows and final row   TODO TODO BUT
+            # REST IS WRONG, first two columnns are the same but should not
+            # be. Except they can be for ours as harvest rate is constant.
 
 response_s <- state_space_reconstruction_for_sve(data = simulated_small_3,
                                                  response_only = TRUE,
@@ -665,8 +670,43 @@ rho_response_s_from_function
 expect_equal(rho_response_s, rho_response_s_from_function)
 ```
 
+### Now to link that from `multiview_embedding()`
 
-TODO Can prob delete un-needed in `state_space_forecasts_for_sve.R`
+Keeping the function name `multiview_embedding()` as that will be called from
+elsewhere (keeping my other new ones as `..._for_sve()` though. Saved Luke's as
+`..._original()`.
+
+```{r mve}
+# Doing this to work out what failed
+sve_this_failed <- single_view_embedding_for_sve(
+  data = simulated_small_3,
+  response = "R_t",
+  lags = list(S_t = 1))
+
+# with browser, seems that ssr and response_s are the same but shifted, but one
+# should be R_t_0 and one S_t_1. So I think ssr calculation is using the wrong
+# thing.
+# It's using the same column whether I do R_t or S_t: this should not be
+# essentially zero
+state_space_reconstruction_for_sve(data, lags = list(S_t = 1)) -
+ state_space_reconstruction_for_sve(data, lags = list(R_t = 1))
+# HERE. Selecting p_t column (arbitrary) does give a different
+# answer, so it's not always picking the same column - SEE ABOVE, it's because
+# of the simulations
+
+
+mve_small <- multiview_embedding(data = simulated_small_3,
+                                 response = "R_t",
+                                 lags = lags_use_multi)
+                                 # TODO orig function: when I had this as lags_use,
+                                 # first six non-NA forecast values were
+                                 # same as for lags_use_multi, but not the rest;
+                                 # maybe think if that makes sense or not now.
+
+
+
+```
+
 
 ## Chat with Carie:
 

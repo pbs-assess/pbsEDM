@@ -1,109 +1,95 @@
 #' Multiview Embedding
 #'
-#' From Luke's email (TODO tidy up when done):
-#' Good to hear from you! Yes, what you describe is the main idea behind
-#' multiview embedding (MVE). It uses the `2^N - 1` subsets of the superset
-#' state space reconstruction of covariates and covariate lags, giving all
-#' possible embedding dimensions and embedding combinations that you're looking
-#' for. [Andy: Ye and Sugihara 2016 exclude those that have no 0 lag variables,
-#' since presumably they're just shifted - keep in for now and check results
-#' agree maybe].
-#' Andy asked: is single-view embedding just standard EDM, and Luke said:
-#' I think MVE was originally a generalization of S-mapping [Andy: no, for MVE
-#' they just use the single nearest neighbour in each view], but we've
-#' implemented it as a generalization of EDM. So in our case, single-view
-#' embedding would be EDM, but other authors might hear 'single-view embedding'
-#' and think 'S-mapping'.
-#' Worth double-checking because this is just from memory ;)
-#'  Andy: TODO don't think that's quite right, checking
-#' the code.
-#' TODO TODO TODO check the definitions; stick with mve for now to get it all
-#' working.
+#' Take a multivariate data set containing variables through time, a response
+#' variable (the variable we care about, such as population number), and a set
+#' of lags that we wish to consider. Based on Ye and Sugihara (2016)'s
+#' description.
 #'
-#' @param data [matrix()] or [data.frame()] with named [numeric()] columns
+#' For all allowed lags, this function builds every possible state space
+#' reconstruction (Figure 1C in Ye and Sugihara), of all possible dimensions. So
+#' variable 1 with 0 lag, variable 1 with 0 lag and variable 2 with 0 lag,
+#' variable 1 with 0 lag and variable 2 with 1 lag, etc. up to variable 1 with
+#' all lag allowed from `lags` and variable 2 with all lags allowed from `lags`.
+#' TODO I feel that some combinations should be duplicated, in the sense that
+#' variable 1 with lag 1 and variable 2 with lag 2 is the same as variable 1
+#' with lag 0 and variable 2 with lag 1 (i.e. if you have nothing with lag of 0
+#' then you can shift everything), but this will reduce the data a little --
+#' look into as may end up keeping state space reconstructions that are
+#' essentially the same, just shifted in time. If there are $N$ total
+#' variable-lag combinations, then there should be $2^N - 1$ possible
+#' reconstructions (each one is either in or out, minus them all being out), but
+#' this may get reduced with what is described above.
+#'
+#' This function calls `single_view_embedding_for_sve()` (the `for_sve` was just
+#' to distinguish from earlier functions), which creates the state space
+#' reconstruction, calculates the distances between points, makes predictions
+#' for all allowable focal times $t^*$ taking into account which neighbours
+#' should be candidates for nearest neighbours - predictions are just from the
+#' single nearest neighbour (as per Y&S, rather than full Simplex), calculate
+#' predicted values of the response variable both scaled and unscaled. Here we
+#' will calculate metrics of the fit, based on just the response variable (as
+#' that is what we are interested in), and pick the best performing ones - the
+#' square root of the total number of reconstructions, as per Y&S. Then use the
+#' average of those to make the actual forecast for the time step after the data.
+#'
+#' Returns **
+#'
+#' @param data [tibble()] or [data.frame()] with named [numeric()] columns
 #' @param response [character()] column name of the response variable in
 #'   \code{data}
 #' @param lags [list()] of a named vector of lags for each explanatory
 #'   variable.
-#' @param index [integer()]
-#' @param buffer [integer()] number of forecasts prior to \code{index}
-#' @param window [integer()] forecast metric moving window width
-#' @param metric [character()]
-#' @param beyond [logical()]
-#' @param weight TBD
-#' @param n_weight [integer()]
-#' @param cores [integer()] number of cores for parallel computation.
 #'
-#' @author Luke A. Rogers
+#' @author Andrew M. Edwards and Luke A. Rogers
 #'
-#' @return [list()]
+#' @return [list()] **TODO
 #' @export
 #'
-multiview_embedding <- function (data,
-                 response,
-                 lags,
-                 index = 50L,
-                 buffer = 10L,
-                 window = integer(0),
-                 metric = "rmse",
-                 beyond = FALSE,
-                 weight = NULL,
-                 n_weight = ceiling(sqrt(2^length(unlist(lags)))),
-                 cores = NULL) {
-
-  # Check arguments ------------------------------------------------------------
-
-  checkmate::assert_integerish(index, lower = 20, upper = nrow(data), len = 1)
-  checkmate::assert_integerish(buffer, lower = 1, upper = 10, len = 1)
+multiview_embedding <- function(data,
+                                response,
+                                lags){
 
   # Create subset lags ---------------------------------------------------------
-
   subset_lags <- create_subset_lags(lags)
 
-  # Apply running empirical dynamic modeling -----------------------------------
+  num_subsets <- length(subset_lags)
 
-  if (is.null(cores)) {
-    # Apply in sequence
-    forecasts <- lapply(
-      subset_lags,
-      FUN = single_view_embedding,
-      data = data,
-      response = response,
-      index = index,
-      buffer = buffer,
-      window = window,
-      metric = metric,
-      beyond = beyond,
-      superset = lags
-    )
-  } else {
-    if (.Platform$OS.type == "unix") {
-      # Apply in parallel via forking
-      forecasts <- parallel::mclapply(
-                               subset_lags,
-                               FUN = single_view_embedding,
-                               data = data,
-                               response = response,
-                               index = index,
-                               buffer = buffer,
-                               window = window,
-                               metric = metric,
-                               beyond = beyond,
-                               superset = lags,
-                               mc.cores = cores
-                             )
-    } else {
-      # Apply in parallel via sockets
-      # cl <- parallel::makeCluster(cores)
-      # parallel::clusterEvalQ(cl, library()) # TODO: packages needed
-      # results_list <- parallel::parLapply()
-      stop("eedm parallel via sockets not yet implemented R/functions.R")
-    }
+  response_each_subset <- list()
+  rho_each_subset <- rep(NA, num_subsets)      # rho based on unscaled (original)
+  rho_s_each_subset <- rep(NA, num_subsets)    # rho based on scaled
+
+browser()
+  # Do single view embedding for each subset, calc rho both ways
+  for(i in 1:num_subsets){
+print(i)
+# fails at St = 1 being the only lag
+    response_calc <- single_view_embedding_for_sve(data = simulated_small_3,
+                                                   response = "R_t",
+                                                   lags = subset_lags[[i]])
+
+    rho_each_subset[i] <- cor(response_calc[, response],
+                              response_calc[, paste0(response,
+                                                     "_predicted")],
+                              use = "pairwise.complete.obs")
+
+    rho_s_each_subset[i] <- cor(response_calc[, paste0(response, "_s")],
+                                response_calc[, paste0(response,
+                                                       "_s_predicted")],
+                                use = "pairwise.complete.obs")
+
+    response_each_subset[[i]] <- response_calc
   }
 
-  # Weight redm forecasts ------------------------------------------------------
 
-  weighted <- weight_single_view_embeddings(forecasts, metric, weight, n_weight)
+  # HERE
+  # Take subsets with top sqrt() rho's
+
+  #  use those to get forecast,
+  #   taking the mean of all the forecasts
+  # Compare with known value outside of this function.
+
+  # HERE
+  # Weight redm forecasts ------------------------------------------------------
 
   # Return results object ------------------------------------------------------
 

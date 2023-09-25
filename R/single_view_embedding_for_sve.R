@@ -57,7 +57,7 @@ single_view_embedding_for_sve <- function(data,
                                                                    use.names = FALSE)))
 
   # Take off the final one because we are shifting (predicting t_star+1 from the
-  # prediction indices for each t_star; need NA at beginning.
+  # prediction indices for each t_star); need NA at beginning.
   response_s_predicted <- c(NA,
                              response_s[prediction_indices[-length(prediction_indices)]])
 
@@ -66,7 +66,7 @@ single_view_embedding_for_sve <- function(data,
   # Define observed ------------------------------------------------------------
   response_observed <- dplyr::pull(data,
                                    response)
-
+browser()
   # Back transform and unlag to give predictions for original response variable
   response_abs_predicted <- untransform_predictions(N_observed = response_observed,
                                                     Y_predicted = response_s_predicted,
