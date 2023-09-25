@@ -632,8 +632,20 @@ rho_response_s
 
 Can also calculate $\rho$ on the untransformed original response variable.
 
-NEXT HERE: Need to untransform, but `untransform_variables()` needs to be
+NEXT HERE: Need to untransform, working on `untransform_predictions()`
 updated to un-first difference also. Can testcheck it works for original.
+
+```{r untransform}
+N_observed <- simulated[1:15, ]$"R_t"
+N_predicted <- untransform_predictions(N_observed = N_observed,
+                                       Y_predicted = response_s_predicted,
+                                       max_lag = max(unlist(lags_use_multi,
+                                                            use.names = FALSE)))
+cor(N_observed, N_predicted[-length(N_predicted)], use =
+                                                     "pairwise.complete.obs")  # Also need to remove first non-NA one
+# Very low, but only a few points to get things working
+```
+
 
 Then put that into `single_view_embedding_for_sve()`, work out what should be
 returned, and then call the proper thing from the relevant mve function.
