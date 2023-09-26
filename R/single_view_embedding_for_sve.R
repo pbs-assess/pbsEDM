@@ -70,8 +70,6 @@ single_view_embedding_for_sve <- function(data,
   response_s_predicted <- c(NA,
                              response_s[prediction_indices[-length(prediction_indices)]])
 
-
-
   # Define observed ------------------------------------------------------------
   response_observed <- dplyr::pull(data,
                                    response)

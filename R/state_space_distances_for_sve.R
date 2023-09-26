@@ -20,6 +20,22 @@
 #'
 #' @export
 #'
+#' @examples
+#' \dontrun{
+#' # From vignette:
+#' simulated <- EDMsimulate::salmon_sim()
+#' ssr_5 <- state_space_reconstruction_for_sve(data = simulated[1:15, ], lags = list(S_t = 1))
+#' # TODO - correc this after correcting function, need to better deal with
+#'   neighbours that don't hav a projection - hadn't thought of possibility of
+#'   being the final row.
+#'
+#' # So no lag of 0, so final row is complete, so distances come out with only
+#'   NA's in first column and first row, not final row like when we have a lag
+#'   of 0 --- may be wrong once correct it).
+#' ssr_5
+#' So just the S_t_s_1 column, which is correct.
+#' 'distances_5 <- state_space_distances_for_sve(ssr_5)
+#' }
 #'
 state_space_distances_for_sve <- function(ssr){
 
@@ -77,13 +93,10 @@ state_space_distances_for_sve <- function(ssr){
 
   distances[, na_proj] <- NA
 
-  # Exclude focal points in the training set -----------------------------------
-  #  Not quite sure about this, but with index = 2 and buffer = 1 (and five dimensions)this just
-  #  refers to rows that have NA's. May be more important in other situations.
-  # distances[seq_len(index - buffer - 1L), ] <- NA
-  # distances[1:(index - buffer - 1), ] <- NA
-
-  # Return the distances matrix -------------------------------------------------
+  # Neigbhours that project to points that are undefined, as is the case for the
+  # final time points since we do not know where it goes, therefore it should
+  # not be a neighbour.
+  distances[, nrow(distances)] <- NA
 
   return(distances)
 }

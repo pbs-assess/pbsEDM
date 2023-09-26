@@ -12,9 +12,9 @@
 #' @return [numeric()][vector()]
 #' @export
 #'
-untransform_predictions <- function (N_observed,
-                                   Y_predicted,
-                                   max_lag) {
+untransform_predictions <- function(N_observed,
+                                    Y_predicted,
+                                    max_lag){
   # Check arguments
   checkmate::assert_true(length(N_observed) == length(Y_predicted))
 
