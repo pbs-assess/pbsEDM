@@ -62,8 +62,9 @@ browser()
   # Do single view embedding for each subset, calc rho both ways
   for(i in 1:num_subsets){
 print(i)
+# Actually fails at first one, since R_t not in data
 # fails at St = 1 being the only lag TODO
-    response_calc <- single_view_embedding_for_sve(data = simulated_small_3,
+    response_calc <- single_view_embedding_for_sve(data = data,
                                                    response = "R_t",
                                                    lags = subset_lags[[i]])
 

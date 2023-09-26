@@ -739,9 +739,15 @@ sve_simulated_4
 # allowing, in this single view embedding, such lags of R_t. Presumably this
 # will just come out as a very poor ssr and get dumped.
 
-mve_small <- multiview_embedding(data = simulated_small_3,
+HERE HERE HERE. This fails - see browser() in function. Fails for S_t with lag
+of 2; need to repeat the fix I just did, have to disallow max_lag -ish candidate
+nearest neighbours at the
+end that have undefined projections. See TODO in state_space_distances_for_sve().
+mve_small <- multiview_embedding(data = simulated_small_4,
                                  response = "R_t",
                                  lags = lags_use_multi)
+
+
                                  # TODO (maybe ignore) orig function: when I had this as lags_use,
                                  # first six non-NA forecast values were
                                  # same as for lags_use_multi, but not the rest;

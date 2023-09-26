@@ -95,7 +95,8 @@ state_space_distances_for_sve <- function(ssr){
 
   # Neigbhours that project to points that are undefined, as is the case for the
   # final time points since we do not know where it goes, therefore it should
-  # not be a neighbour.
+  # not be a neighbour.  TODO need to be more general, for example I think based
+  # on minimum lag (which I've assumed here is 1).
   distances[, nrow(distances)] <- NA
 
   return(distances)
