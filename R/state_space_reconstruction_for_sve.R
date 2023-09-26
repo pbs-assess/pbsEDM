@@ -11,7 +11,8 @@
 #' gave in Appendix S1 of first manuscript, and to not have the response as an
 #' output (as it was getting used in the distance calculations later).
 #'
-#' If this function changes then need to update `untransform_predictions()` also.
+#' If this function changes then need to update `untransform_predictions()`
+#' also. This function is called from `single_view_embedding_for_sve()`.
 #'
 #' @param data [matrix()] or [data.frame()] with variables as named columns
 #' @param lags [list()] of a named vector of lags for each explanatory variable
@@ -32,7 +33,9 @@
 #'   respective standard deviations, with automatically generated column
 #'   names in the following style: for a variable called `S_t` and lags of 0, 1,
 #'   2, the scaled variable and lagged names are `S_t_s_0, `S_t_s_1, and
-#'   `S_t_s_2, where the last number is the lag and `s` stands for scaled.
+#'   `S_t_s_2, where the last number is the lag and `s` stands for scaled. OR if
+#'   there is too high a correlation between lags to be used in the
+#'   reconstruction, then just return a single NA and use that in `single_view_embedding_for_sve()`.
 #'
 #' @export
 #'
@@ -52,8 +55,11 @@
 state_space_reconstruction_for_sve <- function(data,
                                                lags,
                                                response_only = FALSE,
-                                               max_allowed_cor = 0.95){
-browser()
+                                               max_allowed_correlation =
+                                                 0.999999){  # TODO change the
+                                                   # default, just getting
+                                                   # things working
+
   # Define values --------------------------------------------------------------
   col_names <- names(lags)
   lag_sizes <- unlist(lags, use.names = FALSE)
@@ -74,14 +80,17 @@ browser()
 
   Z_cor <- cor(Z, use = "pairwise.complete.obs")
   # TODO check what this will do for just one, Z will be a vector so should need tweaking
-  if(max(Z_cor - diag(diag(Z_cor))) > max_allowed_cor){
-    stop(paste("State space reconstruction using lag names",
-                lag_names,
-                "with corresponding lag sizes",
-                lag_sizes,
-                "has at least two highly correlated axes. Try reducing `max_allowed_cor`
-                 or exclude the correlated axes from `lags` (may not be an easy option
-                 yet, may have to edit code)."))
+  if(max(Z_cor - diag(diag(Z_cor))) > max_allowed_correlation){
+    ## message(paste("State space reconstruction using lag names",
+    ##             lag_names,
+    ##             "with corresponding lag sizes",
+    ##             lag_sizes,
+    ##             "has at least two highly correlated axes. Try reducing `max_allowed_cor`
+    ##              or exclude the correlated axes from `lags` (may not be an easy option
+    ##              yet, may have to edit code)."))
+    return(NA)     # Just skip the rest and use the NA in
+                   # single_view_embedding_for_sve() that is calling this
+                   # function.
   }
 
 

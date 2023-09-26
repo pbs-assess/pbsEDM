@@ -10,6 +10,7 @@
 #' @param lags [list()] of a named vector of lags for each explanatory
 #'   variable.
 #' @param metric [character()]
+#' @param ... currently just `max_allowed_correlation` to pass onto `state_space_reconstruction_for_sve()`
 #'
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
@@ -17,18 +18,26 @@
 #'  original absolute numbers, and then `response_s` and `response_s_predicted`
 #'  both in scaled (first differenced and then scaled) co-ordinates, so we can then
 #'  calculate both types of correlation coefficient (or whatever else) to rank each
-#'  individual single view embedding.
+#'  individual single view embedding. OR a single NA if the lagged variables are
+#'   highly correlated (see `state_space_reconstruction_for_sve()`.
 
 #' @export
 #'
 single_view_embedding_for_sve <- function(data,
                                           response,
-                                          lags){
+                                          lags,
+                                          ...){
 
   # Define the state space reconstruction, using scaled variables --------------
 
   ssr <- state_space_reconstruction_for_sve(data,
-                                            lags)
+                                            lags,
+                                            ...)
+
+  if(all(is.na(ssr))){      # Because lagged variables are highly correlated, so
+                       # don't want to consider those reconstructions
+    return(NA)         # Use this in multiview_embedding()
+  }
 
   # Also need scaled response variable
   response_as_lag <- list(xxx = 0)
@@ -66,7 +75,7 @@ single_view_embedding_for_sve <- function(data,
   # Define observed ------------------------------------------------------------
   response_observed <- dplyr::pull(data,
                                    response)
-browser()
+
   # Back transform and unlag to give predictions for original response variable
   response_abs_predicted <- untransform_predictions(N_observed = response_observed,
                                                     Y_predicted = response_s_predicted,
@@ -86,5 +95,6 @@ browser()
                         paste0(response, "_s"),
                         paste0(response, "_s_predicted"))
 
-  to_return
+  to_return        # Or NA earlier if highly correlated dimensions for this
+                   # state space reconstruction
 }
