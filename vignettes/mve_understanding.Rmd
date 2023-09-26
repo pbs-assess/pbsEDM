@@ -578,7 +578,7 @@ with what I've been doing] now being created as I go along, based on
 Starting fresh (so can just run from here):
 ```{r again}
 set.seed(42)
-# TODO have realised the correlation issue betwen S_t and R_t so modifying code
+# Have realised the correlation issue betwen S_t and R_t so modifying code
 # and rerunning from here.
 h_simulated <- 0.1095 + sample(1:180) * 0.001 # has mean of 0.2
 simulated_4 <- EDMsimulate::salmon_sim(h = h_simulated)
@@ -709,23 +709,35 @@ distances_5  # Did not have NA's in final columns of distances, but have now
              # lag 0, so all the values are included), but just
              # can't be a neighbour.
 
-#. Then redo above sve_this_failed - error because lengths
-             # don't match, but I think I hadn't considered all options.
-
-
 sve_this_worked <- single_view_embedding_for_sve(
   data = simulated_small_4,
   response = "R_t",
   lags = list(S_t = 1))
-
+sve_this_worked             # Gives negative forecast though
 
 # And this to work on correlation issue above
 sve_use_multi <- single_view_embedding_for_sve(
   data = simulated_small_4,
   response = "R_t",
-  lags = lags_use_multi,
-  max_allowed_correlation = 0.99999999)
+  lags = lags_use_multi)
+sve_use_multi
+# All R_t_predicted come out negative !?
 
+# Try the longer time series, only effectively using around 13 candidate
+# neighbours in that one.
+sve_simulated_4 <- single_view_embedding_for_sve(
+  data = simulated_4,
+  response = "R_t",
+  lags = lags_use_multi)
+sve_simulated_4
+# Can see line 28 to 29 has a jump in R_t_observed of 14.2, and R_t_s[28] is
+# 4.23 (considers jump from 28 to 29, then rescaled). R_t_s[29] is -3.43 as it
+# comes down again. But can see that t* = 35 gives a big jump, but then doesn't
+# come back down again. Aha - since we're not using the realistic lags yet I
+# think, only R_t so no detection of R_t lags (a big jump always followed by a
+# big crash). (bottom right arm of Figure 1(d) in manuscript 1). But we're not
+# allowing, in this single view embedding, such lags of R_t. Presumably this
+# will just come out as a very poor ssr and get dumped.
 
 mve_small <- multiview_embedding(data = simulated_small_3,
                                  response = "R_t",
