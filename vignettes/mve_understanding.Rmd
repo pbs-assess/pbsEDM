@@ -761,14 +761,24 @@ sve_simulated_lags_many <- single_view_embedding_for_sve(
 
 ```{r multiview
 HERE HERE HERE. This fails - see browser() in function. Fails for S_t with lag
-of 2 - need to figure out this
-DID THIS:; need to repeat the fix I just did, have to disallow max_lag -ish candidate
+of 2; must be next one I think, as one above runs - need to figure out this
+DID THIS: need to repeat the fix I just did, have to disallow max_lag -ish candidate
 nearest neighbours at the
 end that have undefined projections. See TODO in state_space_distances_for_sve()
 - just tidy up the example.
 mve_small <- multiview_embedding(data = simulated_small_4,
                                  response = "R_t",
                                  lags = lags_use_multi)
+
+# Earlier example was for simulated_4 not simulated_small_4; expect latter is
+# just running out of lags kind of thing. Do explicitly:
+# This now does not have 15 in prediction_indices, having fixed. Not obvious why
+# the error arose with untransform_predictions()
+sve_simulated_small_St2 <- single_view_embedding_for_sve(
+  data = simulated_small_4,
+  response = "R_t",
+  lags = lags_St2)
+
 
 ```
 

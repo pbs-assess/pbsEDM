@@ -35,6 +35,8 @@
 #'
 #' @param lags_of_response_variable NULL or vector of lags being considered for
 #'   the response variable, to help eliminate invalid candidate nearest neighbours
+#' @param response_s vector of values of scaled response variable, which may or
+#'   may not be in the `ssr_input`
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
 #' @return [vector()] where index of each element corresponds to a `t^*`, and
@@ -47,7 +49,8 @@
 #'
 state_space_forecasts_for_sve <- function(ssr_input,
                                           distance,
-                                          lags_of_response_variable){
+                                          lags_of_response_variable,
+                                          response_s){
 #                                          min_number_neighbours = 1, # minimum
                                             # number of neighbours in order to
                                             # pick the closest, TODO implement
@@ -75,7 +78,7 @@ state_space_forecasts_for_sve <- function(ssr_input,
     #  nearest_neighbour_index[t_star] as NA):
     #  - t_star's for which distance is a row of NA's (distance calculation has
     #  taken care of ssr rows with any NA's; this includes first ones and
-    #  row T = nrow(distance).
+    #  row T = nrow(distance)).
     # - Was going to ignore t_star = T-1 because we don't know where it goes (so can't
     #  test how well this ssr performs), but we do need it to make the actual
     #  forecast into the future - calculation of rho will ignore this value
@@ -103,6 +106,10 @@ state_space_forecasts_for_sve <- function(ssr_input,
       # considered just lags of the response variable that end up at
       # response_{t^*+1} and response_{t^*} which goes to the former. See notes.
 
+      # - ALSO, neighbours t for which response_{t+1} is undefined, which needs
+      #   to be made explicit if the response variable (think with 0 lag) is not in the
+      #   state space
+
       # So for t_star we look at the row distance[t_star, ], but need to set
       #  values corresponding to invalid candidate neighbours to NA.
       # which.min will ignores NA's later
@@ -116,7 +123,19 @@ state_space_forecasts_for_sve <- function(ssr_input,
         candidate_neighbours_distances[t_star + lags_of_response_variable] <- NA
       }
 
+      # neighbours t for which response_{t+1} is undefined, including T
+      response_t_plus_1_undefined <- union(which(is.na(response_s)),
+                                           length(response_s))
 
+      # Take off one that would lead to index of 0, this works if empty, though
+      # shouldn't be as have now included the final one above
+      response_t_plus_1_undefined <-
+        response_t_plus_1_undefined[(response_t_plus_1_undefined - 1) > 0.5]
+
+
+      if(length(response_t_plus_1_undefined) != 0){
+        candidate_neighbours_distances[response_t_plus_1_undefined - 1] <- NA
+      }
 
       nearest_neighbour_index[t_star] <- which.min(candidate_neighbours_distances)
     }

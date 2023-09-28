@@ -60,20 +60,20 @@ single_view_embedding_for_sve <- function(data,
   # Make predictions for all allowable focal times $t^*$, taking into account the
   # candidate nearest neighbours,
 
-# HERE HERE - need to define response_lags  , with a NULL if none, use as import
-  #  into next
+  # Define lags of the response variable
   if(response %in% names(lags)){
     lags_of_response_variable <- lags[[which(names(lags) == response)]]
   } else {
     lags_of_response_variable <- NULL
   }
 
-# browser()  # To get lags that we need
+browser()
 
   prediction_indices <- state_space_forecasts_for_sve(ssr,
                                                       distances,
-                                                      lags_of_response_variable
-                                                      = lags_of_response_variable)
+                                                      lags_of_response_variable =
+                                                      lags_of_response_variable,
+                                                      response_s = response_s)
 
   # Take off the final one because we are shifting (predicting t_star+1 from the
   # prediction indices for each t_star); need NA at beginning.
@@ -84,6 +84,7 @@ single_view_embedding_for_sve <- function(data,
   response_observed <- dplyr::pull(data,
                                    response)
 
+# TODO THIS SHOULD MAYBE BE LAGS_OF_RESPONSE_VARIABLE
   # Back transform and unlag to give predictions for original response variable
   response_abs_predicted <- untransform_predictions(N_observed = response_observed,
                                                     Y_predicted = response_s_predicted,
