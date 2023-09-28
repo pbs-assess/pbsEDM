@@ -52,18 +52,28 @@ single_view_embedding_for_sve <- function(data,
   # Matrix of allowed neighbour distances, rows corresponding to
   #   focal point times, columns to neighbour point time. The value represents the
   #   distance from the focal point to the neighbour point. Disallowed focal
-  #   point and neighbour combinations have value NA.
+  #   point and neighbour combinations have value NA, but more are added in
+  #   state_space_forecasts_for_sve() where each $t^*$ is considered.
 
   distances <- state_space_distances_for_sve(ssr)
 
   # Make predictions for all allowable focal times $t^*$, taking into account the
-  # candidate nearest neighbours
+  # candidate nearest neighbours,
+
+# HERE HERE - need to define response_lags  , with a NULL if none, use as import
+  #  into next
+  if(response %in% names(lags)){
+    lags_of_response_variable <- lags[[which(names(lags) == response)]]
+  } else {
+    lags_of_response_variable <- NULL
+  }
+
+# browser()  # To get lags that we need
 
   prediction_indices <- state_space_forecasts_for_sve(ssr,
                                                       distances,
-                                                      max_lag =
-                                                        max(unlist(lags,
-                                                                   use.names = FALSE)))
+                                                      lags_of_response_variable
+                                                      = lags_of_response_variable)
 
   # Take off the final one because we are shifting (predicting t_star+1 from the
   # prediction indices for each t_star); need NA at beginning.

@@ -93,11 +93,22 @@ state_space_distances_for_sve <- function(ssr){
 
   distances[, na_proj] <- NA
 
-  # Neigbhours that project to points that are undefined, as is the case for the
-  # final time points since we do not know where it goes, therefore it should
-  # not be a neighbour.  TODO need to be more general, for example I think based
-  # on minimum lag (which I've assumed here is 1).
+  # Neighbours that project to points that are undefined, as is the case for the
+  # final time point since we do not know where the response variable goes (may
+  # know where the lagged varaibles go), therefore it should
+  # not be a neighbour.
   distances[, nrow(distances)] <- NA
+
+  # But, also need to consider the minimum lag,so need to be more general, for example I think based
+  # on minimum lag (which I've assumed here is 0). - no lag only bumps to next
+  # row, and we've taken into account undefined ones; as long as we know where
+  # the response variable goes in the next single time step we are okay. May be
+  # assuming response variable has lag of 0, which I think is fine and will
+  # always be the case.
+
+  # What we do need is, for each response lag l, exclude rows related to t*, but
+  # we're not defining t* here, so do this in state_space_forecats_for_sve(),
+  # the next call from single_view_embedding_for_sve().
 
   return(distances)
 }

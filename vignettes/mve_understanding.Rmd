@@ -681,7 +681,7 @@ Keeping the function name `multiview_embedding()` as that will be called from
 elsewhere (keeping my other new ones as `..._for_sve()` though. Saved Luke's as
 `..._original()`.
 
-```{r mve}
+```{r mveattempt}
 # Doing this to work out what failed
 simulated <- EDMsimulate::salmon_sim()   # HERE
 sve_this_failed <- single_view_embedding_for_sve(
@@ -738,22 +738,37 @@ sve_simulated_4
 # big crash). (bottom right arm of Figure 1(d) in manuscript 1). But we're not
 # allowing, in this single view embedding, such lags of R_t. Presumably this
 # will just come out as a very poor ssr and get dumped.
+```
 
+```{r St2only}
+lags_St2 <- list(S_t = 2)
+# This fails (during multiview) because I didn't disallow all the nearest
+# neighbours at the end, was only thinking about no lag 0, not no lag 0 or lag
+# 1. So need to consider the minimum lag in state_space_distances_for_
+sve_simulated_St2 <- single_view_embedding_for_sve(
+  data = simulated_4,
+  response = "R_t",
+  lags = lags_St2)
+
+HERE redo this one
+# And this for testing also
+sve_simulated_lags_many <- single_view_embedding_for_sve(
+  data = simulated_4,
+  response = "R_t",
+  lags = list(R_t = 0:4,
+              S_t = 0:3))
+```
+
+```{r multiview
 HERE HERE HERE. This fails - see browser() in function. Fails for S_t with lag
-of 2; need to repeat the fix I just did, have to disallow max_lag -ish candidate
+of 2 - need to figure out this
+DID THIS:; need to repeat the fix I just did, have to disallow max_lag -ish candidate
 nearest neighbours at the
-end that have undefined projections. See TODO in state_space_distances_for_sve().
+end that have undefined projections. See TODO in state_space_distances_for_sve()
+- just tidy up the example.
 mve_small <- multiview_embedding(data = simulated_small_4,
                                  response = "R_t",
                                  lags = lags_use_multi)
-
-
-                                 # TODO (maybe ignore) orig function: when I had this as lags_use,
-                                 # first six non-NA forecast values were
-                                 # same as for lags_use_multi, but not the rest;
-                                 # maybe think if that makes sense or not now.
-
-
 
 ```
 

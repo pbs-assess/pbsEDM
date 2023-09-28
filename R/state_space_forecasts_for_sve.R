@@ -32,8 +32,9 @@
 #' @param ssr_input [matrix()] a state space reconstruction in which the rows
 #'   are points in the state space
 #' @param distance [matrix()] of distances of allowed neighbours
-#' @param max_lag [numeric()] maximum lag used to create the ssr
 #'
+#' @param lags_of_response_variable NULL or vector of lags being considered for
+#'   the response variable, to help eliminate invalid candidate nearest neighbours
 #' @author Andrew M. Edwards and Luke A. Rogers
 #'
 #' @return [vector()] where index of each element corresponds to a `t^*`, and
@@ -46,7 +47,7 @@
 #'
 state_space_forecasts_for_sve <- function(ssr_input,
                                           distance,
-                                          max_lag){
+                                          lags_of_response_variable){
 #                                          min_number_neighbours = 1, # minimum
                                             # number of neighbours in order to
                                             # pick the closest, TODO implement
@@ -78,7 +79,8 @@ state_space_forecasts_for_sve <- function(ssr_input,
     # - Was going to ignore t_star = T-1 because we don't know where it goes (so can't
     #  test how well this ssr performs), but we do need it to make the actual
     #  forecast into the future - calculation of rho will ignore this value
-    #  anyway because the known value at T will be NA.
+    #  anyway because the known value at T will be NA. Also, may be okay to have
+    #  that value when we have no zero lags.
     if(!all(is.na(distance[t_star, ]))){
        # & t_star != nrow(distance) - 1){
 
@@ -88,22 +90,33 @@ state_space_forecasts_for_sve <- function(ssr_input,
       # - x_t that are not fully defined; again, taken care of above as row of
       # NA's in distance
       # - T - 1 as we need to know where it goes to use for prediction; also taken
-      # care of in distances (T - 1 column is NA's)
+      # care of in distances (T - 1 column is NA's)  HERE TODO - not true if we
+      # have no non-zero lags.
       # - we think we should not use any X_t that includes the quantity we are trying
       # to predict. For univariate this was anything including Y_{t^*+1}; for
-      # multivariate it includes any row with a Y_{t^*+1, k}; turns out this is
-      # rows t*+1 to t* + max_lag + 1.
+      # multivariate it includes any row with Y_{t^*+1, 1}, where 1 is response
+      # variable, and then any row
+      # that goes to that (so any row with a Y_{t*, 1}. Had thought this was
+      # rows t*+1 to t* + max_lag + 1, but that's wrong (considers all
+      # variables, but we're only excluding response one, plus assumes
+      # continuously incrementing lags (and I think assumes a 0 lag). Now have
+      # considered just lags of the response variable that end up at
+      # response_{t^*+1} and response_{t^*} which goes to the former. See notes.
 
       # So for t_star we look at the row distance[t_star, ], but need to set
       #  values corresponding to invalid candidate neighbours to NA.
+      # which.min will ignores NA's later
 
-      # which.min ignores NA's, we just need to
       candidate_neighbours_distances <- as.vector(distance[t_star, ])
 
-      # Set non-candidate nearest neighbours to NA
-      max_index_of_invalid_neighbour <- min(t_star + max_lag + 1,
-                                            nrow(distance))  # So don't overshoot
-      candidate_neighbours_distances[(t_star + 1):max_index_of_invalid_neighbour] <- NA
+      # For each lag, l, of the response variable, need to discard t* + l and
+      # t* + l + 1 (see written notes, will type them up). lags_of_response_variable is a vector, so can use to index
+      if(!is.null(lags_of_response_variable)){
+        candidate_neighbours_distances[t_star + lags_of_response_variable + 1] <- NA
+        candidate_neighbours_distances[t_star + lags_of_response_variable] <- NA
+      }
+
+
 
       nearest_neighbour_index[t_star] <- which.min(candidate_neighbours_distances)
     }
