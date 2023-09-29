@@ -17,9 +17,15 @@
 
 #' @export
 #'
+#' @param response_observed
+#' @param response_s_predicted
+#' @param max_lag
+#' @param positive_response_only logical, if TRUE then set any negative
+#'   predictions of the response variable to be the minimum observed value
 untransform_predictions <- function(response_observed,
                                     response_s_predicted,
-                                    max_lag){
+                                    max_lag,
+                                    positive_response_only = TRUE){
   # Check arguments
   checkmate::assert_true(length(response_observed) == length(response_s_predicted))
 
@@ -49,6 +55,11 @@ untransform_predictions <- function(response_observed,
   #  Think the NA's should just flow through.
   response_predicted <- c(NA,                     # deals with the t+1
                           response_observed + Z_predicted)
+
+  if(positive_response_only){
+    min_response_observed <- min(response_observed)
+    response_predicted[response_predicted < 0] = min_response_observed
+  }
 
   return(response_predicted)
 }

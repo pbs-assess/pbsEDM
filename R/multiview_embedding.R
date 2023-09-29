@@ -58,14 +58,12 @@ multiview_embedding <- function(data,
   rho_each_subset <- rep(NA, num_subsets)      # rho based on unscaled (original)
   rho_s_each_subset <- rep(NA, num_subsets)    # rho based on scaled
 
-# browser()
   # Do single view embedding for each subset, calc rho both ways
   for(i in 1:num_subsets){
 print(i)
-# Actually fails at first one, since R_t not in data
-# fails at St = 1 being the only lag TODO
+
     response_calc <- single_view_embedding_for_sve(data = data,
-                                                   response = "R_t",
+                                                   response = response,#"R_t",
                                                    lags = subset_lags[[i]])
 
     rho_each_subset[i] <- cor(response_calc[, response],
@@ -81,44 +79,54 @@ print(i)
     response_each_subset[[i]] <- response_calc
   }
 
-# HERE - got to here, get error but may be at end. Need to do the next stuff.
-  # HERE
-  # Take subsets with top sqrt() rho's
+  sqrt_num_subsets <- round(sqrt(num_subsets))  # approx 2^(N/2) I think
 
-  #  use those to get forecast,
-  #   taking the mean of all the forecasts
-  # Compare with known value outside of this function.
+  order_of_subsets_for_rho_index <- order(rho_each_subset, decreasing = TRUE)
 
-  # HERE
-  # Weight redm forecasts ------------------------------------------------------
+  # Index of the subsets with the highest sqrt_num_subsets rho values (they
+  #  remain in order since not worried about their relative rank to each other)
+  top_subsets_for_rho_index <- which(order_of_subsets_for_rho_index <= sqrt_num_subsets)
+     # Think ties get given averaged ranks of 0.5 (etc.), so just may end up
+     # with an extra or less one. So use length of this not sqrt_num_subsets in
+     # loop below
 
-  # Return results object ------------------------------------------------------
+  R_t_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
+                                               ncol = length(top_subsets_for_rho_index))   # rows are time, columns are
+                                        # each top_subsets_for_rho_index in
+                                        # order
+  lags_of_top_subsets <- list()        # List of list of each top lag
 
-  # HERE for now just
-  return(list(rho_each_subset = rho_each_subset,
-              rho_s_each_subset = rho_s_each_subset))
+  for(subset_i in 1:length(top_subsets_for_rho_index)){
+    R_t_predicted_from_each_top_subset[, subset_i] <-
+      dplyr::pull(response_each_subset[[subset_i]], paste0(response,
+                                                           "_predicted"))
+    lags_of_top_subsets[[subset_i]] <- subset_lags[[subset_i]]
+  }
 
-  ## return(
-  ##   structure(
-  ##     list(
-  ##       data = data,
-  ##       observed = c(dplyr::pull(data, response), NA),
-  ##       forecast = c(rep(NA_real_, index - 1), weighted$results$forecast),
-  ##       response = response,
-  ##       lags = lags,
-  ##       index = index,
-  ##       buffer = buffer,
-  ##       window = window,
-  ##       metric = metric,
-  ##       beyond = beyond,
-  ##       n_weight = n_weight,
-  ##       raw_forecasts = forecasts,
-  ##       ranks = weighted$ranks,
-  ##       summary = weighted$summary,
-  ##       hindsight = weighted$hindsight,
-  ##       results = weighted$results
-  ##     ),
-  ##     class = "multiview_embedding"
-  ##   )
-  ## )
+  R_t_predicted_from_mve <- rowMeans(R_t_predicted_from_each_top_subset,
+                                     na.rm = FALSE)
+  rho_prediction_from_mve <- cor(dplyr::pull(response_calc, response),
+                                 R_t_predicted_from_mve,
+                                 use = "pairwise.complete.obs")
+
+  # want to return:
+  return(list(
+    subset_lags = subset_lags,          # all the combinations of lags
+    rho_each_subset = rho_each_subset,  # rho for each subset
+    rho_s_each_subset = rho_s_each_subset, # rho_s for each subset
+    response_each_subset = response_each_subset,
+    top_subsets_for_rho_index = top_subsets_for_rho_index, # indices of the
+                                        # subsets with the highest
+                                        # sqrt(total number of subsets) rho
+                                        # values
+    rho_each_top_subset = rho_each_subset[top_subsets_for_rho_index], # rho for
+                                        # the top subsets (original order is retained)
+    R_t_predicted_from_each_top_subset = R_t_predicted_from_each_top_subset,
+    lags_of_top_subsets = lags_of_top_subsets,
+    R_t_predicted_from_mve = R_t_predicted_from_mve,  # R_t predicted by taking
+                                        # mean; will contain NaN for ones we
+                                        # can't predict, and has one for
+                                        # forecasting next time step.
+    rho_prediction_from_mve = rho_prediction_from_mve)) # rho from comparing
+                                        # R_t_predicted_from_mve with original data
 }

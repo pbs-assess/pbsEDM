@@ -25,7 +25,9 @@ library(magrittr)
 library(ggplot2)
 ```
 
-Jump to Where we are at section.
+Jump to Where we are at section. Some earlier code probably won't work now as
+I've been continuously updating functions. This is not a vignette, more figuring
+out as go along.
 
 Adapting Luke's original `mve.Rmd` to dig into his multiview embedding functions. Was going
 use the same default time series as in `analyse_simple_time_series.Rmd` but
@@ -839,18 +841,58 @@ predicted, which can compound errors). So re-running gives:
 After correcting, `top_rho` max is only 0.36 (i.e. lower?!), while top
 `top_rho_s` is 0.67. Need to step back and do for a single view.
 
+## Redo a single view example
+
+```{r sve7}
+sve_7 <- single_view_embedding_for_sve(
+  data = simulated_4,
+  response = "R_t",
+  lags = lags_lots)
+sve_7_rho <- cor(sve_7$R_t,
+                 sve_7$R_t_predicted,
+                 use = "pairwise.complete.obs")
+sve_7_rho
+# 0.173301 before changing unstransform_predictions() to set negative predictions
+# to the minimum observed.
+# Once done that the value is the same??? Should be a bit better you'd
+# think. Changed to a high value (200) instead of minimum and it did change rho
+# to negative, so code is changing properly. Changes to 0.17277 when I make it
+# 10* minimum, so code is working properly, just that change surprisingly made
+# no difference (for this example).
+```
+
+Try small multiview again:
+```{r mvesmall2}
+mve_small_again_2 <- multiview_embedding(data = simulated_small_4,
+                                         response = "R_t",
+                                         lags = lags_use_multi)
+mve_small_again_2
+```
+
+It's all working okay. Try shebang one again with longer simulated data and more
+lags. Though the actual top rho values shouldn't change from shebang; the values
+are calculated in the function now.
+```{r shebang2}
+mve_full_shebang_2 <- multiview_embedding(data = simulated_4,
+                                          response = "R_t",
+                                          lags = lags_lots)
+mve_full_shebang_2$rho_prediction_from_mve
+mve_full_shebang_2$rho_each_top_subset
+```
+
+HERE HERE HERE That first rho is only 0.056, presumably worse than the top ones. BUT last one
+is wrong as has -ve ones that surely can't be good. Check calculations in
+function. TODO TODO
+
+
+HERE HERE HERE - could do with a function to put the list of (top) lags into a simple table.
 
 
 
 
-
-TODO function for size of subset_lags, just needs to be based on total number of
+TODO Maybe. function for size of subset_lags, just needs to be based on total number of
 lags. Will need in function (as a check) anyway. Isnt it 2^N - 1 ish.
 Yes. Either in or out.
-
-
-At some point:
-See HERE TODO in `untransform_predictions()`. Can remove if the multiview works out.
 
 
 
