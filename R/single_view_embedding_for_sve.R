@@ -67,7 +67,7 @@ single_view_embedding_for_sve <- function(data,
     lags_of_response_variable <- NULL
   }
 
-browser()
+# browser()
 
   prediction_indices <- state_space_forecasts_for_sve(ssr,
                                                       distances,
@@ -86,8 +86,8 @@ browser()
 
 # TODO THIS SHOULD MAYBE BE LAGS_OF_RESPONSE_VARIABLE
   # Back transform and unlag to give predictions for original response variable
-  response_abs_predicted <- untransform_predictions(N_observed = response_observed,
-                                                    Y_predicted = response_s_predicted,
+  response_abs_predicted <- untransform_predictions(response_observed = response_observed,
+                                                    response_s_predicted = response_s_predicted,
                                                     max_lag = max(unlist(lags,
                                                       use.names = FALSE)))
   # What to return. Lags is an input so don't need that, can just have a tibble

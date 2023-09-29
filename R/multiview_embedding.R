@@ -58,7 +58,7 @@ multiview_embedding <- function(data,
   rho_each_subset <- rep(NA, num_subsets)      # rho based on unscaled (original)
   rho_s_each_subset <- rep(NA, num_subsets)    # rho based on scaled
 
-browser()
+# browser()
   # Do single view embedding for each subset, calc rho both ways
   for(i in 1:num_subsets){
 print(i)
@@ -81,7 +81,7 @@ print(i)
     response_each_subset[[i]] <- response_calc
   }
 
-
+# HERE - got to here, get error but may be at end. Need to do the next stuff.
   # HERE
   # Take subsets with top sqrt() rho's
 
@@ -94,27 +94,31 @@ print(i)
 
   # Return results object ------------------------------------------------------
 
-  return(
-    structure(
-      list(
-        data = data,
-        observed = c(dplyr::pull(data, response), NA),
-        forecast = c(rep(NA_real_, index - 1), weighted$results$forecast),
-        response = response,
-        lags = lags,
-        index = index,
-        buffer = buffer,
-        window = window,
-        metric = metric,
-        beyond = beyond,
-        n_weight = n_weight,
-        raw_forecasts = forecasts,
-        ranks = weighted$ranks,
-        summary = weighted$summary,
-        hindsight = weighted$hindsight,
-        results = weighted$results
-      ),
-      class = "multiview_embedding"
-    )
-  )
+  # HERE for now just
+  return(list(rho_each_subset = rho_each_subset,
+              rho_s_each_subset = rho_s_each_subset))
+
+  ## return(
+  ##   structure(
+  ##     list(
+  ##       data = data,
+  ##       observed = c(dplyr::pull(data, response), NA),
+  ##       forecast = c(rep(NA_real_, index - 1), weighted$results$forecast),
+  ##       response = response,
+  ##       lags = lags,
+  ##       index = index,
+  ##       buffer = buffer,
+  ##       window = window,
+  ##       metric = metric,
+  ##       beyond = beyond,
+  ##       n_weight = n_weight,
+  ##       raw_forecasts = forecasts,
+  ##       ranks = weighted$ranks,
+  ##       summary = weighted$summary,
+  ##       hindsight = weighted$hindsight,
+  ##       results = weighted$results
+  ##     ),
+  ##     class = "multiview_embedding"
+  ##   )
+  ## )
 }

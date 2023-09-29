@@ -622,7 +622,7 @@ prediction_indices <- state_space_forecasts_for_sve(ssr_new,
 # go for t_star+1.
 
 # Take off the final one because we are shifting (predicting t_star+1 from the
-# prediction indices for each t_star; need NA at beginning.
+# prediction indices for each t_star); need NA at beginning.
 response_s_predicted <- c(NA,
                           response_s[prediction_indices[-length(prediction_indices)]])
 
@@ -678,7 +678,7 @@ expect_equal(rho_response_s, rho_response_s_from_function)
 ### Now to link that from `multiview_embedding()`
 
 Keeping the function name `multiview_embedding()` as that will be called from
-elsewhere (keeping my other new ones as `..._for_sve()` though. Saved Luke's as
+elsewhere (keeping my other new ones as `..._for_sve()` though). Saved Luke's as
 `..._original()`.
 
 ```{r mveattempt}
@@ -689,8 +689,7 @@ sve_this_failed <- single_view_embedding_for_sve(
   response = "R_t",
   lags = list(S_t = 1))
 # Originally failed with:
-# Error in untransform_predictions(N_observed = response_observed, Y_predicted = response_s_predicted,  :
-#  !any(is.na(Y_predicted[(min_t_Y_predicted):length(Y_predicted)])) is not TRUE
+# Error in untransform_predictions(N_observed = response_observed, Y_predicted = response_s_predicted),: !any(is.na(Y_predicted[(min_t_Y_predicted):length(Y_predicted)])) is not TRUE
 
 # Originally hadn't had NA's in final column of distances, or final
 # row. Thought it was meant to. Deconstructing, it just needs them in final column:
@@ -742,7 +741,7 @@ sve_simulated_4
 
 ```{r St2only}
 lags_St2 <- list(S_t = 2)
-# This fails (during multiview) because I didn't disallow all the nearest
+# This fails (during multiview below) because I didn't disallow all the nearest
 # neighbours at the end, was only thinking about no lag 0, not no lag 0 or lag
 # 1. So need to consider the minimum lag in state_space_distances_for_
 sve_simulated_St2 <- single_view_embedding_for_sve(
@@ -750,7 +749,7 @@ sve_simulated_St2 <- single_view_embedding_for_sve(
   response = "R_t",
   lags = lags_St2)
 
-HERE redo this one
+# Redid this one and it ran okay, numbers look off though.
 # And this for testing also
 sve_simulated_lags_many <- single_view_embedding_for_sve(
   data = simulated_4,
@@ -759,12 +758,12 @@ sve_simulated_lags_many <- single_view_embedding_for_sve(
               S_t = 0:3))
 ```
 
-```{r multiview
-HERE HERE HERE. This fails - see browser() in function. Fails for S_t with lag
+```{r multiview}
+This fails - see browser() in function. Fails for S_t with lag
 of 2; must be next one I think, as one above runs - need to figure out this
 DID THIS: need to repeat the fix I just did, have to disallow max_lag -ish candidate
 nearest neighbours at the
-end that have undefined projections. See TODO in state_space_distances_for_sve()
+end that have undefined projections. See in state_space_distances_for_sve()
 - just tidy up the example.
 mve_small <- multiview_embedding(data = simulated_small_4,
                                  response = "R_t",
@@ -773,14 +772,77 @@ mve_small <- multiview_embedding(data = simulated_small_4,
 # Earlier example was for simulated_4 not simulated_small_4; expect latter is
 # just running out of lags kind of thing. Do explicitly:
 # This now does not have 15 in prediction_indices, having fixed. Not obvious why
-# the error arose with untransform_predictions()
+# the error arose with untransform_predictions().
 sve_simulated_small_St2 <- single_view_embedding_for_sve(
   data = simulated_small_4,
   response = "R_t",
   lags = lags_St2)
+sve_simulated_small_St2
+```
 
+That runs but thought had something wrong, as `R_t_predicted` should only be values of
+`R_t`, but that's only true if not doing first-differencing and scaling I
+think. `diff(sve_simulated_small_St2$R_t_predicted)` correctly has repeated
+values (i.e. first differences are repated).
+TODO maybe. Had thought `max_lag` in `untransform_predictions()` was wrong, and
+maybe depend on
+response only, but pretty sure it is okay.Given the results are so squiffy,
+there must be something wrong in `untransform_predictions()`. BUT, this is only
+a very short time series so likely to not be good. Retry with the longer one:
+```{r withlonger}
+sve_simulated_St2_again <- single_view_embedding_for_sve(
+  data = simulated_4,
+  response = "R_t",
+  lags = lags_St2)
+sve_simulated_St2_again
+```
+
+Runs okay, numbers not great but don't expect them to be, as only using lag of 2
+for `S_t`. Retry the multiview again:
+```{r mveagain}
+mve_small_again <- multiview_embedding(data = simulated_small_4,
+                                       response = "R_t",
+                                       lags = lags_use_multi)
+```
+That runs until errors, but seems to loop through everything. HERE Debug
+next. BUT, results shouldn't be too great, given the short data set and short
+lags.
+
+How about full shebang:
+```{r mvefullshebang}
+lags_lots <- list(R_t = 0:4,
+                  S_t = 0:8)
+
+mve_full_shebang <- multiview_embedding(data = simulated_4,
+                                       response = "R_t",
+                                       lags = lags_lots)
+# Currently returns:
+#   return(list(rho_each_subset = rho_each_subset,
+#              rho_s_each_subset = rho_s_each_subset))
+# Doing quickly:
+sqrt_length <- round(sqrt(length(mve_full_shebang[[1]])))  # approx 2^(N/2) I think
+
+rho_each_subset <- mve_full_shebang[[1]]
+top_rho <- sort(rho_each_subset, decreasing = TRUE)[1:sqrt_length]
+top_rho
+
+rho_s_each_subset <- mve_full_shebang[[2]]
+top_rho_s <- sort(rho_s_each_subset, decreasing = TRUE)[1:sqrt_length]
+top_rho_s
 
 ```
+HERE HERE HERE So not very good - pretty sure there's an error in the `untransform_predictions()`.
+
+
+
+TODO function for size of subset_lags, just needs to be based on total number of
+lags. Will need in function (as a check) anyway. Isnt it 2^N - 1 ish.
+Yes. Either in or out.
+
+
+At some point:
+See HERE TODO in `untransform_predictions()`. Can remove if the multiview works out.
+
 
 
 ## Chat with Carrie:
