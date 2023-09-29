@@ -40,22 +40,15 @@ untransform_predictions <- function(response_observed,
   Z_sd <- sd(Z_observed,
              na.rm = TRUE)
 
-  # Useful, but not needed as repeated below in loop
-  # Z_predicted <- Z_mean + Z_sd * response_s_predicted
+  Z_predicted <- Z_mean + Z_sd * response_s_predicted
 
-# HERE TODO pretty sure need to double check this; but seems okay. Thought wrong
-# because not great answers when only doing simple view, so see if needs
-# changing once multiview working.
-  # Then something like (double check the indexing)
-  response_predicted <- rep(NA,
-                     length(response_observed) + 1)
-  response_predicted[min_t_response_s_predicted] <- response_observed[min_t_response_s_predicted]  # Only for
-                                        # first-differencing, have to set first one
-  for(i in (min_t_response_s_predicted):length(response_observed)){
-     response_predicted[i + 1] <- Z_mean + Z_sd * response_s_predicted[i] + response_predicted[i]
-  }
-  response_predicted[min_t_response_s_predicted] <- NA   # For first-differencing, haven't
-                                        # predicted this one so set to NA
+  # response_predicted_{t+1} = response_observed_{t} + Z_predicted_{t}
+  #  I'd originaly used response_predicted_{t} which compounded any errors,
+  #  leading to best rho of 0.59 for simualted_4 and lags_lots in
+  #  mve_understanding.Rmd.
+  #  Think the NA's should just flow through.
+  response_predicted <- c(NA,                     # deals with the t+1
+                          response_observed + Z_predicted)
 
   return(response_predicted)
 }

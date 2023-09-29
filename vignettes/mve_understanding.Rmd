@@ -829,9 +829,18 @@ top_rho
 rho_s_each_subset <- mve_full_shebang[[2]]
 top_rho_s <- sort(rho_s_each_subset, decreasing = TRUE)[1:sqrt_length]
 top_rho_s
-
 ```
-HERE HERE HERE So not very good - pretty sure there's an error in the `untransform_predictions()`.
+
+That gave top `top_rho` value of 0.597 (and `top_rho_s` 0.592 I think) when I was incorrectly using `response_predicted`
+in `untransform_predictions()` instead of `response_observed` (i.e. add the
+first differences to the known observation, which we know (!), rather than the
+predicted, which can compound errors). So re-running gives:
+
+After correcting, `top_rho` max is only 0.36 (i.e. lower?!), while top
+`top_rho_s` is 0.67. Need to step back and do for a single view.
+
+
+
 
 
 
