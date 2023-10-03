@@ -881,7 +881,9 @@ mve_full_shebang_2$rho_each_top_subset
 ```
 
 HERE HERE HERE That first rho is only 0.056, presumably worse than the top ones. BUT last one
-is wrong as has -ve ones that surely can't be good. Check calculations in
+is wrong as has -ve ones that surely can't be good, and doesn't have the best
+from `sort(mve_full_shebang_2$rho_each_subset)`.
+`. Check calculations in
 function. TODO TODO
 
 

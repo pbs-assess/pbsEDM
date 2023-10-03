@@ -60,7 +60,7 @@ multiview_embedding <- function(data,
 
   # Do single view embedding for each subset, calc rho both ways
   for(i in 1:num_subsets){
-print(i)
+# print(i)
 
     response_calc <- single_view_embedding_for_sve(data = data,
                                                    response = response,#"R_t",
@@ -82,25 +82,38 @@ print(i)
   sqrt_num_subsets <- round(sqrt(num_subsets))  # approx 2^(N/2) I think
 
   order_of_subsets_for_rho_index <- order(rho_each_subset, decreasing = TRUE)
+  # Gives, in order, the index of the 1st, 2nd, 3rd, ... highest rho's.
+  # > which.max(rho_each_subset)
+  #  4229
+  # > order_of_subsets_for_rho_index[1]
+  #  4229
 
-  # Index of the subsets with the highest sqrt_num_subsets rho values (they
-  #  remain in order since not worried about their relative rank to each other)
-  top_subsets_for_rho_index <- which(order_of_subsets_for_rho_index <= sqrt_num_subsets)
-     # Think ties get given averaged ranks of 0.5 (etc.), so just may end up
-     # with an extra or less one. So use length of this not sqrt_num_subsets in
+browser()
+  # Index of the subsets with the highest sqrt_num_subsets rho values
+  # Think ties (unlikely given accuracy) will just get ignored and the first one
+  # taken. But still use length of this not sqrt_num_subsets in
      # loop below
+  # Indices of the top rho's, e.g. 4229 13073 12825 13104 ...:
+  top_subsets_for_rho_index <-
+    order_of_subsets_for_rho_index[1:sqrt_num_subsets]
+
+ # The actual top rho's (in order of size)
+  rho_each_top_subset <- rho_each_subset[top_subsets_for_rho_index]
 
   R_t_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
-                                               ncol = length(top_subsets_for_rho_index))   # rows are time, columns are
-                                        # each top_subsets_for_rho_index in
-                                        # order
+                                               ncol = length(top_subsets_for_rho_index))  # rows are time, columns are
+  # each top_subsets_for_rho_index in order
+
   lags_of_top_subsets <- list()        # List of list of each top lag
 
-  for(subset_i in 1:length(top_subsets_for_rho_index)){
+  for(i in 1:length(top_subsets_for_rho_index)){
+
+    actual_subset_index <- top_subsets_for_rho_index[i]
+
     R_t_predicted_from_each_top_subset[, subset_i] <-
-      dplyr::pull(response_each_subset[[subset_i]], paste0(response,
+      dplyr::pull(response_each_subset[[actual_subset_index]], paste0(response,
                                                            "_predicted"))
-    lags_of_top_subsets[[subset_i]] <- subset_lags[[subset_i]]
+    lags_of_top_subsets[[subset_i]] <- subset_lags[[actual_subset_index]]
   }
 
   R_t_predicted_from_mve <- rowMeans(R_t_predicted_from_each_top_subset,
@@ -119,7 +132,7 @@ print(i)
                                         # subsets with the highest
                                         # sqrt(total number of subsets) rho
                                         # values
-    rho_each_top_subset = rho_each_subset[top_subsets_for_rho_index], # rho for
+    rho_each_top_subset = rho_each_top_subset, # rho for
                                         # the top subsets (original order is retained)
     R_t_predicted_from_each_top_subset = R_t_predicted_from_each_top_subset,
     lags_of_top_subsets = lags_of_top_subsets,
