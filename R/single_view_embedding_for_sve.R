@@ -20,9 +20,24 @@
 #'  calculate both types of correlation coefficient (or whatever else) to rank each
 #'  individual single view embedding. OR a single NA if the lagged variables are
 #'   highly correlated (see `state_space_reconstruction_for_sve()`.
-
-#' @export
+#' @examples
+#' \dontrun{
+#' h_simulated <- 0.1095 + sample(1:180) * 0.001 # has mean of 0.2
+#' simulated_4 <- EDMsimulate::salmon_sim(h = h_simulated)
+#' res <- single_view_embedding_for_sve(data = simulated_4,
+#'                              response = "R_t",
+#'                              lags = create_subset_lags(list(R_t = 0:4,
+#'                                                             S_t = 0:8
+#'                                                             ))[[16000]]) # picking a specific subset of
+#'                                                                          # potential lags
+#' res %>% as.data.frame()
+#' # Shows that can have R_t_predicted bigger than any original R_t, e.g. line
+#'   73, because R_t_s[72] was the largest possible, and previous R_t was not
+#'   very small. This may change with different seeds, as hadn't set, but idea
+#'   should hold.
+#' }
 #'
+#' @export
 single_view_embedding_for_sve <- function(data,
                                           response,
                                           lags,

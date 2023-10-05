@@ -60,7 +60,7 @@ multiview_embedding <- function(data,
 
   # Do single view embedding for each subset, calc rho both ways
   for(i in 1:num_subsets){
-# print(i)
+    # print(i)
 
     response_calc <- single_view_embedding_for_sve(data = data,
                                                    response = response,#"R_t",
@@ -88,7 +88,7 @@ multiview_embedding <- function(data,
   # > order_of_subsets_for_rho_index[1]
   #  4229
 
-browser()
+# browser()
   # Index of the subsets with the highest sqrt_num_subsets rho values
   # Think ties (unlikely given accuracy) will just get ignored and the first one
   # taken. But still use length of this not sqrt_num_subsets in
@@ -101,8 +101,10 @@ browser()
   rho_each_top_subset <- rho_each_subset[top_subsets_for_rho_index]
 
   R_t_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
-                                               ncol = length(top_subsets_for_rho_index))  # rows are time, columns are
-  # each top_subsets_for_rho_index in order
+                                               ncol =
+                                                 length(top_subsets_for_rho_index))
+                                        # rows are time, columns are
+                                        # each top_subsets_for_rho_index in order
 
   lags_of_top_subsets <- list()        # List of list of each top lag
 
@@ -110,15 +112,20 @@ browser()
 
     actual_subset_index <- top_subsets_for_rho_index[i]
 
-    R_t_predicted_from_each_top_subset[, subset_i] <-
+    R_t_predicted_from_each_top_subset[, i] <-
       dplyr::pull(response_each_subset[[actual_subset_index]], paste0(response,
                                                            "_predicted"))
-    lags_of_top_subsets[[subset_i]] <- subset_lags[[actual_subset_index]]
+    lags_of_top_subsets[[i]] <- subset_lags[[actual_subset_index]]
   }
 
+  # Take the mean for each t* across all the top subsets
   R_t_predicted_from_mve <- rowMeans(R_t_predicted_from_each_top_subset,
                                      na.rm = FALSE)
-  rho_prediction_from_mve <- cor(dplyr::pull(response_calc, response),
+
+  # Take response from the last response_calc (all the same), not data
+  #  as want forecast value (to be an NA)
+  rho_prediction_from_mve <- cor(dplyr::pull(response_calc,
+                                             response),
                                  R_t_predicted_from_mve,
                                  use = "pairwise.complete.obs")
 

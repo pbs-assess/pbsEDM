@@ -27,7 +27,7 @@ library(ggplot2)
 
 Jump to Where we are at section. Some earlier code probably won't work now as
 I've been continuously updating functions. This is not a vignette, more figuring
-out as go along.
+out as go along. So unlikely to get it fully rebuilt.
 
 Adapting Luke's original `mve.Rmd` to dig into his multiview embedding functions. Was going
 use the same default time series as in `analyse_simple_time_series.Rmd` but
@@ -591,8 +591,8 @@ lags_use_multi <- list(R_t = 0,
 # TODO maybe: not sure why this failed a while ago, might be the use of random numbers
 #  expect_equal(EDMsimulate::salmon_sim()[1:15, ], EDMsimulate::salmon_sim(T = 15))
 
-TODO HERE Redo with simulation with changing harvest rate. And change error in
-`state_space_reconstruction_for_sve.R` to something more useful.
+# Redoing later with simulation with changing harvest rate. And change error in
+# `state_space_reconstruction_for_sve.R` to something more useful.
 
 simulated_small_4 <- simulated_4[1:15, ]
 # TODO need different lags to not return an NA
@@ -786,7 +786,7 @@ That runs but thought had something wrong, as `R_t_predicted` should only be val
 `R_t`, but that's only true if not doing first-differencing and scaling I
 think. `diff(sve_simulated_small_St2$R_t_predicted)` correctly has repeated
 values (i.e. first differences are repated).
-TODO maybe. Had thought `max_lag` in `untransform_predictions()` was wrong, and
+Had thought `max_lag` in `untransform_predictions()` was wrong, and
 maybe depend on
 response only, but pretty sure it is okay.Given the results are so squiffy,
 there must be something wrong in `untransform_predictions()`. BUT, this is only
@@ -875,24 +875,27 @@ are calculated in the function now.
 ```{r shebang2}
 mve_full_shebang_2 <- multiview_embedding(data = simulated_4,
                                           response = "R_t",
-                                          lags = lags_lots)
+                                          lags = lags_lots)  # Do lags_use_multi
+                                            # for shorter and quicker one
 mve_full_shebang_2$rho_prediction_from_mve
 mve_full_shebang_2$rho_each_top_subset
 ```
 
-HERE HERE HERE That first rho is only 0.056, presumably worse than the top ones. BUT last one
-is wrong as has -ve ones that surely can't be good, and doesn't have the best
-from `sort(mve_full_shebang_2$rho_each_subset)`.
-`. Check calculations in
-function. TODO TODO
+Wow, fascinating. The overall $\rho$ for mve, averaging over the top subsets, is
+higher than every $\rho$ from every subset! So the averaging is indeed paying
+off, and improving results. Other results are:
+
+```{r shebang2res}
+mve_full_shebang_2$lags_of_top_subsets  # These are in order of highest rho
+mve_full_shebang_2$R_t_predicted_from_mve   # Overall mve prediction, including
+                                            # for the forecast T+1
+```
+
+Can now move onto including this into `sim_and_fit_realisations()` in EDMsimulate.
 
 
-HERE HERE HERE - could do with a function to put the list of (top) lags into a simple table.
-
-
-
-
-TODO Maybe. function for size of subset_lags, just needs to be based on total number of
+TODO Maybe - could do with a function to put the list of (top) lags into a simple table.
+Maybe. function for size of subset_lags, just needs to be based on total number of
 lags. Will need in function (as a check) anyway. Isnt it 2^N - 1 ish.
 Yes. Either in or out.
 
@@ -905,7 +908,7 @@ forecast -- will chat Tuesday and resolve. TODO
 
 We will use `R_t` with lags of 1, 2, and 3. Andy thinks now do want lag 0
 also, see Issue 16. Check our thinking of $t^*$ is the same - discuss as it
-isn't TODO.
+isn't
 `S_t` with lags 1 to 7. When we need the forecast for `R_t` we don't yet know
 `S_t` because that is calculated at the end of the year.
 Number of 5-dimensional (half the max) combinations is
