@@ -7,8 +7,8 @@
 state_space_forecasts_for_sve(
   ssr_input,
   distance,
-  num_nbrs = 1,
-  beyond = FALSE
+  lags_of_response_variable,
+  response_s
 )
 }
 \arguments{
@@ -17,20 +17,29 @@ are points in the state space}
 
 \item{distance}{[matrix()] of distances of allowed neighbours}
 
-\item{beyond}{[logical()]}
+\item{lags_of_response_variable}{NULL or vector of lags being considered for
+the response variable, to help eliminate invalid candidate nearest neighbours}
+
+\item{response_s}{vector of values of scaled response variable, which may or
+may not be in the `ssr_input`}
 }
 \value{
-[vector()] of projected values of t, including for `t^*+1`
-  (in case this particular sve is good and will get used in the multiview
-  embedding to make the forecast).
+[vector()] where index of each element corresponds to a `t^*`, and
+  the value of the element gives the index of the projection (i.e. projection
+  for `t^*+1`, based on where the nearest neighbour went). Because just
+  using the single nearest neighbour, can just return indices and deal with
+  of indices of projections for each `t^* + 1`projected values of t,
+  including for `T+1`.
 }
 \description{
 Adapting, simplifying and correcting `state_space_forecasts()` to be called
   from `single_view_embedding()`. Based on what's described in Hao and
-  Sugihara (2016; Science 353:922).
+  Sugihara (2016; Science 353:922). This function will do some of the
+  following steps in one go (basically looping through the t* values).
 }
 \details{
-Steps are (basically a modified version of our Table 3 in manuscript 1)
+Steps are (basically a modified version of our Table 3 in manuscript 1) TODO
+add to manuscript, move elsewhere
 - take a single view embedding (input into here), which is matrix X in
 manuscript 1, with each row representing time and each column a component
 (dimension) of the state space
@@ -47,9 +56,9 @@ dimensions??? First seems sensible, but second seems to be capturing more of
 the ethos of Takens' theorem.
 - In Simplex the above would be repeated for different `E`, in multiview we
 will repeat this for different views (state space reconstructions) in
-`multiview_embedding()`.
+`multiview_embedding()`, which will call the current function.
 
-Return the projected values of the ssr, to then be used to calculate  the
+Return the projected values of the ssr, to then be used to calculate the
 correlation coefficient (or metric of interest) and make the forecast if this
 particular sve is deemed good.
 }

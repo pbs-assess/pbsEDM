@@ -4,69 +4,56 @@
 \alias{multiview_embedding}
 \title{Multiview Embedding}
 \usage{
-multiview_embedding(
-  data,
-  response,
-  lags,
-  index = 50L,
-  buffer = 10L,
-  window = integer(0),
-  metric = "rmse",
-  beyond = FALSE,
-  weight = NULL,
-  n_weight = ceiling(sqrt(2^length(unlist(lags)))),
-  cores = NULL
-)
+multiview_embedding(data, response, lags)
 }
 \arguments{
-\item{data}{[matrix()] or [data.frame()] with named [numeric()] columns}
+\item{data}{[tibble()] or [data.frame()] with named [numeric()] columns}
 
 \item{response}{[character()] column name of the response variable in
 \code{data}}
 
 \item{lags}{[list()] of a named vector of lags for each explanatory
 variable.}
-
-\item{index}{[integer()]}
-
-\item{buffer}{[integer()] number of forecasts prior to \code{index}}
-
-\item{window}{[integer()] forecast metric moving window width}
-
-\item{metric}{[character()]}
-
-\item{beyond}{[logical()]}
-
-\item{weight}{TBD}
-
-\item{n_weight}{[integer()]}
-
-\item{cores}{[integer()] number of cores for parallel computation.}
 }
 \value{
-[list()]
+[list()] **TODO
 }
 \description{
-From Luke's email (TODO tidy up when done):
-Good to hear from you! Yes, what you describe is the main idea behind
-multiview embedding (MVE). It uses the `2^N - 1` subsets of the superset
-state space reconstruction of covariates and covariate lags, giving all
-possible embedding dimensions and embedding combinations that you're looking
-for. [Andy: Ye and Sugihara 2016 exclude those that have no 0 lag variables,
-since presumably they're just shifted - keep in for now and check results
-agree maybe].
-Andy asked: is single-view embedding just standard EDM, and Luke said:
-I think MVE was originally a generalization of S-mapping [Andy: no, for MVE
-they just use the single nearest neighbour in each view], but we've
-implemented it as a generalization of EDM. So in our case, single-view
-embedding would be EDM, but other authors might hear 'single-view embedding'
-and think 'S-mapping'.
-Worth double-checking because this is just from memory ;)
- Andy: TODO don't think that's quite right, checking
-the code.
-TODO TODO TODO check the definitions; stick with mve for now to get it all
-working.
+Take a multivariate data set containing variables through time, a response
+variable (the variable we care about, such as population number), and a set
+of lags that we wish to consider. Based on Ye and Sugihara (2016)'s
+description.
+}
+\details{
+For all allowed lags, this function builds every possible state space
+reconstruction (Figure 1C in Ye and Sugihara), of all possible dimensions. So
+variable 1 with 0 lag, variable 1 with 0 lag and variable 2 with 0 lag,
+variable 1 with 0 lag and variable 2 with 1 lag, etc. up to variable 1 with
+all lag allowed from `lags` and variable 2 with all lags allowed from `lags`.
+TODO I feel that some combinations should be duplicated, in the sense that
+variable 1 with lag 1 and variable 2 with lag 2 is the same as variable 1
+with lag 0 and variable 2 with lag 1 (i.e. if you have nothing with lag of 0
+then you can shift everything), but this will reduce the data a little --
+look into as may end up keeping state space reconstructions that are
+essentially the same, just shifted in time. If there are $N$ total
+variable-lag combinations, then there should be $2^N - 1$ possible
+reconstructions (each one is either in or out, minus them all being out), but
+this may get reduced with what is described above.
+
+This function calls `single_view_embedding_for_sve()` (the `for_sve` was just
+to distinguish from earlier functions), which creates the state space
+reconstruction, calculates the distances between points, makes predictions
+for all allowable focal times $t^*$ taking into account which neighbours
+should be candidates for nearest neighbours - predictions are just from the
+single nearest neighbour (as per Y&S, rather than full Simplex), calculate
+predicted values of the response variable both scaled and unscaled. Here we
+will calculate metrics of the fit, based on just the response variable (as
+that is what we are interested in), and pick the best performing ones - the
+square root of the total number of reconstructions, as per Y&S. Then use the
+average of those to make the actual forecast for the time step after the data.
+
+Returns **
 }
 \author{
-Luke A. Rogers
+Andrew M. Edwards and Luke A. Rogers
 }

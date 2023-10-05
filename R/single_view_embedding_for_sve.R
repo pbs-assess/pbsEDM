@@ -32,9 +32,9 @@
 #'                                                                          # potential lags
 #' res %>% as.data.frame()
 #' # Shows that can have R_t_predicted bigger than any original R_t, e.g. line
-#'   73, because R_t_s[72] was the largest possible, and previous R_t was not
-#'   very small. This may change with different seeds, as hadn't set, but idea
-#'   should hold.
+#' #  73, because R_t_s[72] was the largest possible, and previous R_t was not
+#' #  very small. This may change with different seeds, as hadn't set, but idea
+#' #  should hold.
 #' }
 #'
 #' @export

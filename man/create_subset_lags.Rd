@@ -15,7 +15,9 @@ variable.}
   reconstruction
 }
 \description{
-Create Subset Lags
+Creates all combinations, though not in quite the logical order one might
+  expect. Could resolve by reording the code maybe, but it works (Andy
+  manually checked a detailed example, essentially the one given).
 }
 \examples{
 create_subset_lags(list(a = c(0, 1, 2), b = c(0, 1)))

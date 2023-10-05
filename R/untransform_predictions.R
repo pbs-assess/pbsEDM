@@ -10,6 +10,8 @@
 #'   state space that used lagged and scaled variables), though just the
 #'   response column
 #' @param max_lag maximum lag used
+#' @param positive_response_only logical, if TRUE then set any negative
+#'   predictions of the response variable to be the minimum observed value
 #' @return [numeric()][vector()] a prediction vector of original `N_t` in
 #'   absolute space, so
 #'   `response_predicted`, but also with a value for `T+1`, which is what we are
@@ -17,11 +19,6 @@
 
 #' @export
 #'
-#' @param response_observed
-#' @param response_s_predicted
-#' @param max_lag
-#' @param positive_response_only logical, if TRUE then set any negative
-#'   predictions of the response variable to be the minimum observed value
 untransform_predictions <- function(response_observed,
                                     response_s_predicted,
                                     max_lag,

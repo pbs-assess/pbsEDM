@@ -2,7 +2,7 @@
 % Please edit documentation in R/single_view_embedding.R
 \name{single_view_embedding}
 \alias{single_view_embedding}
-\title{Single View Embedding}
+\title{Single View Embedding - TODO Andy adapting}
 \usage{
 single_view_embedding(
   data,
@@ -41,7 +41,7 @@ variable.}
 [data.frame()]
 }
 \description{
-Single View Embedding
+Single View Embedding - TODO Andy adapting
 }
 \author{
 Luke A. Rogers
