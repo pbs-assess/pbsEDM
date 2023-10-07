@@ -571,7 +571,7 @@ state_space_reconstruction_for_sve(data = simulated_small_2,
 head(ssr_small_2)
 ```
 
-## Where we are at
+## Where we were at - now see Where we are at further down
 
 So `single_view_embedding_for_sve()` [cumbersome name but consistent for now
 with what I've been doing] now being created as I go along, based on
@@ -806,12 +806,18 @@ mve_small_again <- multiview_embedding(data = simulated_small_4,
                                        response = "R_t",
                                        lags = lags_use_multi)
 ```
-That runs until errors, but seems to loop through everything. HERE Debug
-next. BUT, results shouldn't be too great, given the short data set and short
+That runs until errors, but seems to loop through everything. BUT, results shouldn't be too great, given the short data set and short
 lags.
 
 How about full shebang:
 ```{r mvefullshebang}
+set.seed(42)
+h_simulated <- 0.1095 + sample(1:180) * 0.001 # has mean of 0.2
+simulated_4 <- EDMsimulate::salmon_sim(h = h_simulated)
+
+lags_use_multi <- list(R_t = 0,
+                       S_t = 0:3)
+
 lags_lots <- list(R_t = 0:4,
                   S_t = 0:8)
 
@@ -869,10 +875,24 @@ mve_small_again_2 <- multiview_embedding(data = simulated_small_4,
 mve_small_again_2
 ```
 
+# Where we are at
+
+Can start from here.
+
 It's all working okay. Try shebang one again with longer simulated data and more
 lags. Though the actual top rho values shouldn't change from shebang; the values
 are calculated in the function now.
 ```{r shebang2}
+set.seed(42)
+h_simulated <- 0.1095 + sample(1:180) * 0.001 # has mean of 0.2
+simulated_4 <- EDMsimulate::salmon_sim(h = h_simulated)
+
+lags_use_multi <- list(R_t = 0,
+                       S_t = 0:3)
+
+lags_lots <- list(R_t = 0:4,
+                  S_t = 0:8)
+
 mve_full_shebang_2 <- multiview_embedding(data = simulated_4,
                                           response = "R_t",
                                           lags = lags_lots)  # Do lags_use_multi
@@ -887,8 +907,8 @@ off, and improving results. Other results are:
 
 ```{r shebang2res}
 mve_full_shebang_2$lags_of_top_subsets  # These are in order of highest rho
-mve_full_shebang_2$R_t_predicted_from_mve   # Overall mve prediction, including
-                                            # for the forecast T+1
+mve_full_shebang_2$response_predicted_from_mve   # Overall mve prediction, including
+                                            # for the forecast T+1.
 ```
 
 Can now move onto including this into `sim_and_fit_realisations()` in EDMsimulate.

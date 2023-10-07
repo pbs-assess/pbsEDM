@@ -100,7 +100,7 @@ multiview_embedding <- function(data,
  # The actual top rho's (in order of size)
   rho_each_top_subset <- rho_each_subset[top_subsets_for_rho_index]
 
-  R_t_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
+  response_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
                                                ncol =
                                                  length(top_subsets_for_rho_index))
                                         # rows are time, columns are
@@ -112,21 +112,21 @@ multiview_embedding <- function(data,
 
     actual_subset_index <- top_subsets_for_rho_index[i]
 
-    R_t_predicted_from_each_top_subset[, i] <-
+    response_predicted_from_each_top_subset[, i] <-
       dplyr::pull(response_each_subset[[actual_subset_index]], paste0(response,
                                                            "_predicted"))
     lags_of_top_subsets[[i]] <- subset_lags[[actual_subset_index]]
   }
 
   # Take the mean for each t* across all the top subsets
-  R_t_predicted_from_mve <- rowMeans(R_t_predicted_from_each_top_subset,
+  response_predicted_from_mve <- rowMeans(response_predicted_from_each_top_subset,
                                      na.rm = FALSE)
 
   # Take response from the last response_calc (all the same), not data
   #  as want forecast value (to be an NA)
   rho_prediction_from_mve <- cor(dplyr::pull(response_calc,
                                              response),
-                                 R_t_predicted_from_mve,
+                                 response_predicted_from_mve,
                                  use = "pairwise.complete.obs")
 
   # want to return:
@@ -141,12 +141,12 @@ multiview_embedding <- function(data,
                                         # values
     rho_each_top_subset = rho_each_top_subset, # rho for
                                         # the top subsets (original order is retained)
-    R_t_predicted_from_each_top_subset = R_t_predicted_from_each_top_subset,
+    response_predicted_from_each_top_subset = response_predicted_from_each_top_subset,
     lags_of_top_subsets = lags_of_top_subsets,
-    R_t_predicted_from_mve = R_t_predicted_from_mve,  # R_t predicted by taking
+    response_predicted_from_mve = response_predicted_from_mve,  # response predicted by taking
                                         # mean; will contain NaN for ones we
                                         # can't predict, and has one for
                                         # forecasting next time step.
     rho_prediction_from_mve = rho_prediction_from_mve)) # rho from comparing
-                                        # R_t_predicted_from_mve with original data
+                                        # response_predicted_from_mve with original data
 }
