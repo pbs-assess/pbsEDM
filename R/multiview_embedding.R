@@ -66,8 +66,10 @@ multiview_embedding <- function(data,
                                                    response = response,#"R_t",
                                                    lags = subset_lags[[i]])
 
-    if(is.na(response_calc)){        # Because lags are highly correlated in
-                                     #  state_space_reconstruction_for_sve()
+    if(all(is.na(response_calc))){        # Because lags are highly correlated in
+                                     #  state_space_reconstruction_for_sve();
+                                     #  actually will be a single NA but need to
+                                     #  check like this
       rho_each_subset[i] <- NA
       rho_s_each_subset[i] <- NA
       response_each_subset[[i]] <- NA    # Likely need a switch later to do with
@@ -100,9 +102,10 @@ multiview_embedding <- function(data,
   #  4229
   # NA's are put last, so that will work for rho_each_subset[i] = NA, and the
   # remaining ones will get ignored in the rest of this. Unless we have too
-  # many, which shouldn't happen with our simulations because we are doing noisy ones.
+  # many, which shouldn't happen with our simulations because we are doing noisy
+  # ones, but may for non-noisy since will be many subsets with highly
+  # correlated ssr axes.
 
-# browser()
   # Index of the subsets with the highest sqrt_num_subsets rho values
   # Think ties (unlikely given accuracy) will just get ignored and the first one
   # taken. But still use length of this not sqrt_num_subsets in
@@ -114,7 +117,7 @@ multiview_embedding <- function(data,
  # The actual top rho's (in order of size)
   rho_each_top_subset <- rho_each_subset[top_subsets_for_rho_index]
 
-  response_predicted_from_each_top_subset <- matrix(nrow = nrow(response_calc),
+  response_predicted_from_each_top_subset <- matrix(nrow = nrow(data) + 1,
                                                ncol =
                                                  length(top_subsets_for_rho_index))
                                         # rows are time, columns are
@@ -137,8 +140,11 @@ multiview_embedding <- function(data,
                                      na.rm = FALSE)
 
   # Take response from the last response_calc (all the same), not data
-  #  as want forecast value (to be an NA)
-  rho_prediction_from_mve <- cor(dplyr::pull(response_calc,
+  #  as want forecast value (to be an NA). Except response_calc may just be NA,
+  #  so need to get from the top one (if that's all NA's then need another
+  #  switch to just quit this function, but there should always be one non-NA as
+  #  some ssr will just be one axis.
+  rho_prediction_from_mve <- cor(dplyr::pull(response_each_subset[[order_of_subsets_for_rho_index[1]]],
                                              response),
                                  response_predicted_from_mve,
                                  use = "pairwise.complete.obs")

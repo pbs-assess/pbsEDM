@@ -79,7 +79,9 @@ state_space_reconstruction_for_sve <- function(data,
   Z <- as.matrix(data_first_differenced[, col_names, drop = FALSE])
 
   Z_cor <- cor(Z, use = "pairwise.complete.obs")
-  # TODO check what this will do for just one, Z will be a vector so should need tweaking
+  # TODO check what this will do for just one, Z will be a vector so should need
+  # tweaking as this should give an error
+
   if(max(Z_cor - diag(diag(Z_cor))) > max_allowed_correlation){
     ## message(paste("State space reconstruction using lag names",
     ##             lag_names,
