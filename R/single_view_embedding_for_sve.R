@@ -49,7 +49,8 @@ single_view_embedding_for_sve <- function(data,
                                             lags,
                                             ...)
 
-  if(all(is.na(ssr))){      # Because lagged variables are highly correlated, so
+  if(all(is.na(ssr))){      # Because lagged variables are highly correlated (in
+                            # which case ssr is actually just NA), so
                        # don't want to consider those reconstructions
     return(NA)         # Use this in multiview_embedding()
   }

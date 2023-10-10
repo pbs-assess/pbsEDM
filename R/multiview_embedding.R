@@ -66,18 +66,29 @@ multiview_embedding <- function(data,
                                                    response = response,#"R_t",
                                                    lags = subset_lags[[i]])
 
-    rho_each_subset[i] <- cor(response_calc[, response],
+    if(is.na(response_calc)){        # Because lags are highly correlated in
+                                     #  state_space_reconstruction_for_sve()
+      rho_each_subset[i] <- NA
+      rho_s_each_subset[i] <- NA
+      response_each_subset[[i]] <- NA    # Likely need a switch later to do with
+                                        # this single NA that is not same size tibble
+                                        # as non-NA ones
+    } else {
+
+      rho_each_subset[i] <- cor(response_calc[, response],
                               response_calc[, paste0(response,
                                                      "_predicted")],
                               use = "pairwise.complete.obs")
 
-    rho_s_each_subset[i] <- cor(response_calc[, paste0(response, "_s")],
-                                response_calc[, paste0(response,
-                                                       "_s_predicted")],
-                                use = "pairwise.complete.obs")
+      rho_s_each_subset[i] <- cor(response_calc[, paste0(response, "_s")],
+                                  response_calc[, paste0(response,
+                                                         "_s_predicted")],
+                                  use = "pairwise.complete.obs")
 
-    response_each_subset[[i]] <- response_calc
+      response_each_subset[[i]] <- response_calc
+    }
   }
+
 
   sqrt_num_subsets <- round(sqrt(num_subsets))  # approx 2^(N/2) I think
 
@@ -87,6 +98,9 @@ multiview_embedding <- function(data,
   #  4229
   # > order_of_subsets_for_rho_index[1]
   #  4229
+  # NA's are put last, so that will work for rho_each_subset[i] = NA, and the
+  # remaining ones will get ignored in the rest of this. Unless we have too
+  # many, which shouldn't happen with our simulations because we are doing noisy ones.
 
 # browser()
   # Index of the subsets with the highest sqrt_num_subsets rho values

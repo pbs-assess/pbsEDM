@@ -914,6 +914,25 @@ mve_full_shebang_2$response_predicted_from_mve   # Overall mve prediction, inclu
 Can now move onto including this into `sim_and_fit_realisations()` in EDMsimulate.
 
 
+Still having issues in EDMsimulate (see issue 17).
+```{r debugging}
+set.seed(42)
+simulated_5 <- EDMsimulate::salmon_sim()  # Back to default h_t, not noisy,
+                                        # to see if that's an issue. Shouldn't
+                                        # be. BUT is!
+mve_args_manual = list(lags = list(R_t = 0:1, S_t = 0:3))
+R_switch_manual <- "R_t"
+fit_mve_manual_5 <- do.call(pbsEDM::multiview_embedding,
+                     c(list(data = simulated_5,
+                            response = R_switch_manual),
+                       mve_args_manual))
+```
+Aha - it doesn't work with `h_t` constant (NULL to give default) in
+`salmon_sim()`, but does for `simulated_4` with `h_t` varying.
+HERE HERE
+
+
+
 TODO Maybe - could do with a function to put the list of (top) lags into a simple table.
 Maybe. function for size of subset_lags, just needs to be based on total number of
 lags. Will need in function (as a check) anyway. Isnt it 2^N - 1 ish.
