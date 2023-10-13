@@ -929,7 +929,7 @@ fit_mve_manual_5 <- do.call(pbsEDM::multiview_embedding,
 ```
 Aha - it doesn't work with `h_t` constant (NULL to give default) in
 `salmon_sim()`, but does for `simulated_4` with `h_t` varying.
-HERE HERE
+HERE HERE See fit_models help, have been fixing things and made new tests.
 
 
 
