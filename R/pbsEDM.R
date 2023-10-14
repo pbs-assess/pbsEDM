@@ -184,7 +184,7 @@ pbsEDM <- function (N,
   #----------------- Store observed as vectors --------------------------------#
 
   X_observed <- X[, 1]
-  N_observed <- N[, 1]  # Check that response var. is in first column
+  N_observed <- N[, 1]  # Check that (REQUIRES?) response var. is in first column
 
   #----------------- Compute X_forecast ---------------------------------------#
 

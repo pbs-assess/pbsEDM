@@ -4,11 +4,16 @@
 \alias{create_subset_lags}
 \title{Create Subset Lags}
 \usage{
-create_subset_lags(lags)
+create_subset_lags(lags, response_name = NULL)
 }
 \arguments{
 \item{lags}{[list()] of a named vector of lags for each explanatory
 variable.}
+
+\item{response}{character string; if not NULL then any subset that does not
+include `response` with a lag of 0 is excluded; this if for running
+`pbsEDM` (which requires response variable in the state space) in
+`multivariate_simplex()`.}
 }
 \value{
 [list()] with one lag [list()] for each subset state space
@@ -20,6 +25,6 @@ Creates all combinations, though not in quite the logical order one might
   manually checked a detailed example, essentially the one given).
 }
 \examples{
-create_subset_lags(list(a = c(0, 1, 2), b = c(0, 1)))
-
+s <- create_subset_lags(list(a = c(0, 1, 2), b = c(0, 1)))
+s_with_response <- create_subset_lags(list(a = c(0, 1, 2), b = c(0, 1)), response = "b")
 }
