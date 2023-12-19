@@ -21,23 +21,8 @@ The package implements the simplex and S-map algorithms of empirical dynamic mod
 
 ![](vignettes/pbsEDM_movie_tstar_39.gif)
 
-Users can also analyse their own data. The package complements our manuscript *Explaining empirical dynamic modelling using verbal, graphical, and mathematical approaches* being submitted as a Research Article to \emph{Ecology and Evolution}. The 
-package can be installed directly from GitHub with:
-
-```
-install.packages("remotes")    # If you do not already have the "remotes" package
-remotes::install_github("pbs-assess/pbsEDM")
-```
-
-If you get an error like
-```
-Error in utils::download.file(....)
-```
-then the connection may be timing out. Try
-```
-options(timeout = 1200)
-```
-and then try and install again.
+Users can also analyse their own data. The package complements our manuscript *Explaining empirical dynamic modelling using verbal, graphical, and mathematical approaches* being submitted as a Research Article to *Ecology and Evolution*. The 
+package can be installed directly from GitHub (see instructions below).
 
 ## Vignettes
 
@@ -76,6 +61,23 @@ plot_explain_edm_movie_save(E_results[[1]])           # Figure S.2
 
 plot_explain_edm_all_tstar_movie_save(E_results[[1]]) # Figure S.3
 ```
+## Installation instructions
+
+```
+install.packages("remotes")    # If you do not already have the "remotes" package
+remotes::install_github("pbs-assess/pbsEDM")
+```
+
+If you get an error like
+```
+Error in utils::download.file(....)
+```
+then the connection may be timing out. Try
+```
+options(timeout = 1200)
+```
+and then try and install again.
+
 
 ## Citation
 
