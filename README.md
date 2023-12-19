@@ -21,12 +21,23 @@ The package implements the simplex and S-map algorithms of empirical dynamic mod
 
 ![](vignettes/pbsEDM_movie_tstar_39.gif)
 
-Users can also analyse their own data. The package should not really be used yet until the associated manuscript is reviewed (and the package will be more understandable in conjunction with the manuscript). However, it can be installed directly from GitHub with
+Users can also analyse their own data. The package complements our manuscript *Explaining empirical dynamic modelling using verbal, graphical, and mathematical approaches* being submitted as a Research Article to \emph{Ecology and Evolution}. The 
+package can be installed directly from GitHub with:
 
 ```
-install.packages("devtools")     # One-time installation if you don't already have devtools
-devtools::install_github("pbs-assess/pbsEDM")
+install.packages("remotes")    # If you do not already have the "remotes" package
+remotes::install_github("pbs-assess/pbsEDM")
 ```
+
+If you get an error like
+```
+Error in utils::download.file(....)
+```
+then the connection may be timing out. Try
+```
+options(timeout = 1200)
+```
+and then try and install again.
 
 ## Vignettes
 
@@ -38,18 +49,14 @@ The vignettes are already rendered here:
 * [pbsSmap.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/pbsSmap.html) Demonstration of S-map code.
 
 The source code written in `Rmarkdown`, the R code that gets extracted from the
-  `Rmarkdown` code, and the resulting .html files are all found within your library
-  folder (where all your R libraries get saved), in
-  `library\pbsEDM\doc\`. Or you can look at the `vignettes\` folder on GitHub or locally.
+`Rmarkdown` code, and the resulting .html files are all found within your library
+folder (where all your R libraries get saved), in
+`library\pbsEDM\doc\`. Or you can look at the `vignettes\` folder on GitHub or locally. Terms like `aspect 2' will make more sense upon reading of the manuscript.
 
-<<<<<<< HEAD
 ## To reproduce and save the figures for the manuscript
 
 Just run the following code. Type the function name (or look at the help with ?<function_name>) to see what it does.
-=======
-``` r
-devtools::install_github("pbs-assess/pbsEDM")
->>>>>>> feature/implement-mve
+
 ```
 E_results <- pbsEDM_Evec(NY_lags_example$N_t)
 

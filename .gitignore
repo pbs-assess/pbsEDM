@@ -35,3 +35,8 @@ inst/doc
 doc
 Meta
 lib
+
+
+vignettes/huffaker/
+vignettes/mve_understanding_files/
+zip-file/
