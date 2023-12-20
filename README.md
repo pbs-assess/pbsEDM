@@ -55,11 +55,11 @@ plot_library_size_save()              # Figure 4
 
 # Animated figures for the Appendix:
 
-plot_pbsEDM_Evec_movie_save(E_results)                # Figure S.1
+plot_pbsEDM_Evec_movie_save(E_results)                # Figure A.1
 
-plot_explain_edm_movie_save(E_results[[1]])           # Figure S.2 
+plot_explain_edm_movie_save(E_results[[1]])           # Figure A.2 
 
-plot_explain_edm_all_tstar_movie_save(E_results[[1]]) # Figure S.3
+plot_explain_edm_all_tstar_movie_save(E_results[[1]]) # Figure A.3
 ```
 ## Installation instructions
 
