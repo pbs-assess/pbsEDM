@@ -31,17 +31,17 @@ The name `pbsEDM` combines two acronyms - PBS (our workplace, the Pacific Biolog
 
 ## Vignettes
 
-The vignettes are already rendered here:
+The vignettes for pbsEDM are already rendered here:
 
-* [analyse_simple_time_series.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
-* [aspect_2.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/aspect_2.html) Detailing of aspect 2.
-* [negative_predictions.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/negative_predictions.html) Demonstrations of getting negative predictions, and also how the correlation coefficients differ between looking at predictions of lagged values and predictions of the actual population values.
-* [pbsSmap.html](http://htmlpreview.github.io/?https://github.com/pbs-assess/pbsEDM/blob/master/vignettes/pbsSmap.html) Demonstration of S-map code.
+* [analyse_simple_time_series.html](https://pbs-assess.github.io/pbsEDM/vignettes/analyse_simple_time_series.html) How to analyse a simple time series using the simplex algorithm, and produce figures that help understand the algorithm.
+* [aspect_2.html](https://pbs-assess.github.io/pbsEDM/vignettes/aspect_2.html) Detailing of aspect 2.
+* [negative_predictions.html](https://pbs-assess.github.io/pbsEDM/vignettes/negative_predictions.html) Demonstrations of getting negative predictions, and also how the correlation coefficients differ between looking at predictions of lagged values and predictions of the actual population values.
+* [pbsSmap.html](https://pbs-assess.github.io/pbsEDM/vignettes/pbsSmap.html) Demonstration of S-map code.
 
 The source code written in `Rmarkdown`, the R code that gets extracted from the
 `Rmarkdown` code, and the resulting .html files are all found within your library
 folder (where all your R libraries get saved), in
-`library\pbsEDM\doc\`. Or you can look at the `vignettes\` folder on GitHub or locally. Terms like `aspect 2' will make more sense upon reading of the manuscript.
+`library\pbsEDM\doc\`. Or you can look at the [vignettes](https://github.com/pbs-assess/pbsEDM/tree/main/vignettes/) folder on GitHub or locally. Terms like `aspect 2' will make more sense upon reading of the manuscript.
 
 ## To reproduce and save the figures for the manuscript
 
