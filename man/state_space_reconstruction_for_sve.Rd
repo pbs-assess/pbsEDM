@@ -20,7 +20,9 @@ state_space_reconstruction_for_sve(
 `lags` a list of the form `lags = list(R_t = 0)` (only the response
 variable and must be lag of 0). The variable specified is considered the
 response variable and is being rescaled and renamed here, and renamed, for
-example, `R_t_s`.}
+example, `R_t_s`. TODO seems to all still work even if only giving the
+response variable (e.g. with an MVE choice of lags) and `response_only` =
+FALSE`}
 
 \item{max_allowed_cor}{maximum allowed correlation between two axes (actually
 once their lagged, could change it to raw data if needed), if the

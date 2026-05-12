@@ -46,12 +46,12 @@
 #' @examples
 #' \dontrun{
 #' # Stupid example as Y_t is already first differences of N_t; was using to
-#'   debug. Best comes out as rho=0.97 for lags of 0 and 0, but then can't do
-#'   forecast (as Y_t[100] not defined).
+#' #  debug. Best comes out as rho=0.97 for lags of 0 and 0, but then cannot do
+#' #  forecast (as Y_t[100] not defined).
 #'  res <- multivariate_simplex(data = NY_lags_example, response = "N_t", lags = list("N_t" = 0:2, "Y_t" = 0:1))
 #' }
-#' @export
 #'
+#' @export
 multivariate_simplex <- function(data,
                                  lags,
                                  response = NULL){

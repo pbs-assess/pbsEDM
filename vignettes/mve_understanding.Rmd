@@ -896,7 +896,8 @@ lags_lots <- list(R_t = 0:4,
 mve_full_shebang_2 <- multiview_embedding(data = simulated_4,
                                           response = "R_t",
                                           lags = lags_lots)  # Do lags_use_multi
-                                            # for shorter and quicker one
+                                            # for shorter and quicker one (instantaneous);
+                                            # lags_lots for longer
 mve_full_shebang_2$rho_prediction_from_mve
 mve_full_shebang_2$rho_each_top_subset
 ```

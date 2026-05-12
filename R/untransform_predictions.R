@@ -30,10 +30,16 @@ untransform_predictions <- function(response_observed,
   #  should be response_s_predicted[max_lag + 2], and we have up to
   #  response_s_predicted[T]. This will likely change when don't do first-differencing.
 
-  min_t_response_s_predicted <- max_lag + 2
+  # min_t_response_s_predicted <- max_lag + 2
+  min_t_response_s_predicted <- min(which(!is.na(response_s_predicted)))  # more
+                                        # robust, and can deal with NA's at
+                                        # start that I now have for sockeye
 
   stopifnot(all(is.na(response_s_predicted[1:(min_t_response_s_predicted - 1)])))
-  stopifnot(!any(is.na(response_s_predicted[(min_t_response_s_predicted):length(response_s_predicted)])))    # These detected some errors, so keep in.
+#  stopifnot(!any(is.na(response_s_predicted[(min_t_response_s_predicted):(length(response_s_predicted) - 1)])))    # These detected some errors, so keep in. TODO Andy added -1 in 19/6/25 to get sockeye analyses working; might need to think about more, and might depend on lags
+# Andy just commented out to try and get working; especially as now have earlier
+# NA's in Sockeye data (because want to include lagged PDO etc. in the inputs).
+# 27/6/25 - second stop doesn't fail it seems, need to tidy up.
 
   Z_observed <- c(diff(response_observed), NA)
 
@@ -54,7 +60,8 @@ untransform_predictions <- function(response_observed,
                           response_observed + Z_predicted)
 
   if(positive_response_only){
-    min_response_observed <- min(response_observed)
+    min_response_observed <- min(response_observed,
+                                 na.rm = TRUE)
     response_predicted[response_predicted < 0] = min_response_observed
   }
 

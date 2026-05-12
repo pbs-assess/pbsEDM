@@ -20,7 +20,9 @@
 #'   `lags` a list of the form `lags = list(R_t = 0)` (only the response
 #'   variable and must be lag of 0). The variable specified is considered the
 #'   response variable and is being rescaled and renamed here, and renamed, for
-#'   example, `R_t_s`.
+#'   example, `R_t_s`. TODO seems to all still work even if only giving the
+#'   response variable (e.g. with an MVE choice of lags) and `response_only` =
+#'   FALSE`
 #' @param max_allowed_cor maximum allowed correlation between two axes (actually
 #'   once their lagged, could change it to raw data if needed), if the
 #'   correlation is greater than this then function stops and gives an
@@ -79,10 +81,11 @@ state_space_reconstruction_for_sve <- function(data,
   Z <- as.matrix(data_first_differenced[, col_names, drop = FALSE])
 
   Z_cor <- cor(Z, use = "pairwise.complete.obs")
-  # TODO check what this will do for just one, Z will be a vector so should need
-  # tweaking as this should give an error
+  # for just one, Z will be a vector, but this still gives a 1x1 matrix (1)
 
   if(max(Z_cor - diag(diag(Z_cor))) > max_allowed_correlation){
+    # If just one covariate this if gets skipped since, we remove
+    # the diagonal
     ## message(paste("State space reconstruction using lag names",
     ##             lag_names,
     ##             "with corresponding lag sizes",
@@ -94,8 +97,6 @@ state_space_reconstruction_for_sve <- function(data,
                    # single_view_embedding_for_sve() that is calling this
                    # function.
   }
-
-
 
   Z_means <- apply(Z, 2, mean, na.rm = TRUE)
   Z_sds <- apply(Z, 2, stats::sd, na.rm = TRUE)

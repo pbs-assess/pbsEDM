@@ -135,9 +135,11 @@ multiview_embedding <- function(data,
     lags_of_top_subsets[[i]] <- subset_lags[[actual_subset_index]]
   }
 
-  # Take the mean for each t* across all the top subsets
+  # Take the mean for each t* across all the top subsets, might be based on only
+  #  a few at the beginning (the ones with shorter lags), but won't affect
+  #  future prediction, just the rho calculated below.
   response_predicted_from_mve <- rowMeans(response_predicted_from_each_top_subset,
-                                     na.rm = FALSE)
+                                     na.rm = TRUE)
 
   # Take response from the last response_calc (all the same), not data
   #  as want forecast value (to be an NA). Except response_calc may just be NA,
