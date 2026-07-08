@@ -180,3 +180,19 @@
 #'
 #' @source Generated from data-raw/ricker.R
 "ricker"
+
+#' Example MVE results to create a summary figure for the lags that were
+#' selected
+#'
+#' A list object containing the results of running [multiview_embedding()],
+#' specifically for the Columbia River Bonneville stock for the SalmonPrize
+#' competition in 2026, just the `age11` and `age12` results, with the latter
+#' being more extensive.
+#'
+#' @format [list()] as output from [multiview_embedding()].
+#'
+#' @source Generated from data-raw/age11.R
+"age11_res"
+
+#' @rdname age11_res
+"age12_res"
