@@ -28,7 +28,8 @@ Imports:
     tictoc,
     checkmate,
     magrittr,
-    rlang
+    rlang,
+    ggplot2
 Suggests:
     knitr,
     rmarkdown,
