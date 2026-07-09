@@ -14,6 +14,8 @@
 #'   plot_mve_spaces(age11_res)
 #'   plot_mve_spaces(age11_res, rho_on_top = FALSE)
 #' }
+#'
+#' @author Andrew M. Edwards and GitHub Copilot
 plot_mve_spaces <- function(res_mve,
                             col = "blue",
                             rho_on_top = TRUE,
