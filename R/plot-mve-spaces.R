@@ -7,8 +7,14 @@
 #' @param col character; color to use for tiles where the lag is `TRUE`. Default "blue".
 #' @param rho_on_top logical; if `TRUE` (default), rho values are along the top (x-axis).
 #'   If `FALSE`, rho values are on the y-axis.
+#' @param max_embeddings maximum number of reconstructions to show, so as to not make
+#' the plot massive.
+#' @param first_embedding the first embedding to use for the plot. So if you
+#' want to show 100 across two plots, use `first_embedding = 51` for the second plot.
 #' @param ... passed onto [create_named_lags()], namely `order` to order the
 #' variables consistently.
+#'
+#'
 #' @examples
 #' \dontrun{
 #'   plot_mve_spaces(age11_res)
@@ -16,12 +22,26 @@
 #' }
 #'
 #' @author Andrew M. Edwards and GitHub Copilot
+#'
+#' @return ggplot object
+#' @export
+#'
 plot_mve_spaces <- function(res_mve,
                             col = "blue",
                             rho_on_top = TRUE,
+                            max_embeddings = 50,
+                            first_embedding = 1,
                             ...){
   tib <- make_mve_spaces_tibble(res_mve,
                          ...)
+  # Just use the ones required
+  if(first_embedding != 1){
+    tib <- tib[first_embedding:nrow(tib), ]
+  }
+
+  if(max_embeddings < nrow(tib)){
+    tib <- tib[1:max_embeddings, ]
+  }
 
   # Reshape tibble to long format for ggplot
   tib_long <- tib %>%

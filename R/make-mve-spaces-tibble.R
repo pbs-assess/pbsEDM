@@ -12,6 +12,9 @@
 #'   make_mve_spaces_tibble(age11_res)
 #' }
 #'
+#' @return tibble of top MVE subsets
+#'
+#' @export
 make_mve_spaces_tibble <- function(res_mve,
                                    ...){
   all_lags <- create_named_lags(res_mve$subset_lags,
